@@ -234,14 +234,12 @@ const UpsertVideo = () => {
       data.append(key, formData[key]);
     }
 
-    const responseData = await createData("video/upload", data);
-
-    if (responseData) {
+    await createData("video/upload", data, "video", () => {
       setFormData(init);
       setPreviewVideo(undefined);
       setPreviewThumb(undefined);
       setCurrUser(currUserInit);
-    }
+    });
   };
 
   const update = async () => {
@@ -287,11 +285,9 @@ const UpsertVideo = () => {
       }
     }
 
-    const rspData = await updateData("video", id, data);
-
-    if (rspData) {
-      await refetch();
-    }
+    await updateData("video", id, data, "video", () => {
+      refetch();
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -399,7 +395,6 @@ const UpsertVideo = () => {
           <div
             className='basis-[100%]  2md:basis-[40%] 
             max-h-[360px] h-[40vh] 2md:h-[45vh]'
-            
           >
             <label
               htmlFor='thumbnail'

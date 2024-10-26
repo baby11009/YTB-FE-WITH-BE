@@ -36,7 +36,7 @@ const LeftMenu = ({ openedMenu, path }) => {
     <div
       className={`fixed top-[56px] left-0  ${
         openedMenu ? "w-[240px]" : "w-[74px]"
-      }  h-screen`}
+      }  h-screen z-[9999]`}
     >
       {/* Big menu */}
       {openedMenu && (

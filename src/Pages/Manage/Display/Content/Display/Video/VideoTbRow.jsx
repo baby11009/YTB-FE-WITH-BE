@@ -9,9 +9,9 @@ import VideoUpsertModal from "./VideoUpsertModal";
 const VideoTbRow = ({ handleChecked, checked, data, od, refetch }) => {
   const { setIsShowing } = useAuthContext();
   const handleDelete = async () => {
-    await dltData("/client/video", data?._id);
-
-    refetch();
+    await dltData("/client/video", data?._id, "video",() => {
+      refetch();
+    })
   };
 
   const showDeleteConfirm = () => {

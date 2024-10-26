@@ -125,8 +125,15 @@ const VideoComment = () => {
 
   const handleDeleteMany = async () => {
     console.log(checkedList.join(", "));
-    await dltManyData("/client/comment/delete-many", checkedList);
-    refetch();
+    await dltManyData(
+      "/client/comment/delete-many",
+      checkedList,
+      "comment",
+      () => {
+        setCheckedList([]);
+        refetch();
+      }
+    );
   };
 
   const showDltConfirm = () => {

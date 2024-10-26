@@ -14,8 +14,6 @@ const PlaylistTbRow = ({
   checkedList = [],
   handleChecked,
 }) => {
-
-
   return (
     <tr className={`${od + 1 !== length && "border-b-[1px]"} `}>
       <th>
@@ -72,8 +70,9 @@ const PlaylistTbRow = ({
             <div
               className='text-[rgba(255,255,255,0.4)] group-hover:text-red-500  transition-all duration-[0.2s]'
               onClick={async () => {
-                await dltData("Playlist", data?._id);
-                refetch();
+                await dltData("Playlist", data?._id, "playlist", () => {
+                  refetch();
+                });
               }}
             >
               <DeleteIcon />

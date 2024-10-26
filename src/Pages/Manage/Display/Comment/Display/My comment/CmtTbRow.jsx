@@ -13,9 +13,9 @@ const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
   const [value, setValue] = useState("");
 
   const handleDelete = async () => {
-    await dltData("/client/comment", data?._id);
-
-    refetch();
+    await dltData("/client/comment", data?._id, "comment", () => {
+      refetch();
+    });
   };
   useLayoutEffect(() => {
     if (data) {
@@ -38,11 +38,18 @@ const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
       alert("Comment text cannot be empty");
       return;
     }
-    await updateData("/client/comment", data?._id, {
-      cmtText: value,
-    });
-    refetch();
-    setEditText(false);
+    await updateData(
+      "/client/comment",
+      data?._id,
+      {
+        cmtText: value,
+      },
+      "comment",
+      () => {
+        refetch();
+        setEditText(false);
+      }
+    );
   };
 
   return (

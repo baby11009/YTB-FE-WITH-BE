@@ -42,10 +42,7 @@ const Video = () => {
 
   const [checkedList, setCheckedList] = useState([]);
 
-  const { data, isLoading, refetch } = getDataWithAuth(
-    "/client/video",
-    params
-  );
+  const { data, isLoading, refetch } = getDataWithAuth("/client/video", params);
 
   const [dataList, setDataList] = useState([]);
 
@@ -136,8 +133,10 @@ const Video = () => {
 
   const handleDeleteMany = async () => {
     console.log(checkedList.join(", "));
-    await dltManyData("/client/video/delete-many", checkedList);
-    refetch();
+    await dltManyData("/client/video/delete-many", checkedList, "video", () => {
+      setCheckedList([]);
+      refetch();
+    })
   };
 
   const showDltConfirm = () => {

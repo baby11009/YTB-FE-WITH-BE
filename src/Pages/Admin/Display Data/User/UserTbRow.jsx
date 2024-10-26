@@ -30,8 +30,9 @@ const UserTbRow = ({
       role,
     };
 
-    await updateData("user", id, body);
-    refetch();
+    await updateData("user", id, body, "user", () => {
+      refetch();
+    });
   };
 
   useEffect(() => {
@@ -142,8 +143,9 @@ const UserTbRow = ({
             <div
               className='text-[rgba(255,255,255,0.4)] group-hover:text-red-500  transition-all duration-[0.2s]'
               onClick={async () => {
-                await dltData("user", data?._id);
-                refetch();
+                await dltData("user", data?._id, "user", () => {
+                  refetch();
+                });
               }}
             >
               <DeleteIcon />

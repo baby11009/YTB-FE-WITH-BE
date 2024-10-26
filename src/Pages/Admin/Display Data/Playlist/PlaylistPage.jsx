@@ -27,11 +27,7 @@ const PlaylistPage = ({ openedMenu }) => {
 
   const [searchValue, setSearchValue] = useState("");
 
-  const {
-    data: playlistsData,
-    refetch,
-  } = getDataWithAuth("playlist", params);
-
+  const { data: playlistsData, refetch } = getDataWithAuth("playlist", params);
 
   const [mockArr, setMockArr] = useState([]);
 
@@ -56,11 +52,20 @@ const PlaylistPage = ({ openedMenu }) => {
     }
   };
 
+  const handleDeleteMany = async () => {
+    await dltManyData("playlist/delete-many", checkedList, "playlist", () => {
+      setCheckedList([]);
+      refetch();
+    })
+  };
+
   useLayoutEffect(() => {
     if (playlistsData) {
       setTotalPage(playlistsData?.totalPages);
       if (limit - playlistsData.qtt > 0) {
-        setMockArr(Array.from({ length: limit - playlistsData.qtt }, (_, i) => i));
+        setMockArr(
+          Array.from({ length: limit - playlistsData.qtt }, (_, i) => i)
+        );
       } else {
         setMockArr([]);
       }
@@ -124,10 +129,7 @@ const PlaylistPage = ({ openedMenu }) => {
               className='size-[32px] rounded-[5px] flex items-center justify-center 
          group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
         '
-              onClick={async () => {
-                await dltManyData("playlist/delete-many", checkedList);
-                refetch();
-              }}
+              onClick={handleDeleteMany}
             >
               <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
                 <DeleteAllIcon />

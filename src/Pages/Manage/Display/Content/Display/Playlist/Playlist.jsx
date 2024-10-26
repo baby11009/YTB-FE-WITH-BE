@@ -127,8 +127,10 @@ const Playlist = () => {
 
   const handleDeleteMany = async () => {
     console.log(checkedList.join(", "));
-    await dltManyData("/client/playlist/delete-many", checkedList);
-    refetch();
+    await dltManyData("/client/playlist/delete-many", checkedList,'playlist',() => {
+      setCheckedList([]);
+      refetch();
+    })
   };
 
   const showDltConfirm = () => {

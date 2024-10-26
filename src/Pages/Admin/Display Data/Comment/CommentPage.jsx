@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { DeleteAllIcon, CreateIcon } from "../../../../Assets/Icons";
-import { useState, useEffect, useLayoutEffect} from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { getDataWithAuth } from "../../../../Api/getData";
 import { dltManyData } from "../../../../Api/controller";
 import Display from "./Display";
@@ -49,6 +49,13 @@ const CommentPage = ({ openedMenu }) => {
       const idList = cmtsData?.data?.map((item) => item?._id);
       setCheckedList(idList);
     }
+  };
+
+  const handleDeleteMany = async () => {
+    await dltManyData("comment/delete-many", checkedList, "comment", () => {
+      setCheckedList([]);
+      refetch();
+    })
   };
 
   useLayoutEffect(() => {
@@ -119,10 +126,7 @@ const CommentPage = ({ openedMenu }) => {
               className='size-[32px] rounded-[5px] flex items-center justify-center 
              group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
             '
-              onClick={async () => {
-                await dltManyData("comment/delete-many", checkedList);
-                refetch();
-              }}
+              onClick={handleDeleteMany}
             >
               <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
                 <DeleteAllIcon />

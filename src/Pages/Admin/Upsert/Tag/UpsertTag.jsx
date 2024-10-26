@@ -150,12 +150,10 @@ const UpsertTag = () => {
       finalData.append(key, alowedData[key]);
     }
 
-    const responseData = await createData("tag", finalData);
-
-    if (responseData) {
+    await createData("tag", finalData, "tag", () => {
       setFormData(initForm);
       setPreviewImg("");
-    }
+    });
   };
 
   const update = async () => {
@@ -197,11 +195,9 @@ const UpsertTag = () => {
       data.append(key, finalData[key]);
     }
 
-    const rspData = await updateData("tag", id, data);
-
-    if (rspData) {
-      await refetch();
-    }
+    await updateData("tag", id, data, "tag", () => {
+      refetch();
+    });
   };
 
   const handleSubmit = async (e) => {

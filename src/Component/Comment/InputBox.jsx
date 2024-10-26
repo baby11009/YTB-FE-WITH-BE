@@ -1,9 +1,7 @@
 import { motion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { EmojiIcon } from "../../Assets/Icons";
-import { requestWithAuth } from "../../util/axios-base-url";
-import request from "../../util/axios-base-url";
-import { getCookie } from "../../util/tokenHelpers";
+import { createData } from "../../Api/controller";
 
 const InputBox = ({
   setShowedInput,
@@ -42,29 +40,19 @@ const InputBox = ({
     if (replyId) {
       data.replyId = replyId;
     }
+    await createData("/client/comment", data, "comment", () => {
+      if (refetchReply && setAddNewReply) {
+        refetchReply();
+        setAddNewReply(true);
+      }
 
-    await request
-      .post("/client/comment", data, {
-        headers: {
-          Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-            import.meta.env.VITE_AUTH_TOKEN
-          )}`,
-        },
-      })
-      .then(() => {
-        if (refetchReply && setAddNewReply) {
-          refetchReply();
-          setAddNewReply(true);
-        }
-
-        setAddNewCmt(true);
-        refetchCmtList();
-        setCmtParams((prev) => ({ ...prev, page: 1 }));
-        refetchVideo();
-        setCmtText("");
-        setShowedInput(false);
-      })
-      .catch((err) => console.log(err));
+      setAddNewCmt(true);
+      refetchCmtList();
+      setCmtParams((prev) => ({ ...prev, page: 1 }));
+      refetchVideo();
+      setCmtText("");
+      setShowedInput(false);
+    })
   };
 
   return (

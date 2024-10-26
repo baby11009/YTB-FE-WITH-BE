@@ -9,9 +9,9 @@ import PlaylistUpsertModal from "./PlaylistUpsertModal";
 const PlaylistTbRow = ({ handleChecked, checked, data, od, refetch }) => {
   const { setIsShowing } = useAuthContext();
   const handleDelete = async () => {
-    await dltData("/client/playlist", data?._id);
-
-    refetch();
+    await dltData("/client/playlist", data?._id, "playlist",() => {
+      refetch();
+    })
   };
 
   const showDeleteConfirm = () => {

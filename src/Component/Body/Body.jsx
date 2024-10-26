@@ -17,7 +17,7 @@ const Body = ({
     <div className={`pt-[56px] ${containerStyle}`}>
       {/* Large device Left Menu */}
       {!noLDMenu && (
-        <div className='hidden xl:block'>
+        <div className='hidden xl:block z-[9999]'>
           <LeftMenu
             openedMenu={openedMenu}
             setOpenedMenu={setOpenedMenu}
@@ -26,7 +26,7 @@ const Body = ({
         </div>
       )}
       {/* Small device left menu */}
-      <div className={`${!noLDMenu && " xl:hidden"} z-[2]`}>
+      <div className={`${!noLDMenu && " xl:hidden"} z-[9999]`}>
         <SDLeftMenu
           openedMenu={openedMenu}
           setOpenedMenu={setOpenedMenu}

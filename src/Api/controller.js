@@ -1,26 +1,30 @@
 import request from "../util/axios-base-url";
 import { getCookie } from "../util/tokenHelpers";
 
-export const createData = async (path, data) => {
-  const cfirm = confirm(`Are you sure you want to create new ${path}?`);
+export const createData = async (path, data, dataType, handleSuccess) => {
+  const cfirm = confirm(`Are you sure you want to create new ${dataType}?`);
 
   if (!cfirm) {
-    alert(`Cancel create of ${path}`);
+    alert(`Cancel create of ${dataType}`);
     return;
   }
 
   try {
-    const newData = await request.post(path, data, {
-      headers: {
-        Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-          import.meta.env.VITE_AUTH_TOKEN
-        )}`,
-      },
-    });
+    const newData = await request
+      .post(path, data, {
+        headers: {
+          Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
+            import.meta.env.VITE_AUTH_TOKEN
+          )}`,
+        },
+      })
+      .then((rsp) => {
+        if (handleSuccess) {
+          handleSuccess(rsp);
+        }
+      });
 
-    console.log("🚀 ~ newData:", newData);
-
-    alert(`New ${path} created successfully`);
+    alert(`New ${dataType} created successfully`);
 
     return newData;
   } catch (error) {
@@ -29,24 +33,28 @@ export const createData = async (path, data) => {
   }
 };
 
-export const dltData = async (path, id) => {
-  const cfirm = confirm(`Are you sure you want to delete this ${path}?`);
+export const dltData = async (path, id, dataType, handleSuccess) => {
+  const cfirm = confirm(`Are you sure you want to delete this ${dataType}?`);
 
   if (!cfirm) {
-    alert(`Cancel delete of ${path}`);
+    alert(`Cancel delete of ${dataType}`);
     return;
   }
 
   try {
-    const dltData = await request.delete(`${path}/${id}`, {
-      headers: {
-        Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-          import.meta.env.VITE_AUTH_TOKEN
-        )}`,
-      },
-    });
-
-    console.log("🚀 ~ dltData:", dltData);
+    const dltData = await request
+      .delete(`${path}/${id}`, {
+        headers: {
+          Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
+            import.meta.env.VITE_AUTH_TOKEN
+          )}`,
+        },
+      })
+      .then((rsp) => {
+        if (handleSuccess) {
+          handleSuccess(rsp);
+        }
+      });
 
     alert(dltData.data?.msg);
   } catch (error) {
@@ -55,35 +63,44 @@ export const dltData = async (path, id) => {
   }
 };
 
-export const dltManyData = async (path, idList = []) => {
+export const dltManyData = async (
+  path,
+  idList = [],
+  dataType,
+  handleSuccess
+) => {
   if (idList.length === 0) {
-    alert(`Must choose at least one ${path}`);
+    alert(`Must choose at least one ${dataType}`);
     return;
   }
 
-  const cfirm = confirm(`Are you sure you want to delete these data?`);
+  const cfirm = confirm(`Are you sure you want to delete these ${dataType}?`);
 
   if (!cfirm) {
-    alert(`Cancel delete of these data`);
+    alert(`Cancel delete of these ${dataType}`);
     return;
   }
 
   try {
-    const dltDatas = await request.post(
-      `${path}`,
-      {
-        idList,
-      },
-      {
-        headers: {
-          Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-            import.meta.env.VITE_AUTH_TOKEN
-          )}`,
+    const dltDatas = await request
+      .post(
+        `${path}`,
+        {
+          idList,
         },
-      }
-    );
-
-    console.log("🚀 ~ dltData:", dltDatas);
+        {
+          headers: {
+            Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
+              import.meta.env.VITE_AUTH_TOKEN
+            )}`,
+          },
+        }
+      )
+      .then((rsp) => {
+        if (handleSuccess) {
+          handleSuccess(rsp);
+        }
+      });
 
     alert(dltDatas.data?.msg);
   } catch (error) {
@@ -92,25 +109,36 @@ export const dltManyData = async (path, idList = []) => {
   }
 };
 
-export const updateData = async (path, id, bodyData) => {
-  const cfirm = confirm(`Are you sure you want to change these ${path}?`);
+export const updateData = async (
+  path,
+  id,
+  bodyData,
+  dataType,
+  handleSuccess
+) => {
+  const cfirm = confirm(`Are you sure you want to change these ${dataType}?`);
 
   const [firstLetter, ...rest] = path;
 
   if (!cfirm) {
-    alert(`Cancel change of these ${path}`);
+    alert(`Cancel change of these ${dataType}`);
     return;
   }
 
   try {
-    const data = await request.patch(`${path}/${id}`, bodyData, {
-      headers: {
-        Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-          import.meta.env.VITE_AUTH_TOKEN
-        )}`,
-      },
-    });
-  
+    const data = await request
+      .patch(`${path}/${id}`, bodyData, {
+        headers: {
+          Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
+            import.meta.env.VITE_AUTH_TOKEN
+          )}`,
+        },
+      })
+      .then((rsp) => {
+        if (handleSuccess) {
+          handleSuccess(rsp);
+        }
+      });
 
     alert(`${firstLetter.toUpperCase()}${rest.join("")} updated successfully`);
     return data.data;

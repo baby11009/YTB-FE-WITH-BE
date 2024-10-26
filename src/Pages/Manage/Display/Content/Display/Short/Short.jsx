@@ -42,10 +42,7 @@ const Short = () => {
 
   const [checkedList, setCheckedList] = useState([]);
 
-  const { data, isLoading, refetch } = getDataWithAuth(
-    "/client/video",
-    params
-  );
+  const { data, isLoading, refetch } = getDataWithAuth("/client/video", params);
 
   const [dataList, setDataList] = useState([]);
 
@@ -129,9 +126,10 @@ const Short = () => {
   ]);
 
   const handleDeleteMany = async () => {
-    console.log(checkedList.join(", "));
-    await dltManyData("/client/video/delete-many", checkedList);
-    refetch();
+    await dltManyData("/client/video/delete-many", checkedList, "short", () => {
+      setCheckedList([]);
+      refetch();
+    });
   };
 
   const showDltConfirm = () => {
@@ -169,7 +167,6 @@ const Short = () => {
       scrollToTop();
     }
   }, [data]);
-
 
   return (
     <div className='min-h-[500px] relative'>

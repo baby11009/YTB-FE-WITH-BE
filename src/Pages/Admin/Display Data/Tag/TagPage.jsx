@@ -19,7 +19,6 @@ const initPrs = {
 };
 
 const TagPage = ({ openedMenu }) => {
-
   const queryClient = useQueryClient();
 
   const [totalPage, setTotalPage] = useState(1);
@@ -28,10 +27,7 @@ const TagPage = ({ openedMenu }) => {
 
   const [searchValue, setSearchValue] = useState("");
 
-  const {
-    data: tagData,
-    refetch,
-  } = getDataWithAuth("tag", params);
+  const { data: tagData, refetch } = getDataWithAuth("tag", params);
 
   const [mockArr, setMockArr] = useState([]);
 
@@ -54,6 +50,13 @@ const TagPage = ({ openedMenu }) => {
       const idList = tagData?.data?.map((item) => item?._id);
       setCheckedList(idList);
     }
+  };
+
+  const handleDeleteMany = async () => {
+    await dltManyData("tag/delete-many", checkedList, "tag", () => {
+      setCheckedList([]);
+      refetch();
+    });
   };
 
   useLayoutEffect(() => {
@@ -87,13 +90,11 @@ const TagPage = ({ openedMenu }) => {
     };
   }, [searchValue]);
 
-
   useEffect(() => {
     return () => {
       queryClient.clear();
     };
   }, []);
-
 
   return (
     <>
@@ -126,10 +127,7 @@ const TagPage = ({ openedMenu }) => {
               className='size-[32px] rounded-[5px] flex items-center justify-center 
              group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
             '
-              onClick={async () => {
-                await dltManyData("tag/delete-many", checkedList);
-                refetch();
-              }}
+              onClick={handleDeleteMany}
             >
               <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
                 <DeleteAllIcon />

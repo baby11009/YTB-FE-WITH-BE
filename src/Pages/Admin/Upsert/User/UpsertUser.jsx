@@ -149,15 +149,13 @@ const UpsertUser = () => {
       console.log(item);
     }
 
-    const responseData = await createData("user", data);
-
-    if (responseData) {
+    await createData("user", data, "user", () => {
       setFormData(initForm);
       setPreviewAva("");
       setAvaName("");
       setPreviewBanner("");
       setBannerName("");
-    }
+    });
   };
 
   const update = async () => {
@@ -175,7 +173,6 @@ const UpsertUser = () => {
     };
     for (const key in finalData) {
       if (userData.data.hasOwnProperty(key)) {
-
         if (userData.data[key] === finalData[key]) {
           delete finalData[key];
         }
@@ -210,11 +207,9 @@ const UpsertUser = () => {
       }
     }
 
-    const rspData = await updateData("user", id, data);
-
-    if (rspData) {
-      await refetch();
-    }
+    await updateData("user", id, data, "user", () => {
+      refetch();
+    });
   };
 
   const handleSubmit = async (e) => {

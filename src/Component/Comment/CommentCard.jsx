@@ -1,30 +1,23 @@
 import { llstylish, emoji1, sangtraan, MyChannel } from "../../Assets/Images";
 import {
-  EmptyLikeIcon,
   LoveIcon,
   ThinArrowIcon,
   Setting2Icon,
   Verification,
-  ThickLikeIcon,
 } from "../../Assets/Icons";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import {
-  useState,
-  useRef,
-  useEffect,
-  useLayoutEffect,
-  useCallback,
-} from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import InputBox from "./InputBox";
 import { timeFormat2 } from "../../util/timeforMat";
-import { formatNumber } from "../../util/numberFormat";
+
 import { useAuthContext } from "../../Auth Provider/authContext";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
 import request from "../../util/axios-base-url";
 import { getCookie } from "../../util/tokenHelpers";
 import { LikeAndDislikeCmtBtn } from "../../Component";
 import EditCommentArea from "./EditCommentArea";
+import { updateData, dltData } from "../../Api/controller";
 
 const CommentCard = ({
   showReply,
@@ -71,23 +64,18 @@ const CommentCard = ({
       alert("Không có gì thay đổi");
       return;
     }
-    await request
-      .patch(
-        `/client/comment/${data?._id}`,
-        { cmtText: value },
-        {
-          headers: {
-            Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-              import.meta.env.VITE_AUTH_TOKEN
-            )}`,
-          },
+    await updateData(
+      "/client/comment",
+      data?._id,
+      { cmtText: value },
+      "comment",
+      (rsp) => {
+        if (refetchList) {
+          refetchList(rsp.data?.data);
         }
-      )
-      .then((rsp) => {
-        refetchList();
         setIsShowing(undefined);
-      })
-      .catch((err) => console.log(err));
+      }
+    );
   };
 
   const funcList = [
@@ -107,19 +95,12 @@ const CommentCard = ({
       id: 2,
       text: "Xóa",
       handleOnClick: async () => {
-        await request
-          .delete(`/client/comment/${data?._id}`, {
-            headers: {
-              Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-                import.meta.env.VITE_AUTH_TOKEN
-              )}`,
-            },
-          })
-          .then((rsp) => {
+        await dltData("/client/comment", data?._id, "comment", (rsp) => {
+          if (refetchList) {
             refetchList(rsp.data?.data);
-            refetchVideo();
-          })
-          .catch((err) => console.log(err));
+          }
+          refetchVideo();
+        });
       },
     },
   ];

@@ -57,6 +57,13 @@ const DisplayUser = ({ openedMenu }) => {
     }
   };
 
+  const handleDeleteMany = async () => {
+    await dltManyData("user/delete-many", checkedList, "user", () => {
+      setCheckedList([]);
+      refetch();
+    });
+  };
+
   useLayoutEffect(() => {
     if (usersData) {
       setTotalPage(usersData?.totalPages);
@@ -152,10 +159,7 @@ const DisplayUser = ({ openedMenu }) => {
               className='size-[32px] rounded-[5px] flex items-center justify-center 
              group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
             '
-              onClick={async () => {
-                await dltManyData("user/delete-many", checkedList);
-                refetch();
-              }}
+              onClick={handleDeleteMany}
             >
               <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
                 <DeleteAllIcon />

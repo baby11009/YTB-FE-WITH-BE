@@ -43,14 +43,14 @@ const ManagePage = () => {
     <MainLayOut>
       <>
         <Header setOpenedMenu={setOpenedMenu} />
-        <div className='hidden xl:block z-[500]'>
+        <div className='hidden xl:block relative z-[9500]'>
           <Menu
             openedMenu={openedMenu}
             currPath={location.pathname}
             data={user}
           />
         </div>
-        <div className='block xl:hidden z-[500]'>
+        <div className='block xl:hidden relative z-[9500]'>
           <SdMenu
             openedMenu={openedMenu}
             setOpenedMenu={setOpenedMenu}

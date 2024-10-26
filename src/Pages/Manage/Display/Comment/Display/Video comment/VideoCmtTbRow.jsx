@@ -3,16 +3,14 @@ import { TrashBinIcon, EditIcon } from "../../../../../../Assets/Icons";
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
-import { useLayoutEffect, useState } from "react";
 
 const VideoCmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
-  
   const { setIsShowing } = useAuthContext();
 
   const handleDelete = async () => {
-    await dltData("/client/comment", data?._id);
-
-    refetch();
+    await dltData("/client/comment", data?._id, "comment", () => {
+      refetch();
+    });
   };
 
   const showDeleteConfirm = () => {
@@ -68,16 +66,6 @@ const VideoCmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
       <div className='w-[150px] mr-[100px]'>{timeFormat3(data?.createdAt)}</div>
 
       <div className='w-[100px] absolute right-0 bg-black h-[200px] flex items-center border-l-[2px] px-[12px]'>
-        <button
-          className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-          onClick={() => {
-            setEditText((prev) => !prev);
-          }}
-        >
-          <div className='text-blue-500'>
-            <EditIcon />
-          </div>
-        </button>
         <button
           className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
           onClick={showDeleteConfirm}

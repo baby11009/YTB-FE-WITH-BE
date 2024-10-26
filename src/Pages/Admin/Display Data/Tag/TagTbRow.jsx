@@ -14,7 +14,6 @@ const TagTbRow = ({
   refetch,
   checkedList = [],
 }) => {
-
   return (
     <tr className={`${od + 1 !== length && "border-b-[1px]"} `}>
       <th>
@@ -71,8 +70,9 @@ const TagTbRow = ({
             <div
               className='text-[rgba(255,255,255,0.4)] group-hover:text-red-500  transition-all duration-[0.2s]'
               onClick={async () => {
-                await dltData("tag", data?._id);
-                refetch();
+                await dltData("tag", data?._id, "tag", () => {
+                  refetch();
+                });
               }}
             >
               <DeleteIcon />

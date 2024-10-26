@@ -77,8 +77,9 @@ const CommentTbRow = ({
             <div
               className='text-[rgba(255,255,255,0.4)] group-hover:text-red-500  transition-all duration-[0.2s]'
               onClick={async () => {
-                await dltData("comment", data?._id);
-                refetch();
+                await dltData("comment", data?._id, "comment", () => {
+                  refetch();
+                });
               }}
             >
               <DeleteIcon />

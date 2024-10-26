@@ -14,7 +14,10 @@ const DeleteConfirm = ({ handleDelete, type, data }) => {
   };
 
   return (
-    <div className='size-full max-h-[350px] max-w-[500px] bg-black rounded-[5px] py-[12px] px-[24px]'>
+    <div
+      className='size-full max-h-[350px] max-w-[500px] bg-black rounded-[5px] py-[12px] px-[24px]'
+      style={{ userSelect: "none" }}
+    >
       <h1 className='text-center text-[20px] font-[500]'>
         {type}'s delete confirm
       </h1>

@@ -139,16 +139,21 @@ const VideoUpsertModal = ({ title, id }) => {
         delete finalData[key];
       }
     }
-    const rspData = await updateData("/client/playlist", id, finalData);
-
-    if (rspData) {
+    await updateData("/client/playlist", id, finalData, "playlist", () => {
       refetch();
-    }
+    });
   };
 
   const handleRemoveVideo = async (videoId) => {
-    await updateData("/client/playlist", id, { videoIdList: [videoId] });
-    refetch();
+    await updateData(
+      "/client/playlist",
+      id,
+      { videoIdList: [videoId] },
+      "playlist",
+      () => {
+        refetch();
+      }
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -261,7 +266,7 @@ const VideoUpsertModal = ({ title, id }) => {
                     {/* Head */}
                     <div
                       className='w-fit text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px]
-                      border-b-[2px] border-gray-A sticky left-0 top-0 bg-black' 
+                      border-b-[2px] border-gray-A sticky left-0 top-0 bg-black'
                     >
                       <div className='w-[300px]'>Thumbnail</div>
                       <div className='w-[250px]'>Title</div>

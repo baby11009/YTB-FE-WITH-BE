@@ -46,7 +46,7 @@ const UpsertComment = () => {
     id: "",
     limit: 10,
     page: 1,
-    
+
     clearCache: "video",
   });
 
@@ -184,11 +184,9 @@ const UpsertComment = () => {
       }
     });
 
-    const responseData = await createData("comment", finalData);
-
-    if (responseData) {
+    await createData("comment", finalData, "comment", () => {
       setFormData(initForm);
-    }
+    });
   };
 
   const update = async () => {
@@ -217,11 +215,9 @@ const UpsertComment = () => {
       return;
     }
 
-    const rspData = await updateData("comment", id, finalData);
-
-    if (rspData) {
-      await refetch();
-    }
+    await updateData("comment", id, finalData, "comment", () => {
+      refetch();
+    });
   };
 
   const handleSubmit = async (e) => {

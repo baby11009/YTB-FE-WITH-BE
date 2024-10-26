@@ -235,14 +235,12 @@ const VideoUpsertModal = ({ title, id }) => {
       data.append(key, formData[key]);
     }
 
-    const responseData = await createData("/client/video/upload", data);
-
-    if (responseData) {
+    await createData("/client/video/upload", data, "video",() => {
       setFormData(init);
       setPreviewVideo(undefined);
       setPreviewThumb(undefined);
-      thumbRef.current.files = undefined;
-    }
+      thumbRef.current.value = undefined;
+    })
   };
 
   const update = async () => {
@@ -296,11 +294,9 @@ const VideoUpsertModal = ({ title, id }) => {
       }
     }
 
-    const rspData = await updateData("/client/video", id, data);
-
-    if (rspData) {
-      await refetch();
-    }
+    await updateData("/client/video", id, data, "video", () => {
+      refetch();
+    });
   };
 
   const handleSubmit = async (e) => {

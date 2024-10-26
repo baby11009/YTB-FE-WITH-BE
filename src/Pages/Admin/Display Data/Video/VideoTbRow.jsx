@@ -15,7 +15,6 @@ const VideoTbRow = ({
   checkedList = [],
   handleChecked,
 }) => {
-
   const containerRef = useRef();
   const [opened, setOpened] = useState(false);
 
@@ -28,11 +27,9 @@ const VideoTbRow = ({
       return null;
     }
 
-    const rspData = await updateData("video", id, { type });
-
-    if (rspData) {
-      await refetch();
-    }
+    await updateData("video", id, { type }, "video", () => {
+      refetch();
+    });
   };
 
   useEffect(() => {
@@ -145,8 +142,9 @@ const VideoTbRow = ({
             <div
               className='text-[rgba(255,255,255,0.4)] group-hover:text-red-500  transition-all duration-[0.2s]'
               onClick={async () => {
-                await dltData("video", data?._id);
-                refetch();
+                await dltData("video", data?._id, "video", () => {
+                  refetch();
+                });
               }}
             >
               <DeleteIcon />

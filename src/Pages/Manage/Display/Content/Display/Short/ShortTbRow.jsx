@@ -9,9 +9,9 @@ import ShortUpsertModal from "./ShortUpsertModal";
 const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
   const { setIsShowing } = useAuthContext();
   const handleDelete = async () => {
-    await dltData("/client/video", data?._id);
-
-    refetch();
+    await dltData("/client/video", data?._id, "short", () => {
+      refetch();
+    });
   };
 
   const showDeleteConfirm = () => {

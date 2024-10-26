@@ -149,11 +149,9 @@ const UpsertPlaylist = () => {
       userId: formData.userId,
     };
 
-    const playlist = await createData("playlist", finalFormData);
-
-    if (playlist) {
+    await createData("playlist", finalFormData, "playlist", () => {
       setFormData(initForm);
-    }
+    });
   };
 
   const update = async () => {
@@ -197,11 +195,9 @@ const UpsertPlaylist = () => {
       finalFormData.videoIdList = uniqueIdList;
     }
 
-    const playlist = await updateData("playlist", id, finalFormData);
-
-    if (playlist) {
-      await refetch();
-    }
+    await updateData("playlist", id, finalFormData, "playlist", () => {
+      refetch();
+    });
   };
 
   const handleSubmit = async (e) => {
