@@ -6,7 +6,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { scrollToTop } from "../../util/scrollCustom";
 import { useState, useEffect, useLayoutEffect, Suspense } from "react";
 import { useAuthContext } from "../../Auth Provider/authContext";
-import { Dashboard, Content, Comment } from "./Display";
+import { Dashboard, Content, Comment, ChannelSetting } from "./Display";
 const ManagePage = () => {
   const { user, openedMenu, setOpenedMenu } = useAuthContext();
 
@@ -20,7 +20,7 @@ const ManagePage = () => {
     dashboard: <Dashboard />,
     content: <Content />,
     comment: <Comment />,
-    setting: <div>Setting</div>,
+    setting: <ChannelSetting />,
   };
 
   useLayoutEffect(() => {

@@ -37,9 +37,6 @@ export const getData = (
         });
         return res.data;
       } catch (error) {
-        alert(
-          `Error ${error?.response?.status}: ${error?.response?.data?.msg}`
-        );
         console.error(error);
         return null;
       }
@@ -59,24 +56,25 @@ export const getDataWithAuth = (
 
   const paramsKey = Object.keys(params);
 
-  const notParamsResetKeys = Object.keys(params).filter(
-    (key) => !key.includes("reset") && !key.includes("clearCache")
-  );
-
   let finalParams = {};
+  if (paramsKey.length > 0) {
+    const notParamsResetKeys = Object.keys(params).filter(
+      (key) => !key.includes("reset") && !key.includes("clearCache")
+    );
 
-  if (paramsKey.length !== notParamsResetKeys.length) {
-    notParamsResetKeys.map((key) => {
-      finalParams[key] = params[key];
-    });
-  } else {
-    finalParams = params;
+    if (paramsKey.length !== notParamsResetKeys.length) {
+      notParamsResetKeys.map((key) => {
+        finalParams[key] = params[key];
+      });
+    } else {
+      finalParams = params;
+    }
   }
 
   const token = getCookie(import.meta.env.VITE_AUTH_TOKEN);
 
   return useQuery({
-    queryKey: paramsValue,
+    queryKey: [...paramsValue],
     queryFn: async () => {
       try {
         const res = await request.get(path, {
@@ -90,9 +88,6 @@ export const getDataWithAuth = (
 
         return res.data;
       } catch (error) {
-        alert(
-          `Error ${error?.response?.status}: ${error?.response?.data?.msg}`
-        );
         console.error(error);
         return null;
       }

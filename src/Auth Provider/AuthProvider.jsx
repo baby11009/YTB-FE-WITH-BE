@@ -8,37 +8,39 @@ const AuthProvider = ({ children }) => {
 
   const [isLoading, setIsLoading] = useState(true);
 
+  const [refetch, setRefetch] = useState(true);
+
   const [isShowing, setIsShowing] = useState(undefined);
 
   const [openedMenu, setOpenedMenu] = useState(true);
 
+  const authTokenRef = useRef(getCookie(import.meta.env.VITE_AUTH_TOKEN));
+
+  const getUserInfo = async (token) => {
+    await request
+      .get("/client/user/me", {
+        headers: {
+          Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${token}`,
+        },
+      })
+      .then((rsp) => {
+        setUser(rsp.data.data);
+        setRefetch(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
   useLayoutEffect(() => {
-    const authToken = getCookie(import.meta.env.VITE_AUTH_TOKEN);
-
-    const getUserInfo = async (token) => {
-      await request
-        .get("/client/user/me", {
-          headers: {
-            Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${token}`,
-          },
-        })
-        .then((rsp) => {
-          setUser(rsp.data.data);
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    };
-
-    if (authToken) {
-      getUserInfo(authToken);
+    if (authTokenRef.current && refetch) {
+      getUserInfo(authTokenRef.current);
     } else {
       setIsLoading(false);
     }
-  }, []);
+  }, [refetch]);
 
   return (
     <AuthContext.Provider
@@ -49,6 +51,7 @@ const AuthProvider = ({ children }) => {
         setIsShowing,
         openedMenu,
         setOpenedMenu,
+        setRefetch
       }}
     >
       {isLoading ? (

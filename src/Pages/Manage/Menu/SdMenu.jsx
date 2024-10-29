@@ -65,7 +65,7 @@ const SdMenu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
                   Kênh của bạn
                 </h3>
                 <span className='text-[12px] leading-[16px] text-gray-A'>
-                  {data.email}
+                  {data?.email}
                 </span>
               </div>
               <div className='flex-1 overflow-auto flex flex-col'>

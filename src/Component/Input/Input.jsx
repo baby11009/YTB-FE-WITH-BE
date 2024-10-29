@@ -28,9 +28,9 @@ const Input = ({
   useLayoutEffect(() => {
     inputRef.current.value = value;
     const handleOnBlur = (e) => {
-      
       if (!value && defaultValue) {
         handleOnChange(e.target.name, defaultValue);
+        console.log(1)
       }
     };
     inputRef.current.addEventListener("blur", handleOnBlur);
@@ -48,6 +48,7 @@ const Input = ({
         value === "" &&
         !defaultValue
       ) {
+
         setActived(false);
       }
     };
@@ -98,11 +99,11 @@ const Input = ({
               handleTogglePw();
             }}
             type='button'
-            className={`size-[24px] flex items-center justify-center ${
-              actived ? "block" : "hidden"
-            }`}
+            className='size-[24px] flex items-center justify-center '
           >
-            {hiddenPass ? <HidePasswordIcon /> : <ShowPasswordIcon />}
+            <div className={`${actived && value ? "block" : "hidden"}`}>
+              {hiddenPass ? <HidePasswordIcon /> : <ShowPasswordIcon />}
+            </div>
           </button>
         )}
 

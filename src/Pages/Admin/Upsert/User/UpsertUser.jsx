@@ -21,13 +21,12 @@ const UpsertUser = () => {
   const { id } = useParams();
 
   const queryClient = useQueryClient();
-  const {
-    data: userData,
-    refetch,
-    error: queryError,
-    isLoading,
-    isError,
-  } = getDataWithAuth(`user/${id}`, {}, id !== undefined, false);
+  const { data: userData, refetch } = getDataWithAuth(
+    `user/${id}`,
+    {},
+    id !== undefined,
+    false
+  );
 
   const [formData, setFormData] = useState(initForm);
 
@@ -277,10 +276,6 @@ const UpsertUser = () => {
     };
   }, []);
 
-  if (isError) {
-    return queryError.message;
-  }
-
   return (
     <div className='w-full'>
       <header
@@ -293,7 +288,7 @@ const UpsertUser = () => {
       <form
         noValidate
         onSubmit={handleSubmit}
-        className='flex items-center flex-wrap gap-[24px] mb-[36px]'
+        className='flex items-center flex-wrap mb-[36px]'
       >
         <div
           className={`w-full pt-[16.12%] h-0 relative rounded-[12px] overflow-hidden
@@ -332,7 +327,7 @@ const UpsertUser = () => {
             </div>
           )}
         </div>
-        <div className='flex flex-col sm:flex-row gap-[32px] xl:gap-[48px] mt-[32px]'>
+        <div className='flex flex-col sm:flex-row gap-[32px] xl:gap-[48px] mt-[16px]'>
           <div
             className='size-[72px] 2xsm:size-[120px] 2md:size-[160px] cursor-pointer'
             onClick={() => {

@@ -118,7 +118,9 @@ export const updateData = async (
 ) => {
   const cfirm = confirm(`Are you sure you want to change these ${dataType}?`);
 
-  const [firstLetter, ...rest] = path;
+  const apiPath = id ? `${path}/${id}` : path;
+
+  const [firstLetter, ...rest] = dataType;
 
   if (!cfirm) {
     alert(`Cancel change of these ${dataType}`);
@@ -127,7 +129,7 @@ export const updateData = async (
 
   try {
     const data = await request
-      .patch(`${path}/${id}`, bodyData, {
+      .patch(apiPath, bodyData, {
         headers: {
           Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
             import.meta.env.VITE_AUTH_TOKEN

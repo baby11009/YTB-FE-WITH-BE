@@ -1,12 +1,14 @@
 import ChannelInfor from "./ChannelInfor/ChannelInfor";
 import ChannelDisplay from "./ChannelContents/ChannelDisplay";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import { useParams } from "react-router-dom";
 import { getData } from "../../../Api/getData";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ChannelPart = ({ openedMenu }) => {
-  
+  const queryClient = useQueryClient();
+
   const { id } = useParams();
 
   const { user } = useAuthContext();
@@ -22,6 +24,12 @@ const ChannelPart = ({ openedMenu }) => {
     title: "home",
     payload: undefined,
   });
+
+  useEffect(() => {
+    return () => {
+      queryClient.clear();
+    };
+  }, []);
 
   return (
     <div className='flex flex-col items-center justify-center'>

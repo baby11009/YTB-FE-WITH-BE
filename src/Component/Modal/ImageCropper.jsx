@@ -24,6 +24,7 @@ const ImageCropper = ({
   const [imgSrc, setImgSrc] = useState("");
   const [crop, setCrop] = useState();
   const [error, setError] = useState("");
+  const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
 
   const onSelectFile = (e) => {
     const file = e.files?.[0];
@@ -41,17 +42,21 @@ const ImageCropper = ({
         if (naturalWidth < minWidth || naturalHeight < minHeight) {
           setError(`Image must be at least ${minWidth} x ${minHeight} pixels.`);
           return setImgSrc("");
+        } else {
+          setImgSrc(imageUrl);
+          setImgSize({ width: naturalHeight, height: naturalHeight });
         }
       });
-      setImgSrc(imageUrl);
     });
     reader.readAsDataURL(file);
   };
 
   const onImageLoad = (e) => {
     const { width, height } = e.currentTarget;
-    const cropWidthInPercent = (minWidth / width) * 100;
-
+    const cropWidthInPercent =
+      ((minWidth * (imgRef?.current?.offsetWidth / imgSize.width)) / width) *
+      100;
+    // const cropWidthInPercent = (minWidth / width) * 100;
     const crop = makeAspectCrop(
       {
         unit: "%",
@@ -102,8 +107,12 @@ const ImageCropper = ({
             circularCrop={minWidth === minHeight}
             keepSelection
             aspect={aspectRatio}
-            minWidth={minWidth}
-            minHeight={minHeight}
+            minWidth={minWidth * (imgRef?.current?.offsetWidth / imgSize.width)}
+            minHeight={
+              minHeight * (imgRef?.current?.offsetHeight / imgSize.height)
+            }
+            // minWidth={minWidth}
+            // minHeight={minHeight}
           >
             <img
               ref={imgRef}
@@ -172,8 +181,11 @@ const ImageCropper = ({
             display: "none",
             border: "1px solid black",
             objectFit: "contain",
-            width: minWidth,
-            height: minHeight,
+            width: minWidth * (imgRef?.current?.offsetWidth / imgSize.width),
+            height:
+              minHeight * (imgRef?.current?.offsetHeight / imgSize.height),
+            // width: minWidth,
+            // height: minHeight,
           }}
         />
       )}
