@@ -14,7 +14,7 @@ import {
   bauffs,
 } from "../../../../../Assets/Images";
 import { getData } from "../../../../../Api/getData";
-import { useEffect } from "react";
+import { useEffect, useRef, useLayoutEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 const firstVid = {
@@ -93,13 +93,15 @@ const RowLayout = ({ title, noBtn, children }) => {
 const ChannelHome = ({ channelEmail }) => {
   const queryClient = useQueryClient();
 
+  const channelEmailRef = useRef(channelEmail);
+
   const { data: playlistData } = getData("/data/playlists", {
-    channelEmail: channelEmail,
+    channelEmail: channelEmailRef.current,
     clearCache: "playlist",
   });
 
   const { data: videosData } = getData("/data/videos", {
-    channelEmail: channelEmail,
+    channelEmail: channelEmailRef.current,
     limit: 12,
     sort: { view: -1, createdAt: -1 },
     clearCache: "video",
@@ -110,6 +112,12 @@ const ChannelHome = ({ channelEmail }) => {
       queryClient.clear();
     };
   }, []);
+
+  useLayoutEffect(() => {
+    if (channelEmail) {
+      channelEmailRef.current = channelEmail;
+    }
+  }, [channelEmail]);
 
   return (
     <div className='w-full'>
@@ -186,34 +194,6 @@ const ChannelHome = ({ channelEmail }) => {
           />
         </RowLayout>
       ))}
-
-      {/* <RowLayout title={"Daily Moment Thầy Giáo Ba Stream"}>
-        <VideoRow
-          showBtn={true}
-          width={210}
-          marginX={2}
-          top={"top-[20%]"}
-          thumbRound={"8px"}
-        />
-      </RowLayout>
-      <RowLayout title={"Abe Reaction"}>
-        <VideoRow
-          showBtn={true}
-          width={210}
-          marginX={2}
-          top={"top-[20%]"}
-          thumbRound={"8px"}
-        />
-      </RowLayout>
-      <RowLayout title={"Video phổ biến"}>
-        <VideoRow
-          showBtn={true}
-          width={210}
-          marginX={2}
-          top={"top-[20%]"}
-          thumbRound={"8px"}
-        />
-      </RowLayout> */}
 
       <RowLayout title={"Short Videos"}>
         <ShortVidsRow width={210} marginX={2} top={"top-[15%]"} />

@@ -4,22 +4,22 @@ import { CustomeFuncBox } from "../../../../../Component";
 import { SortIcon } from "../../../../../Assets/Icons";
 import { motion } from "framer-motion";
 import PlaylistList from "./PlaylistList";
-import { getData } from "../../../../../Api/getData";
+import { getDataWithAuth } from "../../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
 
 const ChannelPlaylist = ({ channelEmail }) => {
   const queryClient = useQueryClient();
 
   const [params, setParams] = useState({
-    limit: 12,
     page: 1,
+    limit: 16,
     sort: { createdAt: -1 },
-    channelEmail,
-    videoLimit: 1,
+    clearCache: "playlist",
   });
+  console.log("🚀 ~ params:", params)
 
-  const { data: playlistData, isLoading } = getData(
-    "/data/playlists",
+  const { data: playlistData, isLoading } = getDataWithAuth(
+    "/client/playlist",
     params,
     true
   );

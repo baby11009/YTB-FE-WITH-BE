@@ -55,6 +55,8 @@ import {
   asoken,
 } from "../../../Assets/Images";
 
+import { useNavigate } from "react-router-dom";
+
 export const channelList = [
   {
     id: 1,
@@ -157,6 +159,7 @@ export const funcList1 = [
     path: "/sub-content",
     icon: <SubChannelIcon />,
     activeIcon: <ActiveSubChannelIcon />,
+    condition: true,
   },
   {
     id: 4,
@@ -164,6 +167,7 @@ export const funcList1 = [
     path: "/my-channel",
     activeIcon: <ActiveMyChannel2Icon />,
     icon: <MyChannel2Icon />,
+    condition: true,
   },
 ];
 
@@ -337,6 +341,34 @@ export const Button = ({ data, path, style, textStyle, handleOnClick }) => {
         </div>
         <span className={`${textStyle || "flex-1"}`}>{data?.title}</span>
         {data?.icon2}
+      </div>
+    </li>
+  );
+};
+
+export const ChannelButton = ({ data }) => {
+  const navigate = useNavigate();
+
+  return (
+    <li
+      className='px-[12px] rounded-[10px] cursor-pointer hover:bg-hover-black'
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigate(`/channel/${data?.email}`);
+      }}
+    >
+      <div className='flex  items-center h-[40px]'>
+        <div className='mr-[24px]'>
+          <img
+            src={`${import.meta.env.VITE_BASE_API_URI}${
+              import.meta.env.VITE_VIEW_AVA_API
+            }${data?.avatar}`}
+            alt={`channel-${data?.email}`}
+            className='w-[24px] h-[24px] rounded-full'
+          />
+        </div>
+        <span className='flex-1'>{data?.name}</span>
       </div>
     </li>
   );

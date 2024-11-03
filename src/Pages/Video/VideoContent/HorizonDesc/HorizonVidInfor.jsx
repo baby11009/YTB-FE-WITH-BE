@@ -1,16 +1,12 @@
 import { Link } from "react-router-dom";
-import { MyChannel } from "../../../../Assets/Images";
 import { formatNumber } from "../../../../util/numberFormat";
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import {
   ShareIcon,
   Setting2Icon,
-  DonationIcon,
   Verification,
   DownloadIcon,
-  CutIcon,
   SaveIcon,
-  DiaryIcon,
 } from "../../../../Assets/Icons";
 import {
   CustomeFuncBox,
@@ -18,42 +14,22 @@ import {
   SubscribeBtn,
 } from "../../../../Component";
 
-const HorizonVidInfor = ({
-  opened,
-  setOpened,
-  videoData,
-  refetch,
-}) => {
+const HorizonVidInfor = ({ opened, setOpened, videoData, refetch }) => {
   const funcList1 = [
     {
       id: 1,
-      text: "Chia sẻ",
+      text: "Share",
       icon: <ShareIcon />,
     },
     {
       id: 2,
-      text: "Tải xuống",
+      text: "Download",
       icon: <DownloadIcon />,
     },
     {
-      id: 3,
-      text: "Cảm ơn",
-      icon: <DonationIcon />,
-    },
-    {
-      id: 4,
-      text: "Tạo đoạn video",
-      icon: <CutIcon />,
-    },
-    {
       id: 5,
-      text: "Lưu",
+      text: "Save",
       icon: <SaveIcon />,
-    },
-    {
-      id: 6,
-      text: "Báo vi phạm",
-      icon: <DiaryIcon />,
     },
   ];
   const boxRef = useRef();
@@ -100,17 +76,10 @@ const HorizonVidInfor = ({
               <Verification size={"14"} />
             </div>
             <span className='text-[12px] !leading-[18px] text-gray-A t-1-ellipsis'>
-              {formatNumber(videoData?.channel_info?.subscriber || 0)} người đăng
-              ký
+              {formatNumber(videoData?.channel_info?.subscriber || 0)}{" "}
+              subscribers
             </span>
           </div>
-
-          <button
-            className='px-[16px] text-[14px] leading-[36px] text-black font-[500] bg-white 
-              hover:bg-[#d9d9d9] rounded-[18px] mr-[8px]'
-          >
-            Tham gia
-          </button>
 
           <SubscribeBtn
             sub={videoData?.subscription_info?.notify !== null ? true : false}
@@ -133,32 +102,22 @@ const HorizonVidInfor = ({
             <div
               className='h-[36px] flex items-center justify-center rounded-[18px]
               bg-hover-black hover:bg-[rgba(255,255,255,0.2)] cursor-pointer px-[16px]'
-              title='Chia sẻ'
+              title='Share'
             >
               <div className='ml-[-6px] mr-[6px]'>
                 <ShareIcon />
               </div>
-              <span className='text-[14px] text-nowrap'>Chia sẻ</span>
+              <span className='text-[14px] text-nowrap'>Share</span>
             </div>
             <div
               className='h-[36px] flex md:hidden 2md:flex items-center justify-center rounded-[18px]
               bg-hover-black hover:bg-[rgba(255,255,255,0.2)] cursor-pointer px-[16px] '
-              title='Tải xuống'
+              title='Download'
             >
               <div className='ml-[-6px] mr-[6px]'>
                 <DownloadIcon />
               </div>
-              <span className='text-[14px] text-nowrap'>Tải xuống</span>
-            </div>
-            <div
-              className='h-[36px] hidden 2xsm:flex md:hidden items-center justify-center rounded-[18px]
-              bg-hover-black hover:bg-[rgba(255,255,255,0.2)] cursor-pointer px-[16px] '
-              title='Tải xuống'
-            >
-              <div className='ml-[-6px] mr-[6px]'>
-                <DonationIcon />
-              </div>
-              <span className='text-[14px] text-nowrap'>Cảm ơn</span>
+              <span className='text-[14px] text-nowrap'>Download</span>
             </div>
             <div
               className='w-[36px] h-[36px] flex items-center justify-center rounded-[50%]
@@ -185,4 +144,3 @@ const HorizonVidInfor = ({
   );
 };
 export default HorizonVidInfor;
-

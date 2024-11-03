@@ -72,7 +72,7 @@ const VideoPart = ({ openedMenu }) => {
     refetch: refetchCmtList,
     isSuccess: cmtIsSuccess,
   } = getData(`/data/comment/video-cmt/${id}`, cmtParams, true, true);
-    
+
   useEffect(() => {
     if (isEnd && videoParams.limit === videosList?.data?.length) {
       setVideoParams((prev) => ({
@@ -116,19 +116,22 @@ const VideoPart = ({ openedMenu }) => {
       IsEnd(setIsEnd);
     });
     const element = infoBoxRef.current;
-
-    element.addEventListener("scroll", (e) => {
-      IsElementEnd(setIsBoxEnd, e);
-    });
+    if (element) {
+      element.addEventListener("scroll", (e) => {
+        IsElementEnd(setIsBoxEnd, e);
+      });
+    }
 
     return () => {
       queryClient.clear();
       window.removeEventListener("scroll", () => {
         IsEnd(setIsEnd);
       });
-      element.removeEventListener("scroll", (e) => {
-        IsElementEnd(setIsBoxEnd, e);
-      });
+      if (element) {
+        element.removeEventListener("scroll", (e) => {
+          IsElementEnd(setIsBoxEnd, e);
+        });
+      }
     };
   }, []);
 

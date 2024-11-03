@@ -15,7 +15,7 @@ const ChannelPart = ({ openedMenu }) => {
 
   const { data, refetch } = getData(
     `/data/channels/${id}`,
-    { userId: user?._id },
+    { userId: user?._id, id: id },
     true,
     true
   );
@@ -24,6 +24,13 @@ const ChannelPart = ({ openedMenu }) => {
     title: "home",
     payload: undefined,
   });
+
+  useEffect(() => {
+    setDisplay({
+      title: "home",
+      payload: undefined,
+    });
+  }, [id]);
 
   useEffect(() => {
     return () => {

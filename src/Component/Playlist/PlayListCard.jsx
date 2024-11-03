@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import {
   PlayIcon,
   PlayListIcon,
-  LiveIcon,
   Setting2Icon,
   BlockIcon,
   Verification,
@@ -13,8 +12,14 @@ import CustomeFuncBox from "../Box/CustomeFuncBox";
 import { useParams } from "react-router-dom";
 import { getRandomHexColor } from "../../util/func";
 
-const PlayListCard = ({ data, l2Color, l3Color, showL3, containerStyle }) => {
-
+const PlayListCard = ({
+  data,
+  l2Color,
+  l3Color,
+  showL3,
+  containerStyle,
+  imgStyle,
+}) => {
   const { path } = useParams();
 
   const containRef = useRef();
@@ -49,7 +54,7 @@ const PlayListCard = ({ data, l2Color, l3Color, showL3, containerStyle }) => {
         setShowed(false);
       }}
     >
-      <div className='relative w-full  h-[185.31px]'>
+      <div className={`relative ${imgStyle || "w-full"} aspect-video`}>
         <div
           className='w-full h-full bg-black-0.1 relative rounded-[12px] z-[3]'
           style={{
@@ -89,7 +94,7 @@ const PlayListCard = ({ data, l2Color, l3Color, showL3, containerStyle }) => {
             <PlayListIcon />
           </div>
           <span className=' text-[12px] leading-[18px] text-white mr-[4px] py-[3px]'>
-            {formatNumber(data.videoCount)} video
+            {formatNumber(data?.size)} video
           </span>
         </div>
 

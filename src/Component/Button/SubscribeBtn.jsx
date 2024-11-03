@@ -12,7 +12,7 @@ import { useState } from "react";
 import { getCookie } from "../../util/tokenHelpers";
 
 const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
-  const { user } = useAuthContext();
+  const { user, setRefetch } = useAuthContext();
 
   const [opened, setOpened] = useState(false);
 
@@ -38,6 +38,7 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
       )
       .then(() => {
         refetch();
+        setRefetch(true);
       })
       .catch((err) => console.log(err));
   };
@@ -119,7 +120,7 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
           <BellIcon />
         </div>
       )}
-      <span className='text-[14px] leading-[36px] font-[500]'>
+      <span className='text-[14px] leading-[36px] font-[500] text-nowrap'>
         {sub ? "Đã Đăng ký" : "Đăng ký"}
       </span>
       {sub && (

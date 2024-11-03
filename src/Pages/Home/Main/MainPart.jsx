@@ -53,11 +53,19 @@ const categoryList = [
   },
 ];
 
-const initParams = {
+const videoParams = {
   page: 1,
   limit: 16,
   createdAt: "mới nhất",
+  type: "video",
   prevPlCount: 0,
+};
+
+const shortParams = {
+  page: 1,
+  limit: 18,
+  createdAt: "mới nhất",
+  type: "short",
 };
 
 const MainPart = ({ openedMenu }) => {
@@ -67,21 +75,37 @@ const MainPart = ({ openedMenu }) => {
 
   const [activeIndex, setActiveIndex] = useState(1);
 
-  const [params, setParams] = useState(initParams);
+  const [vidPrs, setVidPrs] = useState(videoParams);
 
-  const [dataList, setDataList] = useState([]);
+  const [shortPrs, setShortPrs] = useState(shortParams);
+
+  const [vidList, setVidList] = useState([]);
+
+  const [shortList, setShortList] = useState([]);
 
   const [isEnd, setIsEnd] = useState(false);
 
-  const { data, isError, error } = getData("/data/all", params, true, true);
+  const { data: videos } = getData("/data/all", vidPrs, true, true);
+
+  const { data: shorts } = getData("/data/all", shortPrs, true, true);
 
   useEffect(() => {
     if (isEnd) {
-      setParams((prev) => ({
-        ...prev,
-        page: prev.page + 1,
-        prevPlCount: dataList.filter((data) => data.video_list).length,
-      }));
+
+      if (videos?.data?.length > 0) {
+        setVidPrs((prev) => ({
+          ...prev,
+          page: prev.page + 1,
+          prevPlCount: vidList.filter((videos) => videos.video_list).length,
+        }));
+      }
+
+      if (shorts?.data?.length > 0) {
+        setShortPrs((prev) => ({
+          ...prev,
+          page: prev.page + 1,
+        }));
+      }
     }
     setAddNew(!isEnd);
   }, [isEnd]);
@@ -99,14 +123,24 @@ const MainPart = ({ openedMenu }) => {
   }, []);
 
   useEffect(() => {
-    if (data) {
+    if (videos) {
       if (addNew) {
-        setDataList(data?.data);
+        setVidList(videos?.data);
       } else {
-        setDataList((prev) => [...prev, ...data?.data]);
+        setVidList((prev) => [...prev, ...videos?.data]);
       }
     }
-  }, [data]);
+  }, [videos]);
+
+  useEffect(() => {
+    if (shorts) {
+      if (addNew) {
+        setShortList(shorts?.data);
+      } else {
+        setShortList((prev) => [...prev, ...shorts?.data]);
+      }
+    }
+  }, [shorts]);
 
   return (
     <div className=' pb-[40px]'>
@@ -116,7 +150,11 @@ const MainPart = ({ openedMenu }) => {
         setActiveIndex={setActiveIndex}
       />
       <div className='mt-[80px] px-[16px]'>
-        <GridLayout openedMenu={openedMenu} vidList={dataList} />
+        <GridLayout
+          openedMenu={openedMenu}
+          vidList={vidList}
+          shortList={shortList}
+        />
       </div>
     </div>
   );

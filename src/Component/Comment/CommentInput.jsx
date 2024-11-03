@@ -16,7 +16,8 @@ const CommentInput = ({
 
   const [showedInput, setShowedInput] = useState(false);
 
-  const handleOnClick = () => {
+  const handleOnClick = (e) => {
+
     setShowedInput(false);
   };
 

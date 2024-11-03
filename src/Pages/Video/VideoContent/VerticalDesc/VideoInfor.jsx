@@ -33,7 +33,7 @@ const hovVars = {
   },
 };
 
-const VideoInfor = ({ sub, time, videoData, refetch }) => {
+const VideoInfor = ({ videoData, refetch, setWatchFull }) => {
   const [opened, setOpened] = useState(false);
 
   const boxRef = useRef();
@@ -58,48 +58,35 @@ const VideoInfor = ({ sub, time, videoData, refetch }) => {
         className='cursor-pointer rounded-[2px] '
         variants={hovVars}
         whileHover='hover'
+        onClick={() => {
+          setWatchFull(true);
+        }}
       >
         <div
           className='text-[28px] leading-[38px]
        t-ellipsis font-bold'
         >
-          {/* Cafuné - Tek It (I Watch The Moon) [Official Video] Cafuné - Tek It (I
-          Watch The Moon) [Official Video] */}
           {videoData?.title}
         </div>
-        <div className='mb-[16px] mr-[8px] text-[14px] leading-[20px] font-[500] flex gap-[7px] n'>
+        <div className='mb-[16px] mr-[8px] text-[14px] leading-[20px] font-[500] flex gap-[7px]'>
           {/* Views */}
-          {/* <span className=''>{formatNumber(3000)} lượt xem</span> */}
-
           <span className=''>{formatNumber(videoData?.view)} lượt xem</span>
+
           {/* time */}
-          {/* <span>{timeFormat(time)}</span> */}
-
           <span>{timeFormat2(videoData?.createdAt)}</span>
-
-          {/* hash tag */}
-          <div className='text-gray-A overflow-hidden flex-1 flex gap-[5px]'>
-            <span>#TekIt</span>
-            <span>#IWatchTheMoon</span>
-            <span>#Cafune</span>
-            <span>#Cafune</span>
-            <span>#Cafune</span>
-          </div>
         </div>
 
         {/* description */}
-        <div className=' text-[14px] leading-[20px] relative'>
-          <span>
-            The official music video for Cafuné's single 'Tek It' - from their
-            album Running - available now.
-          </span>
-          <div
-            className='absolute !min-w-[40px] left-[61%] xl:left-[34.5%] 
-          top-[20px] z-[20] shadow-[-10px_1px_5px_0px_rgba(10,10,10,0.95)]'
-          >
-            ...thêm
+        {videoData?.description && (
+          <div className=' text-[14px] leading-[20px] max-h-[40px] overflow-hidden'>
+            <div
+              className='relative after:content-["...thêm"] after:sticky after:w-[40px]
+         after:shadow-[-10px_1px_5px_0px_rgba(10,10,10,0.95)] after:left-0  inline-block'
+            >
+              {videoData?.description}
+            </div>
           </div>
-        </div>
+        )}
       </motion.div>
 
       <motion.div
@@ -108,15 +95,7 @@ const VideoInfor = ({ sub, time, videoData, refetch }) => {
         whileHover='hover'
       >
         <div className='flex'>
-          {/* <Link>
-            <img
-              src={tgb}
-              alt='image'
-              className='w-[40px] h-[40px] rounded-[50%] mr-[12px]'
-            />
-          </Link> */}
-
-          <Link>
+          <Link to={`/channel/${videoData?.channel_info?.email}`}>
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_AVA_API
@@ -126,13 +105,6 @@ const VideoInfor = ({ sub, time, videoData, refetch }) => {
             />
           </Link>
           <div className='flex  flex-col mr-[24px]'>
-            {/* <div className='flex items-center gap-[4px]' title='Thầy Giáo Ba'>
-              <span className='text-[16px] leading-[22px] font-[500]'>
-                Thầy Giáo Ba
-              </span>
-              <Verification size={"14"} />
-            </div> */}
-
             <div
               className='flex items-center gap-[4px]'
               title={videoData?.channel_info?.name}
@@ -143,13 +115,9 @@ const VideoInfor = ({ sub, time, videoData, refetch }) => {
               <Verification size={"14"} />
             </div>
 
-            {/* <span className='text-[12px] !leading-[18px] text-gray-A'>
-              {formatNumber(334000)} người đăng ký
-            </span> */}
-
             <span className='text-[12px] !leading-[18px] text-gray-A'>
-              {formatNumber(videoData?.channel_info?.subscriber || 0)} người đăng
-              ký
+              {formatNumber(videoData?.channel_info?.subscriber || 0)} người
+              đăng ký
             </span>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { getCookie } from "../util/tokenHelpers";
 import request from "../util/axios-base-url";
 
 const AuthProvider = ({ children }) => {
+
   const [user, setUser] = useState(undefined);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -34,6 +35,7 @@ const AuthProvider = ({ children }) => {
         setIsLoading(false);
       });
   };
+
   useLayoutEffect(() => {
     if (authTokenRef.current && refetch) {
       getUserInfo(authTokenRef.current);

@@ -4,14 +4,16 @@ import CardRow from "../Video/CardRow";
 import { vidList2 as mockList } from "../../Mock Data/videoData";
 import { chunkArray } from "../../util/func";
 
-const mockShortList = Array.from({ length: 15 }, (_, i) => i + 1);
-
 const GridLayout = ({ openedMenu, vidList, shortList }) => {
   const [showQtt, setShowQtt] = useState(1);
 
   const [showCard, setShowCard] = useState(1);
 
-  const [rows, setRows] = useState([]);
+  const [renderRows, setRenderRows] = useState([]);
+
+  const [videoRows, setVideoRows] = useState([]);
+
+  const [shortRows, setShortRows] = useState([]);
 
   const vidsRowsArr = useRef(Array.from({ length: 2 }, (_, i) => i));
 
@@ -42,7 +44,6 @@ const GridLayout = ({ openedMenu, vidList, shortList }) => {
   };
 
   const handleResizeCard = () => {
-
     if (window.innerWidth < 640) {
       setShowCard(1);
     } else if (window.innerWidth < 1024) {
@@ -73,13 +74,28 @@ const GridLayout = ({ openedMenu, vidList, shortList }) => {
   };
 
   useEffect(() => {
-    setRows(chunkArray(vidList, showCard * 2));
+    setVideoRows(chunkArray(vidList, showCard * 2));
   }, [showCard, vidList]);
+
+  useEffect(() => {
+    setShortRows(chunkArray(shortList, showQtt * 2));
+  }, [showQtt, shortList]);
+
+  useEffect(() => {
+    setRenderRows(() => {
+      const rowLength =
+        shortRows.length > videoRows.length
+          ? shortRows.length
+          : videoRows.length;
+
+      return Array.from({ length: rowLength }, (_, i) => i);
+    });
+  }, [videoRows, shortRows]);
 
   return (
     <>
-      {rows.map((row, id) => (
-        <Fragment key={id}>
+      {renderRows.map((row, index) => (
+        <Fragment key={row}>
           <div className='flex flex-col'>
             {vidsRowsArr.current &&
               vidsRowsArr.current.map((item, id) => (
@@ -88,19 +104,21 @@ const GridLayout = ({ openedMenu, vidList, shortList }) => {
                   handleResize={handleResizeCard}
                   showQtt={showCard}
                   openedMenu={openedMenu}
-                  vidList={(row || mockList)?.slice(
+                  vidList={videoRows[row]?.slice(
                     item * showCard,
                     item * showCard + showCard
                   )}
                 />
               ))}
           </div>
-          <ShortVids
-            openedMenu={openedMenu}
-            handleResize={handleResizeShort}
-            showQtt={showQtt}
-            shortList={shortList || mockShortList}
-          />
+          {shortRows[row] && (
+            <ShortVids
+              openedMenu={openedMenu}
+              handleResize={handleResizeShort}
+              showQtt={showQtt}
+              shortList={shortRows[row]}
+            />
+          )}
         </Fragment>
       ))}
     </>

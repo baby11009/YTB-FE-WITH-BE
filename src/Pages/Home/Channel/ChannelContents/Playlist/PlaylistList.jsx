@@ -1,37 +1,10 @@
 import { useState, useLayoutEffect, useEffect, useRef } from "react";
 import { PlaylistCard } from "../../../../../Component";
-import { tgbPl as list } from "../../../../../Mock Data/playlistData";
-
-const PlaylistRow = ({ showQtt, plList }) => {
-  const [vrArr, setVrArr] = useState([]);
-
-  useLayoutEffect(() => {
-    setVrArr(Array.from({ length: showQtt - plList?.length }, (_, i) => i));
-  }, [showQtt, plList]);
-
-  return (
-    <div className='flex mx-[-8px]'>
-      {plList.map((item, index) => (
-        <PlaylistCard
-          key={index}
-          data={item}
-          showL3={false}
-          containerStyle={"!ml-0 !mr-[4px] !mb-[24px]"}
-        />
-      ))}
-      {vrArr.map((item) => (
-        <div className='flex-1' key={item}></div>
-      ))}
-    </div>
-  );
-};
 
 const PlaylistList = ({ playlistList, isLoading }) => {
   const containerRef = useRef();
 
   const [showQtt, setShowQtt] = useState(6);
-
-  const [rows, setRows] = useState(3);
 
   const handleResize = () => {
     if (containerRef.current.offsetWidth > 1070 && containerRef.current) {
@@ -63,24 +36,29 @@ const PlaylistList = ({ playlistList, isLoading }) => {
     // Function to update state with current window width
     handleResize();
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", () => {
+      handleResize();
+    });
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", () => {
+        handleResize();
+      });
     };
   }, []);
 
-  useEffect(() => {
-    setRows(Math.ceil(playlistList?.length / showQtt));
-  }, [showQtt, playlistList]);
-
   return (
-    <div className='w-full' ref={containerRef}>
-      {[...Array(rows)].map((_, index) => (
-        <PlaylistRow
-          showQtt={showQtt}
-          key={index}
-          plList={playlistList.slice(index * showQtt, (index + 1) * showQtt)}
+    <div
+      className='w-full grid'
+      style={{ gridTemplateColumns: `repeat(${showQtt}, minmax(0, 1fr)` }}
+      ref={containerRef}
+    >
+      {playlistList.map((item, id) => (
+        <PlaylistCard
+          key={id}
+          data={item}
+          showL3={false}
+          containerStyle={"!ml-0 !mr-[4px] !mb-[24px]"}
         />
       ))}
       {isLoading && (

@@ -128,8 +128,7 @@ export const updateData = async (
   }
 
   try {
-    const data = await request
-      .patch(apiPath, bodyData, {
+    const data = await request.patch(apiPath, bodyData, {
         headers: {
           Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
             import.meta.env.VITE_AUTH_TOKEN
@@ -143,7 +142,10 @@ export const updateData = async (
       });
 
     alert(`${firstLetter.toUpperCase()}${rest.join("")} updated successfully`);
-    return data.data;
+
+    if (data) {
+      return data.data;
+    }
   } catch (error) {
     console.log("🚀 ~ error:", error);
     alert(error.response.data.msg);

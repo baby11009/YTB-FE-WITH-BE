@@ -9,11 +9,10 @@ export const getData = (
   suspense = true
 ) => {
   const paramsValue = Object.values(params);
-
   const paramsKey = Object.keys(params);
 
   const notParamsResetKeys = Object.keys(params).filter(
-    (key) => !key.includes("reset") && !key.includes("clearCache")
+    (key) => !key.includes("refetch") && !key.includes("clearCache")
   );
 
   let finalParams = {};
@@ -38,6 +37,7 @@ export const getData = (
         return res.data;
       } catch (error) {
         console.error(error);
+        alert(error.response.data.msg);
         return null;
       }
     },
@@ -89,6 +89,7 @@ export const getDataWithAuth = (
         return res.data;
       } catch (error) {
         console.error(error);
+        alert(error.response.data.msg);
         return null;
       }
     },

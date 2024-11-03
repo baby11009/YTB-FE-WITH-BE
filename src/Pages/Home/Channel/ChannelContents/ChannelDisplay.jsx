@@ -7,6 +7,7 @@ import ChannelComunity from "./Comunity/ChannelComunity";
 import ChannelSearch from "./Search/ChannelSearch";
 
 const ChannelDisplay = ({ openedMenu, display, channelEmail }) => {
+
   return (
     <div
       className={`w-[214px] xsm:w-[428px] sm:w-[642px] 2md:w-[856px]  

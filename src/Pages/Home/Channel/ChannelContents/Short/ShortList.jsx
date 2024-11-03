@@ -1,52 +1,5 @@
-import {
-  tgb_s7,
-  tgb_s8,
-  tgb_s9,
-  tgb_s10,
-  tgb_s11,
-  tgb_s12,
-} from "../../../../../Assets/Images";
 import { ShortCard } from "../../../../../Component";
 import { useState, useLayoutEffect, useEffect, useRef } from "react";
-
-const shortList = [
-  {
-    id: 1,
-    title: "Sự kết hợp Thầy Ba và Thầy Quyền #shorts",
-    img: tgb_s7,
-    view: 9800,
-  },
-  {
-    id: 2,
-    title: "Mid số 1 BCS có khác 👏👏👏",
-    img: tgb_s8,
-    view: 22100,
-  },
-  {
-    id: 3,
-    title: "Chịu cách mình nói thua cover #short",
-    img: tgb_s9,
-    view: 15000,
-  },
-  {
-    id: 4,
-    title: "Bé ơi từ từ cover #short",
-    img: tgb_s10,
-    view: 8900,
-  },
-  {
-    id: 5,
-    title: "Buồn hay vui - MCK cover #short",
-    img: tgb_s11,
-    view: 9000,
-  },
-  {
-    id: 6,
-    title: "Thiên lý ơi cover #short",
-    img: tgb_s12,
-    view: 9700,
-  },
-];
 
 const ShortsRow = ({ showQtt, dataList }) => {
   const [vrArr, setVrArr] = useState([]);
@@ -118,12 +71,16 @@ const ShortList = ({ shortList, isLoading }) => {
   }, [showQtt, shortList]);
 
   return (
-    <div ref={containerRef}>
-      {[...Array(rows)].map((_, index) => (
-        <ShortsRow
-          showQtt={showQtt}
-          key={index}
-          dataList={shortList.slice(index * showQtt, (index + 1) * showQtt)}
+    <div
+      className='w-full grid'
+      style={{ gridTemplateColumns: `repeat(${showQtt},minmax(0,1fr))` }}
+      ref={containerRef}
+    >
+      {shortList.map((item, id) => (
+        <ShortCard
+          key={id}
+          data={item}
+          containerStyle={"!mx-[2px] !mb-[20px]"}
         />
       ))}
       {isLoading && (

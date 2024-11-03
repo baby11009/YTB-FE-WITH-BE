@@ -17,7 +17,6 @@ export { default as ListLayout } from "./Content Layout/ListLayout.jsx";
 export { default as ChannelCard } from "./Channel/ChannelCard.jsx";
 export { default as HorizonShorts } from "./Short/HorizonShorts.jsx";
 export { default as CustomeFuncBox2 } from "./Box/CustomeFuncBox2.jsx";
-export { default as PlaylistRow } from "./Playlist/PlaylistRow.jsx";
 export { default as VideoCard2 } from "./Video/VideoCard2.jsx";
 export { default as VideoCard3 } from "./Video/VideoCard3.jsx";
 export { default as CardRow2 } from "./Video/CardRow2.jsx";

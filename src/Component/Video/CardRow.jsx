@@ -24,10 +24,19 @@ const CardRow = ({ vidList, handleResize, showQtt, openedMenu, showBtn }) => {
   }, [openedMenu]);
 
   return (
-    <div className='flex '>
+    <div
+      className='grid'
+      style={{ gridTemplateColumns: `repeat(${showQtt}, minmax(0, 1fr)` }}
+    >
       {vidList?.map((item, index) => {
         if (item?.video_list) {
-          return <PlayListCard data={item} key={index} />;
+          return (
+            <PlayListCard
+              data={item}
+              key={index}
+              imgStyle={"max-h-[185.3px]"}
+            />
+          );
         }
         return (
           <VideoCard
@@ -39,9 +48,7 @@ const CardRow = ({ vidList, handleResize, showQtt, openedMenu, showBtn }) => {
           />
         );
       })}
-      {vrArr.map((item) => (
-        <div className='flex-1' key={item}></div>
-      ))}
+
     </div>
   );
 };

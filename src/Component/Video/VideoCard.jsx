@@ -222,7 +222,7 @@ const VideoCard = ({
         style={thumbStyleInline}
       >
         <div
-          className={`w-full  ${thumbStyle ? "h-full" :"h-[185.31px]"}`}
+          className={`w-full  ${thumbStyle ? "h-full" : "h-[185.31px]"}`}
           style={{ backgroundColor: bgColorRef.current }}
         >
           <img
@@ -235,23 +235,12 @@ const VideoCard = ({
         </div>
 
         {/* duration */}
-        {/* {data.type.status !== "is live" && (
-          <div
-            className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
+        <div
+          className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
           mr-[8px] mb-[8px] text-[12px] leading-[18px] rounded-[4px]'
-          >
-            {durationCalc(data.duration || duration)}
-          </div>
-        )} */}
-
-        {/* {data.type.status !== "is live" && (
-          <div
-            className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
-          mr-[8px] mb-[8px] text-[12px] leading-[18px] rounded-[4px]'
-          >
-            {durationCalc(data.duration || duration)}
-          </div>
-        )} */}
+        >
+          {durationCalc(data.duration || duration)}
+        </div>
 
         {/* progress bar */}
         {!showLive && data.progress !== 0 && (

@@ -1,11 +1,9 @@
-import { useState, useRef } from "react";
-
 import HorizonVidInfor from "./HorizonVidInfor";
 import HorizonDesCmt from "./HorizonDesCmt";
 import CommentBox from "./CommentBox";
+import DetailsBox from "./DetailsBox";
 
 const HorizonDescSection = ({
-  sub,
   videoData,
   cmtData,
   totalCmt,
@@ -18,8 +16,6 @@ const HorizonDescSection = ({
   opened,
   setOpened,
 }) => {
-
-
   return (
     <div className='lg:hidden mt-[12px] mb-[24px]'>
       {opened === "cmt" ? (
@@ -35,6 +31,8 @@ const HorizonDescSection = ({
           setAddNewCmt={setAddNewCmt}
           boxRef={boxRef}
         />
+      ) : opened === "detail" ? (
+        <DetailsBox setOpened={setOpened} data={videoData} />
       ) : (
         <>
           {/* Video Information */}
@@ -52,6 +50,7 @@ const HorizonDescSection = ({
             setOpened={setOpened}
             totalCmt={totalCmt}
             videoData={videoData}
+            firstCmt={cmtData[0]}
           />
         </>
       )}

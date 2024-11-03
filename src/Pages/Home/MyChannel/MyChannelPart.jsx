@@ -20,11 +20,11 @@ const MyChannelPart = ({ openedMenu }) => {
         setDisplay={setDisplay}
         // refetch={refetch}
       />
-      {/* <MyChannelDisplay     
+      <MyChannelDisplay
         openedMenu={openedMenu}
         display={display}
         channelEmail={user?.email}
-      /> */}
+      />
     </div>
   );
 };

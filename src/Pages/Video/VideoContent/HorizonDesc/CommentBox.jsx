@@ -1,7 +1,7 @@
 import { SortIcon, CloseIcon } from "../../../../Assets/Icons";
 import { Comment, CommentInput, CustomeFuncBox } from "../../../../Component";
 import { MyChannel } from "../../../../Assets/Images";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { formatNumber } from "../../../../util/numberFormat";
 
 const CommentBox = ({
@@ -40,20 +40,6 @@ const CommentBox = ({
       },
     },
   ];
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setOpened(false);
-      }
-    };
-
-    window.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      window.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   return (
     <div className='bg-[#000] w-full h-[70vh] rounded-[12px] flex flex-col'>

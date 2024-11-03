@@ -6,11 +6,10 @@ export const IsEnd = (setIsEnd) => {
   const viewportHeight = window.innerHeight;
 
   // Check if the scroll position is at the bottom of the page
-
   setIsEnd(Math.ceil(scrollTop + viewportHeight) >= documentHeight);
 };
-
 export const IsElementEnd = (setIsEnd, element) => {
+
   const scrollHeight = element.target.scrollHeight;
   const scrollTop = element.target.scrollTop;
   const clientHeight = element.target.clientHeight;

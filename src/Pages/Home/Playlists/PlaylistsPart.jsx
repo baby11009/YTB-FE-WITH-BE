@@ -1,38 +1,60 @@
-import { CustomeFuncBox2, PlaylistRow } from "../../../Component";
-import { randomPl1List } from "../../../Mock Data/playlistData";
+import { CustomeFuncBox2, PlaylistCard } from "../../../Component";
 import { useState, useEffect, useLayoutEffect } from "react";
-
+import { getDataWithAuth } from "../../../Api/getData";
+import { IsEnd } from "../../../util/scrollPosition";
+import { useQueryClient } from "@tanstack/react-query";
 
 const PlaylistsPart = ({ openedMenu }) => {
+  const queryClient = useQueryClient();
+
   const [activeId, setActiveId] = useState({
-    id: 1,
-    text: "A-Z",
+    id: 2,
+    text: "Newest",
   });
+
+  const [isEnd, setIsEnd] = useState(false);
+
+  const [params, setParams] = useState({
+    page: 1,
+    limit: 16,
+    sort: { createdAt: -1 },
+  });
+
+  const { data: playlists } = getDataWithAuth(
+    "/client/playlist",
+    params,
+    true,
+    true
+  );
 
   const [showQtt, setShowQtt] = useState(4);
 
-  const [showRows, setShowRows] = useState(1);
-
-  const [vrArr, setVrArr] = useState(
-    Array.from({ length: showRows }, (_, i) => i)
-  );
+  const [dataList, setDataList] = useState([]);
 
   const handleSetActive = (data) => {
+    if (params.sort[data.slug]) {
+      return;
+    }
     setActiveId({
       id: data.id,
       text: data.text,
     });
+    setParams((prev) => ({ ...prev, sort: { [data.slug]: data?.data } }));
   };
 
   const funcList = [
     {
       id: 1,
       text: "A-Z",
+      slug: "title",
+      data: 1,
       handleOnClick: handleSetActive,
     },
     {
       id: 2,
-      text: "Mới thêm gần đây",
+      text: "Newest",
+      slug: "createdAt",
+      data: -1,
       handleOnClick: handleSetActive,
     },
   ];
@@ -64,42 +86,57 @@ const PlaylistsPart = ({ openedMenu }) => {
   useEffect(() => {
     handleResize();
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", () => {
+      handleResize();
+    });
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", () => {
+        handleResize();
+      });
+      queryClient.clear();
     };
   }, [openedMenu]);
 
   useLayoutEffect(() => {
-    setShowRows(Math.ceil(randomPl1List.length / showQtt));
-  }, [showQtt]);
+    document.addEventListener("scroll", () => {
+      IsEnd(setIsEnd);
+    });
 
-  useLayoutEffect(() => {
-    setVrArr(Array.from({ length: showRows }, (_, i) => i));
-  }, [showRows]);
+    return () => {
+      document.removeEventListener("scroll", () => {
+        IsEnd(setIsEnd);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isEnd && params.page < playlists?.totalPage) {
+      setParams((prev) => ({ ...prev, page: prev.page + 1 }));
+    }
+  }, [isEnd]);
+
+  useEffect(() => {
+    if (playlists) {
+      setDataList(playlists?.data);
+    }
+  }, [playlists]);
 
   return (
     <div>
       <div className='mx-[24px]'>
-        <span className='text-[36px] leading-[50px] font-bold  '>
-          Danh sách phát
-        </span>
+        <span className='text-[36px] leading-[50px] font-bold  '>Playlist</span>
       </div>
       <div className='pt-[16px] px-[24px]'>
         <CustomeFuncBox2 funcList={funcList} activeId={activeId} />
       </div>
-      <div className='pt-[24px] mx-[16px] flex justify-center'>
-        <div className='flex flex-col'>
-          {vrArr?.map((item) => (
-            <PlaylistRow
-              key={item}
-              plList={randomPl1List.slice(
-                item * showQtt,
-                item * showQtt + showQtt
-              )}
-              showQtt={showQtt}
-            />
+      <div className='pt-[24px] mx-[16px] flex '>
+        <div
+          className={` grid`}
+          style={{ gridTemplateColumns: `repeat(${showQtt}, minmax(0, 1fr))` }}
+        >
+          {dataList.map((item, id) => (
+            <PlaylistCard key={id} data={item} showL3={item?.size > 1} />
           ))}
         </div>
       </div>

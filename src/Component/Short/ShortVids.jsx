@@ -15,15 +15,15 @@ const ShortCardRow = ({ shortList, showQtt }) => {
 
   useLayoutEffect(() => {
     setVrArr(Array.from({ length: showQtt - shortList?.length }, (_, i) => i));
-  }, [showQtt]);
+  }, [showQtt, shortList]);
 
   return (
     <div className='flex'>
       {shortList?.map((item, index) => {
         return (
           <ShortCard
-            key={item?.id || item}
-            data={item?.id ? item : mockData}
+            key={index}
+            data={item}
             funcBoxPos={(index + 1) % showQtt === 0 && "sm:right-[20%]"}
           />
         );
@@ -37,7 +37,7 @@ const ShortCardRow = ({ shortList, showQtt }) => {
 
 const ShortVids = ({
   openedMenu,
-  shortList,
+  shortList = [],
   handleResize,
   showQtt,
   noBtn,
@@ -59,10 +59,14 @@ const ShortVids = ({
     // Function to update state with current window width
     handleResize();
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", () => {
+      handleResize();
+    });
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", () => {
+        handleResize();
+      });
     };
   }, [openedMenu]);
 
@@ -108,7 +112,7 @@ const ShortVids = ({
               />
             ))}
           </div>
-          {!noBtn && (
+          {!noBtn && shortList?.length > showQtt && (
             <div
               className='absolute bg-black  w-[360px] max-w-[100%] left-[50%] bottom-[0] 
              translate-x-[-50%] translate-y-[50%] '

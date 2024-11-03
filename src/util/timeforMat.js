@@ -80,17 +80,18 @@ export const timeFormat2 = (time) => {
   const seconds = Math.floor(timeElapsed / 1000);
 
   const timeUnits = [
-    { label: "năm", value: 60 * 60 * 24 * 30 * 12 },
-    { label: "tháng", value: 60 * 60 * 24 * 30 },
-    { label: "ngày", value: 60 * 60 * 24 },
-    { label: "giờ", value: 60 * 60 },
-    { label: "phút", value: 60 },
+    { label: "year", value: 60 * 60 * 24 * 30 * 12 },
+    { label: "month", value: 60 * 60 * 24 * 30 },
+    { label: "day", value: 60 * 60 * 24 },
+    { label: "hour", value: 60 * 60 },
+    { label: "minute", value: 60 },
   ];
 
   const unit = timeUnits.find(({ value }) => seconds >= value);
   const quantity = unit ? Math.floor(seconds / unit.value) : seconds;
-
-  return `${quantity} ${unit ? unit.label : "giây"} trước`;
+  return `${quantity} ${unit ? unit.label : "second"}${
+    quantity > 2 ? "s" : ""
+  } ago`;
 };
 
 // Trả về DD/MM/YYYY
@@ -105,5 +106,5 @@ export const timeFormat3 = (time) => {
     .toString()
     .padStart(2, "0")}/${year}`;
 
-    return formattedDate
+  return formattedDate;
 };
