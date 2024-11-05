@@ -42,7 +42,7 @@ const LeftMenu = ({ openedMenu, path }) => {
       {/* Big menu */}
       {openedMenu && (
         <>
-          <div className='text-[14px] font-[500] leading-[20px] h-full-minus-56 overflow-y-scroll menu-scrollbar'>
+          <div className='text-[14px] font-[500] leading-[20px] h-full-minus-56 overflow-y-scroll overscroll-contain menu-scrollbar'>
             <div className='p-[12px]'>
               <ul>
                 {funcList1.slice(0, 3).map((item) => {

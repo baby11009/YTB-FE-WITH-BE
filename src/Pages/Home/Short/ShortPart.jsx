@@ -12,46 +12,54 @@ const ShortPart = () => {
 
   const [isEnd, setIsEnd] = useState(false);
 
+  const [currentIndex, setCurrentIndex] = useState(1);
+
   const shortIdSet = useRef(new Set());
 
   const [params, setParams] = useState({
     watchedIdList: [],
-    userId: user?._id,
+    reset: user?._id,
   });
 
   const [shortList, setShortList] = useState([]);
 
-  const currentIndex = useRef(1);
+  const containerRef = useRef();
 
-  const { data, refetch } = getData("/data/short", params);
+  const { data } = getData("/data/short", params);
 
   const handleScrollPrev = () => {
     window.scrollTo({
       left: window.scrollX,
-      top: window.scrollY - 612,
+      top:
+        window.scrollY -
+        Math.ceil(containerRef.current?.clientHeight / shortList.length) -
+        2,
       behavior: "smooth",
     });
-    currentIndex.current = Math.max(1, currentIndex.current - 1);
+    setCurrentIndex((prev) => Math.max(1, prev - 1));
   };
 
   const handleScrollNext = () => {
     window.scrollTo({
       left: window.scrollX,
-      top: window.scrollY + 612,
+      top:
+        window.scrollY +
+        Math.ceil(containerRef.current?.clientHeight / shortList.length) +
+        2,
       behavior: "smooth",
     });
-    currentIndex.current = currentIndex.current + 1;
+    setCurrentIndex((prev) => Math.min(shortList.length, prev + 1));
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const disableScroll = (e) => {
       e.preventDefault();
     };
 
-    window.addEventListener("wheel", disableScroll, { passive: false });
-    window.addEventListener("touchmove", disableScroll, { passive: false });
+    // document.addEventListener("wheel", disableScroll, { passive: false });
+    // document.addEventListener("touchmove", disableScroll, { passive: false });
 
-    window.addEventListener("scroll", () => {
+    document.addEventListener("scroll", () => {
       IsEnd(setIsEnd);
       IsTop(setIsTop);
     });
@@ -59,9 +67,10 @@ const ShortPart = () => {
     document.documentElement.style.setProperty("--scroll-bar-width", "none");
 
     return () => {
-      window.removeEventListener("wheel", disableScroll, { passive: false });
+      // document.removeEventListener("wheel", disableScroll, { passive: false });
+      // document.addEventListener("touchmove", disableScroll, { passive: false });
 
-      window.removeEventListener("scroll", () => {
+      document.removeEventListener("scroll", () => {
         IsEnd(setIsEnd);
         IsTop(setIsTop);
       });
@@ -72,14 +81,10 @@ const ShortPart = () => {
     };
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (data) {
       data?.data.forEach((item) => {
         if (!shortIdSet.current.has(item._id)) {
-          setParams((prev) => ({
-            ...prev,
-            watchedIdList: [...prev.watchedIdList, item._id],
-          }));
           setShortList((prev) => [...prev, item]);
           shortIdSet.current.add(item._id);
         }
@@ -88,21 +93,19 @@ const ShortPart = () => {
   }, [data]);
 
   useEffect(() => {
-    if (shortList.length - currentIndex.current === 1) {
-      refetch();
+    if (shortList.length - currentIndex === 1) {
+      setParams((prev) => ({
+        ...prev,
+        watchedIdList: [...shortIdSet.current],
+      }));
     }
-  }, [currentIndex.current]);
+  }, [currentIndex, shortList.length]);
 
   return (
-    <div className='relative '>
-      <div className='mx-auto w-fit'>
+    <div className='relative'>
+      <div className='mx-auto w-fit' ref={containerRef}>
         {shortList.map((item, index) => (
-          <LargeShortVid
-            key={index}
-            data={item}
-            total={shortList.length}
-            od={index + 1}
-          />
+          <LargeShortVid key={index} data={item} />
         ))}
       </div>
       <div className='hidden md:flex md:flex-col fixed top-[50%] translate-y-[-50%] right-0'>

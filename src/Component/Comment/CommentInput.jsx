@@ -3,7 +3,6 @@ import InputBox from "./InputBox";
 import { useAuthContext } from "../../Auth Provider/authContext";
 
 const CommentInput = ({
-  myChannelImg,
   refetchVideo,
   showEmoji,
   imgSize,
@@ -17,7 +16,6 @@ const CommentInput = ({
   const [showedInput, setShowedInput] = useState(false);
 
   const handleOnClick = (e) => {
-
     setShowedInput(false);
   };
 
@@ -38,7 +36,9 @@ const CommentInput = ({
         >
           <div>
             <img
-              src={myChannelImg}
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_AVA_API
+              }${user?.avatar}`}
               alt=''
               className={`${imgSize || "size-[24px]"} rounded-[50%] bg-white`}
             />
@@ -52,7 +52,9 @@ const CommentInput = ({
       ) : (
         <InputBox
           handleOnClick={handleOnClick}
-          myChannelImg={myChannelImg}
+          myChannelImg={`${import.meta.env.VITE_BASE_API_URI}${
+            import.meta.env.VITE_VIEW_AVA_API
+          }${user?.avatar}`}
           showEmoji={showEmoji}
           videoId={videoId}
           userId={user?._id}

@@ -49,10 +49,12 @@ const InputBox = ({
       setAddNewCmt(true);
       refetchCmtList();
       setCmtParams((prev) => ({ ...prev, page: 1 }));
-      refetchVideo();
+      if (refetchVideo) {
+        refetchVideo();
+      }
       setCmtText("");
       setShowedInput(false);
-    })
+    });
   };
 
   return (

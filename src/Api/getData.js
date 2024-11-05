@@ -8,6 +8,9 @@ export const getData = (
   condition = true,
   suspense = true
 ) => {
+  if (!path) {
+    return null;
+  }
   const paramsValue = Object.values(params);
   const paramsKey = Object.keys(params);
 
@@ -24,6 +27,8 @@ export const getData = (
   } else {
     finalParams = params;
   }
+
+  const token = getCookie(import.meta.env.VITE_AUTH_TOKEN);
 
   return useQuery({
     queryKey: paramsValue,
@@ -43,6 +48,7 @@ export const getData = (
     },
     enabled: condition,
     suspense,
+    cacheTime: 0,
   });
 };
 
@@ -52,6 +58,9 @@ export const getDataWithAuth = (
   condition = true,
   suspense = true
 ) => {
+  if (!path) {
+    return null;
+  }
   const paramsValue = Object.values(params);
 
   const paramsKey = Object.keys(params);
@@ -80,9 +89,6 @@ export const getDataWithAuth = (
         const res = await request.get(path, {
           params: {
             ...finalParams,
-          },
-          headers: {
-            Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${token}`,
           },
         });
 

@@ -20,7 +20,7 @@ const DescSection = ({
 
   return (
     <div
-      className=' w-[410px] xl:w-[480px] h-screen-h-minus-72 overflow-y-auto flex flex-col px-[16px] pt-[16px] 
+      className=' w-[410px] xl:w-[480px] h-screen-h-minus-72 overflow-y-auto overscroll-contain flex flex-col px-[16px] pt-[16px] 
       border-[1px] border-[rgba(255,255,255,.2)] rounded-[12px] bg-[#0a0a0a]'
       ref={boxRef}
     >
@@ -29,7 +29,11 @@ const DescSection = ({
       ) : (
         <>
           {/* Video in4 */}
-          <VideoInfor videoData={videoData} refetch={refetch} setWatchFull={setWatchFull} />
+          <VideoInfor
+            videoData={videoData}
+            refetch={refetch}
+            setWatchFull={setWatchFull}
+          />
           {/* Comment  */}
           <CommentSection
             refetchVideo={refetch}

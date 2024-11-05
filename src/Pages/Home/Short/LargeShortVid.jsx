@@ -19,12 +19,51 @@ import {
   MuteAudiIcon,
 } from "../../../Assets/Icons";
 
-import { MyChannel } from "../../../Assets/Images";
 import { useState, useEffect, useRef } from "react";
 import { useAnimate, AnimatePresence, motion } from "framer-motion";
 import { formatNumber } from "../../../util/numberFormat";
-
+import { useAuthContext } from "../../../Auth Provider/authContext";
 import { Comment, CommentInput, CustomeFuncBox } from "../../../Component";
+import { getDataWithAuth } from "../../../Api/getData";
+import { getCookie } from "../../../util/tokenHelpers";
+import request from "../../../util/axios-base-url";
+import CommentBox from "./CommentBox";
+import { useQueryClient } from "@tanstack/react-query";
+
+const ConfirmUnsubscribe = ({
+  handleSubscribe,
+  channelEmail,
+  handleCancel,
+}) => {
+  return (
+    <div className=' max-w-[688px] bg-black-21 rounded-[10px]'>
+      <div className='mt-[24px]'>
+        <div className='px-[24px] mt-[4px] mb-[24px] text-nowrap'>
+          Unsubscribe from {channelEmail} ?
+        </div>
+        <div className='flex justify-end items-center py-[8px]'>
+          <button
+            onClick={() => {
+              handleCancel();
+            }}
+            className='px-[16px] leading-[36px] text-[14px] font-[500] rounded-[18px] hover:bg-black-0.1'
+          >
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              await handleSubscribe();
+              handleCancel();
+            }}
+            className='px-[16px] leading-[36px] text-[14px] font-[500] rounded-[18px] text-blue-3E hover:bg-[#263850'
+          >
+            Unsubscribe
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const CustomeButton = ({ Icon, text, title, handleOnClick, showedCmt }) => {
   return (
@@ -38,7 +77,11 @@ const CustomeButton = ({ Icon, text, title, handleOnClick, showedCmt }) => {
           }
           `}
         title={title}
-        onClick={handleOnClick}
+        onClick={() => {
+          if (handleOnClick) {
+            handleOnClick();
+          }
+        }}
       >
         <Icon />
       </button>
@@ -84,10 +127,12 @@ const funcList = [
   },
 ];
 
-const LargeShortVid = ({ data, total, od }) => {
-  const [firstTimeRender, setFirstTimeRender] = useState(true);
+const LargeShortVid = ({ data }) => {
+  const queryClient = useQueryClient();
 
-  const [hoverContain, setHoverContain] = useState(false);
+  const { setIsShowing, user } = useAuthContext();
+
+  const [firstTimeRender, setFirstTimeRender] = useState(true);
 
   const [moveBtn, setMoveBtn] = useState(false);
 
@@ -107,7 +152,6 @@ const LargeShortVid = ({ data, total, od }) => {
     state: false,
     type: "pause",
   });
-  // console.log("🚀 ~ clicked:", data.title, clicked);
 
   const [scope, animate] = useAnimate();
 
@@ -116,6 +160,79 @@ const LargeShortVid = ({ data, total, od }) => {
   const containRef = useRef();
 
   const videoRef = useRef();
+
+  const timeOutRef = useRef();
+
+  const { data: subscriptionInfo, refetch } = getDataWithAuth(
+    `/client/subscribe/${data?.channel_info?._id}`,
+    { reset: data?.channel_info?._id },
+    user ? true : false,
+    false
+  );
+
+  const handleClick = () => {
+    setClicked((prev) => {
+      return {
+        state: !prev.state,
+        type: prev.type === "play" ? "stop" : "play",
+      };
+    });
+    setTimeout(() => {
+      setClicked((prev) => {
+        return {
+          ...prev,
+          state: !prev.state,
+        };
+      });
+    }, 400);
+  };
+
+  const handleSubscribe = async () => {
+    if (!user) {
+      alert(`Please login to subscribe to ${data?.channel_info?.email}`);
+      return;
+    }
+    await request
+      .post(
+        "/client/subscribe",
+        {
+          userId: user?._id,
+          channelId: data?.channel_info?._id,
+        },
+        {
+          headers: {
+            Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
+              import.meta.env.VITE_AUTH_TOKEN
+            )}`,
+          },
+        }
+      )
+      .then(() => {
+        refetch();
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const handleToggleCmt = () => {
+    if (timeOutRef.current) {
+      clearTimeout(timeOutRef.current);
+    }
+    if (showedCmt) {
+      setShowContent(false);
+      setTimeout(() => {
+        setShowedCmt(false);
+      }, 20);
+      timeOutRef.current = setTimeout(() => {
+        setMoveBtn(false);
+      }, 310);
+    } else {
+      setShowedCmt(true);
+      timeOutRef.current = setTimeout(() => {
+        setMoveBtn(true);
+        setShowContent(true);
+      }, 310);
+    }
+  };
 
   useEffect(() => {
     if (scope.current) {
@@ -146,42 +263,6 @@ const LargeShortVid = ({ data, total, od }) => {
       }
     }
   }, [hoverAudio]);
-
-  useEffect(() => {
-    let timeOut;
-    if (showedCmt) {
-      timeOut = setTimeout(() => {
-        setMoveBtn(true);
-        setShowContent(true);
-      }, 310);
-    } else {
-      setShowContent(false);
-      timeOut = setTimeout(() => {
-        setMoveBtn(false);
-      }, 310);
-    }
-
-    return () => {
-      clearTimeout(timeOut);
-    };
-  }, [showedCmt]);
-
-  const handleClick = () => {
-    setClicked((prev) => {
-      return {
-        state: !prev.state,
-        type: prev.type === "play" ? "stop" : "play",
-      };
-    });
-    setTimeout(() => {
-      setClicked((prev) => {
-        return {
-          ...prev,
-          state: !prev.state,
-        };
-      });
-    }, 400);
-  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -234,6 +315,7 @@ const LargeShortVid = ({ data, total, od }) => {
       }
       window.removeEventListener("scroll", checkVisibility);
       window.removeEventListener("resize", checkVisibility);
+      queryClient.clear();
     };
   }, []);
 
@@ -267,98 +349,94 @@ const LargeShortVid = ({ data, total, od }) => {
   }, [videoProgress]);
 
   return (
-    <div className='flex cursor-pointer relative' ref={elementRef}>
+    <div className='flex cursor-pointer relative mb-[16px]' ref={elementRef}>
       <div className='relative'>
         <div
-          className={`mt-[24px] relative overflow-hidden playParent ${
+          className={` relative overflow-hidden bg-[rgb(0,0,0)] group ${
             showedCmt ? "rounded-l-[12px]" : "rounded-[12px]"
-          } ${total === od && "mb-[24px]"}`}
+          } `}
           onClick={handleClick}
-          onMouseOver={() => setHoverContain(true)}
-          onMouseOut={() => setHoverContain(false)}
         >
           {/* <img
             src={`${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_THUMB_API
             }${data?.thumb}`}
             alt=''
-            className='w-[20vw] min-w-[331px] min-h-[588px] h-screen-h-minus-128 absolute z-[-1]'
+            className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128 absolute z-[-1]'
           /> */}
           <video
-            className='w-[20vw] min-w-[331px] min-h-[588px] h-screen-h-minus-128'
+            className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128'
             src={`${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_VIDEO_API
             }${data?.video}`}
             ref={videoRef}
-            autoPlay
           ></video>
-          {hoverContain && (
-            <div className='absolute top-0 left-0 pt-[16px] pb-[32px] px-[16px] w-full flex items-center gap-[16px]'>
-              <div className=' bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(40,40,40,0.6)] rounded-[50%]'>
-                <button
-                  className='w-[48px] h-[48px] flex items-center justify-center'
-                  title='Phát'
-                >
-                  {clicked.type === "play" ? <StopIcon /> : <PlayIcon />}
-                </button>
-              </div>
-              <div
-                className='flex items-center bg-[rgba(0,0,0,0.4)] rounded-[30px] w-[48px]'
-                onMouseOver={() => setHoverAudio(true)}
-                onMouseOut={() => setHoverAudio(false)}
-                ref={scope}
+
+          <div className='absolute top-0 left-0 pt-[16px] pb-[32px] px-[16px] w-full group-hover:flex hidden items-center gap-[16px]'>
+            <div className=' bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(40,40,40,0.6)] rounded-[50%]'>
+              <button
+                className='w-[48px] h-[48px] flex items-center justify-center'
+                title='Phát'
               >
-                <button
-                  className='!w-[48px] h-[48px] flex items-center justify-center'
-                  title='Âm lượng'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setAudioValue((prev) => {
-                      if (prev === 0) {
-                        return 100;
-                      }
-                      return 0;
-                    });
-                  }}
-                >
-                  {audioValue === 0 ? <MuteAudiIcon /> : <ThickAudioIcon />}
-                </button>
-                <AnimatePresence>
-                  {hoverAudio && (
-                    <motion.div
-                      className='flex items-center relative'
-                      initial={{
-                        width: 0,
-                      }}
-                      animate={{
-                        width: "calc(100% - 48px)",
-                        opacity: 1,
-                      }}
-                      exit={{
-                        width: 0,
-                        opacity: 0,
-                      }}
-                      transition={{
-                        type: "tween",
-                        duration: 0.3,
-                      }}
-                    >
-                      <input
-                        type='range'
-                        max={100}
-                        min={0}
-                        step={1}
-                        className='cursor-pointer cs-range'
-                        value={audioValue}
-                        onChange={(e) => setAudioValue(Number(e.target.value))}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                {clicked.type === "play" ? <StopIcon /> : <PlayIcon />}
+              </button>
             </div>
-          )}
+            <div
+              className='flex items-center bg-[rgba(0,0,0,0.4)] rounded-[30px] w-[48px]'
+              onMouseOver={() => setHoverAudio(true)}
+              onMouseOut={() => setHoverAudio(false)}
+              ref={scope}
+            >
+              <button
+                className='!w-[48px] h-[48px] flex items-center justify-center'
+                title='Âm lượng'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAudioValue((prev) => {
+                    if (prev === 0) {
+                      return 100;
+                    }
+                    return 0;
+                  });
+                }}
+              >
+                {audioValue === 0 ? <MuteAudiIcon /> : <ThickAudioIcon />}
+              </button>
+              <AnimatePresence>
+                {hoverAudio && (
+                  <motion.div
+                    className='flex items-center relative'
+                    initial={{
+                      width: 0,
+                    }}
+                    animate={{
+                      width: "calc(100% - 48px)",
+                      opacity: 1,
+                    }}
+                    exit={{
+                      width: 0,
+                      opacity: 0,
+                    }}
+                    transition={{
+                      type: "tween",
+                      duration: 0.3,
+                    }}
+                  >
+                    <input
+                      type='range'
+                      max={100}
+                      min={0}
+                      step={1}
+                      className='cursor-pointer cs-range'
+                      value={audioValue}
+                      onChange={(e) => setAudioValue(Number(e.target.value))}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
 
           <AnimatePresence>
             {clicked.state && (
@@ -391,22 +469,48 @@ const LargeShortVid = ({ data, total, od }) => {
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_AVA_API
-              }${data?.user_info?.avatar}`}
+              }${data?.channel_info?.avatar}`}
               alt=''
               className='w-[36px] h-[36px] rounded-[50%] bg-[#ccc]'
             />
             <span className='text-[14px] leading-[20px] '>
-              {data?.user_info?.email}
+              {data?.channel_info?.email}
             </span>
-            <button className=' hover:bg-[rgba(255,255,255,0.2)] bg-hover-black text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'>
-              <span>Đăng ký</span>
-            </button>
+            {subscriptionInfo?.data?.state ? (
+              <button
+                className=' hover:bg-[rgba(255,255,255,0.2)]
+               bg-hover-black text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
+                onClick={() => {
+                  setIsShowing(
+                    <ConfirmUnsubscribe
+                      handleSubscribe={handleSubscribe}
+                      channelEmail={data?.channel_info?.email}
+                      handleCancel={() => {
+                        setIsShowing(undefined);
+                      }}
+                    />
+                  );
+                }}
+              >
+                <span>Subscribed</span>
+              </button>
+            ) : (
+              <button
+                className=' hover:bg-[#e6e6e6] text-black
+               bg-white text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
+                onClick={async () => {
+                  await handleSubscribe();
+                }}
+              >
+                <span>Subscribe</span>
+              </button>
+            )}
           </div>
           <div className='py-[4px]'>
             <h3 className='text-[14px] leading-[20px]'>{data?.title}</h3>
           </div>
         </div>
-        <div className='px-[12px] absolute bottom-0 w-full translate-y-[30%]'>
+        <div className='px-[12px] absolute bottom-0 w-full '>
           <input
             type='range'
             className='video-range'
@@ -422,7 +526,7 @@ const LargeShortVid = ({ data, total, od }) => {
       </div>
 
       <div
-        className={`h-screen-h-minus-128 min-h-[588px] px-[12px] mt-[24px] 
+        className={`h-screen-h-minus-128 min-h-[616px] px-[12px] 
         flex flex-col items-center justify-end gap-[16px]
         ${moveBtn && "absolute left-[42%] translate-x-[-100%] pb-[24px]"}
         ${showedCmt && !moveBtn && "!hidden"}
@@ -445,7 +549,7 @@ const LargeShortVid = ({ data, total, od }) => {
           text={formatNumber(data?.totalCmt)}
           Icon={CommentIcon}
           title={"Bình luận"}
-          handleOnClick={() => setShowedCmt((prev) => !prev)}
+          handleOnClick={handleToggleCmt}
           showedCmt={showedCmt}
         />
         <CustomeButton
@@ -476,63 +580,14 @@ const LargeShortVid = ({ data, total, od }) => {
       </div>
       <AnimatePresence>
         {showedCmt && (
-          <motion.div
-            className='w-[450px] bg-[#1c1b1b] h-screen-h-minus-128 min-h-[588px] 
-            mt-[24px] rounded-r-[12px] flex flex-col cursor-auto'
-            initial={{
-              width: 0,
+          <CommentBox
+            handleCloseCmt={() => {
+              handleToggleCmt();
             }}
-            animate={{
-              width: "450px",
-              background: "#0f0f0f",
-            }}
-            exit={{
-              width: 0,
-              background: "#1c1b1b",
-            }}
-            transition={{
-              duration: 0.3,
-            }}
-          >
-            {/* Header */}
-            {showContent && (
-              <>
-                <div className='px-[16px] py-[4px] flex items-center justify-between '>
-                  <div className='my-[10px] flex items-center gap-[8px]'>
-                    <h4 className='text-[20px] leading-[28px] font-bold'>
-                      Bình luận
-                    </h4>
-                    <span className=' text-gray-A'>3,1 N</span>
-                  </div>
-                  <div className='flex gap-[8px]'>
-                    <button className='w-[40px] h-[40px] flex items-center justify-center'>
-                      <SortIcon />
-                    </button>
-                    <button
-                      className='w-[40px] h-[40px] rounded-[50%] hover:bg-[rgba(255,255,255,0.2)]
-                      flex items-center justify-center'
-                      onClick={() => setShowedCmt(false)}
-                    >
-                      <CloseIcon />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Comment list */}
-                <div className='px-[16px] flex-1 overflow-y-auto menu-scrollbar'>
-                  <Comment verify={true} owner={true} reply={true} />
-                  <Comment verify={true} owner={true} reply={true} />
-                  <Comment verify={true} reply={true} />
-                  <Comment verify={true} />
-                  <Comment reply={true} />
-                  <Comment />
-                </div>
-                <div className='p-[16px] border-t-[1px] border-[rgba(255,255,255,0.2)]'>
-                  <CommentInput myChannelImg={MyChannel} />
-                </div>
-              </>
-            )}
-          </motion.div>
+            showedContent={showContent}
+            shortId={data?._id}
+            dataCache
+          />
         )}
       </AnimatePresence>
     </div>

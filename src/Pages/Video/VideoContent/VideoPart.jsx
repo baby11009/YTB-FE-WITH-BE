@@ -32,7 +32,7 @@ const VideoPart = ({ openedMenu }) => {
     limit: 8,
     page: 1,
     createdAt: "mới nhất",
-    userId: user?._id,
+    reset: user?._id,
   });
 
   const [videoParams, setVideoParams] = useState(initVideoParams);
@@ -80,12 +80,12 @@ const VideoPart = ({ openedMenu }) => {
         page: prev.page + 1,
         prevPlCount: videoDatas.filter((data) => data.video_list).length,
       }));
+      setAddNew(!isEnd);
     }
-    setAddNew(!isEnd);
   }, [isEnd]);
 
   useEffect(() => {
-    if (isBoxEnd && cmtParams.page < cmtList.totalPages) {
+    if (isBoxEnd && cmtParams.page < cmtList.totalPage) {
       setCmtParams((prev) => ({ ...prev, page: prev.page + 1 }));
     }
     setAddNewCmt(!isBoxEnd);
