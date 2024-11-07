@@ -2,12 +2,24 @@ import { motion } from "framer-motion";
 import { Comment, CommentInput } from "../../../Component";
 import { CloseIcon, SortIcon } from "../../../Assets/Icons";
 import { getData } from "../../../Api/getData";
-import { useState, useLayoutEffect, useRef, useEffect } from "react";
+import {
+  useState,
+  useLayoutEffect,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { IsElementEnd } from "../../../util/scrollPosition";
 import { formatNumber } from "../../../util/numberFormat";
 
-const CommentBox = ({ handleCloseCmt, showedContent, shortId }) => {
+const CommentBox = ({
+  handleCloseCmt,
+  showedContent,
+  shortId,
+  handleRefetch,
+  totalCmt,
+}) => {
   const queryClient = useQueryClient();
 
   const [params, setParams] = useState({
@@ -16,12 +28,11 @@ const CommentBox = ({ handleCloseCmt, showedContent, shortId }) => {
     sort: {
       createdAt: -1,
     },
-
     reset: shortId,
   });
-  console.log("🚀 ~ params:", params);
+  // console.log(params);
 
-  const { data, isLoading, refetch, isSuccess } = getData(
+  const { data, isLoading, refetch } = getData(
     `/data/comment/video-cmt/${shortId}`,
     params,
     true,
@@ -34,17 +45,42 @@ const CommentBox = ({ handleCloseCmt, showedContent, shortId }) => {
 
   const [addNew, setAddNew] = useState(true);
 
-  const scrollRef = useRef();
+  const idListSet = useRef(new Set());
+
+  const refscroll = useCallback((e) => {
+    if (e) {
+      e.addEventListener("scroll", (e) => {
+        IsElementEnd(setIsEnd, e);
+      });
+    }
+  }, []);
 
   useLayoutEffect(() => {
-    if (isSuccess) {
+    if (data) {
       if (addNew) {
         setCommentList(data?.data);
+        data?.data?.forEach((item) => {
+          idListSet.current.add(item?._id);
+        });
       } else {
-        setCommentList((prev) => [...prev, ...data?.data]);
+        let addlist = [];
+        data?.data?.forEach((item) => {
+          if (idListSet.current.has(item?._id)) {
+            return;
+          }
+          addlist.push(item);
+          idListSet.current.add(item?._id);
+        });
+        setCommentList((prev) => {
+          if (params.page === 1) {
+            return [...addlist, ...prev];
+          } else {
+            return [...prev, ...addlist];
+          }
+        });
       }
     }
-  }, [isSuccess, addNew]);
+  }, [data, addNew]);
 
   useEffect(() => {
     return () => {
@@ -53,24 +89,12 @@ const CommentBox = ({ handleCloseCmt, showedContent, shortId }) => {
   }, []);
 
   useEffect(() => {
-    const element = scrollRef.current;
-
-    if (element) {
-      element.addEventListener("scroll", (e) => {
-        IsElementEnd(setIsEnd, e);
-      });
-    }
-    return () => {
-      if (element) {
-        element.removeEventListener("scroll", (e) => {
-          IsElementEnd(setIsEnd, e);
-        });
-      }
-    };
-  }, [scrollRef.current]);
-  useEffect(() => {
     if (isEnd && params.page < data.totalPage) {
-      setParams((prev) => ({ ...prev, page: prev.page + 1 }));
+      setParams((prev) => ({
+        ...prev,
+        page: Math.floor(commentList.length / prev.limit) + 1,
+      }));
+
       setAddNew(!isEnd);
     }
   }, [isEnd]);
@@ -99,9 +123,7 @@ const CommentBox = ({ handleCloseCmt, showedContent, shortId }) => {
           <div className='px-[16px] py-[4px] flex items-center justify-between '>
             <div className='my-[10px] flex items-center gap-[8px]'>
               <h4 className='text-[20px] leading-[28px] font-bold'>Comment</h4>
-              <span className=' text-gray-A'>
-                {formatNumber(data?.totalQtt)}
-              </span>
+              <span className=' text-gray-A'>{totalCmt}</span>
             </div>
             <div className='flex gap-[8px]'>
               <button className='w-[40px] h-[40px] flex items-center justify-center'>
@@ -120,7 +142,7 @@ const CommentBox = ({ handleCloseCmt, showedContent, shortId }) => {
           {/* Comment list */}
           <div
             className='px-[16px] flex-1 overflow-y-auto menu-scrollbar overscroll-contain'
-            ref={scrollRef}
+            ref={refscroll}
           >
             {commentList.map((item, id) => (
               <Comment
@@ -130,6 +152,7 @@ const CommentBox = ({ handleCloseCmt, showedContent, shortId }) => {
                 setAddNewCmt={setAddNew}
                 setCmtParams={setParams}
                 refetchCmtList={refetch}
+                refetchVideo={handleRefetch}
                 key={id}
               />
             ))}
@@ -138,9 +161,16 @@ const CommentBox = ({ handleCloseCmt, showedContent, shortId }) => {
             <CommentInput
               myChannelImg={data?.channel_info?.avatar}
               videoId={shortId}
-              refetchCmtList={refetch}
+              refetchCmtList={() => {
+                if (params.page !== 1) {
+                  setParams((prev) => ({ ...prev, page: 1 }));
+                } else {
+                  refetch();
+                }
+              }}
               setAddNewCmt={setAddNew}
               setCmtParams={setParams}
+              refetchVideo={handleRefetch}
             />
           </div>
         </>

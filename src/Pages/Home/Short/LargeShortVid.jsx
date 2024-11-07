@@ -8,8 +8,6 @@ import {
   PlayIcon,
   ThickAudioIcon,
   StopIcon,
-  CloseIcon,
-  SortIcon,
   DescriptionIcon,
   SubtitlesIcon,
   AddPLIcon,
@@ -19,13 +17,11 @@ import {
   MuteAudiIcon,
 } from "../../../Assets/Icons";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { useAnimate, AnimatePresence, motion } from "framer-motion";
 import { formatNumber } from "../../../util/numberFormat";
 import { useAuthContext } from "../../../Auth Provider/authContext";
-import { Comment, CommentInput, CustomeFuncBox } from "../../../Component";
-import { getDataWithAuth } from "../../../Api/getData";
-import { getCookie } from "../../../util/tokenHelpers";
+import {  CustomeFuncBox } from "../../../Component";
 import request from "../../../util/axios-base-url";
 import CommentBox from "./CommentBox";
 import { useQueryClient } from "@tanstack/react-query";
@@ -65,13 +61,23 @@ const ConfirmUnsubscribe = ({
   );
 };
 
-const CustomeButton = ({ Icon, text, title, handleOnClick, showedCmt }) => {
+const CustomeButton = ({
+  Icon,
+  text,
+  title,
+  handleOnClick,
+  showedCmt,
+  buttonCss,
+  iconCss,
+}) => {
   return (
     <div className='flex flex-col items-center w-[48px] '>
       <button
         className={`w-[48px] h-[48px] rounded-[50%] flex items-center justify-center
           ${
-            showedCmt
+            buttonCss
+              ? buttonCss
+              : showedCmt
               ? "bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(40,40,40,0.6)]"
               : "bg-hover-black hover:bg-[rgba(255,255,255,0.2)]"
           }
@@ -83,7 +89,9 @@ const CustomeButton = ({ Icon, text, title, handleOnClick, showedCmt }) => {
           }
         }}
       >
-        <Icon />
+        <div className={`${iconCss ? iconCss : ""}`}>
+          <Icon />
+        </div>
       </button>
       {text && (
         <span className='mt-[4px] text-[14px] leading-[20px] cursor-default overflow-hidden t-1-ellipsis'>
@@ -127,7 +135,7 @@ const funcList = [
   },
 ];
 
-const LargeShortVid = ({ data }) => {
+const LargeShortVid = ({ shortId }) => {
   const queryClient = useQueryClient();
 
   const { setIsShowing, user } = useAuthContext();
@@ -163,12 +171,9 @@ const LargeShortVid = ({ data }) => {
 
   const timeOutRef = useRef();
 
-  const { data: subscriptionInfo, refetch } = getDataWithAuth(
-    `/client/subscribe/${data?.channel_info?._id}`,
-    { reset: data?.channel_info?._id },
-    user ? true : false,
-    false
-  );
+  const [shortDetails, setShortDetails] = useState(undefined);
+
+  const [refetch, setRefetch] = useState(true);
 
   const handleClick = () => {
     setClicked((prev) => {
@@ -189,28 +194,28 @@ const LargeShortVid = ({ data }) => {
 
   const handleSubscribe = async () => {
     if (!user) {
-      alert(`Please login to subscribe to ${data?.channel_info?.email}`);
+      alert(
+        `Please login to subscribe to ${shortDetails?.channel_info?.email}`
+      );
       return;
     }
     await request
-      .post(
-        "/client/subscribe",
-        {
-          userId: user?._id,
-          channelId: data?.channel_info?._id,
-        },
-        {
-          headers: {
-            Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-              import.meta.env.VITE_AUTH_TOKEN
-            )}`,
-          },
-        }
-      )
+      .post("/client/subscribe", {
+        userId: user?._id,
+        channelId: shortDetails?.channel_info?._id,
+      })
       .then(() => {
-        refetch();
+        setRefetch(true);
       })
       .catch((err) => console.log(err));
+  };
+
+  const handleToggleReact = async (type) => {
+    await request
+      .post("/client/react", { videoId: shortId, type: type })
+      .then(() => {
+        setRefetch(true);
+      });
   };
 
   const handleToggleCmt = () => {
@@ -233,6 +238,45 @@ const LargeShortVid = ({ data }) => {
       }, 310);
     }
   };
+
+  const fetchData = async () => {
+    await request
+      .get(`/data/video/${shortId}`)
+      .then(({ data }) => {
+        if (!shortDetails) {
+          setShortDetails(data?.data);
+        } else {
+          setShortDetails((prev) => {
+            const datakeys = Object.keys(data?.data);
+            const finalData = { ...prev };
+            datakeys.forEach((key) => {
+              if (
+                prev[key] !== data?.data[key] ||
+                typeof prev[key] === "object" ||
+                Array.isArray(prev[key])
+              ) {
+                finalData[key] = data?.data[key];
+              }
+            });
+
+            return finalData;
+          });
+        }
+      })
+      .catch((err) => {
+        alert(err.response.data.msg);
+        console.error(err);
+      })
+      .finally(() => {
+        setRefetch(false);
+      });
+  };
+
+  useLayoutEffect(() => {
+    if (refetch) {
+      fetchData();
+    }
+  }, [refetch]);
 
   useEffect(() => {
     if (scope.current) {
@@ -360,7 +404,7 @@ const LargeShortVid = ({ data }) => {
           {/* <img
             src={`${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_THUMB_API
-            }${data?.thumb}`}
+            }${shortDetails?.thumb}`}
             alt=''
             className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128 absolute z-[-1]'
           /> */}
@@ -368,7 +412,7 @@ const LargeShortVid = ({ data }) => {
             className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128'
             src={`${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_VIDEO_API
-            }${data?.video}`}
+            }${shortDetails?.video}`}
             ref={videoRef}
           ></video>
 
@@ -469,14 +513,14 @@ const LargeShortVid = ({ data }) => {
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_AVA_API
-              }${data?.channel_info?.avatar}`}
+              }${shortDetails?.channel_info?.avatar}`}
               alt=''
               className='w-[36px] h-[36px] rounded-[50%] bg-[#ccc]'
             />
             <span className='text-[14px] leading-[20px] '>
-              {data?.channel_info?.email}
+              {shortDetails?.channel_info?.email}
             </span>
-            {subscriptionInfo?.data?.state ? (
+            {shortDetails?.subscription_info ? (
               <button
                 className=' hover:bg-[rgba(255,255,255,0.2)]
                bg-hover-black text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
@@ -484,7 +528,7 @@ const LargeShortVid = ({ data }) => {
                   setIsShowing(
                     <ConfirmUnsubscribe
                       handleSubscribe={handleSubscribe}
-                      channelEmail={data?.channel_info?.email}
+                      channelEmail={shortDetails?.channel_info?.email}
                       handleCancel={() => {
                         setIsShowing(undefined);
                       }}
@@ -507,7 +551,9 @@ const LargeShortVid = ({ data }) => {
             )}
           </div>
           <div className='py-[4px]'>
-            <h3 className='text-[14px] leading-[20px]'>{data?.title}</h3>
+            <h3 className='text-[14px] leading-[20px]'>
+              {shortDetails?.title}
+            </h3>
           </div>
         </div>
         <div className='px-[12px] absolute bottom-0 w-full '>
@@ -534,19 +580,43 @@ const LargeShortVid = ({ data }) => {
         `}
       >
         <CustomeButton
-          text={formatNumber(data?.like)}
+          text={formatNumber(shortDetails?.like)}
           Icon={LikeIcon}
           title='Tôi thích video này'
           showedCmt={showedCmt}
+          buttonCss={
+            shortDetails?.react_info?.type === "like"
+              ? "bg-white-F1 hover:bg-white-D9"
+              : undefined
+          }
+          iconCss={
+            shortDetails?.react_info?.type === "like" ? "text-black" : undefined
+          }
+          handleOnClick={() => {
+            handleToggleReact("like");
+          }}
         />
         <CustomeButton
-          text={formatNumber(data?.dislike)}
+          text={formatNumber(shortDetails?.dislike)}
           Icon={DisLikeIcon}
           title='Tôi không thích video này'
           showedCmt={showedCmt}
+          buttonCss={
+            shortDetails?.react_info?.type === "dislike"
+              ? "bg-white-F1 hover:bg-white-D9"
+              : undefined
+          }
+          iconCss={
+            shortDetails?.react_info?.type === "dislike"
+              ? "text-black"
+              : undefined
+          }
+          handleOnClick={() => {
+            handleToggleReact("dislike");
+          }}
         />
         <CustomeButton
-          text={formatNumber(data?.totalCmt)}
+          text={formatNumber(shortDetails?.totalCmt)}
           Icon={CommentIcon}
           title={"Bình luận"}
           handleOnClick={handleToggleCmt}
@@ -585,8 +655,11 @@ const LargeShortVid = ({ data }) => {
               handleToggleCmt();
             }}
             showedContent={showContent}
-            shortId={data?._id}
-            dataCache
+            shortId={shortId}
+            handleRefetch={() => {
+              setRefetch(true);
+            }}
+            totalCmt={formatNumber(shortDetails?.totalCmt)}
           />
         )}
       </AnimatePresence>

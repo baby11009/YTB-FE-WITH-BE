@@ -9,6 +9,7 @@ export default {
         white: "#ffffff",
         "white-F1": "#F1F1F1",
         "white-FB3": "#FFFFFFB3",
+        "white-D9": "#d9d9d9",
         black: "#0f0f0f",
         "gray-A": "#AAAAAA",
         "red-CC": "#CC0000",

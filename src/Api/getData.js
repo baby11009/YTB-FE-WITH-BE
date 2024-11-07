@@ -6,7 +6,7 @@ export const getData = (
   path,
   params = {},
   condition = true,
-  suspense = true
+  suspense = false
 ) => {
   if (!path) {
     return null;

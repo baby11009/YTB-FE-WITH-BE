@@ -27,6 +27,7 @@ const ShortPart = () => {
 
   const { data } = getData("/data/short", params);
 
+
   const handleScrollPrev = () => {
     window.scrollTo({
       left: window.scrollX,
@@ -84,9 +85,9 @@ const ShortPart = () => {
   useLayoutEffect(() => {
     if (data) {
       data?.data.forEach((item) => {
-        if (!shortIdSet.current.has(item._id)) {
+        if (!shortIdSet.current.has(item)) {
           setShortList((prev) => [...prev, item]);
-          shortIdSet.current.add(item._id);
+          shortIdSet.current.add(item);
         }
       });
     }
@@ -105,7 +106,7 @@ const ShortPart = () => {
     <div className='relative'>
       <div className='mx-auto w-fit' ref={containerRef}>
         {shortList.map((item, index) => (
-          <LargeShortVid key={index} data={item} />
+          <LargeShortVid key={index} shortId={item} />
         ))}
       </div>
       <div className='hidden md:flex md:flex-col fixed top-[50%] translate-y-[-50%] right-0'>
