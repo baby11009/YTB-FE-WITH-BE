@@ -9,6 +9,7 @@ import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { scrollToTop } from "../../../util/scrollCustom";
+import connectSocket from "../../../util/connectSocket";
 
 const initVideoParams = {
   page: 1,
@@ -26,12 +27,12 @@ const VideoPart = ({ openedMenu }) => {
 
   const [addNew, setAddNew] = useState(true);
 
-  const [addNewCmt, setAddNewCmt] = useState(true);
-
   const [cmtParams, setCmtParams] = useState({
     limit: 8,
     page: 1,
-    createdAt: "mới nhất",
+    sort: {
+      createdAt: -1,
+    },
     reset: user?._id,
   });
 
@@ -47,6 +48,12 @@ const VideoPart = ({ openedMenu }) => {
 
   const [opened, setOpened] = useState("");
 
+  const cmtIdListSet = useRef(new Set());
+
+  const infoBoxRef = useRef();
+
+  const cmtBoxRef = useRef();
+
   const { data: videoData, refetch } = getData(
     `/data/video/${id}`,
     {
@@ -56,10 +63,6 @@ const VideoPart = ({ openedMenu }) => {
     true
   );
 
-  const infoBoxRef = useRef();
-
-  const cmtBoxRef = useRef();
-
   const { data: videosList, isSuccess } = getData(
     `/data/all`,
     videoParams,
@@ -67,11 +70,12 @@ const VideoPart = ({ openedMenu }) => {
     true
   );
 
-  const {
-    data: cmtList,
-    refetch: refetchCmtList,
-    isSuccess: cmtIsSuccess,
-  } = getData(`/data/comment/video-cmt/${id}`, cmtParams, true, true);
+  const { data: cmtList, refetch: refetchCmtList } = getData(
+    `/data/comment/video-cmt/${id}`,
+    cmtParams,
+    true,
+    true
+  );
 
   useEffect(() => {
     if (isEnd && videoParams.limit === videosList?.data?.length) {
@@ -88,7 +92,6 @@ const VideoPart = ({ openedMenu }) => {
     if (isBoxEnd && cmtParams.page < cmtList.totalPage) {
       setCmtParams((prev) => ({ ...prev, page: prev.page + 1 }));
     }
-    setAddNewCmt(!isBoxEnd);
   }, [isBoxEnd]);
 
   useEffect(() => {
@@ -102,19 +105,30 @@ const VideoPart = ({ openedMenu }) => {
   }, [isSuccess, videosList]);
 
   useEffect(() => {
-    if (cmtIsSuccess) {
-      if (addNewCmt) {
-        setCmtDatas(cmtList?.data);
-      } else {
-        setCmtDatas((prev) => [...prev, ...cmtList?.data]);
-      }
+    if (cmtList) {
+      let addlist = [];
+      cmtList?.data?.forEach((item) => {
+        if (cmtIdListSet.current.has(item?._id)) {
+          return;
+        }
+        addlist.push(item);
+        cmtIdListSet.current.add(item?._id);
+      });
+      setCmtDatas((prev) => {
+        if (cmtParams.page === 1) {
+          return [...addlist, ...prev];
+        } else {
+          return [...prev, ...addlist];
+        }
+      });
     }
-  }, [cmtIsSuccess, cmtList]);
+  }, [cmtList]);
 
   useEffect(() => {
     window.addEventListener("scroll", () => {
       IsEnd(setIsEnd);
     });
+
     const element = infoBoxRef.current;
     if (element) {
       element.addEventListener("scroll", (e) => {
@@ -122,8 +136,38 @@ const VideoPart = ({ openedMenu }) => {
       });
     }
 
+    const socket = connectSocket();
+    const updateComment = (data) => {
+      if (data) {
+        setCmtDatas((prev) => {
+          const dataList = [...prev];
+          dataList.forEach((item, id) => {
+            if (item?._id === data?._id) {
+              dataList[id] = { ...dataList[id], ...data };
+            }
+          });
+
+          return dataList;
+        });
+      }
+    };
+    if (socket) {
+      socket.on("update-parent-comment", updateComment);
+    }
+
     return () => {
+      // Clear socket when unmount
+      if (!socket.connected) {
+        socket.off();
+      }
+      if (socket.connected) {
+        socket.disconnect();
+      }
+      if (socket) {
+        socket.off("update-parent-comment", updateComment);
+      }
       queryClient.clear();
+
       window.removeEventListener("scroll", () => {
         IsEnd(setIsEnd);
       });
@@ -159,7 +203,9 @@ const VideoPart = ({ openedMenu }) => {
     setCmtParams({
       limit: 8,
       page: 1,
-      createdAt: "mới nhất",
+      sort: {
+        createdAt: -1,
+      },
       userId: user?._id,
     });
     refetchCmtList();
@@ -183,7 +229,6 @@ const VideoPart = ({ openedMenu }) => {
           refetchCmtList={refetchCmtList}
           cmtParams={cmtParams}
           setCmtParams={setCmtParams}
-          setAddNewCmt={setAddNewCmt}
           opened={opened}
           setOpened={setOpened}
         />
@@ -206,7 +251,6 @@ const VideoPart = ({ openedMenu }) => {
           refetchCmtList={refetchCmtList}
           cmtParams={cmtParams}
           setCmtParams={setCmtParams}
-          setAddNewCmt={setAddNewCmt}
         />
       </div>
     </div>

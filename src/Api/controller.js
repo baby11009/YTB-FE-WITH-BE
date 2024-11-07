@@ -102,7 +102,8 @@ export const dltManyData = async (
         }
       });
 
-    alert(dltDatas.data?.msg);
+    alert(`Delete ${dataType} successfully`);
+    console.log(dltDatas.data);
   } catch (error) {
     console.log("🚀 ~ error:", error);
     alert(error.response.data.msg);
@@ -128,7 +129,8 @@ export const updateData = async (
   }
 
   try {
-    const data = await request.patch(apiPath, bodyData, {
+    const data = await request
+      .patch(apiPath, bodyData, {
         headers: {
           Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
             import.meta.env.VITE_AUTH_TOKEN

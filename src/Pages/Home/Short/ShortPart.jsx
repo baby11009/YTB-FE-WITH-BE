@@ -4,6 +4,7 @@ import { useLayoutEffect, useState, useRef, useEffect } from "react";
 import { IsEnd, IsTop } from "../../../util/scrollPosition";
 import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
+import connectSocket from "../../../util/connectSocket";
 
 const ShortPart = () => {
   const { user } = useAuthContext();
@@ -24,9 +25,8 @@ const ShortPart = () => {
   const [shortList, setShortList] = useState([]);
 
   const containerRef = useRef();
-
+  const socketRef = useRef(null);
   const { data } = getData("/data/short", params);
-
 
   const handleScrollPrev = () => {
     window.scrollTo({
@@ -66,10 +66,19 @@ const ShortPart = () => {
     });
 
     document.documentElement.style.setProperty("--scroll-bar-width", "none");
-
+    if (!socketRef.current) {
+      socketRef.current = connectSocket();
+    }
     return () => {
       // document.removeEventListener("wheel", disableScroll, { passive: false });
       // document.addEventListener("touchmove", disableScroll, { passive: false });
+
+      if (socketRef.current && !socketRef.current.connected) {
+        socketRef.current.off();
+      }
+      if (socketRef.current && socketRef.current.connected) {
+        socketRef.current.disconnect();
+      }
 
       document.removeEventListener("scroll", () => {
         IsEnd(setIsEnd);
@@ -106,7 +115,11 @@ const ShortPart = () => {
     <div className='relative'>
       <div className='mx-auto w-fit' ref={containerRef}>
         {shortList.map((item, index) => (
-          <LargeShortVid key={index} shortId={item} />
+          <LargeShortVid
+            key={index}
+            shortId={item}
+            socket={socketRef.current}
+          />
         ))}
       </div>
       <div className='hidden md:flex md:flex-col fixed top-[50%] translate-y-[-50%] right-0'>

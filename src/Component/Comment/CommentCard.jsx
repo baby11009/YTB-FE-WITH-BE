@@ -47,8 +47,9 @@ const CommentCard = ({
       setAddNewReply(true);
     }
     setCmtParams((prev) => ({ ...prev, page: 1 }));
-    refetchCmtList();
-    setAddNewCmt(true);
+    if (refetchCmtList) {
+      refetchCmtList();
+    }
   });
 
   const handleOnClick = () => {

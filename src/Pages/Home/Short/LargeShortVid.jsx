@@ -21,10 +21,11 @@ import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { useAnimate, AnimatePresence, motion } from "framer-motion";
 import { formatNumber } from "../../../util/numberFormat";
 import { useAuthContext } from "../../../Auth Provider/authContext";
-import {  CustomeFuncBox } from "../../../Component";
+import { CustomeFuncBox } from "../../../Component";
 import request from "../../../util/axios-base-url";
 import CommentBox from "./CommentBox";
 import { useQueryClient } from "@tanstack/react-query";
+import { io } from "socket.io-client";
 
 const ConfirmUnsubscribe = ({
   handleSubscribe,
@@ -135,7 +136,7 @@ const funcList = [
   },
 ];
 
-const LargeShortVid = ({ shortId }) => {
+const LargeShortVid = ({ shortId, socket }) => {
   const queryClient = useQueryClient();
 
   const { setIsShowing, user } = useAuthContext();
@@ -660,6 +661,7 @@ const LargeShortVid = ({ shortId }) => {
               setRefetch(true);
             }}
             totalCmt={formatNumber(shortDetails?.totalCmt)}
+            socket={socket}
           />
         )}
       </AnimatePresence>

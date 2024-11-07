@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { IsElementEnd } from "../../../util/scrollPosition";
-import { formatNumber } from "../../../util/numberFormat";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 
 const CommentBox = ({
   handleCloseCmt,
@@ -19,7 +19,10 @@ const CommentBox = ({
   shortId,
   handleRefetch,
   totalCmt,
+  socket,
 }) => {
+  const { user } = useAuthContext();
+
   const queryClient = useQueryClient();
 
   const [params, setParams] = useState({
@@ -30,9 +33,8 @@ const CommentBox = ({
     },
     reset: shortId,
   });
-  // console.log(params);
 
-  const { data, isLoading, refetch } = getData(
+  const { data, refetch } = getData(
     `/data/comment/video-cmt/${shortId}`,
     params,
     true,
@@ -57,33 +59,46 @@ const CommentBox = ({
 
   useLayoutEffect(() => {
     if (data) {
-      if (addNew) {
-        setCommentList(data?.data);
-        data?.data?.forEach((item) => {
-          idListSet.current.add(item?._id);
-        });
-      } else {
-        let addlist = [];
-        data?.data?.forEach((item) => {
-          if (idListSet.current.has(item?._id)) {
-            return;
-          }
-          addlist.push(item);
-          idListSet.current.add(item?._id);
-        });
-        setCommentList((prev) => {
-          if (params.page === 1) {
-            return [...addlist, ...prev];
-          } else {
-            return [...prev, ...addlist];
-          }
-        });
-      }
+      let addlist = [];
+      data?.data?.forEach((item) => {
+        if (idListSet.current.has(item?._id)) {
+          return;
+        }
+        addlist.push(item);
+        idListSet.current.add(item?._id);
+      });
+      setCommentList((prev) => {
+        if (params.page === 1) {
+          return [...addlist, ...prev];
+        } else {
+          return [...prev, ...addlist];
+        }
+      });
     }
-  }, [data, addNew]);
+  }, [data]);
 
   useEffect(() => {
+    const updateComment = (data) => {
+      if (data) {
+        setCommentList((prev) => {
+          const dataList = [...prev];
+          dataList.forEach((item, id) => {
+            if (item?._id === data?._id) {
+              dataList[id] = { ...dataList[id], ...data };
+            }
+          });
+
+          return dataList;
+        });
+      }
+    };
+    if (socket) {
+      socket.on(`update-parent-comment-${user?._id}`, updateComment);
+    }
     return () => {
+      if (socket) {
+        socket.off(`update-parent-comment-${user?._id}`, updateComment);
+      }
       queryClient.removeQueries(shortId);
     };
   }, []);
@@ -151,7 +166,6 @@ const CommentBox = ({
                 videoUserId={data?.channel_info?._id}
                 setAddNewCmt={setAddNew}
                 setCmtParams={setParams}
-                refetchCmtList={refetch}
                 refetchVideo={handleRefetch}
                 key={id}
               />
@@ -161,6 +175,8 @@ const CommentBox = ({
             <CommentInput
               myChannelImg={data?.channel_info?.avatar}
               videoId={shortId}
+              setAddNewCmt={setAddNew}
+              setCmtParams={setParams}
               refetchCmtList={() => {
                 if (params.page !== 1) {
                   setParams((prev) => ({ ...prev, page: 1 }));
@@ -168,8 +184,6 @@ const CommentBox = ({
                   refetch();
                 }
               }}
-              setAddNewCmt={setAddNew}
-              setCmtParams={setParams}
               refetchVideo={handleRefetch}
             />
           </div>

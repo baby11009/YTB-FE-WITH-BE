@@ -47,7 +47,9 @@ const InputBox = ({
       }
 
       // setAddNewCmt(true);
-      refetchCmtList();
+      if (refetchCmtList) {
+        refetchCmtList();
+      }
       setCmtParams((prev) => ({ ...prev, page: 1 }));
       if (refetchVideo) {
         refetchVideo();
