@@ -4,7 +4,7 @@ import request from "../../util/axios-base-url";
 import { useAuthContext } from "../../Auth Provider/authContext";
 import { getCookie } from "../../util/tokenHelpers";
 
-const LikeAndDislikeCmt = ({ cmtId, like, type, refetchList }) => {
+const LikeAndDislikeCmt = ({ cmtId, like, type }) => {
   const { user } = useAuthContext();
 
   const handleToggleReact = async (type) => {
@@ -26,7 +26,6 @@ const LikeAndDislikeCmt = ({ cmtId, like, type, refetchList }) => {
         }
       )
       .then((rsp) => {
-        refetchList();
       })
       .catch((err) => {
         console.log(err);

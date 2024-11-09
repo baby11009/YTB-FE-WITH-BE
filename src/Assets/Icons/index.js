@@ -135,3 +135,4 @@ export { default as ActiveCustomeIcon } from "./ActiveCustome.jsx";
 export { default as SortIcon2 } from "./Sort2.jsx";
 export { default as GotoIcon } from "./Goto.jsx";
 export { default as MuteAudiIcon } from "./MuteAudio.jsx";
+export { default as CurveArrowIcon } from "./CurveArrow.jsx";

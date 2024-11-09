@@ -13,10 +13,10 @@ const DescSection = ({
   cmtParams,
   setCmtParams,
   setCmtAddNew,
-  setCmtBoxIsEnd
+  setCmtBoxIsEnd,
+  socket,
 }) => {
   const [watchFull, setWatchFull] = useState(false);
-
 
   return (
     <div
@@ -46,6 +46,7 @@ const DescSection = ({
             cmtParams={cmtParams}
             setCmtParams={setCmtParams}
             setCmtBoxIsEnd={setCmtBoxIsEnd}
+            socket={socket}
           />
         </>
       )}

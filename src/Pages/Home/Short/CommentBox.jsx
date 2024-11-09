@@ -32,6 +32,7 @@ const CommentBox = ({
       createdAt: -1,
     },
     reset: shortId,
+    clearCache: "comment",
   });
 
   const [isEnd, setIsEnd] = useState(false);
@@ -54,9 +55,10 @@ const CommentBox = ({
   const handleChoseSort = (data) => {
     if (!params.sort[data.id]) {
       setAddNew(true);
-      setParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
       const boxCmt = document.getElementById("cmtBox");
       boxCmt.scrollTop = 0;
+      queryClient.invalidateQueries("comment");
+      setParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
     }
   };
 
@@ -134,12 +136,14 @@ const CommentBox = ({
 
     if (socket) {
       socket.on(`update-parent-comment-${user?._id}`, updateComment);
+      socket.on(`update-comment-${user?._id}`, updateComment);
       socket.on(`create-comment-${user?._id}`, addNewCmt);
       socket.on(`delete-comment-${user?._id}`, deleteCmt);
     }
     return () => {
       if (socket) {
         socket.off(`update-parent-comment-${user?._id}`, updateComment);
+        socket.off(`update-comment-${user?._id}`, updateComment);
         socket.off(`create-comment-${user?._id}`, addNewCmt);
         socket.off(`delete-comment-${user?._id}`, deleteCmt);
       }
@@ -148,7 +152,7 @@ const CommentBox = ({
   }, []);
 
   useEffect(() => {
-    if (isEnd && params.page < data.totalPage) {
+    if (isEnd && params.page < data?.totalPage) {
       setParams((prev) => ({
         ...prev,
         page: Math.floor(commentList.length / prev.limit) + 1,

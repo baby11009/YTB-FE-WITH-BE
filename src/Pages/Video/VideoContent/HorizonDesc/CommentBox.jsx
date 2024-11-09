@@ -4,6 +4,7 @@ import { MyChannel } from "../../../../Assets/Images";
 import { useRef, useState, useCallback } from "react";
 import { formatNumber } from "../../../../util/numberFormat";
 import { IsElementEnd } from "../../../../util/scrollPosition";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CommentBox = ({
   setOpened,
@@ -12,12 +13,14 @@ const CommentBox = ({
   totalCmt,
   videoId,
   videoUserId,
-  refetchCmtList,
   cmtParams,
   setCmtParams,
   setCmtAddNew,
   refetchVideo,
+  socket,
 }) => {
+  const queryClient = useQueryClient();
+
   const [openedSort, setOpenedSort] = useState(false);
 
   const containerRef = useRef();
@@ -27,6 +30,7 @@ const CommentBox = ({
       setCmtAddNew(true);
       const boxCmt = document.getElementById("cmtBox");
       boxCmt.scrollTop = 0;
+      queryClient.invalidateQueries("comment");
       setCmtParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
     }
   };
@@ -103,9 +107,8 @@ const CommentBox = ({
             data={item}
             videoUserId={videoUserId}
             videoId={videoId}
-            refetchCmtList={refetchCmtList}
             setCmtParams={setCmtParams}
-            setAddNewCmt={setCmtAddNew}
+            socket={socket}
           />
         ))}
       </div>
@@ -113,7 +116,6 @@ const CommentBox = ({
         <CommentInput
           myChannelImg={MyChannel}
           videoId={videoId}
-          refetchCmtList={refetchCmtList}
           setAddNewCmt={setCmtAddNew}
           setCmtParams={setCmtParams}
           refetchVideo={refetchVideo}

@@ -24,11 +24,6 @@ const CommentCard = ({
   data,
   videoUserId,
   videoId,
-  setAddNewCmt,
-  setAddNewReply,
-  setCmtParams,
-  refetchReply,
-  refetchCmtList,
   refetchVideo,
 }) => {
   const { user, setIsShowing } = useAuthContext();
@@ -39,16 +34,6 @@ const CommentCard = ({
 
   const containerRef = useRef();
 
-  const refetchList = useCallback((data) => {
-    if (data?.replied_cmt_id || data?.replied_parent_cmt_id) {
-      refetchReply();
-      setAddNewReply(true);
-    }
-    setCmtParams((prev) => ({ ...prev, page: 1 }));
-    if (refetchCmtList) {
-      refetchCmtList();
-    }
-  });
 
   const handleOnClick = () => {
     if (!user) {
@@ -69,9 +54,7 @@ const CommentCard = ({
       { cmtText: value },
       "comment",
       (rsp) => {
-        if (refetchList) {
-          refetchList(rsp.data?.data);
-        }
+       
         setIsShowing(undefined);
       }
     );
@@ -95,9 +78,6 @@ const CommentCard = ({
       text: "Xóa",
       handleOnClick: async () => {
         await dltData("/client/comment", data?._id, "comment", (rsp) => {
-          if (refetchList) {
-            refetchList(rsp.data?.data);
-          }
           refetchVideo();
         });
       },
@@ -119,7 +99,7 @@ const CommentCard = ({
   }, []);
 
   return (
-    <div className='flex mb-[16px]'>
+    <div className='flex mb-[8px]'>
       <Link className='mr-[12px]' to={`/channel/${5}`}>
         <img
           src={`${import.meta.env.VITE_BASE_API_URI}${
@@ -172,9 +152,6 @@ const CommentCard = ({
             cmtId={data?._id}
             like={data?.like}
             type={data?.react_info?.type}
-            refetchList={() => {
-              refetchList(data);
-            }}
           />
 
           {/* channel Like */}
@@ -208,12 +185,7 @@ const CommentCard = ({
             handleOnClick={handleOnClick}
             videoId={videoId}
             userId={user?._id}
-            refetchCmtList={refetchCmtList}
             replyId={data?._id}
-            setAddNewCmt={setAddNewCmt}
-            setCmtParams={setCmtParams}
-            refetchReply={refetchReply}
-            setAddNewReply={setAddNewReply}
             refetchVideo={refetchVideo}
           />
         )}
@@ -221,7 +193,7 @@ const CommentCard = ({
         {/* Reply comment */}
         {data?.replied_cmt_total > 0 && (
           <button
-            className='flex items-center gap-[6px] rounded-[30px] px-[16px] hover:bg-[#263850]'
+            className='flex items-center gap-[6px] rounded-[30px] px-[16px] hover:bg-blue-26'
             onClick={() => setShowReply((prev) => !prev)}
           >
             <div

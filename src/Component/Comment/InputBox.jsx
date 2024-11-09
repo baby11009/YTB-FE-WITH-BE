@@ -12,10 +12,7 @@ const InputBox = ({
   videoId,
   userId,
   replyId,
-  setCmtParams,
-  setAddNewReply,
   refetchVideo,
-  refetchReply,
 }) => {
   const [focused, setFocused] = useState(false);
 
@@ -39,11 +36,7 @@ const InputBox = ({
       data.replyId = replyId;
     }
     await createData("/client/comment", data, "comment", () => {
-      if (refetchReply && setAddNewReply) {
-        refetchReply();
-        setAddNewReply(true);
-      }
-      setCmtParams((prev) => ({ ...prev, page: 1 }));
+
       if (refetchVideo) {
         refetchVideo();
       }

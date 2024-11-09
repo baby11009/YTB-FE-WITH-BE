@@ -34,6 +34,7 @@ const VideoPart = ({ openedMenu }) => {
       createdAt: -1,
     },
     reset: user?._id,
+    clearCache: "comment",
   });
 
   const [cmtAddNew, setCmtAddNew] = useState(false);
@@ -54,7 +55,7 @@ const VideoPart = ({ openedMenu }) => {
 
   const infoBoxRef = useRef();
 
-  const cmtBoxRef = useRef();
+  const socketRef = useRef();
 
   const { data: videoDetails, refetch } = getData(
     `/data/video/${id}`,
@@ -89,7 +90,7 @@ const VideoPart = ({ openedMenu }) => {
       if (cmtAddNew) {
         setCmtList(cmtData?.data);
         cmtIdListSet.current.clear();
-        cmtIdListSet.current.add(cmtData?.data.map((item) => item._id));
+        cmtData?.data.forEach((item) => cmtIdListSet.current.add(item._id));
         setCmtAddNew(false);
       } else {
         let addlist = [];
@@ -146,7 +147,7 @@ const VideoPart = ({ openedMenu }) => {
     });
 
     const socket = connectSocket();
-
+    socketRef.current = socket;
     const updateComment = (data) => {
       if (data) {
         setCmtList((prev) => {
@@ -164,20 +165,21 @@ const VideoPart = ({ openedMenu }) => {
 
     const addNewCmt = (data) => {
       if (data) {
-        setCmtList((prev) => [...data, ...prev]);
-        cmtIdListSet.current.add(data[0]._id);
+        setCmtList((prev) => [data, ...prev]);
+        cmtIdListSet.current.add(data._id);
       }
     };
 
     const deleteCmt = (data) => {
       if (data) {
         setCmtList((prev) => prev.filter((item) => item?._id !== data._id));
-        cmtIdListSet.current.delete(data[0]._id);
+        cmtIdListSet.current.delete(data._id);
       }
     };
 
     if (socket) {
       socket.on(`update-parent-comment-${user?._id}`, updateComment);
+      socket.on(`update-comment-${user?._id}`, updateComment);
       socket.on(`create-comment-${user?._id}`, addNewCmt);
       socket.on(`delete-comment-${user?._id}`, deleteCmt);
     }
@@ -192,6 +194,7 @@ const VideoPart = ({ openedMenu }) => {
       }
       if (socket) {
         socket.off(`update-parent-comment-${user?._id}`, updateComment);
+        socket.off(`update-comment-${user?._id}`, updateComment);
         socket.off(`create-comment-${user?._id}`, addNewCmt);
         socket.off(`delete-comment-${user?._id}`, deleteCmt);
       }
@@ -220,6 +223,7 @@ const VideoPart = ({ openedMenu }) => {
           opened={opened}
           setCmtAddNew={setCmtAddNew}
           setOpened={setOpened}
+          socket={socketRef.current}
         />
         <OtherSection openedMenu={openedMenu} vidList={videoList} />
       </div>
@@ -241,6 +245,7 @@ const VideoPart = ({ openedMenu }) => {
           setCmtParams={setCmtParams}
           setCmtBoxIsEnd={setCmtBoxIsEnd}
           setCmtAddNew={setCmtAddNew}
+          socket={socketRef.current}
         />
       </div>
     </div>

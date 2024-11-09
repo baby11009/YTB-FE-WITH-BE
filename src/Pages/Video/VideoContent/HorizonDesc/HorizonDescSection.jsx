@@ -14,6 +14,7 @@ const HorizonDescSection = ({
   opened,
   setOpened,
   refetchVideo,
+  socket,
 }) => {
   return (
     <div className='lg:hidden mt-[12px] mb-[24px]'>
@@ -30,6 +31,7 @@ const HorizonDescSection = ({
           setCmtParams={setCmtParams}
           setCmtAddNew={setCmtAddNew}
           setCmtBoxIsEnd={setCmtBoxIsEnd}
+          socket={socket}
         />
       ) : opened === "detail" ? (
         <DetailsBox setOpened={setOpened} data={videoDetails} />

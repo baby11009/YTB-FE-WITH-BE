@@ -15,7 +15,7 @@ export const getData = (
   const paramsKey = Object.keys(params);
 
   const notParamsResetKeys = Object.keys(params).filter(
-    (key) => !key.includes("refetch") && !key.includes("clearCache")
+    (key) => key !== "refetch" && key !== "clearCache" && key !== "reset"
   );
 
   let finalParams = {};

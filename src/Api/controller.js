@@ -57,10 +57,10 @@ export const dltData = async (path, id, dataType, handleSuccess) => {
       });
 
     alert(`Delete ${dataType} successfully`);
-    console.log(dltData.data);
+
   } catch (error) {
     console.log("🚀 ~ error:", error);
-    alert(error.response.data.msg);
+    alert(error?.response?.data?.msg);
   }
 };
 

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { MyChannel } from "../../../../Assets/Images";
 import { formatNumber } from "../../../../util/numberFormat";
 import { IsElementEnd } from "../../../../util/scrollPosition";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CommentSection = ({
   refetchVideo,
@@ -15,7 +16,10 @@ const CommentSection = ({
   setCmtAddNew,
   setCmtParams,
   setCmtBoxIsEnd,
+  socket,
 }) => {
+  const queryClient = useQueryClient();
+
   const [opened, setOpened] = useState(false);
 
   const containerRef = useRef();
@@ -25,6 +29,7 @@ const CommentSection = ({
       setCmtAddNew(true);
       const boxCmt = document.getElementById("cmtBox");
       boxCmt.scrollTop = 0;
+      queryClient.invalidateQueries("comment");
       setCmtParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
     }
   };
@@ -115,6 +120,7 @@ const CommentSection = ({
             videoUserId={videoUserId}
             videoId={videoId}
             setCmtParams={setCmtParams}
+            socket={socket}
           />
         ))}
       </div>
