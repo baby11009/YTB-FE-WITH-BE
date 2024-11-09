@@ -7,7 +7,6 @@ const CommentInput = ({
   showEmoji,
   imgSize,
   videoId,
-  refetchCmtList,
   setAddNewCmt,
   setCmtParams,
 }) => {
@@ -59,7 +58,6 @@ const CommentInput = ({
           videoId={videoId}
           userId={user?._id}
           refetchVideo={refetchVideo}
-          refetchCmtList={refetchCmtList}
           setAddNewCmt={setAddNewCmt}
           setCmtParams={setCmtParams}
           setShowedInput={setShowedInput}

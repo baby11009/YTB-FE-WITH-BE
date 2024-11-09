@@ -13,7 +13,6 @@ const Comment = ({
   refetchCmtList,
   refetchVideo,
 }) => {
- 
   const { user } = useAuthContext();
 
   const [replyCmtsData, setReplyCmtsData] = useState([]);

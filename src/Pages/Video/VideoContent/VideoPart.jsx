@@ -36,15 +36,17 @@ const VideoPart = ({ openedMenu }) => {
     reset: user?._id,
   });
 
+  const [cmtAddNew, setCmtAddNew] = useState(false);
+
+  const [cmtBoxIsEnd, setCmtBoxIsEnd] = useState(false);
+
   const [videoParams, setVideoParams] = useState(initVideoParams);
 
-  const [videoDatas, setVideoDatas] = useState([]);
+  const [videoList, setVideoList] = useState([]);
 
-  const [cmtDatas, setCmtDatas] = useState([]);
+  const [cmtList, setCmtList] = useState([]);
 
   const [isEnd, setIsEnd] = useState(false);
-
-  const [isBoxEnd, setIsBoxEnd] = useState(false);
 
   const [opened, setOpened] = useState("");
 
@@ -54,7 +56,7 @@ const VideoPart = ({ openedMenu }) => {
 
   const cmtBoxRef = useRef();
 
-  const { data: videoData, refetch } = getData(
+  const { data: videoDetails, refetch } = getData(
     `/data/video/${id}`,
     {
       subscriberId: user?._id,
@@ -63,139 +65,56 @@ const VideoPart = ({ openedMenu }) => {
     true
   );
 
-  const { data: videosList, isSuccess } = getData(
-    `/data/all`,
-    videoParams,
-    true,
-    true
-  );
+  const { data: videoData } = getData(`/data/all`, videoParams, true, false);
 
-  const { data: cmtList, refetch: refetchCmtList } = getData(
+  const { data: cmtData, refetch: refetchcmt } = getData(
     `/data/comment/video-cmt/${id}`,
     cmtParams,
     true,
-    true
+    false
   );
 
   useEffect(() => {
-    if (isEnd && videoParams.limit === videosList?.data?.length) {
+    if (videoData) {
+      if (addNew) {
+        setVideoList(videoData?.data);
+      } else {
+        setVideoList((prev) => [...prev, ...videoData?.data]);
+      }
+    }
+  }, [videoData]);
+
+  useEffect(() => {
+    if (cmtData) {
+      if (cmtAddNew) {
+        setCmtList(cmtData?.data);
+        cmtIdListSet.current.clear();
+        cmtIdListSet.current.add(cmtData?.data.map((item) => item._id));
+        setCmtAddNew(false);
+      } else {
+        let addlist = [];
+        cmtData?.data?.forEach((item) => {
+          if (cmtIdListSet.current.has(item?._id)) {
+            return;
+          }
+          addlist.push(item);
+          cmtIdListSet.current.add(item?._id);
+        });
+        setCmtList((prev) => [...prev, ...addlist]);
+      }
+    }
+  }, [cmtData]);
+
+  useEffect(() => {
+    if (isEnd && videoParams.limit === videoData?.data?.length) {
       setVideoParams((prev) => ({
         ...prev,
         page: prev.page + 1,
-        prevPlCount: videoDatas.filter((data) => data.video_list).length,
+        prevPlCount: videoList.filter((data) => data.video_list).length,
       }));
       setAddNew(!isEnd);
     }
   }, [isEnd]);
-
-  useEffect(() => {
-    if (isBoxEnd && cmtParams.page < cmtList.totalPage) {
-      setCmtParams((prev) => ({ ...prev, page: prev.page + 1 }));
-    }
-  }, [isBoxEnd]);
-
-  useEffect(() => {
-    if (isSuccess) {
-      if (addNew) {
-        setVideoDatas(videosList?.data);
-      } else {
-        setVideoDatas((prev) => [...prev, ...videosList?.data]);
-      }
-    }
-  }, [isSuccess, videosList]);
-
-  useEffect(() => {
-    if (cmtList) {
-      let addlist = [];
-      cmtList?.data?.forEach((item) => {
-        if (cmtIdListSet.current.has(item?._id)) {
-          return;
-        }
-        addlist.push(item);
-        cmtIdListSet.current.add(item?._id);
-      });
-      setCmtDatas((prev) => {
-        if (cmtParams.page === 1) {
-          return [...addlist, ...prev];
-        } else {
-          return [...prev, ...addlist];
-        }
-      });
-    }
-  }, [cmtList]);
-
-  useEffect(() => {
-    window.addEventListener("scroll", () => {
-      IsEnd(setIsEnd);
-    });
-
-    const element = infoBoxRef.current;
-    if (element) {
-      element.addEventListener("scroll", (e) => {
-        IsElementEnd(setIsBoxEnd, e);
-      });
-    }
-
-    const socket = connectSocket();
-    const updateComment = (data) => {
-      if (data) {
-        setCmtDatas((prev) => {
-          const dataList = [...prev];
-          dataList.forEach((item, id) => {
-            if (item?._id === data?._id) {
-              dataList[id] = { ...dataList[id], ...data };
-            }
-          });
-
-          return dataList;
-        });
-      }
-    };
-    if (socket) {
-      socket.on("update-parent-comment", updateComment);
-    }
-
-    return () => {
-      // Clear socket when unmount
-      if (!socket.connected) {
-        socket.off();
-      }
-      if (socket.connected) {
-        socket.disconnect();
-      }
-      if (socket) {
-        socket.off("update-parent-comment", updateComment);
-      }
-      queryClient.clear();
-
-      window.removeEventListener("scroll", () => {
-        IsEnd(setIsEnd);
-      });
-      if (element) {
-        element.removeEventListener("scroll", (e) => {
-          IsElementEnd(setIsBoxEnd, e);
-        });
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const element = cmtBoxRef.current;
-
-    if (element) {
-      element.addEventListener("scroll", (e) => {
-        IsElementEnd(setIsBoxEnd, e);
-      });
-    }
-
-    return () => {
-      if (element) {
-        element.removeEventListener("scroll", (e) => {
-          IsElementEnd(setIsBoxEnd, e);
-        });
-      }
-    };
-  }, [cmtBoxRef, opened]);
 
   useEffect(() => {
     refetch();
@@ -208,31 +127,101 @@ const VideoPart = ({ openedMenu }) => {
       },
       userId: user?._id,
     });
-    refetchCmtList();
+    refetchcmt();
     scrollToTop();
   }, [id]);
+
+  useEffect(() => {
+    if (cmtBoxIsEnd && cmtParams.page < cmtData?.totalPage) {
+      setCmtParams((prev) => ({
+        ...prev,
+        page: Math.floor(cmtList.length / prev.limit) + 1,
+      }));
+    }
+  }, [cmtBoxIsEnd]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", () => {
+      IsEnd(setIsEnd);
+    });
+
+    const socket = connectSocket();
+
+    const updateComment = (data) => {
+      if (data) {
+        setCmtList((prev) => {
+          const dataList = [...prev];
+          dataList.forEach((item, id) => {
+            if (item?._id === data?._id) {
+              dataList[id] = { ...dataList[id], ...data };
+            }
+          });
+
+          return dataList;
+        });
+      }
+    };
+
+    const addNewCmt = (data) => {
+      if (data) {
+        setCmtList((prev) => [...data, ...prev]);
+        cmtIdListSet.current.add(data[0]._id);
+      }
+    };
+
+    const deleteCmt = (data) => {
+      if (data) {
+        setCmtList((prev) => prev.filter((item) => item?._id !== data._id));
+        cmtIdListSet.current.delete(data[0]._id);
+      }
+    };
+
+    if (socket) {
+      socket.on(`update-parent-comment-${user?._id}`, updateComment);
+      socket.on(`create-comment-${user?._id}`, addNewCmt);
+      socket.on(`delete-comment-${user?._id}`, deleteCmt);
+    }
+
+    return () => {
+      // Clear socket when unmount
+      if (!socket.connected) {
+        socket.off();
+      }
+      if (socket.connected) {
+        socket.disconnect();
+      }
+      if (socket) {
+        socket.off(`update-parent-comment-${user?._id}`, updateComment);
+        socket.off(`create-comment-${user?._id}`, addNewCmt);
+        socket.off(`delete-comment-${user?._id}`, deleteCmt);
+      }
+      queryClient.clear();
+
+      window.removeEventListener("scroll", () => {
+        IsEnd(setIsEnd);
+      });
+    };
+  }, []);
 
   return (
     <div className='flex xl:px-[1.75%] 2xl:px-[2.5%] 3xl:px-[3%] 4xl:px-[3.5%] 5xl:px-[10%]'>
       <div className='flex-1 pl-[16px] pr-[8px] w-full'>
         {/* Video section */}
-        <VideoSection url={videoData.data?.video} />
+        <VideoSection url={videoDetails.data?.video} />
         {/* Other content section */}
         <HorizonDescSection
-          sub={true}
           refetchVideo={refetch}
-          videoData={videoData?.data}
-          cmtData={cmtDatas}
-          totalCmt={cmtList?.totalQtt}
-          refetch={refetch}
-          boxRef={cmtBoxRef}
-          refetchCmtList={refetchCmtList}
+          videoDetails={videoDetails?.data}
+          cmtList={cmtList}
+          setCmtBoxIsEnd={setCmtBoxIsEnd}
+          refetchcmt={refetchcmt}
           cmtParams={cmtParams}
           setCmtParams={setCmtParams}
           opened={opened}
+          setCmtAddNew={setCmtAddNew}
           setOpened={setOpened}
         />
-        <OtherSection openedMenu={openedMenu} vidList={videoDatas} />
+        <OtherSection openedMenu={openedMenu} vidList={videoList} />
       </div>
       {/*  */}
 
@@ -243,14 +232,15 @@ const VideoPart = ({ openedMenu }) => {
       >
         <DescSection
           sub={true}
-          videoData={videoData?.data}
-          cmtData={cmtDatas}
-          totalCmt={videoData?.data?.totalCmt}
+          videoDetails={videoDetails?.data}
+          cmtList={cmtList}
+          totalCmt={videoDetails?.data?.totalCmt}
           refetch={refetch}
           boxRef={infoBoxRef}
-          refetchCmtList={refetchCmtList}
           cmtParams={cmtParams}
           setCmtParams={setCmtParams}
+          setCmtBoxIsEnd={setCmtBoxIsEnd}
+          setCmtAddNew={setCmtAddNew}
         />
       </div>
     </div>

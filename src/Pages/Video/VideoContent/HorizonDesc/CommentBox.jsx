@@ -1,45 +1,56 @@
 import { SortIcon, CloseIcon } from "../../../../Assets/Icons";
 import { Comment, CommentInput, CustomeFuncBox } from "../../../../Component";
 import { MyChannel } from "../../../../Assets/Images";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { formatNumber } from "../../../../util/numberFormat";
+import { IsElementEnd } from "../../../../util/scrollPosition";
 
 const CommentBox = ({
   setOpened,
-  boxRef,
-  cmtData,
+  setCmtBoxIsEnd,
+  cmtList,
   totalCmt,
   videoId,
   videoUserId,
   refetchCmtList,
   cmtParams,
   setCmtParams,
-  setAddNewCmt,
+  setCmtAddNew,
+  refetchVideo,
 }) => {
   const [openedSort, setOpenedSort] = useState(false);
 
   const containerRef = useRef();
 
+  const handleChoseSort = (data) => {
+    if (!cmtParams.sort[data.id]) {
+      setCmtAddNew(true);
+      const boxCmt = document.getElementById("cmtBox");
+      boxCmt.scrollTop = 0;
+      setCmtParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
+    }
+  };
+
   const funcList = [
     {
-      id: "mới nhất",
-      text: "Mới nhất xếp trước",
-      handleOnClick: (data) => {
-        if (cmtParams?.createdAt !== data.id) {
-          setCmtParams((prev) => ({ ...prev, page: 1, createdAt: data.id }));
-        }
-      },
+      id: "createdAt",
+      text: "Newest first",
+      handleOnClick: handleChoseSort,
     },
     {
-      id: "cũ nhất",
-      text: "Cũ nhất xếp trước",
-      handleOnClick: (data) => {
-        if (cmtParams?.createdAt !== data.id) {
-          setCmtParams((prev) => ({ ...prev, page: 1, createdAt: data.id }));
-        }
-      },
+      id: "top",
+      text: "Top comments",
+      handleOnClick: handleChoseSort,
     },
   ];
+
+  const scrollRef = useCallback((e) => {
+    if (e) {
+      e.addEventListener("scroll", (e) => {
+        IsElementEnd(setCmtBoxIsEnd, e);
+      });
+    }
+  }, []);
 
   return (
     <div className='bg-[#000] w-full h-[70vh] rounded-[12px] flex flex-col'>
@@ -66,7 +77,7 @@ const CommentBox = ({
                 style={"w-[156px] right-0 top-[100%]"}
                 setOpened={setOpenedSort}
                 funcList1={funcList}
-                currentId={cmtParams.createdAt}
+                currentId={Object.keys(cmtParams.sort)[0]}
               />
             )}
           </div>
@@ -82,20 +93,19 @@ const CommentBox = ({
 
       <div
         className='px-[16px] flex-1 overflow-y-auto menu-scrollbar'
-        ref={boxRef}
+        ref={scrollRef}
+        id='cmtBox'
       >
-        {cmtData?.map((item, id) => (
+        {cmtList?.map((item, id) => (
           <Comment
             key={id}
-            verify={true}
-            owner={true}
-            reply={true}
+            refetchVideo={refetchVideo}
             data={item}
             videoUserId={videoUserId}
             videoId={videoId}
             refetchCmtList={refetchCmtList}
             setCmtParams={setCmtParams}
-            setAddNewCmt={setAddNewCmt}
+            setAddNewCmt={setCmtAddNew}
           />
         ))}
       </div>
@@ -104,8 +114,9 @@ const CommentBox = ({
           myChannelImg={MyChannel}
           videoId={videoId}
           refetchCmtList={refetchCmtList}
-          setAddNewCmt={setAddNewCmt}
+          setAddNewCmt={setCmtAddNew}
           setCmtParams={setCmtParams}
+          refetchVideo={refetchVideo}
         />
       </div>
     </div>

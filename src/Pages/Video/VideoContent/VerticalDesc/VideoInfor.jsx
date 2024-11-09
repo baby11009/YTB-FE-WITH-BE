@@ -33,7 +33,7 @@ const hovVars = {
   },
 };
 
-const VideoInfor = ({ videoData, refetch, setWatchFull }) => {
+const VideoInfor = ({ videoDetails, refetch, setWatchFull }) => {
   const [opened, setOpened] = useState(false);
 
   const boxRef = useRef();
@@ -66,24 +66,24 @@ const VideoInfor = ({ videoData, refetch, setWatchFull }) => {
           className='text-[28px] leading-[38px]
        t-ellipsis font-bold'
         >
-          {videoData?.title}
+          {videoDetails?.title}
         </div>
         <div className='mb-[16px] mr-[8px] text-[14px] leading-[20px] font-[500] flex gap-[7px]'>
           {/* Views */}
-          <span className=''>{formatNumber(videoData?.view)} lượt xem</span>
+          <span className=''>{formatNumber(videoDetails?.view)} lượt xem</span>
 
           {/* time */}
-          <span>{timeFormat2(videoData?.createdAt)}</span>
+          <span>{timeFormat2(videoDetails?.createdAt)}</span>
         </div>
 
         {/* description */}
-        {videoData?.description && (
+        {videoDetails?.description && (
           <div className=' text-[14px] leading-[20px] max-h-[40px] overflow-hidden'>
             <div
               className='relative after:content-["...thêm"] after:sticky after:w-[40px]
          after:shadow-[-10px_1px_5px_0px_rgba(10,10,10,0.95)] after:left-0  inline-block'
             >
-              {videoData?.description}
+              {videoDetails?.description}
             </div>
           </div>
         )}
@@ -95,11 +95,11 @@ const VideoInfor = ({ videoData, refetch, setWatchFull }) => {
         whileHover='hover'
       >
         <div className='flex'>
-          <Link to={`/channel/${videoData?.channel_info?.email}`}>
+          <Link to={`/channel/${videoDetails?.channel_info?.email}`}>
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_AVA_API
-              }${videoData?.channel_info?.avatar}`}
+              }${videoDetails?.channel_info?.avatar}`}
               alt='image'
               className='w-[40px] h-[40px] rounded-[50%] mr-[12px]'
             />
@@ -107,25 +107,25 @@ const VideoInfor = ({ videoData, refetch, setWatchFull }) => {
           <div className='flex  flex-col mr-[24px]'>
             <div
               className='flex items-center gap-[4px]'
-              title={videoData?.channel_info?.name}
+              title={videoDetails?.channel_info?.name}
             >
               <span className='text-[16px] leading-[22px] font-[500]'>
-                {videoData?.channel_info?.name}
+                {videoDetails?.channel_info?.name}
               </span>
               <Verification size={"14"} />
             </div>
 
             <span className='text-[12px] !leading-[18px] text-gray-A'>
-              {formatNumber(videoData?.channel_info?.subscriber || 0)} người
+              {formatNumber(videoDetails?.channel_info?.subscriber || 0)} người
               đăng ký
             </span>
           </div>
         </div>
         <SubscribeBtn
-          sub={videoData?.subscription_info?.notify !== null ? true : false}
-          notify={videoData?.subscription_info?.notify}
-          id={videoData?.subscription_info?._id}
-          channelId={videoData?.channel_info?._id}
+          sub={videoDetails?.subscription_info?.notify !== null ? true : false}
+          notify={videoDetails?.subscription_info?.notify}
+          id={videoDetails?.subscription_info?._id}
+          channelId={videoDetails?.channel_info?._id}
           refetch={refetch}
         />
       </motion.div>
@@ -134,9 +134,9 @@ const VideoInfor = ({ videoData, refetch, setWatchFull }) => {
       <div className='flex items-center mt-[24px]'>
         <div className='flex gap-[8px] ml-[8px]'>
           <LikeAndDislikeBtn
-            totalLike={videoData?.like}
-            videoId={videoData?._id}
-            reactState={videoData?.react_info?.type}
+            totalLike={videoDetails?.like}
+            videoId={videoDetails?._id}
+            reactState={videoDetails?.react_info?.type}
             refetch={refetch}
           />
           <div

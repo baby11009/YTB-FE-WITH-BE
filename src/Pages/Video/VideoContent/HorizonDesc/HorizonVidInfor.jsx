@@ -14,7 +14,7 @@ import {
   SubscribeBtn,
 } from "../../../../Component";
 
-const HorizonVidInfor = ({ opened, setOpened, videoData, refetch }) => {
+const HorizonVidInfor = ({ opened, setOpened, videoData, refetchVideo }) => {
   const funcList1 = [
     {
       id: 1,
@@ -86,7 +86,7 @@ const HorizonVidInfor = ({ opened, setOpened, videoData, refetch }) => {
             notify={videoData?.subscription_info?.notify}
             id={videoData?.subscription_info?._id}
             channelId={videoData?.channel_info?._id}
-            refetch={refetch}
+            refetch={refetchVideo}
           />
         </div>
 
@@ -96,7 +96,7 @@ const HorizonVidInfor = ({ opened, setOpened, videoData, refetch }) => {
             totalLike={videoData?.like}
             videoId={videoData?._id}
             reactState={videoData?.react_info?.type}
-            refetch={refetch}
+            refetch={refetchVideo}
           />
           <div className='flex gap-[8px] ml-[8px]'>
             <div

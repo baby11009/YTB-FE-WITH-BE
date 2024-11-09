@@ -1,42 +1,44 @@
 import { SortIcon } from "../../../../Assets/Icons";
 import { CustomeFuncBox, CommentInput, Comment } from "../../../../Component";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { MyChannel } from "../../../../Assets/Images";
 import { formatNumber } from "../../../../util/numberFormat";
+import { IsElementEnd } from "../../../../util/scrollPosition";
 
 const CommentSection = ({
   refetchVideo,
-  cmtData,
+  cmtList,
   totalCmt,
   cmtParams,
   videoUserId,
   videoId,
-  refetchCmtList,
-  setAddNewCmt,
+  setCmtAddNew,
   setCmtParams,
+  setCmtBoxIsEnd,
 }) => {
   const [opened, setOpened] = useState(false);
 
   const containerRef = useRef();
 
+  const handleChoseSort = (data) => {
+    if (!cmtParams.sort[data.id]) {
+      setCmtAddNew(true);
+      const boxCmt = document.getElementById("cmtBox");
+      boxCmt.scrollTop = 0;
+      setCmtParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
+    }
+  };
+
   const funcList = [
     {
-      id: "mới nhất",
-      text: "Mới nhất xếp trước",
-      handleOnClick: (data) => {
-        if (cmtParams?.createdAt !== data.id) {
-          setCmtParams((prev) => ({ ...prev, page: 1, createdAt: data.id }));
-        }
-      },
+      id: "createdAt",
+      text: "Newest first",
+      handleOnClick: handleChoseSort,
     },
     {
-      id: "cũ nhất",
-      text: "Cũ nhất xếp trước",
-      handleOnClick: (data) => {
-        if (cmtParams?.createdAt !== data.id) {
-          setCmtParams((prev) => ({ ...prev, page: 1, createdAt: data.id }));
-        }
-      },
+      id: "top",
+      text: "Top comments",
+      handleOnClick: handleChoseSort,
     },
   ];
 
@@ -54,11 +56,19 @@ const CommentSection = ({
     };
   }, []);
 
+  const scrollRef = useCallback((e) => {
+    if (e) {
+      e.addEventListener("scroll", (e) => {
+        IsElementEnd(setCmtBoxIsEnd, e);
+      });
+    }
+  }, []);
+
   return (
-    <div>
+    <div className='flex flex-col overflow-hidden'>
       {/* Header */}
       <div className='my-[24px]'>
-        <div className='text-[16px] leading-[22px] flex items-center gap-[32px] mb-[12px]'>
+        <div className='text-[16px] leading-[22px] flex items-center justify-between gap-[32px] mb-[12px]'>
           <div>Bình luận {formatNumber(totalCmt)}</div>
           <div
             className='relative cursor-pointer'
@@ -75,10 +85,10 @@ const CommentSection = ({
             </div>
             {opened && (
               <CustomeFuncBox
-                style={"w-[156px] left-0 top-[150%]"}
+                style={"w-[156px] right-0 top-[150%]"}
                 setOpened={setOpened}
                 funcList1={funcList}
-                currentId={cmtParams.createdAt}
+                currentId={Object.keys(cmtParams.sort)[0]}
               />
             )}
           </div>
@@ -88,22 +98,22 @@ const CommentSection = ({
           myChannelImg={MyChannel}
           showEmoji={true}
           videoId={videoId}
-          refetchCmtList={refetchCmtList}
-          setAddNewCmt={setAddNewCmt}
           setCmtParams={setCmtParams}
         />
       </div>
       {/* Cmt List */}
-      <div>
-        {cmtData?.map((item, id) => (
+      <div
+        className='flex-1 overflow-y-scroll overscroll-y-contain'
+        ref={scrollRef}
+        id='cmtBox'
+      >
+        {cmtList?.map((item, id) => (
           <Comment
             key={id}
             refetchVideo={refetchVideo}
             data={item}
             videoUserId={videoUserId}
             videoId={videoId}
-            refetchCmtList={refetchCmtList}
-            setAddNewCmt={setAddNewCmt}
             setCmtParams={setCmtParams}
           />
         ))}

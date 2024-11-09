@@ -12,11 +12,9 @@ const InputBox = ({
   videoId,
   userId,
   replyId,
-  setAddNewCmt,
   setCmtParams,
   setAddNewReply,
   refetchVideo,
-  refetchCmtList,
   refetchReply,
 }) => {
   const [focused, setFocused] = useState(false);
@@ -44,11 +42,6 @@ const InputBox = ({
       if (refetchReply && setAddNewReply) {
         refetchReply();
         setAddNewReply(true);
-      }
-
-      // setAddNewCmt(true);
-      if (refetchCmtList) {
-        refetchCmtList();
       }
       setCmtParams((prev) => ({ ...prev, page: 1 }));
       if (refetchVideo) {

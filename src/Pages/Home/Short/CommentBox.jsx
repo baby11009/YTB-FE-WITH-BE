@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Comment, CommentInput } from "../../../Component";
+import { Comment, CommentInput, CustomeFuncBox } from "../../../Component";
 import { CloseIcon, SortIcon } from "../../../Assets/Icons";
 import { getData } from "../../../Api/getData";
 import {
@@ -34,20 +34,44 @@ const CommentBox = ({
     reset: shortId,
   });
 
-  const { data, refetch } = getData(
+  const [isEnd, setIsEnd] = useState(false);
+
+  const [commentList, setCommentList] = useState([]);
+
+  const [addNew, setAddNew] = useState(false);
+
+  const idListSet = useRef(new Set());
+
+  const [sortOpened, setSortOpened] = useState(false);
+
+  const { data } = getData(
     `/data/comment/video-cmt/${shortId}`,
     params,
     true,
     false
   );
 
-  const [isEnd, setIsEnd] = useState(false);
+  const handleChoseSort = (data) => {
+    if (!params.sort[data.id]) {
+      setAddNew(true);
+      setParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
+      const boxCmt = document.getElementById("cmtBox");
+      boxCmt.scrollTop = 0;
+    }
+  };
 
-  const [commentList, setCommentList] = useState([]);
-
-  const [addNew, setAddNew] = useState(true);
-
-  const idListSet = useRef(new Set());
+  const funcList = [
+    {
+      id: "createdAt",
+      text: "Newest first",
+      handleOnClick: handleChoseSort,
+    },
+    {
+      id: "top",
+      text: "Top comments",
+      handleOnClick: handleChoseSort,
+    },
+  ];
 
   const refscroll = useCallback((e) => {
     if (e) {
@@ -59,21 +83,22 @@ const CommentBox = ({
 
   useLayoutEffect(() => {
     if (data) {
-      let addlist = [];
-      data?.data?.forEach((item) => {
-        if (idListSet.current.has(item?._id)) {
-          return;
-        }
-        addlist.push(item);
-        idListSet.current.add(item?._id);
-      });
-      setCommentList((prev) => {
-        if (params.page === 1) {
-          return [...addlist, ...prev];
-        } else {
-          return [...prev, ...addlist];
-        }
-      });
+      if (addNew) {
+        setCommentList(data?.data);
+        idListSet.current.clear();
+        idListSet.current.add(data?.data.map((item) => item._id));
+        setAddNew(false);
+      } else {
+        let addlist = [];
+        data?.data?.forEach((item) => {
+          if (idListSet.current.has(item?._id)) {
+            return;
+          }
+          addlist.push(item);
+          idListSet.current.add(item?._id);
+        });
+        setCommentList((prev) => [...prev, ...addlist]);
+      }
     }
   }, [data]);
 
@@ -92,12 +117,31 @@ const CommentBox = ({
         });
       }
     };
+
+    const addNewCmt = (data) => {
+      if (data) {
+        setCommentList((prev) => [...data, ...prev]);
+        idListSet.current.add(data[0]?._id);
+      }
+    };
+
+    const deleteCmt = (data) => {
+      if (data) {
+        setCommentList((prev) => prev.filter((item) => item?._id !== data._id));
+        idListSet.current.delete(data[0]?._id);
+      }
+    };
+
     if (socket) {
       socket.on(`update-parent-comment-${user?._id}`, updateComment);
+      socket.on(`create-comment-${user?._id}`, addNewCmt);
+      socket.on(`delete-comment-${user?._id}`, deleteCmt);
     }
     return () => {
       if (socket) {
         socket.off(`update-parent-comment-${user?._id}`, updateComment);
+        socket.off(`create-comment-${user?._id}`, addNewCmt);
+        socket.off(`delete-comment-${user?._id}`, deleteCmt);
       }
       queryClient.removeQueries(shortId);
     };
@@ -109,8 +153,6 @@ const CommentBox = ({
         ...prev,
         page: Math.floor(commentList.length / prev.limit) + 1,
       }));
-
-      setAddNew(!isEnd);
     }
   }, [isEnd]);
 
@@ -141,8 +183,24 @@ const CommentBox = ({
               <span className=' text-gray-A'>{totalCmt}</span>
             </div>
             <div className='flex gap-[8px]'>
-              <button className='w-[40px] h-[40px] flex items-center justify-center'>
-                <SortIcon />
+              <button
+                className='w-[40px] h-[40px] flex items-center justify-center rounded-[50%] 
+              hover:bg-[rgba(255,255,255,0.2)] relative'
+                onClick={() => {
+                  setSortOpened((prev) => !prev);
+                }}
+              >
+                <div>
+                  <SortIcon />
+                </div>
+                {sortOpened && (
+                  <CustomeFuncBox
+                    style={"w-[156px] right-0 top-[100%]"}
+                    setOpened={setSortOpened}
+                    funcList1={funcList}
+                    currentId={Object.keys(params.sort)[0]}
+                  />
+                )}
               </button>
               <button
                 className='w-[40px] h-[40px] rounded-[50%] hover:bg-[rgba(255,255,255,0.2)]
@@ -158,6 +216,7 @@ const CommentBox = ({
           <div
             className='px-[16px] flex-1 overflow-y-auto menu-scrollbar overscroll-contain'
             ref={refscroll}
+            id='cmtBox'
           >
             {commentList.map((item, id) => (
               <Comment
@@ -177,13 +236,6 @@ const CommentBox = ({
               videoId={shortId}
               setAddNewCmt={setAddNew}
               setCmtParams={setParams}
-              refetchCmtList={() => {
-                if (params.page !== 1) {
-                  setParams((prev) => ({ ...prev, page: 1 }));
-                } else {
-                  refetch();
-                }
-              }}
               refetchVideo={handleRefetch}
             />
           </div>

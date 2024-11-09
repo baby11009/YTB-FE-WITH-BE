@@ -4,53 +4,52 @@ import CommentBox from "./CommentBox";
 import DetailsBox from "./DetailsBox";
 
 const HorizonDescSection = ({
-  videoData,
-  cmtData,
-  totalCmt,
-  boxRef,
-  refetch,
+  videoDetails,
+  cmtList,
+  setCmtBoxIsEnd,
   refetchCmtList,
-  setAddNewCmt,
+  setCmtAddNew,
   cmtParams,
   setCmtParams,
   opened,
   setOpened,
+  refetchVideo,
 }) => {
   return (
     <div className='lg:hidden mt-[12px] mb-[24px]'>
       {opened === "cmt" ? (
         <CommentBox
+          refetchVideo={refetchVideo}
           setOpened={setOpened}
-          cmtData={cmtData}
-          totalCmt={totalCmt}
-          videoUserId={videoData?.channel_info._id}
-          videoId={videoData?._id}
+          cmtList={cmtList}
+          totalCmt={videoDetails?.totalCmt}
+          videoUserId={videoDetails?.channel_info._id}
+          videoId={videoDetails?._id}
           refetchCmtList={refetchCmtList}
           cmtParams={cmtParams}
           setCmtParams={setCmtParams}
-          setAddNewCmt={setAddNewCmt}
-          boxRef={boxRef}
+          setCmtAddNew={setCmtAddNew}
+          setCmtBoxIsEnd={setCmtBoxIsEnd}
         />
       ) : opened === "detail" ? (
-        <DetailsBox setOpened={setOpened} data={videoData} />
+        <DetailsBox setOpened={setOpened} data={videoDetails} />
       ) : (
         <>
           {/* Video Information */}
-
           <HorizonVidInfor
             opened={opened}
             setOpened={setOpened}
-            videoData={videoData}
-            refetch={refetch}
+            videoDetails={videoDetails}
+            refetchVideo={refetchVideo}
           />
 
           {/* Description & Comment */}
           <HorizonDesCmt
             opened={opened}
             setOpened={setOpened}
-            totalCmt={totalCmt}
-            videoData={videoData}
-            firstCmt={cmtData[0]}
+            totalCmt={videoDetails?.totalCmt}
+            videoDetails={videoDetails}
+            firstCmt={cmtList[0]}
           />
         </>
       )}

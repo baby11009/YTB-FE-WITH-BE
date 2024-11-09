@@ -1,4 +1,4 @@
-import { llstylish, emoji1, sangtraan, MyChannel } from "../../Assets/Images";
+import { sangtraan, MyChannel } from "../../Assets/Images";
 import {
   LoveIcon,
   ThinArrowIcon,
@@ -13,8 +13,6 @@ import { timeFormat2 } from "../../util/timeforMat";
 
 import { useAuthContext } from "../../Auth Provider/authContext";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
-import request from "../../util/axios-base-url";
-import { getCookie } from "../../util/tokenHelpers";
 import { LikeAndDislikeCmtBtn } from "../../Component";
 import EditCommentArea from "./EditCommentArea";
 import { updateData, dltData } from "../../Api/controller";

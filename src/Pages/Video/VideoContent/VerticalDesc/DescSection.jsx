@@ -4,49 +4,48 @@ import { useState } from "react";
 import DetailsBox from "./DetailsBox";
 
 const DescSection = ({
-  videoData,
-  cmtData,
+  videoDetails,
+  cmtList,
   totalCmt,
   cmtCreatedAt,
-  setCmtCreatedAt,
   boxRef,
   refetch,
-  refetchCmtList,
   cmtParams,
   setCmtParams,
-  setAddNewCmt,
+  setCmtAddNew,
+  setCmtBoxIsEnd
 }) => {
   const [watchFull, setWatchFull] = useState(false);
 
+
   return (
     <div
-      className=' w-[410px] xl:w-[480px] h-screen-h-minus-72 overflow-y-auto overscroll-contain flex flex-col px-[16px] pt-[16px] 
+      className=' w-[410px] xl:w-[480px] h-screen-h-minus-72 overflow-hidden flex flex-col px-[16px] pt-[16px] 
       border-[1px] border-[rgba(255,255,255,.2)] rounded-[12px] bg-[#0a0a0a]'
       ref={boxRef}
     >
       {watchFull ? (
-        <DetailsBox setOpened={setWatchFull} data={videoData} />
+        <DetailsBox setOpened={setWatchFull} data={videoDetails} />
       ) : (
         <>
           {/* Video in4 */}
           <VideoInfor
-            videoData={videoData}
+            videoDetails={videoDetails}
             refetch={refetch}
             setWatchFull={setWatchFull}
           />
           {/* Comment  */}
           <CommentSection
             refetchVideo={refetch}
-            cmtData={cmtData}
+            cmtList={cmtList}
             totalCmt={totalCmt}
-            videoUserId={videoData?.channel_info?._id}
-            videoId={videoData?._id}
-            refetchCmtList={refetchCmtList}
+            videoUserId={videoDetails?.channel_info?._id}
+            videoId={videoDetails?._id}
             cmtCreatedAt={cmtCreatedAt}
-            setCmtCreatedAt={setCmtCreatedAt}
-            setAddNewCmt={setAddNewCmt}
+            setCmtAddNew={setCmtAddNew}
             cmtParams={cmtParams}
             setCmtParams={setCmtParams}
+            setCmtBoxIsEnd={setCmtBoxIsEnd}
           />
         </>
       )}
