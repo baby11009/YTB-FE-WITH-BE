@@ -17,7 +17,6 @@ const CommentBox = ({
   setCmtParams,
   setCmtAddNew,
   refetchVideo,
-  socket,
 }) => {
   const queryClient = useQueryClient();
 
@@ -108,7 +107,6 @@ const CommentBox = ({
             videoUserId={videoUserId}
             videoId={videoId}
             setCmtParams={setCmtParams}
-            socket={socket}
           />
         ))}
       </div>

@@ -16,7 +16,7 @@ const CommentSection = ({
   setCmtAddNew,
   setCmtParams,
   setCmtBoxIsEnd,
-  socket,
+  replyCmtModified,
 }) => {
   const queryClient = useQueryClient();
 
@@ -108,21 +108,26 @@ const CommentSection = ({
       </div>
       {/* Cmt List */}
       <div
-        className='flex-1 overflow-y-scroll overscroll-y-contain'
+        className='flex-1 overflow-y-auto overscroll-y-contain'
         ref={scrollRef}
         id='cmtBox'
       >
-        {cmtList?.map((item, id) => (
-          <Comment
-            key={id}
-            refetchVideo={refetchVideo}
-            data={item}
-            videoUserId={videoUserId}
-            videoId={videoId}
-            setCmtParams={setCmtParams}
-            socket={socket}
-          />
-        ))}
+        {cmtList?.length > 0 &&
+          cmtList?.map((item, id) => (
+            <Comment
+              key={id}
+              refetchVideo={refetchVideo}
+              data={item}
+              videoUserId={videoUserId}
+              videoId={videoId}
+              setCmtParams={setCmtParams}
+              replyCmtModified={
+                item?._id === replyCmtModified?.data?.replied_cmt_id
+                  ? replyCmtModified
+                  : null
+              }
+            />
+          ))}
       </div>
     </div>
   );

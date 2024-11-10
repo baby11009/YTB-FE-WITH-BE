@@ -45,6 +45,8 @@ const CommentBox = ({
 
   const [sortOpened, setSortOpened] = useState(false);
 
+  const [replyCmtModified, setReplyCmtModified] = useState(null);
+
   const { data } = getData(
     `/data/comment/video-cmt/${shortId}`,
     params,
@@ -122,7 +124,7 @@ const CommentBox = ({
 
     const addNewCmt = (data) => {
       if (data) {
-        setCommentList((prev) => [...data, ...prev]);
+        setCommentList((prev) => [data, ...prev]);
         idListSet.current.add(data[0]?._id);
       }
     };
@@ -133,12 +135,23 @@ const CommentBox = ({
         idListSet.current.delete(data[0]?._id);
       }
     };
-
+    const modifiedReply = (data, action) => {
+      setReplyCmtModified({ data: data, action });
+    };
     if (socket) {
       socket.on(`update-parent-comment-${user?._id}`, updateComment);
       socket.on(`update-comment-${user?._id}`, updateComment);
       socket.on(`create-comment-${user?._id}`, addNewCmt);
       socket.on(`delete-comment-${user?._id}`, deleteCmt);
+      socket.on(`create-reply-comment-${user?._id}`, (data) => {
+        modifiedReply(data, "create");
+      });
+      socket.on(`update-reply-comment-${user?._id}`, (data) => {
+        modifiedReply(data, "update");
+      });
+      socket.on(`delete-reply-comment-${user?._id}`, (data) => {
+        modifiedReply(data, "delete");
+      });
     }
     return () => {
       if (socket) {
@@ -146,6 +159,15 @@ const CommentBox = ({
         socket.off(`update-comment-${user?._id}`, updateComment);
         socket.off(`create-comment-${user?._id}`, addNewCmt);
         socket.off(`delete-comment-${user?._id}`, deleteCmt);
+        socket.off(`create-reply-comment-${user?._id}`, (data) => {
+          modifiedReply(data, "create");
+        });
+        socket.off(`update-reply-comment-${user?._id}`, (data) => {
+          modifiedReply(data, "update");
+        });
+        socket.off(`delete-reply-comment-${user?._id}`, (data) => {
+          modifiedReply(data, "delete");
+        });
       }
       queryClient.removeQueries(shortId);
     };
@@ -231,6 +253,7 @@ const CommentBox = ({
                 setCmtParams={setParams}
                 refetchVideo={handleRefetch}
                 key={id}
+                replyCmtModified={replyCmtModified}
               />
             ))}
           </div>

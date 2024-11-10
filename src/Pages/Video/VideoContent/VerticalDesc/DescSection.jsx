@@ -14,7 +14,7 @@ const DescSection = ({
   setCmtParams,
   setCmtAddNew,
   setCmtBoxIsEnd,
-  socket,
+  replyCmtModified
 }) => {
   const [watchFull, setWatchFull] = useState(false);
 
@@ -46,7 +46,7 @@ const DescSection = ({
             cmtParams={cmtParams}
             setCmtParams={setCmtParams}
             setCmtBoxIsEnd={setCmtBoxIsEnd}
-            socket={socket}
+            replyCmtModified={replyCmtModified}
           />
         </>
       )}

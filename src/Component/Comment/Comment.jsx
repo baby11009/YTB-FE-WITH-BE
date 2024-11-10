@@ -1,8 +1,7 @@
 import CommentCard from "./CommentCard";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getData } from "../../Api/getData";
 import { useAuthContext } from "../../Auth Provider/authContext";
-import { useQueryClient } from "@tanstack/react-query";
 import { CurveArrowIcon } from "../../Assets/Icons";
 import { useCallback } from "react";
 
@@ -12,59 +11,110 @@ const Comment = ({
   videoId,
   videoUserId,
   refetchVideo,
-  socket,
+  replyCmtModified,
 }) => {
   const { user } = useAuthContext();
 
-  const queryClient = useQueryClient();
-
-  const [replyCmtsData, setReplyCmtsData] = useState([]);
+  const [replyCmtsList, setReplyCmtList] = useState([]);
 
   const [showReply, setShowReply] = useState(false);
 
   const [addNewReply, setAddNewReply] = useState(false);
 
+  const replyIdsListSet = useRef(new Set());
+
+  const [firstOpened, setFirstOpened] = useState(true);
+
   const [cmtReplyPrs, setCmtReplyPrs] = useState({
-    limit: 3,
+    limit: 5,
     page: 1,
     replyId: data?._id,
     userId: user?._id,
-    clearCache: `cmt-${data?._id}`,
   });
 
-  const { data: replyCmtList, isLoading } = getData(
-    `/data/comment/video-cmt/${videoId}`,
-    cmtReplyPrs,
-    showReply,
-    false
-  );
+  const {
+    data: replyCmtsData,
+    isLoading,
+    refetch,
+  } = getData(`/data/comment/video-cmt/${videoId}`, cmtReplyPrs, showReply);
 
   useEffect(() => {
-    if (replyCmtList && showReply) {
+    if (replyCmtsData && showReply) {
       if (addNewReply) {
-        setReplyCmtsData(replyCmtList?.data);
+        setReplyCmtList(replyCmtsData?.data);
+        replyCmtsData?.data.forEach((item) =>
+          replyIdsListSet.current.add(item?._id)
+        );
       } else {
-        setReplyCmtsData((prev) => [...prev, ...replyCmtList?.data]);
+        let addList = [];
+        replyCmtsData?.data.forEach((item) => {
+          if (!replyIdsListSet.current.has(item?._id)) {
+            addList.push(item);
+            replyIdsListSet.current.add(item?._id);
+          }
+        });
+        setReplyCmtList((prev) => [...prev, ...addList]);
       }
     }
-  }, [replyCmtList, showReply]);
+  }, [replyCmtsData, showReply]);
 
   useEffect(() => {
-    if (!showReply) {
-      queryClient.removeQueries(`cmt-${data?._id}`);
-      setReplyCmtsData([]);
-      setCmtReplyPrs((prev) => ({ ...prev, page: 1 }));
+    if (!showReply && !firstOpened) {
+      setReplyCmtList([]);
+      replyIdsListSet.current.clear();
+      setCmtReplyPrs({
+        limit: 5,
+        page: 1,
+        replyId: data?._id,
+        userId: user?._id,
+      });
     } else {
-      // socket.on(`create-reply-comment-${user?._id}`, (data) => {
-      //   console.log(data);
-      // });
-      // socket.on(`update-reply-comment-${user?._id}`);
-      // socket.on(`delete-reply-comment-${user?._id}`);
+      setFirstOpened(false);
     }
   }, [showReply]);
 
+  useEffect(() => {
+    if (replyCmtModified) {
+      switch (replyCmtModified.action) {
+        case "create":
+          setReplyCmtList((prev) => [replyCmtModified.data, ...prev]);
+          break;
+        case "update":
+          setReplyCmtList((prev) => {
+            const dataList = [...prev];
+            dataList.forEach((item, id) => {
+              if (item?._id === replyCmtModified.data?._id) {
+                dataList[id] = { ...item, ...replyCmtModified.data };
+              }
+            });
+
+            return dataList;
+          });
+          break;
+        case "delete":
+          setReplyCmtList((prev) =>
+            prev.filter((item) => item?._id !== replyCmtModified.data?._id)
+          );
+          break;
+      }
+    }
+  }, [replyCmtModified]);
+
+  useEffect(() => {
+    if (
+      replyCmtsList.length < 4 &&
+      cmtReplyPrs.page < replyCmtsData?.totalPage
+    ) {
+      if (cmtReplyPrs.page > 1) {
+        setCmtReplyPrs((prev) => ({ ...prev, page: 1 }));
+      } else {
+        refetch();
+      }
+    }
+  }, [replyCmtsList]);
+
   const handleShowMoreReplyCmt = useCallback(() => {
-    if (cmtReplyPrs.page < replyCmtList?.totalPage)
+    if (cmtReplyPrs.page < replyCmtsData?.totalPage)
       setCmtReplyPrs((prev) => ({ ...prev, page: prev.page + 1 }));
   });
 
@@ -83,7 +133,7 @@ const Comment = ({
         <div className='pl-[36px]'>
           <div className={` ${isLoading && "flex justify-center mb-[16px]"} `}>
             {!isLoading &&
-              replyCmtsData.map((item, id) => (
+              replyCmtsList.map((item, id) => (
                 <CommentCard
                   key={id}
                   showReply={showReply}
@@ -102,9 +152,9 @@ const Comment = ({
           border-r-[transparent] border-[#717171] animate-spin'
             ></div>
           )}
-          {cmtReplyPrs.page < replyCmtList?.totalPage && (
+          {cmtReplyPrs.page < replyCmtsData?.totalPage && (
             <button
-              className='flex items-center justify-center rounded-[30px] text-blue-3E hover:bg-blue-26 px-[16px]'
+              className='flex items-center justify-center rounded-[30px] text-blue-3E hover:bg-blue-26 px-[16px] mb-[8px]'
               onClick={() => {
                 handleShowMoreReplyCmt();
               }}

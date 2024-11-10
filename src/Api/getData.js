@@ -11,6 +11,7 @@ export const getData = (
   if (!path) {
     return null;
   }
+
   const paramsValue = Object.values(params);
   const paramsKey = Object.keys(params);
 
@@ -48,7 +49,6 @@ export const getData = (
     },
     enabled: condition,
     suspense,
-    cacheTime: 0,
   });
 };
 
