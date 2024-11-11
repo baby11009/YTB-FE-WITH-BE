@@ -13,6 +13,7 @@ const InputBox = ({
   userId,
   replyId,
   refetchVideo,
+  replyUserId,
 }) => {
   const [focused, setFocused] = useState(false);
 
@@ -36,7 +37,6 @@ const InputBox = ({
       data.replyId = replyId;
     }
     await createData("/client/comment", data, "comment", () => {
-
       if (refetchVideo) {
         refetchVideo();
       }

@@ -13,6 +13,7 @@ const Comment = ({
   refetchVideo,
   replyCmtModified,
 }) => {
+
   const { user } = useAuthContext();
 
   const [replyCmtsList, setReplyCmtList] = useState([]);
@@ -74,10 +75,12 @@ const Comment = ({
   }, [showReply]);
 
   useEffect(() => {
-    if (replyCmtModified) {
+    // console.log(replyCmtModified);
+    if (replyCmtModified && showReply) {
       switch (replyCmtModified.action) {
         case "create":
           setReplyCmtList((prev) => [replyCmtModified.data, ...prev]);
+          replyIdsListSet.current.add(replyCmtModified.data?._id);
           break;
         case "update":
           setReplyCmtList((prev) => {
@@ -112,6 +115,10 @@ const Comment = ({
       }
     }
   }, [replyCmtsList]);
+
+  useEffect(() => {
+    return () => {};
+  }, []);
 
   const handleShowMoreReplyCmt = useCallback(() => {
     if (cmtReplyPrs.page < replyCmtsData?.totalPage)

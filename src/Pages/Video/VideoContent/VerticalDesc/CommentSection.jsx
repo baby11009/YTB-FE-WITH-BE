@@ -4,8 +4,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { MyChannel } from "../../../../Assets/Images";
 import { formatNumber } from "../../../../util/numberFormat";
 import { IsElementEnd } from "../../../../util/scrollPosition";
-import { useQueryClient } from "@tanstack/react-query";
-
 const CommentSection = ({
   refetchVideo,
   cmtList,
@@ -18,8 +16,6 @@ const CommentSection = ({
   setCmtBoxIsEnd,
   replyCmtModified,
 }) => {
-  const queryClient = useQueryClient();
-
   const [opened, setOpened] = useState(false);
 
   const containerRef = useRef();
@@ -29,7 +25,6 @@ const CommentSection = ({
       setCmtAddNew(true);
       const boxCmt = document.getElementById("cmtBox");
       boxCmt.scrollTop = 0;
-      queryClient.invalidateQueries("comment");
       setCmtParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
     }
   };
@@ -113,15 +108,16 @@ const CommentSection = ({
         id='cmtBox'
       >
         {cmtList?.length > 0 &&
-          cmtList?.map((item, id) => (
+          cmtList?.map((item) => (
             <Comment
-              key={id}
+              key={item?._id}
               refetchVideo={refetchVideo}
               data={item}
               videoUserId={videoUserId}
               videoId={videoId}
               setCmtParams={setCmtParams}
               replyCmtModified={
+                item?._id === replyCmtModified?.data?.replied_parent_cmt_id ||
                 item?._id === replyCmtModified?.data?.replied_cmt_id
                   ? replyCmtModified
                   : null

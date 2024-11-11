@@ -7,7 +7,7 @@ import {
 } from "../../Assets/Icons";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import InputBox from "./InputBox";
 import { timeFormat2 } from "../../util/timeforMat";
 
@@ -34,7 +34,6 @@ const CommentCard = ({
 
   const containerRef = useRef();
 
-
   const handleOnClick = () => {
     if (!user) {
       alert("Đăng nhập để bình luận");
@@ -54,7 +53,6 @@ const CommentCard = ({
       { cmtText: value },
       "comment",
       (rsp) => {
-       
         setIsShowing(undefined);
       }
     );
@@ -100,7 +98,7 @@ const CommentCard = ({
 
   return (
     <div className='flex mb-[8px]'>
-      <Link className='mr-[12px]' to={`/channel/${5}`}>
+      <Link className='mr-[12px]' to={`/channel/${data?.user_info?.email}`}>
         <img
           src={`${import.meta.env.VITE_BASE_API_URI}${
             import.meta.env.VITE_VIEW_AVA_API
@@ -138,10 +136,12 @@ const CommentCard = ({
 
         {/* content */}
         <div className='text-[14px] leading-[20px]'>
-          {data?.reply_user_info?.email && (
-            <span className='break-all text-blue-3E'>
-              @{data?.reply_user_info?.email}{" "}
-            </span>
+          {data?.replied_user_info?.email && (
+            <Link to={`/channel/${data?.replied_user_info?.email}`}>
+              <span className='break-all text-blue-3E'>
+                @{data?.replied_user_info?.email}{" "}
+              </span>
+            </Link>
           )}
           <span className='break-all'>{data?.cmtText}</span>
         </div>

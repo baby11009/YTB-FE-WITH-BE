@@ -1,7 +1,7 @@
 import { SortIcon, CloseIcon } from "../../../../Assets/Icons";
 import { Comment, CommentInput, CustomeFuncBox } from "../../../../Component";
 import { MyChannel } from "../../../../Assets/Images";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { formatNumber } from "../../../../util/numberFormat";
 import { IsElementEnd } from "../../../../util/scrollPosition";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ const CommentBox = ({
   setCmtParams,
   setCmtAddNew,
   refetchVideo,
+  replyCmtModified,
 }) => {
   const queryClient = useQueryClient();
 
@@ -29,7 +30,6 @@ const CommentBox = ({
       setCmtAddNew(true);
       const boxCmt = document.getElementById("cmtBox");
       boxCmt.scrollTop = 0;
-      queryClient.invalidateQueries("comment");
       setCmtParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
     }
   };
@@ -101,12 +101,13 @@ const CommentBox = ({
       >
         {cmtList?.map((item, id) => (
           <Comment
-            key={id}
+            key={item?._id}
             refetchVideo={refetchVideo}
             data={item}
             videoUserId={videoUserId}
             videoId={videoId}
             setCmtParams={setCmtParams}
+            replyCmtModified={replyCmtModified}
           />
         ))}
       </div>

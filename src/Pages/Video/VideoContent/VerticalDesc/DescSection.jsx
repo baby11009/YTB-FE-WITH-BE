@@ -14,7 +14,7 @@ const DescSection = ({
   setCmtParams,
   setCmtAddNew,
   setCmtBoxIsEnd,
-  replyCmtModified
+  replyCmtModified,
 }) => {
   const [watchFull, setWatchFull] = useState(false);
 

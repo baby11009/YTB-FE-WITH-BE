@@ -7,14 +7,13 @@ const HorizonDescSection = ({
   videoDetails,
   cmtList,
   setCmtBoxIsEnd,
-  refetchCmtList,
   setCmtAddNew,
   cmtParams,
   setCmtParams,
   opened,
   setOpened,
   refetchVideo,
-  modifiedReply,
+  replyCmtModified,
 }) => {
   return (
     <div className='lg:hidden mt-[12px] mb-[24px]'>
@@ -26,11 +25,11 @@ const HorizonDescSection = ({
           totalCmt={videoDetails?.totalCmt}
           videoUserId={videoDetails?.channel_info._id}
           videoId={videoDetails?._id}
-          refetchCmtList={refetchCmtList}
           cmtParams={cmtParams}
           setCmtParams={setCmtParams}
           setCmtAddNew={setCmtAddNew}
           setCmtBoxIsEnd={setCmtBoxIsEnd}
+          replyCmtModified={replyCmtModified}
         />
       ) : opened === "detail" ? (
         <DetailsBox setOpened={setOpened} data={videoDetails} />

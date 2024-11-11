@@ -31,7 +31,7 @@ const VideoPart = ({ openedMenu }) => {
     limit: 8,
     page: 1,
     sort: {
-      createdAt: -1,
+      top: -1,
     },
     reset: user?._id,
     clearCache: "comment",
@@ -68,12 +68,13 @@ const VideoPart = ({ openedMenu }) => {
 
   const { data: videoData } = getData(`/data/all`, videoParams, true, false);
 
-  const { data: cmtData, refetch: refetchcmt } = getData(
+  const { data: cmtData, refetch: refetchCmt } = getData(
     `/data/comment/video-cmt/${id}`,
     cmtParams,
     true,
     false
   );
+  console.log("🚀 ~  cmtData:", cmtData);
 
   useEffect(() => {
     if (videoData) {
@@ -88,8 +89,8 @@ const VideoPart = ({ openedMenu }) => {
   useEffect(() => {
     if (cmtData) {
       if (cmtAddNew) {
-        setCmtList([...cmtData?.data]);
         cmtIdListSet.current.clear();
+        setCmtList(cmtData?.data);
         cmtData?.data.forEach((item) => cmtIdListSet.current.add(item._id));
         setCmtAddNew(false);
       } else {
@@ -98,6 +99,7 @@ const VideoPart = ({ openedMenu }) => {
           if (cmtIdListSet.current.has(item?._id)) {
             return;
           }
+
           addlist.push(item);
           cmtIdListSet.current.add(item?._id);
         });
@@ -129,7 +131,7 @@ const VideoPart = ({ openedMenu }) => {
   useEffect(() => {
     if (cmtList.length < 4 && cmtParams.page < cmtData?.totalPage) {
       if (cmtParams.page === 1) {
-        refetchcmt();
+        refetchCmt();
       } else {
         setCmtParams((prev) => ({ ...prev, page: 1 }));
       }
@@ -144,12 +146,12 @@ const VideoPart = ({ openedMenu }) => {
       limit: 8,
       page: 1,
       sort: {
-        createdAt: -1,
+        top: -1,
       },
       userId: user?._id,
       clearCache: "comment",
     });
-    refetchcmt();
+    refetchCmt();
     setCmtAddNew(true);
     cmtIdListSet.current.clear();
     scrollToTop();
@@ -221,12 +223,12 @@ const VideoPart = ({ openedMenu }) => {
       });
 
       // Clear socket when unmount
-      if (!socket.connected) {
+      if (socket && !socket?.connected) {
         socket.off();
-      }
-      if (socket.connected) {
+      } else if (socket && socket?.connected) {
         socket.disconnect();
       }
+
       if (socket) {
         socket.off(`update-parent-comment-${user?._id}`, updateComment);
         socket.off(`update-comment-${user?._id}`, updateComment);
@@ -256,7 +258,6 @@ const VideoPart = ({ openedMenu }) => {
           videoDetails={videoDetails?.data}
           cmtList={cmtList}
           setCmtBoxIsEnd={setCmtBoxIsEnd}
-          refetchcmt={refetchcmt}
           cmtParams={cmtParams}
           setCmtParams={setCmtParams}
           opened={opened}
