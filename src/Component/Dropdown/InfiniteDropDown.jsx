@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ThinArrowIcon, SearchIcon } from "../../Assets/Icons";
 import { useQueryClient } from "@tanstack/react-query";
+import { IsElementEnd } from "../../util/scrollPosition";
 
 const InfiniteDropDown = ({
   title,
@@ -14,6 +15,7 @@ const InfiniteDropDown = ({
   handleSetCurr,
   disabled,
   prsRemoveValue,
+  displayData,
 }) => {
   const queryClient = useQueryClient();
 
@@ -23,9 +25,17 @@ const InfiniteDropDown = ({
 
   const [addNewValue, setAddNewValue] = useState(false);
 
+  const [isEnd, setIsEnd] = useState(false);
+
   const containerRef = useRef();
 
-  const boxRef = useRef();
+  const refscroll = useCallback((e) => {
+    if (e) {
+      e.addEventListener("scroll", (e) => {
+        IsElementEnd(setIsEnd, e);
+      });
+    }
+  }, []);
 
   const timeOutRef = useRef();
 
@@ -53,10 +63,6 @@ const InfiniteDropDown = ({
       setIsOpened(opened);
     }
 
-    if (!opened && boxRef.current) {
-      boxRef.current.scrollTop = 0;
-    }
-
     window.addEventListener("mousedown", handleClickOutScope);
 
     return () => {
@@ -68,30 +74,6 @@ const InfiniteDropDown = ({
   }, [opened]);
 
   useEffect(() => {
-    const element = boxRef.current;
-
-    const handleScroll = () => {
-      const element = boxRef.current;
-      if (element) {
-        const { scrollTop, scrollHeight, clientHeight } = element;
-        if (Math.ceil(scrollTop) + clientHeight >= scrollHeight) {
-          handleSetParams(undefined, 1);
-        }
-      }
-    };
-
-    if (element) {
-      element.addEventListener("scroll", handleScroll);
-    }
-
-    return () => {
-      if (element) {
-        element.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [boxRef.current]);
-
-  useEffect(() => {
     if (list) {
       if (addNewValue) {
         setDataList([...list]);
@@ -101,6 +83,12 @@ const InfiniteDropDown = ({
       }
     }
   }, [list]);
+
+  useEffect(() => {
+    if (isEnd) {
+      handleSetParams(undefined, 1);
+    }
+  }, [isEnd]);
 
   useEffect(() => {
     return () => {
@@ -156,7 +144,7 @@ const InfiniteDropDown = ({
                 <SearchIcon />
               </div>
             </div>
-            <div className='size-full overflow-auto' ref={boxRef}>
+            <div className='size-full overflow-auto' ref={refscroll}>
               {isLoading && dataList.length === 0 ? (
                 <div className='flex flex-col items-center justify-center '>
                   <div
@@ -176,7 +164,7 @@ const InfiniteDropDown = ({
                       handleSetCurr(item);
                     }}
                   >
-                    {item?.email || item?._id}
+                    {item[displayData]}
                   </button>
                 ))
               ) : (

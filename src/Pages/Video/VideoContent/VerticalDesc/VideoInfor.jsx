@@ -1,13 +1,9 @@
 import { formatNumber } from "../../../../util/numberFormat";
-import { timeFormat, timeFormat2 } from "../../../../util/timeforMat";
+import { timeFormat2 } from "../../../../util/timeforMat";
 import { Link } from "react-router-dom";
-import { tgb } from "../../../../Assets/Images";
 import {
   Verification,
-  BellIcon,
-  ThinArrowIcon,
   SaveIcon,
-  EmptyLikeIcon,
   DownloadIcon,
   ShareIcon,
   DiaryIcon,
@@ -21,6 +17,7 @@ import {
   SubscribeBtn,
   LikeAndDislikeBtn,
 } from "../../../../Component";
+
 
 const hovVars = {
   hover: {
@@ -122,7 +119,7 @@ const VideoInfor = ({ videoDetails, refetch, setWatchFull }) => {
           </div>
         </div>
         <SubscribeBtn
-          sub={videoDetails?.subscription_info?.notify !== null ? true : false}
+          sub={videoDetails?.subscription_info !== null ? true : false}
           notify={videoDetails?.subscription_info?.notify}
           id={videoDetails?.subscription_info?._id}
           channelId={videoDetails?.channel_info?._id}

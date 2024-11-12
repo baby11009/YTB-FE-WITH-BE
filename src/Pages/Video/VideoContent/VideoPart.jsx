@@ -74,7 +74,6 @@ const VideoPart = ({ openedMenu }) => {
     true,
     false
   );
-  console.log("🚀 ~  cmtData:", cmtData);
 
   useEffect(() => {
     if (videoData) {
@@ -139,7 +138,6 @@ const VideoPart = ({ openedMenu }) => {
   }, [cmtList]);
 
   useEffect(() => {
-    // Reload when the id is changed
     refetch();
     setVideoParams(initVideoParams);
     setCmtParams({
@@ -275,7 +273,6 @@ const VideoPart = ({ openedMenu }) => {
           2xl:right-[2.5%] 3xl:right-[3%] 4xl:right-[3.5%] 5xl:right-[10%] top-[56px] ml-[8px]'
       >
         <DescSection
-          sub={true}
           videoDetails={videoDetails?.data}
           cmtList={cmtList}
           totalCmt={videoDetails?.data?.totalCmt}

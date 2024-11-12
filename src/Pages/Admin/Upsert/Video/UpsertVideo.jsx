@@ -548,6 +548,7 @@ const UpsertVideo = () => {
               list={data?.data}
               isLoading={isLoading}
               isError={isError}
+              displayData={"email"}
               errorMsg={userError?.response?.data?.msg}
               handleSetParams={(value, pageInc) => {
                 setUserParams((prev) => {

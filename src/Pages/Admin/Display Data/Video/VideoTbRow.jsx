@@ -69,7 +69,7 @@ const VideoTbRow = ({
       </th>
       <th>
         <div
-          className='size-[40px] rounded-[50%] bg-cover bg-center bg-no-repeat'
+          className='w-[60px] aspect-video border-[2px] rounded-[5px] bg-contain bg-center bg-no-repeat'
           style={{
             backgroundImage: `url("${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_THUMB_API

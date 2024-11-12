@@ -9,7 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 const initForm = {
   userId: "",
   email: "",
-  videoId: "",
+  videoId: undefined,
   replyId: "",
   cmtText: "",
   like: 0,
@@ -44,9 +44,9 @@ const UpsertComment = () => {
 
   const [videoPrs, setVideoPrs] = useState({
     id: "",
+    title: "",
     limit: 10,
     page: 1,
-
     clearCache: "video",
   });
 
@@ -54,6 +54,7 @@ const UpsertComment = () => {
     id: "",
     limit: 10,
     page: 1,
+    videoId: formData.videoId ? formData.videoId : undefined,
     clearCache: "reply",
   });
 
@@ -85,17 +86,12 @@ const UpsertComment = () => {
     isError: replyCmtsIsError,
     error: replyCmtsError,
   } = getDataWithAuth(
-    `/comment/video-comment/${formData.videoId || "000000000000000000000000"}`,
+    `/comment`,
     replyPrs,
-    () => {
-      if (cmtOpened && formData.videoId) {
-        return true;
-      }
-
-      return false;
-    },
+    cmtOpened && formData.videoId ? true : false,
     false
   );
+  console.log("🚀 ~  replyPrs:", replyPrs);
 
   const handleOnChange = (name, value) => {
     setFormData((prev) => ({
@@ -282,6 +278,12 @@ const UpsertComment = () => {
   }, [error]);
 
   useEffect(() => {
+    if (formData.videoId) {
+      setReplyPrs((prev) => ({ ...prev, videoId: formData.videoId }));
+    }
+  }, [formData.videoId]);
+
+  useEffect(() => {
     return () => {
       queryClient.clear();
     };
@@ -315,6 +317,7 @@ const UpsertComment = () => {
               isLoading={userIsLoading}
               isError={userIsError}
               errorMsg={userError?.response?.data?.msg}
+              displayData={"email"}
               handleSetParams={(value, pageInc) => {
                 setUserPrs((prev) => {
                   let finalobj = {
@@ -335,7 +338,6 @@ const UpsertComment = () => {
               }}
               params={userPrs}
               handleSetCurr={(data) => {
-                console.log("🚀 ~ data:", data);
                 setFormData((prev) => ({
                   ...prev,
                   userId: data?._id,
@@ -363,6 +365,7 @@ const UpsertComment = () => {
               list={videosData?.data}
               isLoading={videoIsLoading}
               isError={videoIsError}
+              displayData={"title"}
               errorMsg={videoError?.response?.data?.msg}
               handleSetParams={(value, pageInc) => {
                 setVideoPrs((prev) => {
@@ -370,12 +373,12 @@ const UpsertComment = () => {
                     ...prev,
                   };
 
-                  if (value !== undefined) {
-                    finalobj.id = value;
+                  if (value || value === "") {
+                    finalobj.title = value;
                     finalobj.page = 1;
                   }
 
-                  if (pageInc !== undefined) {
+                  if (pageInc) {
                     finalobj.page = finalobj.page + pageInc;
                   }
 
@@ -401,7 +404,7 @@ const UpsertComment = () => {
           {/* Comment */}
           <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[80]'>
             <InfiniteDropDown
-              disabled={commentData ? true : false}
+              disabled={commentData || !formData.videoId ? true : false}
               title={"Reply to"}
               prsRemoveValue={replyPrs.clearCache}
               value={formData.replyId || "Chưa chọn"}
@@ -409,19 +412,20 @@ const UpsertComment = () => {
               list={replyCmtsData?.data}
               isLoading={replyCmtsIsLoading}
               isError={replyCmtsIsError}
+              displayData={"_id"}
               errorMsg={replyCmtsError?.response?.data?.msg}
               handleSetParams={(value, pageInc) => {
                 setReplyPrs((prev) => {
                   let finalobj = {
                     ...prev,
-                    page: 1,
                   };
 
-                  if (value !== undefined) {
+                  if (value || value === "") {
                     finalobj.id = value;
+                    finalobj.page = 1;
                   }
 
-                  if (pageInc !== undefined) {
+                  if (pageInc) {
                     finalobj.page = finalobj.page + pageInc;
                   }
 

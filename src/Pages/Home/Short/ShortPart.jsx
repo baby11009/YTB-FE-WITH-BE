@@ -13,6 +13,12 @@ const ShortPart = () => {
 
   const [isEnd, setIsEnd] = useState(false);
 
+  const [isScrolling, setIsScrolling] = useState(false);
+
+  useEffect(() => {
+    console.log("🚀 ~ isScrolling:", isScrolling);
+  }, [isScrolling]);
+
   const [currentIndex, setCurrentIndex] = useState(1);
 
   const shortIdSet = useRef(new Set());
@@ -29,6 +35,10 @@ const ShortPart = () => {
   const { data } = getData("/data/short", params);
 
   const handleScrollPrev = () => {
+    if (isScrolling) {
+      return;
+    }
+    setIsScrolling(true);
     window.scrollTo({
       left: window.scrollX,
       top:
@@ -38,9 +48,16 @@ const ShortPart = () => {
       behavior: "smooth",
     });
     setCurrentIndex((prev) => Math.max(1, prev - 1));
+    setTimeout(() => {
+      setIsScrolling(false);
+    }, 500);
   };
 
   const handleScrollNext = () => {
+    if (isScrolling) {
+      return;
+    }
+    setIsScrolling(true);
     window.scrollTo({
       left: window.scrollX,
       top:
@@ -50,16 +67,12 @@ const ShortPart = () => {
       behavior: "smooth",
     });
     setCurrentIndex((prev) => Math.min(shortList.length, prev + 1));
+    setTimeout(() => {
+      setIsScrolling(false);
+    }, 500);
   };
 
   useEffect(() => {
-    const disableScroll = (e) => {
-      e.preventDefault();
-    };
-
-    // document.addEventListener("wheel", disableScroll, { passive: false });
-    // document.addEventListener("touchmove", disableScroll, { passive: false });
-
     document.addEventListener("scroll", () => {
       IsEnd(setIsEnd);
       IsTop(setIsTop);
@@ -110,6 +123,23 @@ const ShortPart = () => {
       }));
     }
   }, [currentIndex, shortList.length]);
+
+  useEffect(() => {
+    const handleScroll = (e) => {
+      e.preventDefault();
+      if (e.deltaY >= 100) {
+        handleScrollNext();
+      } else {
+        handleScrollPrev();
+      }
+    };
+
+    window.addEventListener("wheel", handleScroll, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", handleScroll, { passive: false });
+    };
+  }, [shortList.length, isScrolling]);
 
   return (
     <div className='relative'>

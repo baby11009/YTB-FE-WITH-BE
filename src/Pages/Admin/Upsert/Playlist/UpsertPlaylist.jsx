@@ -304,6 +304,7 @@ const UpsertPlaylist = () => {
               isLoading={userIsLoading}
               isError={userIsError}
               errorMsg={userError?.response?.data?.msg}
+              displayData={"email"}
               handleSetParams={(value, pageInc) => {
                 setUserPrs((prev) => {
                   let finalobj = {

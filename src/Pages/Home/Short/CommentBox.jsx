@@ -56,11 +56,10 @@ const CommentBox = ({
 
   const handleChoseSort = (data) => {
     if (!params.sort[data.id]) {
-      setAddNew(true);
       const boxCmt = document.getElementById("cmtBox");
       boxCmt.scrollTop = 0;
-      queryClient.invalidateQueries("comment");
       setParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
+      setAddNew(true);
     }
   };
 
@@ -85,12 +84,12 @@ const CommentBox = ({
     }
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (data) {
       if (addNew) {
-        setCommentList(data?.data);
         idListSet.current.clear();
-        idListSet.current.add(data?.data.map((item) => item._id));
+        setCommentList(data?.data);
+        data?.data?.forEach((item) => idListSet.current.add(item?._id));
         setAddNew(false);
       } else {
         let addlist = [];
@@ -125,14 +124,14 @@ const CommentBox = ({
     const addNewCmt = (data) => {
       if (data) {
         setCommentList((prev) => [data, ...prev]);
-        idListSet.current.add(data[0]?._id);
+        idListSet.current.add(data?._id);
       }
     };
 
     const deleteCmt = (data) => {
       if (data) {
         setCommentList((prev) => prev.filter((item) => item?._id !== data._id));
-        idListSet.current.delete(data[0]?._id);
+        idListSet.current.delete(data?._id);
       }
     };
     const modifiedReply = (data, action) => {
@@ -169,7 +168,7 @@ const CommentBox = ({
           modifiedReply(data, "delete");
         });
       }
-      queryClient.removeQueries(shortId);
+      queryClient.removeQueries("comment");
     };
   }, []);
 
@@ -250,16 +249,14 @@ const CommentBox = ({
                 videoId={shortId}
                 videoUserId={data?.channel_info?._id}
                 setAddNewCmt={setAddNew}
-                setCmtParams={setParams}
                 refetchVideo={handleRefetch}
-                key={id}
+                key={item?._id}
                 replyCmtModified={replyCmtModified}
               />
             ))}
           </div>
           <div className='p-[16px] border-t-[1px] border-[rgba(255,255,255,0.2)]'>
             <CommentInput
-              myChannelImg={data?.channel_info?.avatar}
               videoId={shortId}
               setAddNewCmt={setAddNew}
               setCmtParams={setParams}

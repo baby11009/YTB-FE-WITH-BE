@@ -1,6 +1,5 @@
 import request from "../util/axios-base-url";
 import { useQuery } from "@tanstack/react-query";
-import { getCookie } from "../util/tokenHelpers";
 
 export const getData = (
   path,
@@ -28,8 +27,6 @@ export const getData = (
   } else {
     finalParams = params;
   }
-
-  const token = getCookie(import.meta.env.VITE_AUTH_TOKEN);
 
   return useQuery({
     queryKey: paramsValue,
@@ -79,8 +76,6 @@ export const getDataWithAuth = (
       finalParams = params;
     }
   }
-
-  const token = getCookie(import.meta.env.VITE_AUTH_TOKEN);
 
   return useQuery({
     queryKey: [...paramsValue],

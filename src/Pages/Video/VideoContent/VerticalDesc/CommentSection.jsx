@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { MyChannel } from "../../../../Assets/Images";
 import { formatNumber } from "../../../../util/numberFormat";
 import { IsElementEnd } from "../../../../util/scrollPosition";
+
 const CommentSection = ({
   refetchVideo,
   cmtList,
@@ -16,6 +17,7 @@ const CommentSection = ({
   setCmtBoxIsEnd,
   replyCmtModified,
 }) => {
+
   const [opened, setOpened] = useState(false);
 
   const containerRef = useRef();
@@ -65,7 +67,7 @@ const CommentSection = ({
   }, []);
 
   return (
-    <div className='flex flex-col overflow-hidden'>
+    <div className='flex-1 flex flex-col overflow-hidden'>
       {/* Header */}
       <div className='my-[24px]'>
         <div className='text-[16px] leading-[22px] flex items-center justify-between gap-[32px] mb-[12px]'>

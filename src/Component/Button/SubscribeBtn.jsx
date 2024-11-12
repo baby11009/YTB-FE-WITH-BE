@@ -78,12 +78,6 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
     },
     {
       id: 2,
-      text: "Dành riêng cho bạn",
-      icon: <BellIcon />,
-      handleOnClick: 1,
-    },
-    {
-      id: 3,
       text: "Không nhận thông báo",
       icon: <SlashBellIcon />,
       handleOnClick: () => {
@@ -91,13 +85,16 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
       },
     },
     {
-      id: 4,
+      id: 3,
       text: "Hủy đăng ký",
       icon: <UnSubIcon />,
       handleOnClick: handleSubscribBtn,
     },
   ];
 
+  if (user?._id === channelId) {
+    return <></>;
+  }
   return (
     <button
       className={`px-[16px] rounded-[18px] flex items-center relative
