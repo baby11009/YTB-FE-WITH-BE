@@ -8,6 +8,8 @@ export const AuthContext = createContext({
   setIsShowing: () => {},
   openedMenu: false,
   setOpenedMenu: () => {},
+  setShowHover: () => {},
+  handleCursorPositon: () => {},
 });
 
 export const useAuthContext = () => useContext(AuthContext);

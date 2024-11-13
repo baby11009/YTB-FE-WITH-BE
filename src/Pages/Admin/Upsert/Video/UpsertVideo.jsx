@@ -10,6 +10,11 @@ import { createData, updateData } from "../../../../Api/controller";
 import { getData, getDataWithAuth } from "../../../../Api/getData";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import User from "../../../../Assets/Icons/User";
+
+const UserCard = ({ data }) => {
+  return <div className='h-[30px] bg-black-28'>{data?.email}</div>;
+};
 
 const init = {
   userId: "",
@@ -384,8 +389,8 @@ const UpsertVideo = () => {
   }, []);
 
   return (
-    <div>
-      <header className='pt-[16px] pb-[32px]'>
+    <div className="pb-[3202px]">
+      <header className='pt-[16px] '>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Videos</h2>
       </header>
 
@@ -575,6 +580,7 @@ const UpsertVideo = () => {
                   email: data?.email,
                 });
               }}
+              HoverCard={UserCard}
             />
             <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] my-[6px] px-[8px]'>
               <span>

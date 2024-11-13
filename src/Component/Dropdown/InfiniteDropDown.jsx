@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { ThinArrowIcon, SearchIcon } from "../../Assets/Icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { IsElementEnd } from "../../util/scrollPosition";
+import { useAuthContext } from "../../Auth Provider/authContext";
 
 const InfiniteDropDown = ({
   title,
@@ -16,8 +17,11 @@ const InfiniteDropDown = ({
   disabled,
   prsRemoveValue,
   displayData,
+  HoverCard,
 }) => {
   const queryClient = useQueryClient();
+
+  const { setShowHover, handleCursorPositon } = useAuthContext();
 
   const [opened, setOpened] = useState(undefined);
 
@@ -70,6 +74,7 @@ const InfiniteDropDown = ({
       handleSetParams("");
       setDataList([]);
       setAddNewValue(false);
+      setShowHover(undefined);
     };
   }, [opened]);
 
@@ -144,12 +149,12 @@ const InfiniteDropDown = ({
                 <SearchIcon />
               </div>
             </div>
-            <div className='size-full overflow-auto' ref={refscroll}>
+            <div className='size-full overflow-y-auto' ref={refscroll}>
               {isLoading && dataList.length === 0 ? (
                 <div className='flex flex-col items-center justify-center '>
                   <div
                     className=' animate-spin size-[40px] rounded-[50%] border-[2px] 
-                border-b-transparent border-l-transparent border-white'
+                  border-b-transparent border-l-transparent border-white'
                   ></div>
                 </div>
               ) : isError ? (
@@ -159,12 +164,21 @@ const InfiniteDropDown = ({
                   <button
                     key={id}
                     type='button'
-                    className='px-[12px] py-[4px] text-start w-full hover:bg-black-0.2'
+                    className='px-[12px] py-[4px] text-start w-full hover:bg-black-0.2 relative'
                     onClick={() => {
                       handleSetCurr(item);
                     }}
+                    onMouseMove={(e) => {
+                      handleCursorPositon(e);
+                    }}
+                    onMouseEnter={(e) => {
+                      setShowHover(<HoverCard data={item} />);
+                    }}
+                    onMouseLeave={() => {
+                      setShowHover(null);
+                    }}
                   >
-                    {item[displayData]}
+                    <span> {item[displayData]}</span>
                   </button>
                 ))
               ) : (

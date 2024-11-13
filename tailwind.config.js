@@ -16,10 +16,11 @@ export default {
         "red-FF": "#FF0000",
         "gray-71": "#717171",
         "blue-3E": "#3EA6FF",
-        "blue-26" : "#263850",
+        "blue-26": "#263850",
         "black-0.1": "rgba(255,255,255,0.1)",
         "black-0.2": "rgba(255,255,255,0.2)",
         "black-21": "#212121",
+        "black-28": "#282828",
       },
       backgroundColor: {
         "hover-black": "rgba(255,255,255,0.1)",

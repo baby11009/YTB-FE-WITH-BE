@@ -1,10 +1,9 @@
 import { AuthContext } from "./authContext";
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { getCookie } from "../util/tokenHelpers";
 import request from "../util/axios-base-url";
 
 const AuthProvider = ({ children }) => {
-
   const [user, setUser] = useState(undefined);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -13,9 +12,17 @@ const AuthProvider = ({ children }) => {
 
   const [isShowing, setIsShowing] = useState(undefined);
 
+  const [showHover, setShowHover] = useState(undefined);
+
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+
   const [openedMenu, setOpenedMenu] = useState(true);
 
   const authTokenRef = useRef(getCookie(import.meta.env.VITE_AUTH_TOKEN));
+
+  const modalRef = useRef();
+
+  const hoverContainerRef = useRef();
 
   const getUserInfo = async (token) => {
     await request
@@ -44,6 +51,44 @@ const AuthProvider = ({ children }) => {
     }
   }, [refetch]);
 
+  useEffect(() => {
+    if (showHover && modalRef.current) {
+      modalRef.current.style.left = `${cursorPosition.x + 20}px`;
+      modalRef.current.style.top = `${cursorPosition.y - 100}px`;
+    }
+  }, [showHover, modalRef]);
+
+  const handleCursorPositon = (e) => {
+    const position = {
+      x: e.pageX + 20,
+      y: e.pageY - 20,
+    };
+
+    if (
+      hoverContainerRef.current &&
+      window.innerWidth - e.clientX < hoverContainerRef.current.clientWidth + 50
+    ) {
+      position.x -= hoverContainerRef.current.clientWidth + 40;
+    }
+
+    if (
+      hoverContainerRef.current &&
+      window.innerHeight - e.clientY <
+        hoverContainerRef.current.clientHeight + 10
+    ) {
+      position.y -= hoverContainerRef.current.clientHeight - 20;
+    }
+
+    if (
+      hoverContainerRef.current &&
+      e.clientY - 56 < hoverContainerRef.current.clientHeight
+    ) {
+      position.y += hoverContainerRef.current.clientHeight;
+    }
+
+    setCursorPosition(position);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -53,18 +98,35 @@ const AuthProvider = ({ children }) => {
         setIsShowing,
         openedMenu,
         setOpenedMenu,
-        setRefetch
+        setRefetch,
+        showHover,
+        setShowHover,
+        handleCursorPositon,
       }}
     >
-      {isLoading ? (
-        <div className='w-screen h-screen size bg-black flex items-center justify-center'>
-          <span className='text-white font-bold text-[20px] leading-[22px]'>
-            Loading......
-          </span>
-        </div>
-      ) : (
-        children
-      )}
+      <div className='relative'>
+        {isLoading ? (
+          <div className='w-screen h-screen size bg-black flex items-center justify-center'>
+            <span className='text-white font-bold text-[20px] leading-[22px]'>
+              Loading......
+            </span>
+          </div>
+        ) : (
+          children
+        )}
+        {showHover && (
+          <div
+            className='absolute z-[9999]'
+            style={{
+              left: cursorPosition.x,
+              top: cursorPosition.y,
+            }}
+            ref={hoverContainerRef}
+          >
+            {showHover}
+          </div>
+        )}
+      </div>
     </AuthContext.Provider>
   );
 };
