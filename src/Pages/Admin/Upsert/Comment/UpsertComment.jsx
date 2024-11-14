@@ -1,6 +1,11 @@
-import { useRef, useState, useEffect, useLayoutEffect, Suspense } from "react";
-import { UploadImageIcon } from "../../../../Assets/Icons";
-import { Input, InfiniteDropDown } from "../../../../Component";
+import { useRef, useState, useEffect, useLayoutEffect } from "react";
+import {
+  Input,
+  InfiniteDropDown,
+  HovVideorCard,
+  HovCommentCard,
+  HovUserCard,
+} from "../../../../Component";
 import { createData, updateData } from "../../../../Api/controller";
 import { getDataWithAuth } from "../../../../Api/getData";
 import { useParams } from "react-router-dom";
@@ -91,7 +96,6 @@ const UpsertComment = () => {
     cmtOpened && formData.videoId ? true : false,
     false
   );
-  console.log("🚀 ~  replyPrs:", replyPrs);
 
   const handleOnChange = (name, value) => {
     setFormData((prev) => ({
@@ -344,6 +348,7 @@ const UpsertComment = () => {
                   email: data?.email,
                 }));
               }}
+              HoverCard={HovUserCard}
             />
             <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
               <span>
@@ -360,6 +365,7 @@ const UpsertComment = () => {
               disabled={commentData ? true : false}
               prsRemoveValue={videoPrs.clearCache}
               title={"Video"}
+              dataType={"video"}
               value={formData.videoId || "Chưa chọn"}
               setIsOpened={setVideoOpened}
               list={videosData?.data}
@@ -391,6 +397,7 @@ const UpsertComment = () => {
                   videoId: data._id,
                 }));
               }}
+              HoverCard={HovVideorCard}
             />
             <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
               <span>
@@ -406,6 +413,7 @@ const UpsertComment = () => {
             <InfiniteDropDown
               disabled={commentData || !formData.videoId ? true : false}
               title={"Reply to"}
+              dataType={"comment"}
               prsRemoveValue={replyPrs.clearCache}
               value={formData.replyId || "Chưa chọn"}
               setIsOpened={setCmtOpened}
@@ -438,6 +446,7 @@ const UpsertComment = () => {
                   replyId: data._id,
                 }));
               }}
+              HoverCard={HovCommentCard}
             />
             <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
               <span>

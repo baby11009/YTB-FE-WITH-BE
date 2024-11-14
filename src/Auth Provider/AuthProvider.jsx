@@ -20,8 +20,6 @@ const AuthProvider = ({ children }) => {
 
   const authTokenRef = useRef(getCookie(import.meta.env.VITE_AUTH_TOKEN));
 
-  const modalRef = useRef();
-
   const hoverContainerRef = useRef();
 
   const getUserInfo = async (token) => {
@@ -43,6 +41,36 @@ const AuthProvider = ({ children }) => {
       });
   };
 
+  const handleCursorPositon = (e) => {
+    const position = {
+      x: e.pageX + 10,
+      y: e.pageY - 10,
+    };
+
+    if (
+      hoverContainerRef.current &&
+      window.innerWidth - e.clientX < hoverContainerRef.current.clientWidth + 20
+    ) {
+      position.x = e.pageX - hoverContainerRef.current.clientWidth;
+    }
+
+    if (
+      hoverContainerRef.current &&
+      window.innerHeight - e.clientY <
+        hoverContainerRef.current.clientHeight + 20
+    ) {
+      position.y = e.pageY - hoverContainerRef.current.clientHeight;
+    }
+
+    if (
+      hoverContainerRef.current &&
+      e.clientY - 56 < hoverContainerRef.current.clientHeight + 25
+    ) {
+      position.y = e.pageY + hoverContainerRef.current.clientHeight + 20;
+    }
+
+    setCursorPosition(position);
+  };
   useLayoutEffect(() => {
     if (authTokenRef.current && refetch) {
       getUserInfo(authTokenRef.current);
@@ -52,42 +80,50 @@ const AuthProvider = ({ children }) => {
   }, [refetch]);
 
   useEffect(() => {
-    if (showHover && modalRef.current) {
-      modalRef.current.style.left = `${cursorPosition.x + 20}px`;
-      modalRef.current.style.top = `${cursorPosition.y - 100}px`;
-    }
-  }, [showHover, modalRef]);
-
-  const handleCursorPositon = (e) => {
-    const position = {
-      x: e.pageX + 20,
-      y: e.pageY - 20,
+    const handleClickOutside = (event) => {
+      if (
+        hoverContainerRef.current &&
+        !hoverContainerRef.current.contains(event.target)
+      ) {
+        setShowHover((prev) => {
+          if (prev) {
+            return undefined;
+          }
+        });
+      }
     };
 
-    if (
-      hoverContainerRef.current &&
-      window.innerWidth - e.clientX < hoverContainerRef.current.clientWidth + 50
-    ) {
-      position.x -= hoverContainerRef.current.clientWidth + 40;
+    document.addEventListener("mousedown", (e) => {
+      handleClickOutside(e);
+    });
+
+    return () => {
+      document.removeEventListener("mousedown", (e) => {
+        handleClickOutside(e);
+      });
+    };
+  }, [hoverContainerRef.current]);
+
+  useEffect(() => {
+    const disabledScroll = (e) => {
+      e.preventDefault();
+    };
+    if (showHover) {
+      document.addEventListener("scroll", disabledScroll, { passive: false });
+      document.addEventListener("wheel", disabledScroll, { passive: false });
     }
 
-    if (
-      hoverContainerRef.current &&
-      window.innerHeight - e.clientY <
-        hoverContainerRef.current.clientHeight + 10
-    ) {
-      position.y -= hoverContainerRef.current.clientHeight - 20;
-    }
-
-    if (
-      hoverContainerRef.current &&
-      e.clientY - 56 < hoverContainerRef.current.clientHeight
-    ) {
-      position.y += hoverContainerRef.current.clientHeight;
-    }
-
-    setCursorPosition(position);
-  };
+    return () => {
+      if (showHover) {
+        document.removeEventListener("scroll", disabledScroll, {
+          passive: false,
+        });
+        document.removeEventListener("wheel", disabledScroll, {
+          passive: false,
+        });
+      }
+    };
+  }, [showHover]);
 
   return (
     <AuthContext.Provider
@@ -116,7 +152,7 @@ const AuthProvider = ({ children }) => {
         )}
         {showHover && (
           <div
-            className='absolute z-[9999]'
+            className='absolute z-[9999] translate-y-[-100%]'
             style={{
               left: cursorPosition.x,
               top: cursorPosition.y,

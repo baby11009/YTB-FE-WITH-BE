@@ -322,8 +322,8 @@ const UpsertUser = () => {
           }}
         >
           {!previewBanner && (
-            <div className='absolute top-[50%] left-[50%] translate-x-[-50%]  translate-y-[-50%]'>
-              <PlusIcon size={48} />
+            <div className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[18px] xsm:w-[24px] sm:w-[36px] lg:w-[48px]'>
+              <PlusIcon />
             </div>
           )}
         </div>
@@ -358,13 +358,15 @@ const UpsertUser = () => {
                 className='size-full rounded-[50%]
             overflow-hidden border-[2px] border-dashed flex items-center justify-center'
               >
-                <PlusIcon size={48} />
+                <div className='w-[18px] xsm:w-[24px] sm:w-[36px] lg:w-[48px]'>
+                  <PlusIcon size={48} />
+                </div>
               </div>
             )}
           </div>
-          <div className='flex-1 flex flex-wrap'>
+          <div className='flex-1 flex flex-wrap gap-[16px] mt-[28px]'>
             {/* name */}
-            <div className='basis-[100%] lg:basis-[40%] 2xl:lg-[45%] mr-[16px] mt-[16px] sm:mt-0'>
+            <div className='basis-[100%]  md:basis-[45%] xl:basis-[30%] mr-[16px]'>
               <Input
                 id={"name"}
                 type={"text"}
@@ -380,7 +382,7 @@ const UpsertUser = () => {
               />
             </div>
 
-            <div className='basis-[100%] lg:basis-[40%] 2xl:lg-[45%] mr-[16px] mt-[28px] lg:mt-0'>
+            <div className='basis-[100%] md:basis-[45%] xl:basis-[30%] mr-[16px] '>
               <Input
                 id={"email"}
                 type={"email"}
@@ -397,7 +399,7 @@ const UpsertUser = () => {
               />
             </div>
 
-            <div className='basis-[100%]  lg:basis-[40%] 2xl:lg-[45%] mr-[16px] mt-[28px] '>
+            <div className='basis-[100%]  md:basis-[45%] xl:basis-[30%] mr-[16px] '>
               <Input
                 id={"password"}
                 type={"password"}
@@ -415,7 +417,7 @@ const UpsertUser = () => {
             </div>
 
             {/* Role */}
-            <div className='basis-[100%]  lg:basis-[40%] 2xl:lg-[45%]  mr-[16px] mt-[28px]  z-[100]'>
+            <div className='basis-[100%]  md:basis-[45%] xl:basis-[30%]  mr-[16px]  z-[100]'>
               <DropDown
                 list={roles.current}
                 title={"Role"}
@@ -426,7 +428,7 @@ const UpsertUser = () => {
               />
             </div>
             {/* Confirm */}
-            <div className='basis-[100%] lg:basis-[40%] 2xl:lg-[45%] mr-[16px] mt-[28px]'>
+            <div className='basis-[100%] md:basis-[45%] xl:basis-[30%] mr-[16px]'>
               <DropDown
                 list={confirms.current}
                 title={"Confirm"}

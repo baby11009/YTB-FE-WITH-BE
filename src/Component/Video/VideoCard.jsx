@@ -15,13 +15,14 @@ import {
   CloseIcon,
 } from "../../Assets/Icons";
 import { motion, useAnimate } from "framer-motion";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CustomeFuncBox } from "..";
-import { timeFormat, timeFormat2 } from "../../util/timeforMat";
+import { timeFormat2 } from "../../util/timeforMat";
 import { formatNumber } from "../../util/numberFormat";
 import { durationCalc } from "../../util/durationCalc";
 import { getRandomHexColor } from "../../util/func";
+import { useAuthContext } from "../../Auth Provider/authContext";
 
 const funcList1 = [
   {
@@ -68,13 +69,7 @@ const funcList2 = [
   },
 ];
 
-const view = 1200000;
-
-const postedTime = "05/12/2024, 6:05:20 PM";
-
 const duration = 12500;
-
-const progress = 20;
 
 const HoverButton = ({ title, icon }) => {
   const [scope, animate] = useAnimate();
@@ -153,7 +148,6 @@ const HoverButton = ({ title, icon }) => {
 const VideoCard = ({
   data,
   showBtn,
-  showLive,
   showCloseBtn,
   layout,
   style,
@@ -169,6 +163,8 @@ const VideoCard = ({
   noFunc2,
   funcBoxPos,
 }) => {
+  const { setShowHover, handleCursorPositon } = useAuthContext();
+
   const containRef = useRef();
 
   const bgColorRef = useRef(getRandomHexColor());
@@ -176,20 +172,6 @@ const VideoCard = ({
   const [showed, setShowed] = useState(false);
 
   const [opened, setOpened] = useState(false);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (containRef.current && !containRef.current.contains(event.target)) {
-        setOpened("");
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   const navigate = useNavigate();
 
@@ -239,20 +221,19 @@ const VideoCard = ({
           className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
           mr-[8px] mb-[8px] text-[12px] leading-[18px] rounded-[4px]'
         >
-          {durationCalc(data.duration || duration)}
+          {durationCalc(data?.duration || duration)}
         </div>
 
         {/* progress bar */}
-        {!showLive && data.progress !== 0 && (
-          <div className='w-full absolute bottom-0 h-[4px] bg-gray-71'>
-            <div
-              className='absolute h-full bg-red-FF'
-              style={{
-                width: data.progress || progress + "%",
-              }}
-            ></div>
-          </div>
-        )}
+
+        {/* <div className='w-full absolute bottom-0 h-[4px] bg-gray-71'>
+          <div
+            className='absolute h-full bg-red-FF'
+            style={{
+              width: data.progress || progress + "%",
+            }}
+          ></div>
+        </div> */}
 
         {/* Hover things */}
         {showed && showBtn && (
@@ -264,34 +245,9 @@ const VideoCard = ({
             />
           </div>
         )}
-        {/* {showLive &&
-          data.type.title === "live" &&
-          data.type.status === "is live" && (
-            <div
-              className={`bg-[rgba(204,0,0,0.9)] m-[4px] px-[4px] w-fit rounded-[2px]
-             text-white text-[12px] leading-[18px] flex items-center absolute right-0 bottom-0
-            `}
-            >
-              <LiveIcon />
-              <p>Trực tiếp</p>
-            </div>
-          )} */}
       </div>
 
       <div className={` flex-1 flex  ${ctContainerStyle}`}>
-        {/* {data.channel.img && (
-          <div
-            className={`w-[36px] h-[36px] rounded-[50%] overflow-hidden cursor-pointer mr-[12px] ${imgStyle}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              handleNavigate(5);
-            }}
-          >
-            <img src={data.channel.img} alt='' />
-          </div>
-        )} */}
-
         <div
           className={`w-[36px] h-[36px] rounded-[50%] overflow-hidden cursor-pointer mr-[12px] ${imgStyle}`}
           onClick={(e) => {
@@ -336,24 +292,30 @@ const VideoCard = ({
                 <div
                   className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center 
                   absolute right-0 translate-x-[30%] translate-y-[-15%] z-[500] active:bg-black-0.2'
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setOpened((prev) => !prev);
+                    handleCursorPositon(e);
+                    setShowHover((prev) =>
+                      prev ? undefined : (
+                        <CustomeFuncBox
+                          style={`w-[270px] right-[20%]  top-[100%] ${
+                            funcBoxPos ? funcBoxPos : "sm:left-[-20%]"
+                          }`}
+                          setOpened={setOpened}
+                          funcList1={funcList1}
+                          funcList2={!noFunc2 && funcList2}
+                        />
+                      )
+                    );
                   }}
                   ref={containRef}
                 >
                   <Setting2Icon />
-                  {opened && !noFuncBox && (
-                    <CustomeFuncBox
-                      style={`w-[270px] right-[20%]  top-[100%] ${
-                        funcBoxPos ? funcBoxPos : "sm:left-[-20%]"
-                      }`}
-                      setOpened={setOpened}
-                      funcList1={funcList1}
-                      funcList2={!noFunc2 && funcList2}
-                    />
-                  )}
                 </div>
               )}
             </div>
@@ -363,22 +325,6 @@ const VideoCard = ({
                 "text-[12px] leading-[18px] sm:text-[14px] sm:leading-[20px]"
               }`}
             >
-              {/* {data.channel?.name && (
-                <div className='flex items-center gap-[4px] mr-[8px]'>
-                  <div
-                    title={data.channel.name}
-                    className='hover:text-white-F1'
-                  >
-                    {data.channel.name}
-                  </div>
-                  {data.channel.subs >= 100000 && (
-                    <div>
-                      <Verification size={"14"} />
-                    </div>
-                  )}
-                </div>
-              )} */}
-
               <div className='flex items-center gap-[4px] mr-[8px]'>
                 <div
                   title={data?.user_info?.name}
@@ -392,20 +338,6 @@ const VideoCard = ({
                 </div>
               </div>
 
-              {/* {data.type.status !== "is live" && (
-                <div className='flex flex-wrap items-center'>
-                  <span>{formatNumber(data?.view || view)} lượt xem</span>
-                  <span
-                    className={`${
-                      layout === "horizon" && "hidden"
-                    } before:content-['•'] before:mx-[4px]`}
-                  >
-                    {data.type.status === "live end" && "Phát trực tiếp "}
-                    {timeFormat(data.postedTime || postedTime)}
-                  </span>
-                </div>
-              )} */}
-
               <div className='flex flex-wrap items-center'>
                 <span>{formatNumber(data?.view)} lượt xem</span>
                 <span
@@ -413,26 +345,9 @@ const VideoCard = ({
                     layout === "horizon" && "hidden"
                   } before:content-['•'] before:mx-[4px]`}
                 >
-                  {/* {data.type.status === "live end" && "Phát trực tiếp "} */}
                   {timeFormat2(data?.createdAt)}
                 </span>
               </div>
-
-              {/* {data.type.title === "live" && data.type.status === "is live" && (
-                <div className='flex flex-col'>
-                  <span>{formatNumber(1800)} đang xem</span>
-                  {!showLive && (
-                    <div
-                      className={`bg-[rgba(204,0,0,0.9)] mt-[4px] px-[4px] w-fit rounded-[2px]
-                       text-white text-[12px] leading-[18px] flex items-center
-                       `}
-                    >
-                      <LiveIcon />
-                      <p>Trực tiếp</p>
-                    </div>
-                  )}
-                </div>
-              )} */}
             </div>
 
             {data.desc && (

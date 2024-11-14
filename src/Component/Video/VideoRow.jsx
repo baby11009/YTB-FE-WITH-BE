@@ -2,7 +2,7 @@ import { ThinArrowIcon } from "../../Assets/Icons";
 import { useRef, useState, useEffect } from "react";
 import { VideoCard } from "..";
 import { smoothScroll, checkScrollPosition } from "../../util/scrollCustom";
-import { vidList2 as mockList } from "../../Mock Data/videoData";
+import { useAuthContext } from "../../Auth Provider/authContext";
 
 const VideoRow = ({
   vidList,
@@ -13,6 +13,8 @@ const VideoRow = ({
   top,
   thumbRound,
 }) => {
+  const { openedMenu } = useAuthContext();
+
   const rowRef = useRef();
 
   const [atStart, setAtStart] = useState(true);
@@ -52,7 +54,7 @@ const VideoRow = ({
         );
       }
     };
-  }, []);
+  }, [openedMenu]);
 
   return (
     <div
@@ -88,7 +90,7 @@ const VideoRow = ({
         className='whitespace-nowrap overflow-x-auto hidden-scorllbar'
         ref={rowRef}
       >
-        {(vidList || mockList).map((item, id) => {
+        {vidList.map((item, id) => {
           return (
             <VideoCard
               key={id}

@@ -30,6 +30,10 @@ const ChannelPart = ({ openedMenu }) => {
       title: "home",
       payload: undefined,
     });
+
+    return () => {
+      queryClient.removeQueries([user?._id, id]);
+    };
   }, [id]);
 
   useEffect(() => {

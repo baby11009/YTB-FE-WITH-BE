@@ -94,7 +94,7 @@ const PlayListCard = ({
             <PlayListIcon />
           </div>
           <span className=' text-[12px] leading-[18px] text-white mr-[4px] py-[3px]'>
-            {formatNumber(data?.size)} video
+            {formatNumber(data?.itemList?.length)} video
           </span>
         </div>
 

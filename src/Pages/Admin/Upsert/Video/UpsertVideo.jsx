@@ -1,20 +1,16 @@
-import { useRef, useState, useEffect, useLayoutEffect, Suspense } from "react";
+import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { UploadImageIcon } from "../../../../Assets/Icons";
 import {
   Input,
   DropDown,
   InfiniteDropDown,
   InfiniteDropDownWithCheck,
+  HovUserCard,
 } from "../../../../Component";
 import { createData, updateData } from "../../../../Api/controller";
-import { getData, getDataWithAuth } from "../../../../Api/getData";
+import { getDataWithAuth } from "../../../../Api/getData";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import User from "../../../../Assets/Icons/User";
-
-const UserCard = ({ data }) => {
-  return <div className='h-[30px] bg-black-28'>{data?.email}</div>;
-};
 
 const init = {
   userId: "",
@@ -389,7 +385,7 @@ const UpsertVideo = () => {
   }, []);
 
   return (
-    <div className="pb-[3202px]">
+    <div>
       <header className='pt-[16px] '>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Videos</h2>
       </header>
@@ -580,7 +576,7 @@ const UpsertVideo = () => {
                   email: data?.email,
                 });
               }}
-              HoverCard={UserCard}
+              HoverCard={HovUserCard}
             />
             <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] my-[6px] px-[8px]'>
               <span>

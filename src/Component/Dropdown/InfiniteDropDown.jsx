@@ -8,6 +8,7 @@ const InfiniteDropDown = ({
   title,
   value,
   setIsOpened,
+  dataType,
   list,
   isLoading,
   isError,
@@ -53,6 +54,7 @@ const InfiniteDropDown = ({
   };
 
   useEffect(() => {
+    clearTimeout(timeOutRef.current);
     const handleClickOutScope = (e) => {
       if (
         containerRef.current &&
@@ -72,7 +74,11 @@ const InfiniteDropDown = ({
     return () => {
       window.removeEventListener("mousedown", handleClickOutScope);
       handleSetParams("");
-      setDataList([]);
+      if (!opened) {
+        timeOutRef.current = setTimeout(() => {
+          setDataList([]);
+        }, 500);
+      }
       setAddNewValue(false);
       setShowHover(undefined);
     };
@@ -139,7 +145,7 @@ const InfiniteDropDown = ({
         `}
         >
           <div className='size-full flex flex-col'>
-            <div className='flex items-center justify-center ml-[12px] mr-[14px] mb-[8px] py-[4px] border-b-[1px]'>
+            <div className='flex items-center justify-center ml-[12px] mr-[14px] mb-[12px] py-[8px] border-b-[1px]'>
               <input
                 type='text'
                 className='flex-1 bg-transparent outline-none'
@@ -149,9 +155,9 @@ const InfiniteDropDown = ({
                 <SearchIcon />
               </div>
             </div>
-            <div className='size-full overflow-y-auto' ref={refscroll}>
+            <div className='flex-1 w-full overflow-y-auto' ref={refscroll}>
               {isLoading && dataList.length === 0 ? (
-                <div className='flex flex-col items-center justify-center '>
+                <div className='flex h-full items-center justify-center '>
                   <div
                     className=' animate-spin size-[40px] rounded-[50%] border-[2px] 
                   border-b-transparent border-l-transparent border-white'
@@ -182,7 +188,9 @@ const InfiniteDropDown = ({
                   </button>
                 ))
               ) : (
-                <div className='px-[12px]'>Not found any {title}</div>
+                <div className='flex items-center justify-center h-full'>
+                  Not found any {dataType}
+                </div>
               )}
             </div>
           </div>

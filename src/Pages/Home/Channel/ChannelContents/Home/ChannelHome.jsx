@@ -17,23 +17,6 @@ import { getData } from "../../../../../Api/getData";
 import { useEffect, useRef, useLayoutEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-const firstVid = {
-  id: 1,
-  thumb: iloda_v1,
-  channel: {
-    name: "iLoda",
-    subs: 195000,
-  },
-  type: {
-    title: "video",
-  },
-  title:
-    "Tôi biến VÙNG ĐẤT HOANG thành VƯƠNG QUỐC TRUNG CỔ THỊNH VƯỢNG mỗi tội ... (Manor Lords #1)",
-  view: 133000,
-  postedTime: "04/15/2024, 12:25:32 AM",
-  desc: "➥ Đăng ký kênh để xem thêm Video mỗi ngày: https://bom.to/2ylFGlf ➥ Lịch Live: 2 ca Stream mỗi ngày:- Ca 1: 12h - 15h30- Ca 2: 22h - 3h30 Các buổi Stream sẽ bắt...",
-};
-
 const membersList = [
   {
     id: 1,
@@ -122,19 +105,23 @@ const ChannelHome = ({ channelEmail }) => {
   return (
     <div className='w-full'>
       {/* First vid */}
-      <div className='py-[24px] border-b-[1px] border-black-0.2 overflow-hidden mr-[-32px] xsm:mr-0'>
-        <div className='w-full  max-w-[862px]'>
-          <VideoCard
-            data={videosData?.data[0]}
-            showBtn={true}
-            noFunc2={true}
-            style={"flex gap-[16px] mx-0 mb-0"}
-            thumbStyle={"min-w-[246px] w-[246px] h-[138px] mb-0 rounded-[8px]"}
-            titleStyle={"text-[18px] leading-[26px] font-[400] max-h-[56px]"}
-            infoStyle={"flex text-[12px] leading-[18px]"}
-          />
+      {videosData?.data?.length > 0 && (
+        <div className='py-[24px] border-b-[1px] border-black-0.2 overflow-hidden mr-[-32px] xsm:mr-0'>
+          <div className='w-full  max-w-[862px]'>
+            <VideoCard
+              data={videosData?.data[0]}
+              showBtn={true}
+              noFunc2={true}
+              style={"flex gap-[16px] mx-0 mb-0"}
+              thumbStyle={
+                "min-w-[246px] w-[246px] h-[138px] mb-0 rounded-[8px]"
+              }
+              titleStyle={"text-[18px] leading-[26px] font-[400] max-h-[56px]"}
+              infoStyle={"flex text-[12px] leading-[18px]"}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Membership */}
 
@@ -172,28 +159,35 @@ const ChannelHome = ({ channelEmail }) => {
 
       {/* Recommend & List  */}
 
-      <RowLayout title={"Dành cho bạn"} noBtn={true}>
-        <VideoRow
-          showBtn={true}
-          width={354}
-          marginX={2}
-          top={"top-[30%]"}
-          vidList={videosData?.data}
-        />
-      </RowLayout>
-
-      {playlistData?.data.map((playlist) => (
-        <RowLayout title={playlist?.title} key={playlist?._id}>
+      {videosData?.data?.length > 0 && (
+        <RowLayout title={"Dành cho bạn"} noBtn={true}>
           <VideoRow
             showBtn={true}
-            width={210}
+            width={354}
             marginX={2}
             top={"top-[30%]"}
-            thumbRound={"8px"}
-            vidList={playlist?.video_list}
+            vidList={videosData?.data}
           />
         </RowLayout>
-      ))}
+      )}
+
+      {playlistData?.data?.length > 0 &&
+        playlistData?.data.map((playlist) => {
+          if (playlist?.itemList?.length > 0) {
+            return (
+              <RowLayout title={playlist?.title} key={playlist?._id}>
+                <VideoRow
+                  showBtn={true}
+                  width={210}
+                  marginX={2}
+                  top={"top-[30%]"}
+                  thumbRound={"8px"}
+                  vidList={playlist?.video_list}
+                />
+              </RowLayout>
+            );
+          }
+        })}
 
       <RowLayout title={"Short Videos"}>
         <ShortVidsRow width={210} marginX={2} top={"top-[15%]"} />
