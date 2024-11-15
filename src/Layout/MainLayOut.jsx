@@ -12,19 +12,11 @@ const MainLayOut = ({ children, style }) => {
 
   const { isShowing } = useAuthContext();
 
-  useLayoutEffect(() => {
-    if (isShowing) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-  }, [isShowing]);
-
   return (
     <div className='min-h-screen text-white-F1 relative'>
       {children}
       {isShowing && (
-        <div className=' fixed z-[9999] inset-0 bg-[rgba(0,0,0,0.5)]'>
+        <div className=' fixed z-[9999] inset-0 bg-[rgba(0,0,0,0.3)]'>
           <div className='w-screen h-screen flex items-center justify-center'>
             {isShowing}
           </div>

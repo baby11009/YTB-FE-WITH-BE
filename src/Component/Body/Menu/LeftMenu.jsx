@@ -1,7 +1,4 @@
-import {
-  ThinArrowIcon,
-  AllIcon,
-} from "../../../Assets/Icons";
+import { ThinArrowIcon, AllIcon } from "../../../Assets/Icons";
 
 import { useNavigate } from "react-router-dom";
 

@@ -10,6 +10,7 @@ export const AuthContext = createContext({
   setOpenedMenu: () => {},
   setShowHover: () => {},
   handleCursorPositon: () => {},
+  modalContainerRef: undefined,
 });
 
 export const useAuthContext = () => useContext(AuthContext);

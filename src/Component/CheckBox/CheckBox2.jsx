@@ -31,7 +31,9 @@ const CheckBox2 = ({ checked, setChecked }) => {
         onMouseDown={() => setClicked(true)}
         onMouseUp={() => setClicked(false)}
         onClick={() => {
-          setChecked();
+          if (setChecked) {
+            setChecked();
+          }
         }}
       >
         {checked && <div className='check-mark'></div>}

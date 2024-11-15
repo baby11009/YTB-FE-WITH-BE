@@ -42,14 +42,20 @@ const CustomeFuncBox = ({
     `}
     >
       {funcList1 &&
-        funcList1.map((item) => (
-          <CustomeFuncBtn
-            key={item.id}
-            data={item}
-            currentId={currentId}
-            setOpened={setOpened}
-          />
-        ))}
+        funcList1.map((item) => {
+          if (item.condition) {
+            return null;
+          }
+
+          return (
+            <CustomeFuncBtn
+              key={item.id}
+              data={item}
+              currentId={currentId}
+              setOpened={setOpened}
+            />
+          );
+        })}
       {funcList2 && <hr className='border-[rgba(255,255,255,0.2)] my-[8px]' />}
       {funcList2 &&
         funcList2.map((item) => (

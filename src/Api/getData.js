@@ -40,8 +40,8 @@ export const getData = (
         return res.data;
       } catch (error) {
         console.error(error);
-        alert(error.response.data.msg);
-        return null;
+        alert(error.response.data.msg || error.response.data);
+        throw error;
       }
     },
     enabled: condition,
@@ -90,8 +90,8 @@ export const getDataWithAuth = (
         return res.data;
       } catch (error) {
         console.error(error);
-        alert(error.response.data.msg);
-        return null;
+        alert(error.response.data.msg || error.response.data);
+        throw error;
       }
     },
     enabled: condition,

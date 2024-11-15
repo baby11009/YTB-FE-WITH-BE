@@ -22,6 +22,8 @@ const AuthProvider = ({ children }) => {
 
   const hoverContainerRef = useRef();
 
+  const modalContainerRef = useRef();
+
   const getUserInfo = async (token) => {
     await request
       .get("/client/user/me", {
@@ -125,6 +127,31 @@ const AuthProvider = ({ children }) => {
     };
   }, [showHover]);
 
+  useEffect(() => {
+    if (isShowing) {
+      setShowHover(undefined);
+    }
+
+    return () => {};
+  }, [isShowing]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        modalContainerRef.current &&
+        !modalContainerRef.current.contains(e.target)
+      ) {
+        setIsShowing(undefined);
+      }
+    };
+
+    window.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -138,6 +165,7 @@ const AuthProvider = ({ children }) => {
         showHover,
         setShowHover,
         handleCursorPositon,
+        modalContainerRef,
       }}
     >
       <div className='relative'>

@@ -23,51 +23,9 @@ import { formatNumber } from "../../util/numberFormat";
 import { durationCalc } from "../../util/durationCalc";
 import { getRandomHexColor } from "../../util/func";
 import { useAuthContext } from "../../Auth Provider/authContext";
-
-const funcList1 = [
-  {
-    id: 1,
-    text: "Thêm vào danh sách chờ",
-    icon: <AddWLIcon />,
-  },
-  {
-    id: 2,
-    text: "Lưu vào danh sách Xem sau",
-    icon: <WatchedIcon />,
-  },
-  {
-    id: 3,
-    text: "Thêm vào danh sách phát",
-    icon: <AddPLIcon />,
-  },
-  {
-    id: 4,
-    text: "Tải xuống",
-    icon: <DownloadIcon />,
-  },
-  {
-    id: 5,
-    text: "Chia sẻ",
-    icon: <ShareIcon />,
-  },
-];
-const funcList2 = [
-  {
-    id: 1,
-    text: "Không quan tâm",
-    icon: <BlockIcon />,
-  },
-  {
-    id: 2,
-    text: "Không đề xuất kênh này",
-    icon: <NoSuggetIcon />,
-  },
-  {
-    id: 3,
-    text: "Báo cao vi phạm",
-    icon: <DiaryIcon />,
-  },
-];
+import request from "../../util/axios-base-url";
+import { useInsertionEffect } from "react";
+import InsertPlaylist from "../Modal/InsertPlaylist";
 
 const duration = 12500;
 
@@ -159,11 +117,11 @@ const VideoCard = ({
   thumbStyle,
   thumbStyleInline,
   imgStyle,
-  noFuncBox,
   noFunc2,
   funcBoxPos,
 }) => {
-  const { setShowHover, handleCursorPositon } = useAuthContext();
+  const { setShowHover, handleCursorPositon, setIsShowing, user } =
+    useAuthContext();
 
   const containRef = useRef();
 
@@ -175,11 +133,59 @@ const VideoCard = ({
 
   const navigate = useNavigate();
 
-  const handleNavigate = (id) => {
+  const handleNavigate = () => {
     navigate(`/channel/${data?.user_info?.email}`);
   };
 
-  const handleRemove = (id) => {};
+  const funcList1 = [
+    {
+      id: 1,
+      text: "Add to queue",
+      icon: <AddWLIcon />,
+    },
+    {
+      id: 2,
+      text: "Save to watch later",
+      icon: <WatchedIcon />,
+    },
+    {
+      id: 3,
+      text: "Add to Playlist",
+      icon: <AddPLIcon />,
+      handleOnClick: () => {
+        setIsShowing(<InsertPlaylist videoId={data?._id} />);
+      },
+      condition: user ? false : true,
+    },
+    {
+      id: 4,
+      text: "Download",
+      icon: <DownloadIcon />,
+    },
+    {
+      id: 5,
+      text: "Share",
+      icon: <ShareIcon />,
+    },
+  ];
+
+  const funcList2 = [
+    {
+      id: 1,
+      text: "Not interested",
+      icon: <BlockIcon />,
+    },
+    {
+      id: 2,
+      text: "Don't recommend channel",
+      icon: <NoSuggetIcon />,
+    },
+    {
+      id: 3,
+      text: "Report",
+      icon: <DiaryIcon />,
+    },
+  ];
 
   return (
     <Link
