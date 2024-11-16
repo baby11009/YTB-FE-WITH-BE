@@ -14,12 +14,19 @@ import CheckBox2 from "../CheckBox/CheckBox2";
 import { IsElementEnd } from "../../util/scrollPosition";
 
 const PlaylistCard = ({ data, videoId }) => {
-  const [checked, setChecked] = useState(data?.itemList.includes(videoId));
+  const [playlistData, setPlaylistData] = useState(data);
+
+  const [checked, setChecked] = useState(false);
+
   const handleAddToPlaylist = useCallback(async (data) => {
     try {
-      await request.patch(`/client/playlist/${data?._id}`, {
-        videoIdList: [videoId],
-      });
+      const rsp = await request
+        .patch(`/client/playlist/${data?._id}`, {
+          videoIdList: [videoId],
+        })
+        .then((rsp) => {
+          setPlaylistData((prev) => ({ ...prev, ...rsp.data?.data }));
+        });
     } catch (error) {
       setChecked((prev) => !prev);
       alert("Failed to add to playlist");
@@ -27,35 +34,39 @@ const PlaylistCard = ({ data, videoId }) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (playlistData) setChecked(playlistData?.itemList.includes(videoId));
+  }, [playlistData]);
+
   return (
     <div
       className='mb-[16px] flex items-center'
       onClick={async () => {
         setChecked((prev) => !prev);
-        await handleAddToPlaylist(data, setChecked);
+        await handleAddToPlaylist(playlistData, setChecked);
       }}
     >
       <CheckBox2
         checked={checked}
         setChecked={async () => {
           setChecked((prev) => !prev);
-          await handleAddToPlaylist(data, setChecked);
+          await handleAddToPlaylist(playlistData, setChecked);
         }}
       />
       <div className='flex-1  overflow-hidden text-ellipsis line-clamp-1 pl-[16px] '>
-        {data?.title}
+        {playlistData?.title}
       </div>
       <div className='mt-[3px] ml-[4px]'>
-        {data?.type === "public" ? <PublicIcon /> : <PrivateIcon />}
+        {playlistData?.type === "public" ? <PublicIcon /> : <PrivateIcon />}
       </div>
     </div>
   );
 };
 
-const InsertPlaylist = ({ videoId }) => {
+const InsertPlaylist = ({ videoId, setDisplay }) => {
   const queryClient = useQueryClient();
 
-  const { modalContainerRef, setIsShowing, user } = useAuthContext();
+  const { setIsShowing } = useAuthContext();
 
   const [queries, setQueries] = useState({
     sort: { createdAt: -1 },
@@ -101,10 +112,7 @@ const InsertPlaylist = ({ videoId }) => {
   }, []);
 
   return (
-    <div
-      ref={modalContainerRef}
-      className='max-w-[648px] min-w-[210px] max-h-[340px] bg-black-21 rounded-[10px] flex flex-col '
-    >
+    <div className='max-w-[648px] min-w-[210px] max-h-[340px] flex flex-col '>
       <div className='flex items-center'>
         <h2 className='flex-1 text-[16px] leading-[22px] py-[16px] px-[24px]'>
           Save video to...
@@ -133,8 +141,12 @@ const InsertPlaylist = ({ videoId }) => {
         ) : (
           dataList.length > 0 &&
           isSuccess &&
-          dataList.map((item) => (
-            <PlaylistCard key={item?._id} data={item} videoId={videoId} />
+          dataList.map((item, id) => (
+            <PlaylistCard
+              key={`${item?._id}-${id}`}
+              data={item}
+              videoId={videoId}
+            />
           ))
         )}
 
@@ -147,7 +159,13 @@ const InsertPlaylist = ({ videoId }) => {
         )}
       </div>
       <div className='px-[24px] py-[12px]'>
-        <button className='flex items-center justify-center px-[16px] rounded-[20px] bg-black-0.1 w-full hover:bg-black-0.2'>
+        <button
+          className='flex items-center justify-center px-[16px] 
+        rounded-[20px] bg-black-0.1 w-full hover:bg-black-0.2'
+          onClick={() => {
+            setDisplay("create");
+          }}
+        >
           <div className='w-[24px] ml-[-6px] mr-[6px]'>
             <PlusIcon />
           </div>

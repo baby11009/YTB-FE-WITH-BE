@@ -1,6 +1,5 @@
 import {
   Verification,
-  LiveIcon,
   Setting2Icon,
   BlockIcon,
   AddWLIcon,
@@ -23,9 +22,7 @@ import { formatNumber } from "../../util/numberFormat";
 import { durationCalc } from "../../util/durationCalc";
 import { getRandomHexColor } from "../../util/func";
 import { useAuthContext } from "../../Auth Provider/authContext";
-import request from "../../util/axios-base-url";
-import { useInsertionEffect } from "react";
-import InsertPlaylist from "../Modal/InsertPlaylist";
+import PlaylistModal from "../Modal/PlaylistModal";
 
 const duration = 12500;
 
@@ -153,7 +150,7 @@ const VideoCard = ({
       text: "Add to Playlist",
       icon: <AddPLIcon />,
       handleOnClick: () => {
-        setIsShowing(<InsertPlaylist videoId={data?._id} />);
+        setIsShowing(<PlaylistModal videoId={data?._id} />);
       },
       condition: user ? false : true,
     },

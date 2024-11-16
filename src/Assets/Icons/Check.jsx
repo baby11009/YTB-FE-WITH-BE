@@ -1,11 +1,12 @@
-const ThinArrow = ({ size, color }) => {
+const Check = () => {
   return (
     <svg
       xmlns='http://www.w3.org/2000/svg'
-      height={"16"}
-      width={"16"}
-      viewBox='0 0 16 16'
+      height='24'
+      viewBox='0 0 24 24'
+      width='24'
       focusable='false'
+      aria-hidden='true'
       style={{
         pointerEvents: "none",
         display: "inherit",
@@ -14,8 +15,8 @@ const ThinArrow = ({ size, color }) => {
       }}
       fill={"currentColor"}
     >
-      <path d='M4.97 12.65 9.62 8 4.97 3.35l.71-.71L11.03 8l-5.35 5.35-.71-.7z'></path>
+      <path d='m9 18.7-5.4-5.4.7-.7L9 17.3 20.6 5.6l.7.7L9 18.7z'></path>
     </svg>
   );
 };
-export default ThinArrow;
+export default Check;

@@ -16,7 +16,9 @@ const CustomeFuncBtn = ({ data, currentId, setOpened }) => {
         }
       }}
     >
-      {data.icon && <div className='mr-[16px]'>{data.icon}</div>}
+      {data.icon && (
+        <div className='mr-[16px] w-[24px] text-white-F1'>{data.icon}</div>
+      )}
       <div
         className={`text-[14px] leading-[20px] text-nowrap ${
           data.icon && "mr-[24px]"
