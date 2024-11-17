@@ -11,7 +11,7 @@ const PlaylistModal = ({ videoId }) => {
       {display === "insert" ? (
         <InsertPlaylist videoId={videoId} setDisplay={setDisplay} />
       ) : (
-        <CreatePlaylist setDisplay={setDisplay} />
+        <CreatePlaylist setDisplay={setDisplay} videoId={videoId} />
       )}
     </div>
   );

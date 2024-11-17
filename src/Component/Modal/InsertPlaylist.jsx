@@ -70,7 +70,7 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
 
   const [queries, setQueries] = useState({
     sort: { createdAt: -1 },
-    limit: 2,
+    limit: 8,
     page: 1,
   });
 
