@@ -7,6 +7,7 @@ import { useAuthContext } from "../../../Auth Provider/authContext";
 import connectSocket from "../../../util/connectSocket";
 
 const ShortPart = () => {
+  
   const { user } = useAuthContext();
 
   const [isTop, setIsTop] = useState(true);
@@ -14,10 +15,6 @@ const ShortPart = () => {
   const [isEnd, setIsEnd] = useState(false);
 
   const [isScrolling, setIsScrolling] = useState(false);
-
-  useEffect(() => {
-    console.log("🚀 ~ isScrolling:", isScrolling);
-  }, [isScrolling]);
 
   const [currentIndex, setCurrentIndex] = useState(1);
 

@@ -61,13 +61,15 @@ const PlayListCard = ({
             backgroundColor: bgColorRef.current,
           }}
         >
-          <img
-            src={`${import.meta.env.VITE_BASE_API_URI}${
-              import.meta.env.VITE_VIEW_THUMB_API
-            }${data?.video_list[0]?.thumb}`}
-            alt='thumb'
-            className='object-contain w-full h-full rounded-[12px] '
-          />
+          {data?.videoCount > 0 && (
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.video_list[0]?.thumb}`}
+              alt='thumb'
+              className='object-contain w-full h-full rounded-[12px] '
+            />
+          )}
         </div>
         {showL3 && (
           <div
@@ -94,7 +96,7 @@ const PlayListCard = ({
             <PlayListIcon />
           </div>
           <span className=' text-[12px] leading-[18px] text-white mr-[4px] py-[3px]'>
-            {formatNumber(data?.itemList?.length)} video
+            {formatNumber(data?.videoCount)} video
           </span>
         </div>
 

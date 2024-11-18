@@ -14,15 +14,16 @@ const ChannelPlaylist = ({ channelEmail }) => {
     page: 1,
     limit: 16,
     sort: { createdAt: -1 },
+    videoLimit: 1,
     clearCache: "playlist",
   });
-  console.log("🚀 ~ params:", params)
 
   const { data: playlistData, isLoading } = getDataWithAuth(
     "/client/playlist",
     params,
     true
   );
+  console.log("🚀 ~ playlistData:", playlistData);
 
   const [dataList, setDataList] = useState([]);
 

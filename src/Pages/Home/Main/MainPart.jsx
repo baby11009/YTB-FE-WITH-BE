@@ -56,16 +56,23 @@ const categoryList = [
 const videoParams = {
   page: 1,
   limit: 16,
-  createdAt: "mới nhất",
+  sort: {
+    createdAt: -1,
+  },
   type: "video",
   prevPlCount: 0,
+  watchedVideoIdList: [],
+  watchedPlIdList: [],
 };
 
 const shortParams = {
   page: 1,
-  limit: 18,
-  createdAt: "mới nhất",
+  limit: 12,
+  sort: {
+    createdAt: -1,
+  },
   type: "short",
+  watchedVideoIdList: [],
 };
 
 const MainPart = ({ openedMenu }) => {
@@ -85,18 +92,29 @@ const MainPart = ({ openedMenu }) => {
 
   const [isEnd, setIsEnd] = useState(false);
 
+  const watchedVideoIdSet = useRef(new Set());
+
+  const watchedPlIdSet = useRef(new Set());
+  console.log("🚀 ~ watchedPlIdSet:", watchedPlIdSet)
+
+  const watchedShortIdSet = useRef(new Set());
+
   const { data: videos } = getData("/data/all", vidPrs, true, true);
 
   const { data: shorts } = getData("/data/all", shortPrs, true, true);
 
   useEffect(() => {
     if (isEnd) {
-
       if (videos?.data?.length > 0) {
         setVidPrs((prev) => ({
           ...prev,
           page: prev.page + 1,
           prevPlCount: vidList.filter((videos) => videos.video_list).length,
+          watchedVideoIdList: [
+            ...prev.watchedVideoIdList,
+            ...watchedVideoIdSet.current,
+          ],
+          watchedPlIdList: [...prev.watchedPlIdList, ...watchedPlIdSet.current],
         }));
       }
 
@@ -104,6 +122,10 @@ const MainPart = ({ openedMenu }) => {
         setShortPrs((prev) => ({
           ...prev,
           page: prev.page + 1,
+          watchedVideoIdList: [
+            ...prev.watchedVideoIdList,
+            ...watchedShortIdSet.current,
+          ],
         }));
       }
     }
@@ -125,9 +147,23 @@ const MainPart = ({ openedMenu }) => {
   useEffect(() => {
     if (videos) {
       if (addNew) {
+        watchedPlIdSet.current.clear();
+        watchedVideoIdSet.current.clear();
         setVidList(videos?.data);
+        videos?.data?.forEach((item) => {
+          if (item?.videoCount) {
+            watchedPlIdSet.current.add(item._id);
+          } else watchedVideoIdSet.current.add(item._id);
+        });
       } else {
         setVidList((prev) => [...prev, ...videos?.data]);
+        videos?.data?.forEach((item) => {
+          if (item?.videoCount && !watchedPlIdSet.current.has(item._id)) {
+            watchedPlIdSet.current.add(item._id);
+          } else if (!watchedVideoIdSet.current.has(item._id)) {
+            watchedVideoIdSet.current.add(item._id);
+          }
+        });
       }
     }
   }, [videos]);
@@ -135,9 +171,18 @@ const MainPart = ({ openedMenu }) => {
   useEffect(() => {
     if (shorts) {
       if (addNew) {
+        watchedShortIdSet.current.clear();
         setShortList(shorts?.data);
+        shorts?.data.forEach((item) => {
+          watchedShortIdSet.current.add(item?._id);
+        });
       } else {
         setShortList((prev) => [...prev, ...shorts?.data]);
+        shorts?.data.forEach((item) => {
+          if (!watchedShortIdSet.current.has(item._id)) {
+            watchedShortIdSet.current.add(item?._id);
+          }
+        });
       }
     }
   }, [shorts]);
