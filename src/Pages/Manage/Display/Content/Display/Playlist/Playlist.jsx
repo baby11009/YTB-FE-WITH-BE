@@ -23,11 +23,13 @@ const initParams = {
   limit: 8,
   page: 1,
   sort: { createdAt: -1, size: -1 },
+  videoLimit: 4,
   clearCache: "playlist",
 };
 
 const Playlist = () => {
   const queryClient = useQueryClient();
+  
   const { setIsShowing, openedMenu } = useAuthContext();
 
   const [sort, setSort] = useState(undefined);
@@ -127,10 +129,15 @@ const Playlist = () => {
 
   const handleDeleteMany = async () => {
     console.log(checkedList.join(", "));
-    await dltManyData("/client/playlist/delete-many", checkedList,'playlist',() => {
-      setCheckedList([]);
-      refetch();
-    })
+    await dltManyData(
+      "/client/playlist/delete-many",
+      checkedList,
+      "playlist",
+      () => {
+        setCheckedList([]);
+        refetch();
+      }
+    );
   };
 
   const showDltConfirm = () => {

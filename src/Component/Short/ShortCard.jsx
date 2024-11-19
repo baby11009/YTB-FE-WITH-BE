@@ -39,7 +39,7 @@ const ShortCard = ({ data, containerStyle, funcBoxPos }) => {
 
   return (
     <Link
-      to={`/short/${data.id}`}
+      to={`/short/${data._id}`}
       className={`flex-1 mx-[8px] mb-[20px] cursor-pointer inline-block ${containerStyle}`}
     >
       <div

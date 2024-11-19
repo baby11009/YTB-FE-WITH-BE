@@ -5,9 +5,10 @@ import { IsEnd, IsTop } from "../../../util/scrollPosition";
 import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import connectSocket from "../../../util/connectSocket";
-
+import { useParams } from "react-router-dom";
 const ShortPart = () => {
-  
+  const { id } = useParams();
+
   const { user } = useAuthContext();
 
   const [isTop, setIsTop] = useState(true);
@@ -22,6 +23,7 @@ const ShortPart = () => {
 
   const [params, setParams] = useState({
     watchedIdList: [],
+    shortId: id,
     reset: user?._id,
   });
 
