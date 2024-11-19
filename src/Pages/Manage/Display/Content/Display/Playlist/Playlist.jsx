@@ -29,7 +29,7 @@ const initParams = {
 
 const Playlist = () => {
   const queryClient = useQueryClient();
-  
+
   const { setIsShowing, openedMenu } = useAuthContext();
 
   const [sort, setSort] = useState(undefined);
