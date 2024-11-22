@@ -1,5 +1,6 @@
 import { ChannelCard } from "../../../Component";
 import { channelList } from "../../../Mock Data/channelData";
+import { getDataWithAuth } from "../../../Api/getData";
 
 const SubscribeChannel = ({ openedMenu }) => {
   return (

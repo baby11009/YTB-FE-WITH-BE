@@ -22,7 +22,22 @@ const router = createBrowserRouter([
   },
   {
     path: "/:path",
-    element: <HomePage />,
+    element: (
+      <ProtectedRoute
+        onlyAuthTheseRoutes={[
+          "/sub-content",
+          "/sub-channels",
+          "/my-channel",
+          "/watched/me",
+          "/playlists",
+          "/playlist/wl",
+          "/playlist/lv",
+        ]}
+        disableRouteAfterSigin={["/auth/login"]}
+      >
+        <HomePage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/:path/:id",
@@ -36,7 +51,7 @@ const router = createBrowserRouter([
     path: "/auth/:path",
     element: (
       <ProtectedRoute
-        notAuthRoutes={["/auth/login"]}
+        disableRouteAfterSigin={["/auth/login"]}
         accessRoutes={["/auth/confirm"]}
       >
         <AuthPage />
@@ -78,7 +93,7 @@ const router = createBrowserRouter([
   {
     path: "/manage/:func",
     element: (
-      <ProtectedRoute notAuthRoutes={["/auth/login"]}>
+      <ProtectedRoute authAll={true} disableRouteAfterSigin={["/auth/login"]}>
         <ManagePage />
       </ProtectedRoute>
     ),
@@ -87,7 +102,7 @@ const router = createBrowserRouter([
   {
     path: "/manage/:func/:data",
     element: (
-      <ProtectedRoute notAuthRoutes={["/auth/login"]}>
+      <ProtectedRoute authAll={true} disableRouteAfterSigin={["/auth/login"]}>
         <ManagePage />
       </ProtectedRoute>
     ),

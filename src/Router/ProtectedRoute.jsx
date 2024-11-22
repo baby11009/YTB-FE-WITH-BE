@@ -6,7 +6,9 @@ const ProtectedRoute = ({
   children,
   requiredRole,
   accessRoutes,
-  notAuthRoutes,
+  authAll,
+  disableRouteAfterSigin,
+  onlyAuthTheseRoutes,
 }) => {
   const { user } = useAuthContext();
   const location = useLocation();
@@ -15,16 +17,25 @@ const ProtectedRoute = ({
 
   if (accessRoutes) {
     if (accessRoutes.includes(location.pathname) && !location.state?.access) {
-      return <Navigate to={"/error/403/Don't have permission"} replace />;
+      return <Navigate to={"/error/400/Cannot access"} replace />;
+    }
+  }
+  if (authAll && !authToken) {
+    return <Navigate to={"/auth/login"} replace />;
+  } else if (onlyAuthTheseRoutes && !authToken) {
+    if (onlyAuthTheseRoutes.includes(location.pathname)) {
+      return <Navigate to={"/auth/login"} replace />;
     }
   }
 
-  if (authToken) {
-    if (notAuthRoutes?.includes(location.pathname)) {
+  // Disable route after user has logged in
+  if (authToken && disableRouteAfterSigin) {
+    if (disableRouteAfterSigin?.includes(location.pathname)) {
       return <Navigate to={"/error/400/Cannot access"} replace />;
     }
   }
 
+  // User role must be authenticated
   if (requiredRole) {
     if (!authToken) {
       return <Navigate to={"/auth/login"} replace />;

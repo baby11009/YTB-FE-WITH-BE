@@ -95,7 +95,6 @@ const MainPart = ({ openedMenu }) => {
   const watchedVideoIdSet = useRef(new Set());
 
   const watchedPlIdSet = useRef(new Set());
-  console.log("🚀 ~ watchedPlIdSet:", watchedPlIdSet)
 
   const watchedShortIdSet = useRef(new Set());
 
