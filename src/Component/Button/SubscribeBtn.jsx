@@ -8,7 +8,7 @@ import {
 import request from "../../util/axios-base-url";
 import { useAuthContext } from "../../Auth Provider/authContext";
 import { CustomeFuncBox } from "../../Component";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getCookie } from "../../util/tokenHelpers";
 
 const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
@@ -16,11 +16,14 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
 
   const [opened, setOpened] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSubscribBtn = async () => {
     if (!user) {
       alert("Vui lòng đăng nhập để đăng ký");
       return;
     }
+    setIsLoading(true);
     await request
       .post(
         "/client/subscribe",
@@ -36,17 +39,22 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
           },
         }
       )
-      .then(() => {
-        refetch();
+      .then((rsp) => {
+        refetch(rsp.data);
+
         setRefetch(true);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const handleChangeNotify = async (notiCode, currNotiCode) => {
     if (currNotiCode === notiCode) {
       return;
     }
+    setIsLoading(true);
     await request
       .patch(
         `/client/subscribe/${id}`,
@@ -59,8 +67,11 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
           },
         }
       )
-      .then(() => refetch())
-      .catch((err) => console.log(err));
+      .then((rsp) => refetch(rsp.data))
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const handleOpenedBox = () => {
@@ -73,7 +84,7 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
       text: "Tất cả",
       icon: <ThickBellIcon />,
       handleOnClick: () => {
-        handleChangeNotify(2);
+        handleChangeNotify(1);
       },
     },
     {
@@ -81,7 +92,7 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
       text: "Không nhận thông báo",
       icon: <SlashBellIcon />,
       handleOnClick: () => {
-        handleChangeNotify(1);
+        handleChangeNotify(2);
       },
     },
     {
@@ -92,11 +103,30 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
     },
   ];
 
+  const containerRef = useRef();
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpened(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   if (user?._id === channelId) {
     return <></>;
   }
+
   return (
     <button
+      disabled={isLoading}
+      ref={containerRef}
       className={`px-[16px] rounded-[18px] flex items-center relative
         ${
           sub
@@ -112,11 +142,8 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
         }
       }}
     >
-      {sub && (
-        <div className='ml-[-6px] mr-[6px]'>
-          <BellIcon />
-        </div>
-      )}
+      {notify === 1 ? <BellIcon /> : notify === 2 && <SlashBellIcon />}
+
       <span className='text-[14px] leading-[36px] font-[500] text-nowrap'>
         {sub ? "Đã Đăng ký" : "Đăng ký"}
       </span>
@@ -130,37 +157,10 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
           style={"right-0 top-[101%]"}
           setOpened={setOpened}
           funcList1={funcList2}
-          currentId={notify === 1 ? 3 : 1}
+          currentId={notify}
         />
       )}
     </button>
   );
 };
 export default SubscribeBtn;
-
-{
-  /* <button
-className={`px-[16px] rounded-[18px] flex items-center
-${
-sub
-  ? "bg-hover-black hover:bg-[rgba(255,255,255,0.2)]"
-  : "bg-[#ffffff] text-black"
-}
-`}
-onClick={handleSubscribBtn}
->
-{sub && (
-  <div className='ml-[-6px] mr-[6px]'>
-    <BellIcon />
-  </div>
-)}
-<span className='text-[14px] leading-[36px] font-[500]'>
-  {sub ? "Đã Đăng ký" : "Đăng ký"}
-</span>
-{sub && (
-  <div className='rotate-90 ml-[6px] mr-[-6px]'>
-    <ThinArrowIcon />
-  </div>
-)}
-</button> */
-}

@@ -63,6 +63,7 @@ export const getDataWithAuth = (
   const paramsKey = Object.keys(params);
 
   let finalParams = {};
+  
   if (paramsKey.length > 0) {
     const notParamsResetKeys = Object.keys(params).filter(
       (key) => !key.includes("reset") && !key.includes("clearCache")

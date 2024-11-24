@@ -1,7 +1,7 @@
 const CustomeFuncBtn = ({ data, currentId, setOpened }) => {
   return (
     <div
-      className={`flex items-center h-[36px] pl-[16px] pr-[12px] cursor-pointer
+      className={`flex items-center h-[40px] px-[16px] py-[2px] cursor-pointer
         ${
           currentId === data.id
             ? "bg-hover-black hover:bg-[rgba(255,255,255,0.2)]"
@@ -39,7 +39,7 @@ const CustomeFuncBox = ({
 }) => {
   return (
     <div
-      className={`absolute bg-[#282828] rounded-[12px] py-[8px] flex flex-col overflow-hidden z-[2000]
+      className={`absolute bg-[#282828] rounded-[12px] flex flex-col overflow-hidden z-[2000]
         ${style}
     `}
     >

@@ -20,6 +20,7 @@ const ProtectedRoute = ({
       return <Navigate to={"/error/400/Cannot access"} replace />;
     }
   }
+  
   if (authAll && !authToken) {
     return <Navigate to={"/auth/login"} replace />;
   } else if (onlyAuthTheseRoutes && !authToken) {
