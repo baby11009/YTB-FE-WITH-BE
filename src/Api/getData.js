@@ -46,6 +46,7 @@ export const getData = (
     },
     enabled: condition,
     suspense,
+    cacheTime: 0,
   });
 };
 
@@ -63,7 +64,7 @@ export const getDataWithAuth = (
   const paramsKey = Object.keys(params);
 
   let finalParams = {};
-  
+
   if (paramsKey.length > 0) {
     const notParamsResetKeys = Object.keys(params).filter(
       (key) => !key.includes("reset") && !key.includes("clearCache")
@@ -97,5 +98,6 @@ export const getDataWithAuth = (
     },
     enabled: condition,
     suspense: suspense,
+    cacheTime: 0,
   });
 };

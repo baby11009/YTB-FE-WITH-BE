@@ -1,18 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { IsEnd, IsTop } from "../../../../../util/scrollPosition";
-import { CustomeFuncBox } from "../../../../../Component";
+import { IsEnd } from "../../../../../util/scrollPosition";
+import { CustomeFuncBox, PlaylistCard } from "../../../../../Component";
 import { SortIcon } from "../../../../../Assets/Icons";
 import { motion } from "framer-motion";
-import PlaylistList from "./PlaylistList";
 import { getDataWithAuth } from "../../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
 
-const ChannelPlaylist = ({ channelEmail }) => {
-  const queryClient = useQueryClient();
-
+const ChannelPlaylist = () => {
+  
   const [params, setParams] = useState({
     page: 1,
-    limit: 16,
+    limit: 12,
     sort: { createdAt: -1 },
     videoLimit: 1,
     clearCache: "playlist",
@@ -23,7 +21,6 @@ const ChannelPlaylist = ({ channelEmail }) => {
     params,
     true
   );
-  console.log("🚀 ~ playlistData:", playlistData);
 
   const [dataList, setDataList] = useState([]);
 
@@ -41,13 +38,13 @@ const ChannelPlaylist = ({ channelEmail }) => {
   const funcList = [
     {
       id: 1,
-      text: "Ngày thêm (mới nhất)",
+      text: "Date added (newest)",
       handleOnClick: handleFuncClick,
       sort: { createdAt: -1 },
     },
     {
       id: 2,
-      text: "Video đã thêm lần cuối",
+      text: "Last added video",
       handleOnClick: handleFuncClick,
       sort: { updatedAt: -1 },
     },
@@ -75,7 +72,6 @@ const ChannelPlaylist = ({ channelEmail }) => {
       window.removeEventListener("scroll", () => {
         IsEnd(setIsEnd);
       });
-      queryClient.clear();
     };
   }, []);
 
@@ -105,7 +101,7 @@ const ChannelPlaylist = ({ channelEmail }) => {
             backgroundColor: "rgba(255,255,255,0.2)",
           }}
         >
-          Danh sách phát đã tạo
+          Created playlist
         </motion.div>
         <motion.div
           className='cursor-pointer relative'
@@ -119,20 +115,36 @@ const ChannelPlaylist = ({ channelEmail }) => {
             <div className='mr-[8px]'>
               <SortIcon />
             </div>
-            <span className='text-nowrap'>Sắp xếp theo</span>
+            <span className='text-nowrap'>Sort by</span>
           </div>
           {opened && (
             <CustomeFuncBox
               setOpened={setOpened}
-              style={"right-[5%] top-[150%]"}
+              style={"right-0 top-[150%]"}
               funcList1={funcList}
               currentId={currentIndex}
             />
           )}
         </motion.div>
       </div>
-
-      <PlaylistList playlistList={dataList} isLoading={isLoading} />
+      <div className='grid grid-cols-1 xsm:grid-cols-2 642:grid-cols-3 856:grid-cols-4 1070:grid-cols-5 1336:grid-cols-6'>
+        {dataList.map((playlist, id) => (
+          <PlaylistCard
+            key={id}
+            data={playlist}
+            showL3={false}
+            containerStyle={"!ml-0 !mr-[4px] !mb-[24px]"}
+          />
+        ))}
+      </div>
+      {isLoading && (
+        <div className='mt-[20px] mb-[40px] flex items-center justify-center'>
+          <div
+            className='w-[40px] h-[40px] rounded-[50px] border-[3px] border-[rgba(255,255,255,0.4)] 
+        border-b-[transparent] border-l-[transparent] animate-spin'
+          ></div>
+        </div>
+      )}
     </div>
   );
 };

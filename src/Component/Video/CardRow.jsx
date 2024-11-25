@@ -34,7 +34,7 @@ const CardRow = ({ vidList, handleResize, showQtt, openedMenu, showBtn }) => {
             <PlayListCard
               data={item}
               key={index}
-              imgStyle={"max-h-[185.3px]"}
+              imgStyle={"w-full max-h-[185.3px]"}
             />
           );
         }

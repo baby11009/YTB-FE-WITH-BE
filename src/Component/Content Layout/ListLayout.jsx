@@ -1,21 +1,33 @@
-import ShortVids from "../Short/ShortVids";
 import VideoCard from "../Video/VideoCard";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ThickGridIcon, EmptyGridIcon, ListIcon } from "../../Assets/Icons";
-import { IsEnd, IsTop } from "../../util/scrollPosition";
+import {
+  ThickGridIcon,
+  EmptyGridIcon,
+  ListIcon,
+  Short2Icon,
+  CloseIcon,
+  ThinArrowIcon,
+} from "../../Assets/Icons";
+import ShortCard from "../Short/ShortCard";
+import { smoothScroll } from "../../util/scrollCustom";
 
 const HorizonCard = ({ data, layout, setLayout, showBtn }) => {
   return (
     <div className='pb-[24px] border-b-[1px] border-black-0.2'>
       <div className='my-[14px] flex justify-between'>
-        <Link to={`/channel/${data.id}`} className='flex items-center'>
+        <Link to={`/channel/${data._id}`} className='flex items-center'>
           <div className='size-[32px] rounded-[50%] overflow-hidden mr-[8px]'>
-            <img src={data.channel?.img} alt='channel image' />
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_AVA_API
+              }${data?.user_info?.avatar}`}
+              alt='channel image'
+            />
           </div>
           <div>
             <span className='text-[20px] leading-[28px] font-bold'>
-              {data.channel?.name}
+              {data?.user_info?.name}
             </span>
           </div>
         </Link>
@@ -26,7 +38,7 @@ const HorizonCard = ({ data, layout, setLayout, showBtn }) => {
               to={`/sub-channels`}
             >
               <span className=' text-nowrap text-[14px] leading-[36px] font-[500] text-blue-3E'>
-                Quản lý
+                Manage
               </span>
             </Link>
 
@@ -48,14 +60,12 @@ const HorizonCard = ({ data, layout, setLayout, showBtn }) => {
       <div className='w-full max-w-[862px]'>
         <VideoCard
           data={data}
-          noFunc2={true}
-          showLive={data.type.title === "live"}
           style={"flex gap-[16px] mx-0 mb-0"}
           thumbStyle={"w-[246px] h-[138px] mb-0 rounded-[8px]"}
           titleStyle={"text-[18px] leading-[26px] font-[400] max-h-[56px]"}
           infoStyle={"flex text-[12px] leading-[18px]"}
+          funcBoxPos={"sm:right-0 lg:translate-x-[100%]"}
           imgStyle={"hidden"}
-          liveStyle={"hidden"}
         />
       </div>
     </div>
@@ -63,56 +73,48 @@ const HorizonCard = ({ data, layout, setLayout, showBtn }) => {
 };
 
 const ListLayout = ({ openedMenu, vidList, shortList, layout, setLayout }) => {
-  const shortResponse = `grid-cols-1 xsm:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2lg:grid-cols-5 5xl:grid-cols-9
-  ${
-    openedMenu
-      ? "1-5xl:grid-cols-5 3xl:grid-cols-6 4xl:grid-cols-7"
-      : "1-5xl:grid-cols-6 3xl:grid-cols-7 4xl:grid-cols-9"
-  }`;
+  const [isScroll, setIsScroll] = useState(false);
 
-  const [showQtt, setShowQtt] = useState(1);
+  const [scrollPosition, setScrollPosition] = useState("begin");
 
-  const [isEnd, setIsEnd] = useState(false);
-
-  const [isTop, setIsTop] = useState(true);
-
-  const handleResizeShort = () => {
-    if (window.innerWidth < 426) {
-      setShowQtt(1);
-    } else if (window.innerWidth < 640) {
-      setShowQtt(2);
-    } else if (window.innerWidth < 1024) {
-      setShowQtt(3);
-    } else if (window.innerWidth < 1168) {
-      setShowQtt(4);
-    } else if (window.innerWidth < 1436) {
-      setShowQtt(5);
-    } else if (window.innerWidth < 1760) {
-      if (openedMenu) {
-        setShowQtt(5);
-      } else setShowQtt(6);
-    } else if (window.innerWidth < 2086) {
-      if (openedMenu) {
-        setShowQtt(6);
-      } else setShowQtt(7);
-    } else if (window.innerWidth < 2256) {
-      if (openedMenu) {
-        setShowQtt(7);
-      } else setShowQtt(9);
-    } else setShowQtt(9);
+  const scrollContainer = useRef();
+  const handleScroll = (direction) => {
+    setIsScroll(true);
+    smoothScroll(
+      direction,
+      scrollContainer,
+      350,
+      scrollContainer.current.clientWidth
+    );
   };
 
   useEffect(() => {
-    window.addEventListener("scroll", () => {
-      IsEnd(setIsEnd);
-      IsTop(setIsTop);
-    });
+    const handleScroll = (e) => {
+      if (e.target.scrollLeft === 0) {
+        setScrollPosition("begin");
+      } else if (
+        Math.ceil(e.target.clientWidth + e.target.scrollLeft) ===
+        e.target.scrollWidth
+      ) {
+        setScrollPosition("end");
+      } else {
+        setScrollPosition(undefined);
+      }
+    };
+    if (scrollContainer.current) {
+      scrollContainer.current.addEventListener("scroll", handleScroll);
+      scrollContainer.current.addEventListener("scrollend", () => {
+        setIsScroll(false);
+      });
+    }
 
     return () => {
-      window.removeEventListener("scroll", () => {
-        IsEnd(setIsEnd);
-        IsTop(setIsTop);
-      });
+      if (scrollContainer.current) {
+        scrollContainer.current.removeEventListener("scroll", handleScroll);
+        scrollContainer.current.removeEventListener("scrollend", () => {
+          setIsScroll(false);
+        });
+      }
     };
   }, []);
 
@@ -132,20 +134,68 @@ const ListLayout = ({ openedMenu, vidList, shortList, layout, setLayout }) => {
           setLayout={setLayout}
           showBtn={true}
         />
+        <div className='mb-[48px] pb-[17px] border-b-[1px] border-[rgba(255,255,255,0.2)]'>
+          <div className='ml-[8px] my-[16px] flex items-center justify-between'>
+            <div className='flex gap-[8px]'>
+              <Short2Icon />
+              <span className='text-[20px] leading-[28px] font-[700]'>
+                Shorts
+              </span>
+            </div>
 
-        <ShortVids
-          openedMenu={openedMenu}
-          handleResize={handleResizeShort}
-          showQtt={showQtt}
-          shortResponse={shortResponse}
-          shortList={shortList}
-          noBtn={true}
-          container1Style={"mb-0 ml-[-8px]"}
-        />
+            <div className='px-[16px] rounded-[18px] hover:bg-[#263850] cursor-pointer'>
+              <span className=' text-nowrap text-[14px] leading-[36px] font-[500] text-blue-3E'>
+                View all
+              </span>
+            </div>
+          </div>
+          <div className='relative'>
+            {scrollPosition !== "begin" && (
+              <button
+                disabled={isScroll}
+                className=' bg-black-21 absolute left-[-20px] top-[40%] translate-y-[-30%]
+           rounded-[50%] overflow-hidden'
+                onClick={() => handleScroll("left")}
+              >
+                <div className='hover:bg-black-0.2 size-[40px]  flex items-center justify-center ove '>
+                  <div className='w-[18px] rotate-[-180deg]'>
+                    <ThinArrowIcon />
+                  </div>
+                </div>
+              </button>
+            )}
+
+            <div className='flex overflow-hidden' ref={scrollContainer}>
+              {shortList.map((short) => (
+                <ShortCard
+                  key={short?._id}
+                  data={short}
+                  imgStyle={"h-[315px]"}
+                  containerStyle={"pr-[4px] min-w-[210px]  box-content"}
+                />
+              ))}
+            </div>
+
+            {scrollPosition !== "end" && (
+              <button
+                disabled={isScroll}
+                className=' bg-black-21 absolute right-[-20px] top-[40%] translate-y-[-30%]
+         rounded-[50%] overflow-hidden'
+                onClick={() => handleScroll("right")}
+              >
+                <div className='hover:bg-black-0.2 size-[40px]  flex items-center justify-center ove '>
+                  <div className='w-[18px]'>
+                    <ThinArrowIcon />
+                  </div>
+                </div>
+              </button>
+            )}
+          </div>
+        </div>
 
         {vidList?.slice(1, vidList?.length - 1).map((item) => (
           <HorizonCard
-            key={item.id}
+            key={item._id}
             data={item}
             layout={layout}
             setLayout={setLayout}

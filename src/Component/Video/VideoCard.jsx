@@ -185,8 +185,7 @@ const VideoCard = ({
   ];
 
   return (
-    <Link
-      to={`/video/${data?._id || 5}`}
+    <div
       className={`flex-1 relative ${style || "mx-[8px] mb-[40px]"}`}
       style={styleInline}
       onMouseOver={() => {
@@ -200,36 +199,37 @@ const VideoCard = ({
         }
       }}
     >
-      <div
-        className={`relative overflow-hidden ${
-          thumbStyle || "mb-[12px] rounded-[12px]"
-        } `}
-        style={thumbStyleInline}
-      >
+      <Link to={`/video/${data?._id || 5}`}>
         <div
-          className={`w-full  ${thumbStyle ? "h-full" : "h-[185.31px]"}`}
-          style={{ backgroundColor: bgColorRef.current }}
+          className={`relative overflow-hidden ${
+            thumbStyle || "mb-[12px] rounded-[12px]"
+          } `}
+          style={thumbStyleInline}
         >
-          <img
-            src={`${import.meta.env.VITE_BASE_API_URI}${
-              import.meta.env.VITE_VIEW_THUMB_API
-            }${data?.thumb}`}
-            alt=''
-            className='object-contain w-full h-full'
-          />
-        </div>
+          <div
+            className={`w-full  ${thumbStyle ? "h-full" : "h-[185.31px]"}`}
+            style={{ backgroundColor: bgColorRef.current }}
+          >
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.thumb}`}
+              alt=''
+              className='object-contain w-full h-full'
+            />
+          </div>
 
-        {/* duration */}
-        <div
-          className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
+          {/* duration */}
+          <div
+            className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
           mr-[8px] mb-[8px] text-[12px] leading-[18px] rounded-[4px]'
-        >
-          {durationCalc(data?.duration || duration)}
-        </div>
+          >
+            {durationCalc(data?.duration || duration)}
+          </div>
 
-        {/* progress bar */}
+          {/* progress bar */}
 
-        {/* <div className='w-full absolute bottom-0 h-[4px] bg-gray-71'>
+          {/* <div className='w-full absolute bottom-0 h-[4px] bg-gray-71'>
           <div
             className='absolute h-full bg-red-FF'
             style={{
@@ -238,17 +238,18 @@ const VideoCard = ({
           ></div>
         </div> */}
 
-        {/* Hover things */}
-        {showed && showBtn && (
-          <div className='absolute right-0 top-0'>
-            <HoverButton title={"Xem sau"} icon={<LaterIcon />} />
-            <HoverButton
-              title={"Thêm vào danh sách chờ"}
-              icon={<PlayListIcon />}
-            />
-          </div>
-        )}
-      </div>
+          {/* Hover things */}
+          {showed && showBtn && (
+            <div className='absolute right-0 top-0'>
+              <HoverButton title={"Xem sau"} icon={<LaterIcon />} />
+              <HoverButton
+                title={"Thêm vào danh sách chờ"}
+                icon={<PlayListIcon />}
+              />
+            </div>
+          )}
+        </div>
+      </Link>
 
       <div className={` flex-1 flex  ${ctContainerStyle}`}>
         <div
@@ -306,8 +307,10 @@ const VideoCard = ({
                     setShowHover((prev) =>
                       prev ? undefined : (
                         <CustomeFuncBox
-                          style={`w-[270px] right-[20%]  top-[100%] ${
-                            funcBoxPos ? funcBoxPos : "sm:left-[-20%]"
+                          style={`w-[270px] right-[20%] ${
+                            funcBoxPos
+                              ? funcBoxPos
+                              : "sm:left-[-20%] top-[100%] "
                           }`}
                           setOpened={setOpened}
                           funcList1={funcList1}
@@ -364,7 +367,7 @@ const VideoCard = ({
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 export default VideoCard;

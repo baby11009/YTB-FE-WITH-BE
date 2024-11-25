@@ -5,6 +5,7 @@ import { vidList2 as mockList } from "../../Mock Data/videoData";
 import { chunkArray } from "../../util/func";
 
 const GridLayout = ({ openedMenu, vidList, shortList }) => {
+  
   const [showQtt, setShowQtt] = useState(1);
 
   const [showCard, setShowCard] = useState(1);

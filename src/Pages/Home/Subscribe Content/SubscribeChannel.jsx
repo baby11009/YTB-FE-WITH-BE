@@ -1,4 +1,4 @@
-import { ChannelCard, CustomeFuncBox } from "../../../Component";
+import { ChannelCard, CustomeFuncBox,PlaylistCard } from "../../../Component";
 import { useQuery } from "@tanstack/react-query";
 import request from "../../../util/axios-base-url";
 import { getCookie } from "../../../util/tokenHelpers";
@@ -42,6 +42,7 @@ const SubscribeChannel = ({ openedMenu }) => {
       }
     },
     suspense: true,
+    cacheTime: 0,
   });
 
   const handleSort = (data) => {

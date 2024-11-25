@@ -61,7 +61,7 @@ const PlayListCard = ({
             backgroundColor: bgColorRef.current,
           }}
         >
-          {data?.videoCount > 0 && (
+          {data?.size > 0 && (
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_THUMB_API
@@ -96,7 +96,7 @@ const PlayListCard = ({
             <PlayListIcon />
           </div>
           <span className=' text-[12px] leading-[18px] text-white mr-[4px] py-[3px]'>
-            {formatNumber(data?.videoCount)} video
+            {formatNumber(data?.size)} video
           </span>
         </div>
 

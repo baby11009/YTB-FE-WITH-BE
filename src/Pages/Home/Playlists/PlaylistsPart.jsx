@@ -17,6 +17,7 @@ const PlaylistsPart = ({ openedMenu }) => {
   const [params, setParams] = useState({
     page: 1,
     limit: 16,
+    videoLimit: 1,
     sort: { createdAt: -1 },
   });
 

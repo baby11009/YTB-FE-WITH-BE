@@ -16,7 +16,7 @@ const funcList1 = [
   },
 ];
 
-const ShortCard = ({ data, containerStyle, funcBoxPos }) => {
+const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle }) => {
   const [opened, setOpened] = useState(false);
 
   const containRef = useRef();
@@ -40,10 +40,14 @@ const ShortCard = ({ data, containerStyle, funcBoxPos }) => {
   return (
     <Link
       to={`/short/${data._id}`}
-      className={`flex-1 mx-[8px] mb-[20px] cursor-pointer inline-block ${containerStyle}`}
+      className={`cursor-pointer inline-block ${
+        containerStyle ? containerStyle : "flex-1 mx-[8px] mb-[20px]"
+      }`}
     >
       <div
-        className='rounded-[12px] overflow-hidden w-full h-[387.55px]'
+        className={`rounded-[12px] overflow-hidden w-full ${
+          imgStyle ? imgStyle : "h-[387.55px]"
+        }`}
         style={{ backgroundColor: bgColorRef.current }}
       >
         <img
