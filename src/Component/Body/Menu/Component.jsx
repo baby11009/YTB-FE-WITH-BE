@@ -156,7 +156,7 @@ export const funcList1 = [
   {
     id: 3,
     title: "Kênh đăng ký",
-    path: "/sub-content",
+    path: "/sub-content?layout=grid",
     icon: <SubChannelIcon />,
     activeIcon: <ActiveSubChannelIcon />,
     condition: true,

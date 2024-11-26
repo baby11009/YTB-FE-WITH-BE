@@ -39,7 +39,7 @@ const HomePage = () => {
     "sub-channels": <SubscribeChannel openedMenu={openedMenu} />,
     watched: <WatchedPart openedMenu={openedMenu} />,
     playlists: <PlaylistsPart openedMenu={openedMenu} />,
-    playlist: <PlaylistPart id={params?.id} />,
+    playlist: <PlaylistPart />,
     "ytb-channel": <YtbChannelPart openedMenu={openedMenu} />,
     feed: <FeedPart openedMenu={openedMenu} id={params?.id} />,
     news: <NewsPart openedMenu={openedMenu} />,

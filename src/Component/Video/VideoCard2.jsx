@@ -12,6 +12,7 @@ import {
   ShareIcon,
 } from "../../Assets/Icons";
 import { useState, useRef, useEffect } from "react";
+import { getRandomHexColor } from "../../util/func";
 
 const funcList1 = [
   {
@@ -54,10 +55,9 @@ const funcList2 = [
   },
 ];
 
-const duration = 1000
+const randomColor = getRandomHexColor();
 
 const VideoCard2 = ({ data }) => {
-
   const boxContainerRef = useRef();
 
   const [opened, setOpened] = useState(false);
@@ -82,20 +82,30 @@ const VideoCard2 = ({ data }) => {
   return (
     <Link
       className='inline-flex flex-1 py-[8px] cursor-pointer'
-      to={`/video/${data?.id}`}
+      to={`/video/${data?._id}`}
     >
-      <div className='w-[160px] h-[90px] rounded-[12px] overflow-hidden mr-[8px] relative'>
-        <img src={data.thumb} alt='' draggable={false}/>
+      <div
+        className='w-[160px] h-[90px] rounded-[12px] overflow-hidden mr-[8px] relative'
+        style={{ backgroundColor: randomColor }}
+      >
+        <img
+          src={`${import.meta.env.VITE_BASE_API_URI}${
+            import.meta.env.VITE_VIEW_THUMB_API
+          }${data?.thumb}`}
+          alt=''
+          draggable={false}
+          className='object-contain w-full h-full'
+        />
         {/* duration */}
-        {data.type.status !== "is live" && (
-          <div
-            className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
+
+        <div
+          className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
         mr-[8px] mb-[8px] text-[12px] leading-[18px] rounded-[4px]'
-          >
-            {durationCalc(data?.duration || duration)}
-          </div>
-        )}
-        {data.progress !== 0 && (
+        >
+          {durationCalc(data?.duration || duration)}
+        </div>
+
+        {/* {data.progress !== 0 && (
           <div className='w-full absolute bottom-0 h-[4px] bg-gray-71'>
             <div
               className='absolute h-full bg-red-FF'
@@ -104,14 +114,14 @@ const VideoCard2 = ({ data }) => {
               }}
             ></div>
           </div>
-        )}
+        )} */}
       </div>
       <div className='flex-1 w-0 overflow-hidden'>
         <div className='mb-[8px] t-ellipsis text-[16px] leading-[22px] font-[500]'>
           {data?.title}
         </div>
         <div className='flex items-center text-[12px] leading-[18px] text-gray-A text-nowrap'>
-          <div>{data?.channel.name}</div>
+          <div>{data?.channel_info.name}</div>
           <div className="hidden 2xsm:block before:content-['•'] before:mx-[4px]">
             {formatNumber(data?.view || 0)} lượt xem
           </div>

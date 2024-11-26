@@ -16,7 +16,7 @@ const funcList1 = [
   },
 ];
 
-const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle }) => {
+const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle, noDesc }) => {
   const [opened, setOpened] = useState(false);
 
   const containRef = useRef();
@@ -58,40 +58,42 @@ const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle }) => {
           className='size-full object-contain'
         />
       </div>
-      <div className='pt-[12px] flex justify-between'>
-        <div>
-          <div className=' text-[16px] leading-[22px]'>
-            <h3 className='t-ellipsis '>{data.title}</h3>
+      {!noDesc && (
+        <div className='pt-[12px] flex justify-between'>
+          <div>
+            <div className=' text-[16px] leading-[22px]'>
+              <h3 className='t-ellipsis '>{data.title}</h3>
+            </div>
+            <div className='text-[14px] leading-[20px] text-gray-A'>
+              {formatNumber(data.view || view)} lượt xem
+            </div>
           </div>
-          <div className='text-[14px] leading-[20px] text-gray-A'>
-            {formatNumber(data.view || view)} lượt xem
-          </div>
-        </div>
-        <motion.div
-          className='w-[24px] h-[24px] rounded-[50%] relative'
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            setOpened(true);
-          }}
-          whileTap={{
-            backgroundColor: "rgba(255,255,255,0.2)",
-          }}
-          ref={containRef}
-        >
-          <Setting2Icon />
+          <motion.div
+            className='w-[24px] h-[24px] rounded-[50%] relative'
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setOpened(true);
+            }}
+            whileTap={{
+              backgroundColor: "rgba(255,255,255,0.2)",
+            }}
+            ref={containRef}
+          >
+            <Setting2Icon />
 
-          {opened && (
-            <CustomeFuncBox
-              style={`w-[210px] top-[100%] right-[20%] ${
-                funcBoxPos ? funcBoxPos : "sm:left-[-20%]"
-              } `}
-              setOpened={setOpened}
-              funcList1={funcList1}
-            />
-          )}
-        </motion.div>
-      </div>
+            {opened && (
+              <CustomeFuncBox
+                style={`w-[210px] top-[100%] right-[20%] ${
+                  funcBoxPos ? funcBoxPos : "sm:left-[-20%]"
+                } `}
+                setOpened={setOpened}
+                funcList1={funcList1}
+              />
+            )}
+          </motion.div>
+        </div>
+      )}
     </Link>
   );
 };

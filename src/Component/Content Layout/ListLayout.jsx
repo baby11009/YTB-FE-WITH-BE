@@ -1,18 +1,17 @@
 import VideoCard from "../Video/VideoCard";
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ThickGridIcon,
   EmptyGridIcon,
   ListIcon,
   Short2Icon,
-  CloseIcon,
   ThinArrowIcon,
 } from "../../Assets/Icons";
 import ShortCard from "../Short/ShortCard";
 import { smoothScroll } from "../../util/scrollCustom";
 
-const HorizonCard = ({ data, layout, setLayout, showBtn }) => {
+const HorizonCard = ({ data, layout, setLayout }) => {
   return (
     <div className='pb-[24px] border-b-[1px] border-black-0.2'>
       <div className='my-[14px] flex justify-between'>
@@ -31,7 +30,7 @@ const HorizonCard = ({ data, layout, setLayout, showBtn }) => {
             </span>
           </div>
         </Link>
-        {showBtn && (
+        {setLayout && (
           <div className='flex items-center'>
             <Link
               className='px-[16px] rounded-[18px] hover:bg-[#263850] cursor-pointer'
@@ -73,6 +72,7 @@ const HorizonCard = ({ data, layout, setLayout, showBtn }) => {
 };
 
 const ListLayout = ({ openedMenu, vidList, shortList, layout, setLayout }) => {
+  const navigate = useNavigate();
   const [isScroll, setIsScroll] = useState(false);
 
   const [scrollPosition, setScrollPosition] = useState("begin");
@@ -128,12 +128,7 @@ const ListLayout = ({ openedMenu, vidList, shortList, layout, setLayout }) => {
             : "2lg:w-[1070px] 1-5xl:w-[1284px]"
         }`}
       >
-        <HorizonCard
-          data={vidList[0]}
-          layout={layout}
-          setLayout={setLayout}
-          showBtn={true}
-        />
+        <HorizonCard data={vidList[0]} layout={layout} setLayout={setLayout} />
         <div className='mb-[48px] pb-[17px] border-b-[1px] border-[rgba(255,255,255,0.2)]'>
           <div className='ml-[8px] my-[16px] flex items-center justify-between'>
             <div className='flex gap-[8px]'>
@@ -143,11 +138,16 @@ const ListLayout = ({ openedMenu, vidList, shortList, layout, setLayout }) => {
               </span>
             </div>
 
-            <div className='px-[16px] rounded-[18px] hover:bg-[#263850] cursor-pointer'>
+            <button
+              className='px-[16px] rounded-[18px] hover:bg-[#263850] cursor-pointer'
+              onClick={() => {
+                navigate("short");
+              }}
+            >
               <span className=' text-nowrap text-[14px] leading-[36px] font-[500] text-blue-3E'>
                 View all
               </span>
-            </div>
+            </button>
           </div>
           <div className='relative'>
             {scrollPosition !== "begin" && (
@@ -194,12 +194,7 @@ const ListLayout = ({ openedMenu, vidList, shortList, layout, setLayout }) => {
         </div>
 
         {vidList?.slice(1, vidList?.length - 1).map((item) => (
-          <HorizonCard
-            key={item._id}
-            data={item}
-            layout={layout}
-            setLayout={setLayout}
-          />
+          <HorizonCard key={item._id} data={item} layout={layout} />
         ))}
       </div>
     </div>
