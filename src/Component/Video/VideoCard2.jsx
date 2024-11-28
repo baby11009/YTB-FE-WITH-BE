@@ -102,7 +102,7 @@ const VideoCard2 = ({ data }) => {
           className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
         mr-[8px] mb-[8px] text-[12px] leading-[18px] rounded-[4px]'
         >
-          {durationCalc(data?.duration || duration)}
+          {durationCalc(data?.duration || 0)}
         </div>
 
         {/* {data.progress !== 0 && (

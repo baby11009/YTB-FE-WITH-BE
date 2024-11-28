@@ -149,7 +149,7 @@ export const funcList1 = [
   {
     id: 2,
     title: "Shorts",
-    path: "/short/1",
+    path: "/short",
     icon: <ShortIcon />,
     activeIcon: <ActiveShortIcon />,
   },
@@ -322,7 +322,7 @@ export const Button = ({ data, path, style, textStyle, handleOnClick }) => {
     <li
       className={`px-[12px] rounded-[10px] cursor-pointer
         ${
-          path && data.path && data?.path === path
+          path && data.path && data?.path.split("?")[0] === path
             ? "bg-hover-black hover:bg-black-0.2"
             : "hover:bg-hover-black"
         }

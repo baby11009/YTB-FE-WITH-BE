@@ -37,20 +37,30 @@ const funcList = [
 
 const btnList = [
   {
-    id: 1,
+    id: "all",
     title: "All",
   },
   {
-    id: 2,
+    id: "video",
     title: "Video",
   },
   {
-    id: 3,
+    id: "short",
     title: "Short",
   },
 ];
 
-const Display = ({ id, title, updatedAt, size, videoList }) => {
+const Display = ({
+  id,
+  title,
+  updatedAt,
+  size,
+  videoList,
+  handleSort,
+  currSort,
+  changePostion,
+}) => {
+  
   const { user } = useAuthContext();
 
   const containerRef = useRef();
@@ -63,13 +73,9 @@ const Display = ({ id, title, updatedAt, size, videoList }) => {
 
   const [playList, setPlaylist] = useState(undefined);
 
-  const [data, setData] = useState(undefined);
-
   const [showed, setShowed] = useState(false);
 
   const [opened, setOpened] = useState(false);
-
-  const [activeId, setActiveId] = useState(1);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -85,47 +91,10 @@ const Display = ({ id, title, updatedAt, size, videoList }) => {
     };
   }, []);
 
-  useLayoutEffect(() => {
-    if (playList) {
-      setData(playList?.vidList);
-    }
-  }, [playList]);
-
-  useLayoutEffect(() => {
-    switch (id) {
-      case "wl":
-        setPlaylist(playListWL);
-        setNoDrag(false);
-        break;
-      case "lv":
-        setPlaylist(playlistLv);
-        setNoDrag(true);
-        break;
-      default:
-        setPlaylist(playListWL);
-        setNoDrag(false);
-    }
-  }, [id]);
-
-  const handleSort = () => {
-    let list = [...data];
-
-    let temp;
-
-    if (dragItem.current !== dragOverItem.current && !noDrag) {
-      temp = list[dragItem.current];
-
-      list[dragItem.current] = list[dragOverItem.current];
-
-      list[dragOverItem.current] = temp;
-
-      setData(list);
-    }
+  const handleChangePosition = (e) => {
+    e.target.style.opacity = 1;
+    changePostion(dragItem.current, dragOverItem.current);
   };
-
-  if (!playList) {
-    return "loading";
-  }
 
   return (
     <div className='flex justify-center pt-[24px]'>
@@ -149,13 +118,13 @@ const Display = ({ id, title, updatedAt, size, videoList }) => {
                     setShowed(false);
                   }}
                 >
-                  {data && (
+                  {/* {data && (
                     <img
                       src={data[0]?.thumb}
                       alt='thumb image'
                       className='w-full h-full '
                     />
-                  )}
+                  )} */}
                   {showed && (
                     <div className='absolute inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.8)] '>
                       <div>
@@ -265,13 +234,15 @@ const Display = ({ id, title, updatedAt, size, videoList }) => {
                 <button
                   className={`my-[12px] mr-[12px] px-[12px] rounded-[8px]  transition-colors ease-out duration-300
                       ${
-                        activeId === item.id
+                        currSort === item.id
                           ? "bg-white-F1 hover:bg-white text-black"
                           : "bg-black-0.1 hover:bg-black-0.2"
                       }
                     `}
                   key={item.id}
-                  onClick={() => setActiveId(item.id)}
+                  onClick={() => {
+                    handleSort(item.id);
+                  }}
                 >
                   {item.title}
                 </button>
@@ -284,18 +255,17 @@ const Display = ({ id, title, updatedAt, size, videoList }) => {
                 className='flex items-center hover:bg-black-0.1 rounded-[12px] cursor-grabbing'
                 key={index}
                 draggable={noDrag}
-                onDragStart={() => {
+                onDragStart={(e) => {
                   if (!noDrag) {
+                    e.target.style.opacity = "0";
                     dragItem.current = index;
                   }
                 }}
-                onDragEnter={() => {
-                  if (!noDrag) {
-                    dragOverItem.current = index;
-                  }
+                onDragEnd={handleChangePosition}
+                onDragOver={(e) => {
+                  dragOverItem.current = index;
+                  e.preventDefault();
                 }}
-                onDragEnd={handleSort}
-                onDragOver={(e) => e.preventDefault()}
               >
                 <div
                   className={`w-[36px] flex items-center justify-center ${

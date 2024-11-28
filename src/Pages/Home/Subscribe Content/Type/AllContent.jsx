@@ -11,8 +11,11 @@ import { useQuery } from "@tanstack/react-query";
 import { getCookie } from "../../../../util/tokenHelpers";
 import { IsEnd } from "../../../../util/scrollPosition";
 import { useSearchParams } from "react-router-dom";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const AllContent = ({ openedMenu }) => {
+  const { setFetchingState } = useAuthContext();
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [layout, setLayout] = useState("grid");
@@ -41,7 +44,11 @@ const AllContent = ({ openedMenu }) => {
 
   const shortIdsSet = useRef(new Set());
 
-  const { data: videoData } = useQuery({
+  const {
+    data: videoData,
+    isLoading,
+    isSuccess,
+  } = useQuery({
     queryKey: [...Object.values(videoQueriese)],
     queryFn: async () => {
       try {
@@ -124,6 +131,19 @@ const AllContent = ({ openedMenu }) => {
   useEffect(() => {
     setLayout(searchParams.get("layout"));
   }, [searchParams]);
+
+  useEffect(() => {
+    setFetchingState(() => {
+      if (isLoading) return "loading";
+
+      if (isSuccess) {
+        setTimeout(() => {
+          setFetchingState("none");
+        }, 1000);
+        return "success";
+      }
+    });
+  }, [isLoading, isSuccess]);
 
   useEffect(() => {
     window.addEventListener("scroll", () => {

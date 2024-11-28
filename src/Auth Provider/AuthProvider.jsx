@@ -8,6 +8,8 @@ const AuthProvider = ({ children }) => {
 
   const [isLoading, setIsLoading] = useState(true);
 
+  const [fetchingState, setFetchingState] = useState("none");
+
   const [refetch, setRefetch] = useState(true);
 
   const [isShowing, setIsShowing] = useState(undefined);
@@ -166,9 +168,22 @@ const AuthProvider = ({ children }) => {
         setShowHover,
         handleCursorPositon,
         modalContainerRef,
+        setFetchingState,
       }}
     >
       <div className='relative'>
+        <div
+          className={`absolute w-full h-[2px] bg-red-600 z-[9999] 
+        left-0 
+          ${
+            fetchingState === "loading"
+              ? "translate-x-[-70%] transition-all ease-in"
+              : fetchingState === "success"
+              ? "translate-x-[100%] transition-all ease-out "
+              : "translate-x-[-100%]"
+          }
+        `}
+        ></div>
         {isLoading ? (
           <div className='w-screen h-screen size bg-black flex items-center justify-center'>
             <span className='text-white font-bold text-[20px] leading-[22px]'>

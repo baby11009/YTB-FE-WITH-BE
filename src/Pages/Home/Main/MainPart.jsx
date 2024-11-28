@@ -3,6 +3,7 @@ import { GridLayout } from "../../../Component";
 import { IsEnd } from "../../../util/scrollPosition";
 import { useQueryClient } from "@tanstack/react-query";
 import { getData } from "../../../Api/getData";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 
 import CategoryPart from "./CategoryPart";
 
@@ -76,6 +77,8 @@ const shortParams = {
 };
 
 const MainPart = ({ openedMenu }) => {
+  const { setFetchingState } = useAuthContext();
+
   const [addNew, setAddNew] = useState(true);
 
   const queryClient = useQueryClient();
@@ -98,9 +101,13 @@ const MainPart = ({ openedMenu }) => {
 
   const watchedShortIdSet = useRef(new Set());
 
-  const { data: videos } = getData("/data/all", vidPrs, true, true);
+  const {
+    data: videos,
+    isLoading,
+    isSuccess,
+  } = getData("/data/all", vidPrs, true);
 
-  const { data: shorts } = getData("/data/all", shortPrs, true, true);
+  const { data: shorts } = getData("/data/all", shortPrs, true);
 
   useEffect(() => {
     if (isEnd) {
@@ -130,6 +137,21 @@ const MainPart = ({ openedMenu }) => {
     }
     setAddNew(!isEnd);
   }, [isEnd]);
+
+  useEffect(() => {
+    setFetchingState(() => {
+      if (isLoading) return "loading";
+
+      if (isSuccess) {
+        setTimeout(() => {
+          setFetchingState("none");
+        }, 1000);
+        return "success";
+      } else {
+        return "error";
+      }
+    });
+  }, [isLoading, isSuccess]);
 
   useLayoutEffect(() => {
     window.addEventListener("scroll", () => {

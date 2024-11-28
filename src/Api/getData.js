@@ -40,13 +40,15 @@ export const getData = (
         return res.data;
       } catch (error) {
         console.error(error);
-        alert(error.response.data.msg || error.response.data);
+        alert(
+          error.response?.data?.msg || error.response?.data || error.message
+        );
         throw error;
       }
     },
     enabled: condition,
     suspense,
-    cacheTime: 0,
+    cacheTime: 0, // Always fetch fresh data
   });
 };
 

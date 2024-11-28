@@ -11,6 +11,7 @@ export const AuthContext = createContext({
   setShowHover: () => {},
   handleCursorPositon: () => {},
   modalContainerRef: undefined,
+  setFetchingState: () => {},
 });
 
 export const useAuthContext = () => useContext(AuthContext);
