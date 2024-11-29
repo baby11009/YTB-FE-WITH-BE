@@ -25,3 +25,20 @@ export const chunkArray = (arr, chunkSize) => {
 
   return chunks;
 };
+
+export function getRandomLinearGradient() {
+  const randomColor = () => {
+    const r = Math.floor(Math.random() * 256); // Red
+    const g = Math.floor(Math.random() * 256); // Green
+    const b = Math.floor(Math.random() * 256); // Blue
+    return { r, g, b };
+  };
+
+  const color = randomColor();
+
+  const color1 = `rgba(${color.r}, ${color.g}, ${color.b},0.800)`;
+
+  const color2 = `rgba(${color.r}, ${color.g}, ${color.b},0.298)`;
+
+  return `linear-gradient(to bottom, ${color1} 0%, ${color2} 33%, rgba(15,15,15,1) 100%)`;
+}

@@ -29,7 +29,7 @@ export const getData = (
   }
 
   return useQuery({
-    queryKey: paramsValue,
+    queryKey: [...paramsValue, path],
     queryFn: async () => {
       try {
         const res = await request.get(path, {
@@ -82,7 +82,7 @@ export const getDataWithAuth = (
   }
 
   return useQuery({
-    queryKey: [...paramsValue],
+    queryKey: [...paramsValue, path],
     queryFn: async () => {
       try {
         const res = await request.get(path, {

@@ -1,11 +1,27 @@
 import Display from "./Display";
 import request from "../../../util/axios-base-url";
-import { useEffect, useState, useRef } from "react";
-import { getCookie } from "../../../util/tokenHelpers";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../Auth Provider/authContext";
+import { DownloadIcon } from "../../../Assets/Icons";
 
+const funcList = [
+  {
+    id: 1,
+    text: "Move to top",
+    icon: (
+      <div className='rotate-[180deg]'>
+        <DownloadIcon />
+      </div>
+    ),
+  },
+  {
+    id: 2,
+    text: "Move to bottom",
+    icon: <DownloadIcon />,
+  },
+];
 const WatchLater = () => {
   const { setFetchingState } = useAuthContext();
 
@@ -19,12 +35,11 @@ const WatchLater = () => {
 
   const videoIdsset = useRef(new Set());
 
-  const [addNew, setAddNew] = useState(false);
+  const [addNew, setAddNew] = useState(true);
 
   const [videoList, setVideoList] = useState([]);
 
   const [playlistInfo, setPlaylistInfo] = useState(undefined);
-  console.log("🚀 ~ playlistInf:", playlistInfo)
 
   const {
     data: watchLaterData,
@@ -33,7 +48,7 @@ const WatchLater = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: [...Object.values(queriese)],
+    queryKey: [...Object.values(queriese), "watchlater"],
     queryFn: async () => {
       try {
         const rsp = await request.get("/client/user/watchlater", {
@@ -77,7 +92,7 @@ const WatchLater = () => {
     }
   }, [watchLaterData]);
 
-  const handleChangePosition = async (from, to) => {
+  const handleChangePosition = useCallback(async (from, to) => {
     setVideoList((prev) => {
       const videos = [...prev];
       const temp = videos[from];
@@ -92,7 +107,7 @@ const WatchLater = () => {
         to,
       },
     });
-  };
+  });
 
   useEffect(() => {
     setFetchingState(() => {
@@ -113,24 +128,23 @@ const WatchLater = () => {
   }, [isLoading, isSuccess]);
 
   return (
-    <>
-      <Display
-        title={playlistInfo?.title}
-        updatedAt={playlistInfo?.updatedAt}
-        size={playlistInfo?.size}
-        videoList={videoList}
-        handleSort={(type) => {
-          queryClient.removeQueries({
-            queryKey: Object.values(queriese),
-            exact: true,
-          });
-          setQueriese((prev) => ({ ...prev, page: 1, type }));
-          setAddNew(true);
-        }}
-        currSort={queriese.type}
-        changePostion={handleChangePosition}
-      />
-    </>
+    <Display
+      title={playlistInfo?.title}
+      updatedAt={playlistInfo?.updatedAt}
+      size={playlistInfo?.size}
+      videoList={videoList}
+      handleSort={(type) => {
+        queryClient.removeQueries({
+          queryKey: [...Object.values(queriese), "watchlater"],
+          exact: true,
+        });
+        setQueriese((prev) => ({ ...prev, page: 1, type }));
+        setAddNew(true);
+      }}
+      currSort={queriese.type}
+      changePostion={handleChangePosition}
+      funcList={funcList}
+    />
   );
 };
 export default WatchLater;

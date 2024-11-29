@@ -14,8 +14,8 @@ import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { timeFormat2 } from "../../../util/timeforMat";
 import { formatNumber } from "../../../util/numberFormat";
 import { CustomeFuncBox, VideoCard2 } from "../../../Component";
-import { playListWL, playlistLv } from "../../../Mock Data/playlistData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
+import { getRandomLinearGradient } from "../../../util/func";
 
 const funcList = [
   {
@@ -51,7 +51,6 @@ const btnList = [
 ];
 
 const Display = ({
-  id,
   title,
   updatedAt,
   size,
@@ -59,8 +58,9 @@ const Display = ({
   handleSort,
   currSort,
   changePostion,
+  noDrag,
+  funcList,
 }) => {
-  
   const { user } = useAuthContext();
 
   const containerRef = useRef();
@@ -69,11 +69,7 @@ const Display = ({
 
   const dragOverItem = useRef(0);
 
-  const [noDrag, setNoDrag] = useState(false);
-
-  const [playList, setPlaylist] = useState(undefined);
-
-  const [showed, setShowed] = useState(false);
+  const lightnearColor = useRef(getRandomLinearGradient());
 
   const [opened, setOpened] = useState(false);
 
@@ -92,8 +88,10 @@ const Display = ({
   }, []);
 
   const handleChangePosition = (e) => {
+    if (noDrag) return;
     e.target.style.opacity = 1;
     changePostion(dragItem.current, dragOverItem.current);
+    lightnearColor.current = getRandomLinearGradient();
   };
 
   return (
@@ -101,39 +99,61 @@ const Display = ({
       <div className='relative w-full'>
         {/* Left side */}
         <div
-          className=' lg:fixed w-full lg:w-[360px] lg:min-h-[85.5vh] lg:mb-[24px] lg:ml-[24px] rounded-[16px] '
-          style={{
-            background: playList?.linearBg,
-          }}
+          className='lg:fixed w-full lg:w-[360px] lg:min-h-[85.5vh] lg:mb-[24px] lg:ml-[24px] lg:rounded-[16px] 
+          relative overflow-hidden'
         >
           <div className='p-[24px]'>
-            <div className='flex flex-col sm:flex-row sm:items-center lg:flex-col lg:items-start'>
+            <div className='absolute inset-0 bg-transparent opacity-[0.7] blur-[30px] flex justify-center z-[-1]'>
+              <div className='h-[268px] lg:h-[403px] aspect-video'>
+                {videoList?.length > 0 ? (
+                  <img
+                    src={`${import.meta.env.VITE_BASE_API_URI}${
+                      import.meta.env.VITE_VIEW_THUMB_API
+                    }${videoList[0]?.thumb}`}
+                    alt='thumb image'
+                    className='rounded-[12px] object-contain r'
+                  />
+                ) : (
+                  <div className='size-full bg-[rgba(0,0,0,0.5)] rounded-[12px]'></div>
+                )}
+              </div>
+              <div
+                className='absolute inset-0'
+                style={{
+                  background: lightnearColor.current,
+                }}
+              ></div>
+            </div>
+            <div className='flex flex-col sm:flex-row sm:items-center lg:flex-col lg:items-start '>
               <Link className='inline-block w-full flex-1'>
-                <div
-                  className='relative rounded-[12px] overflow-hidden cursor-pointer mb-[16px]'
-                  onMouseOver={() => {
-                    setShowed(true);
-                  }}
-                  onMouseOut={() => {
-                    setShowed(false);
-                  }}
-                >
-                  {/* {data && (
-                    <img
-                      src={data[0]?.thumb}
-                      alt='thumb image'
-                      className='w-full h-full '
-                    />
-                  )} */}
-                  {showed && (
-                    <div className='absolute inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.8)] '>
-                      <div>
-                        <PlayIcon />
+                <div className='relative cursor-pointer mb-[16px] flex items-center justify-center'>
+                  {videoList?.length > 0 ? (
+                    <div className='relative rounded-[12px] overflow-hidden group'>
+                      <img
+                        src={`${import.meta.env.VITE_BASE_API_URI}${
+                          import.meta.env.VITE_VIEW_THUMB_API
+                        }${videoList[0]?.thumb}`}
+                        alt='thumb image'
+                        className={`${
+                          videoList[0].type === "video"
+                            ? "h-[189px]"
+                            : "h-[224px]"
+                        } object-contain`}
+                      />
+                      <div
+                        className='absolute inset-0 flex items-center justify-center
+                       bg-[rgba(0,0,0,0.8)] group-hover:opacity-[1] opacity-0 transition-opacity duration-[.3s]'
+                      >
+                        <div>
+                          <PlayIcon />
+                        </div>
+                        <span className='ml-[2px] text-[12px] font-[500]'>
+                          PHÁT TẤT CẢ
+                        </span>
                       </div>
-                      <span className='ml-[2px] text-[12px] font-[500]'>
-                        PHÁT TẤT CẢ
-                      </span>
                     </div>
+                  ) : (
+                    <div className='h-[189px] aspect-video bg-[rgba(0,0,0,0.5)] rounded-[12px]'></div>
                   )}
                 </div>
               </Link>
@@ -143,8 +163,8 @@ const Display = ({
                   {title}
                 </div>
 
-                <div className='flex flex-col sm:flex-row lg:flex-col'>
-                  <div className='mt-[16px] mb-[12px] flex-1'>
+                <div className='flex lg:flex-col mt-[16px]'>
+                  <div className=' mb-[12px] flex-1'>
                     <Link className='inline-block text-[14px] leading-[20px] font-[500] mb-[4px]'>
                       {user?.name}
                     </Link>
@@ -157,10 +177,10 @@ const Display = ({
                     </div>
                   </div>
 
-                  <div className='flex items-center gap-[8px]'>
+                  <div className='flex items-center'>
                     <button
                       className='size-[36px] rounded-[50%] bg-black-0.1 hover:bg-black-0.2 
-                        flex items-center justify-center'
+                        flex items-center justify-center mr-[8px]'
                     >
                       <DownloadIcon />
                     </button>
@@ -254,15 +274,15 @@ const Display = ({
               <div
                 className='flex items-center hover:bg-black-0.1 rounded-[12px] cursor-grabbing'
                 key={index}
-                draggable={noDrag}
+                draggable={!noDrag}
                 onDragStart={(e) => {
-                  if (!noDrag) {
-                    e.target.style.opacity = "0";
-                    dragItem.current = index;
-                  }
+                  if (noDrag) return;
+                  e.target.style.opacity = "0";
+                  dragItem.current = index;
                 }}
                 onDragEnd={handleChangePosition}
                 onDragOver={(e) => {
+                  if (noDrag) return;
                   dragOverItem.current = index;
                   e.preventDefault();
                 }}
@@ -275,7 +295,7 @@ const Display = ({
                 >
                   {noDrag ? index + 1 : <EqualIcon />}
                 </div>
-                <VideoCard2 data={item} />
+                <VideoCard2 data={item} funcList2={funcList} />
               </div>
             ))}
           </div>

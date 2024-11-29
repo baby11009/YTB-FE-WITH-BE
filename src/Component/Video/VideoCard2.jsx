@@ -17,47 +17,35 @@ import { getRandomHexColor } from "../../util/func";
 const funcList1 = [
   {
     id: 1,
-    text: "Thêm vào danh sách chờ",
+    text: "Add to queue",
     icon: <AddWLIcon />,
   },
   {
     id: 2,
-    text: "Lưu vào danh sách Xem sau",
+    text: "Save to watch later",
     icon: <WatchedIcon />,
   },
   {
     id: 3,
-    text: "Thêm vào danh sách phát",
+    text: "Save to playlist",
     icon: <AddPLIcon />,
   },
   {
     id: 4,
-    text: "Tải xuống",
+    text: "Download",
     icon: <DownloadIcon />,
   },
   {
     id: 5,
-    text: "Chia sẻ",
+    text: "Share",
     icon: <ShareIcon />,
-  },
-];
-
-const funcList2 = [
-  {
-    id: 1,
-    text: "Chuyển lên đầu",
-    icon: <DownloadIcon />,
-  },
-  {
-    id: 2,
-    text: "Chuyển xuống dưới cùng",
-    icon: <DownloadIcon />,
   },
 ];
 
 const randomColor = getRandomHexColor();
 
-const VideoCard2 = ({ data }) => {
+const VideoCard2 = ({ data, funcList2 }) => {
+  console.log("🚀 ~ funcList2:", funcList2);
   const boxContainerRef = useRef();
 
   const [opened, setOpened] = useState(false);
@@ -147,7 +135,7 @@ const VideoCard2 = ({ data }) => {
         {opened && (
           <CustomeFuncBox
             funcList1={funcList1}
-            funcList2={funcList2}
+            funcList2={funcList2 ? funcList2 : undefined}
             setOpened={setOpened}
             style={"right-0 top-[75%]"}
           />

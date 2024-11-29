@@ -39,7 +39,7 @@ const CustomeFuncBox = ({
 }) => {
   return (
     <div
-      className={`absolute bg-[#282828] rounded-[12px] flex flex-col overflow-hidden z-[2000]
+      className={`absolute bg-[#282828] rounded-[12px] flex flex-col overflow-hidden z-[2000] py-[8px]
         ${style}
     `}
     >
