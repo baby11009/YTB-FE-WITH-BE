@@ -60,6 +60,7 @@ const Display = ({
   changePostion,
   noDrag,
   funcList,
+  isLoading,
 }) => {
   const { user } = useAuthContext();
 
@@ -295,9 +296,22 @@ const Display = ({
                 >
                   {noDrag ? index + 1 : <EqualIcon />}
                 </div>
-                <VideoCard2 data={item} funcList2={funcList} />
+                <VideoCard2
+                  index={index}
+                  data={item}
+                  funcList2={funcList}
+                  size={videoList?.length}
+                />
               </div>
             ))}
+            {isLoading && (
+              <div className='flex items-center justify-center'>
+                <div
+                  className='size-[36px] rounded-[50%] border-[2px] border-gray-A
+              border-l-transparent border-b-transparent animate-spin my-[8px]'
+                ></div>
+              </div>
+            )}
           </div>
         </div>
       </div>

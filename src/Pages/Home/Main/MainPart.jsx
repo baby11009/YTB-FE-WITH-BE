@@ -143,9 +143,6 @@ const MainPart = ({ openedMenu }) => {
       if (isLoading) return "loading";
 
       if (isSuccess) {
-        setTimeout(() => {
-          setFetchingState("none");
-        }, 1000);
         return "success";
       } else {
         return "error";

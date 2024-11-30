@@ -46,7 +46,7 @@ const ChannelVideo = ({ channelEmail }) => {
   }, []);
 
   useEffect(() => {
-    if (isEnd && videosData.totalPage > params.page) {
+    if (isEnd && videosData && videosData.totalPage > params.page) {
       setParams((prev) => ({ ...prev, page: prev.page + 1 }));
       setAddNew(false);
     }

@@ -46,35 +46,37 @@ const AuthProvider = ({ children }) => {
   };
 
   const handleCursorPositon = (e) => {
+    console.dir(hoverContainerRef.current);
+    // [...hoverContainerRef.current.child].forEach((child) => {
+    //   console.log(child);
+    // });
+
     const position = {
       x: e.pageX + 10,
       y: e.pageY - 10,
     };
 
     if (
-      hoverContainerRef.current &&
-      window.innerWidth - e.clientX < hoverContainerRef.current.clientWidth + 20
+      window.innerWidth - e.clientX <
+      hoverContainerRef.current.clientWidth + 20
     ) {
       position.x = e.pageX - hoverContainerRef.current.clientWidth;
     }
 
     if (
-      hoverContainerRef.current &&
       window.innerHeight - e.clientY <
-        hoverContainerRef.current.clientHeight + 20
+      hoverContainerRef.current.clientHeight + 20
     ) {
       position.y = e.pageY - hoverContainerRef.current.clientHeight;
     }
 
-    if (
-      hoverContainerRef.current &&
-      e.clientY - 56 < hoverContainerRef.current.clientHeight + 25
-    ) {
+    if (e.clientY - 56 < hoverContainerRef.current.clientHeight + 25) {
       position.y = e.pageY + hoverContainerRef.current.clientHeight + 20;
     }
 
     setCursorPosition(position);
   };
+
   useLayoutEffect(() => {
     if (authTokenRef.current && refetch) {
       getUserInfo(authTokenRef.current);
@@ -138,6 +140,19 @@ const AuthProvider = ({ children }) => {
   }, [isShowing]);
 
   useEffect(() => {
+    if (fetchingState === "success" || fetchingState === "error") {
+      const resetTimeout = setTimeout(() => {
+        setFetchingState("none"); // Reset về trạng thái ban đầu
+      }, 500); // Thời gian cho thanh trượt chạy ra khỏi màn hình
+      return () => clearTimeout(resetTimeout);
+    }
+  }, [fetchingState]);
+
+  useEffect(() => {
+    console.log(cursorPosition);
+  }, [cursorPosition]);
+
+  useEffect(() => {
     const handleClickOutside = (e) => {
       if (
         modalContainerRef.current &&
@@ -178,7 +193,7 @@ const AuthProvider = ({ children }) => {
           ${
             fetchingState === "loading"
               ? "translate-x-[-70%] transition-all ease-in"
-              : fetchingState === "success"
+              : fetchingState === "success" || fetchingState === "error"
               ? "translate-x-[100%] transition-all ease-out "
               : "translate-x-[-100%]"
           }
@@ -193,18 +208,19 @@ const AuthProvider = ({ children }) => {
         ) : (
           children
         )}
-        {showHover && (
-          <div
-            className='absolute z-[9999] translate-y-[-100%]'
-            style={{
-              left: cursorPosition.x,
-              top: cursorPosition.y,
-            }}
-            ref={hoverContainerRef}
-          >
-            {showHover}
-          </div>
-        )}
+
+        <div
+          className={`fixed z-[9999] translate-y-[-100%]  ${
+            showHover ? "opacity-1" : "opacity-0"
+          }`}
+          style={{
+            left: cursorPosition.x,
+            top: cursorPosition.y,
+          }}
+          ref={hoverContainerRef}
+        >
+          {showHover}
+        </div>
       </div>
     </AuthContext.Provider>
   );

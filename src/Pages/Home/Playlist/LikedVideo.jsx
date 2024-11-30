@@ -7,13 +7,6 @@ import { useAuthContext } from "../../../Auth Provider/authContext";
 import { IsEnd } from "../../../util/scrollPosition";
 import { TrashBinIcon } from "../../../Assets/Icons";
 
-const funcList = [
-  {
-    id: 1,
-    text: "Remove from Liked videos",
-    icon: <TrashBinIcon />,
-  },
-];
 const LikedVideo = () => {
   const { setFetchingState } = useAuthContext();
 
@@ -21,7 +14,7 @@ const LikedVideo = () => {
 
   const [queriese, setQueriese] = useState({
     page: 1,
-    limit: 12,
+    limit: 8,
     type: "all",
   });
 
@@ -36,7 +29,7 @@ const LikedVideo = () => {
   const [isEnd, setIsEnd] = useState(false);
 
   const {
-    data: watchLaterData,
+    data: likedVideosData,
     isLoading,
     isSuccess,
     isError,
@@ -58,15 +51,44 @@ const LikedVideo = () => {
     cacheTime: 0,
   });
 
+  const remvoveFromList = async (_, productData) => {
+    try {
+      await request
+        .post("/client/react", {
+          videoId: productData?._id,
+          type: "like",
+        })
+        .then((rsp) => {
+          if (rsp.data.type === "DELETE") {
+            setVideoList((prev) => {
+              return prev.filter((item) => item._id !== rsp.data.data.video_id);
+            });
+          }
+        });
+    } catch (error) {
+      alert("Failed to remove from Liked videos");
+      throw error;
+    }
+  };
+
+  const funcList = [
+    {
+      id: 1,
+      text: "Remove from Liked videos",
+      icon: <TrashBinIcon />,
+      handleOnClick: remvoveFromList,
+    },
+  ];
+
   useEffect(() => {
-    if (watchLaterData) {
+    if (likedVideosData) {
       setPlaylistInfo((prev) =>
-        prev ? { ...prev, ...watchLaterData?.data } : watchLaterData?.data
+        prev ? { ...prev, ...likedVideosData?.data } : likedVideosData?.data
       );
       if (addNew) {
         videoIdsset.current.clear();
-        setVideoList(watchLaterData?.data?.video_list);
-        watchLaterData?.data?.video_list?.forEach((video) => {
+        setVideoList(likedVideosData?.data?.video_list);
+        likedVideosData?.data?.video_list?.forEach((video) => {
           if (!videoIdsset.current.has(video?._id)) {
             videoIdsset.current.add(video?._id);
           }
@@ -74,7 +96,7 @@ const LikedVideo = () => {
         setAddNew(false);
       } else {
         const finalData = [];
-        watchLaterData?.data?.video_list?.forEach((video) => {
+        likedVideosData?.data?.video_list?.forEach((video) => {
           if (!videoIdsset.current.has(video?._id)) {
             videoIdsset.current.add(video?._id);
             finalData.push(video);
@@ -83,7 +105,7 @@ const LikedVideo = () => {
         setVideoList((prev) => [...prev, ...finalData]);
       }
     }
-  }, [watchLaterData]);
+  }, [likedVideosData]);
 
   useEffect(() => {
     setFetchingState(() => {
@@ -103,7 +125,23 @@ const LikedVideo = () => {
     });
   }, [isLoading, isSuccess]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (isEnd && likedVideosData && queriese.page < likedVideosData.totalPage) {
+      setQueriese((prev) => ({ ...prev, page: prev.page + 1 }));
+    }
+  }, [isEnd]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", () => {
+      IsEnd(setIsEnd);
+    });
+
+    return () => {
+      window.removeEventListener("scroll", () => {
+        IsEnd(setIsEnd);
+      });
+    };
+  }, []);
 
   return (
     <Display
@@ -111,13 +149,16 @@ const LikedVideo = () => {
       updatedAt={videoList[0]?.updatedAt}
       size={playlistInfo?.size}
       videoList={videoList}
+      isLoading={isLoading}
       handleSort={(type) => {
-        queryClient.removeQueries({
-          queryKey: [...Object.values(queriese), "likedvideos"],
-          exact: true,
-        });
-        setQueriese((prev) => ({ ...prev, page: 1, type }));
-        setAddNew(true);
+        if (queriese.type !== type) {
+          queryClient.removeQueries({
+            queryKey: [...Object.values(queriese), "likedvideos"],
+            exact: true,
+          });
+          setQueriese((prev) => ({ ...prev, page: 1, type }));
+          setAddNew(true);
+        }
       }}
       currSort={queriese.type}
       noDrag={true}

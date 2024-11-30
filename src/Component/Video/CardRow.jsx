@@ -1,14 +1,8 @@
 import VideoCard from "./VideoCard";
 import PlayListCard from "../Playlist/PlayListCard";
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect } from "react";
 
 const CardRow = ({ vidList, handleResize, showQtt, openedMenu, showBtn }) => {
-  const [vrArr, setVrArr] = useState([]);
-
-  useLayoutEffect(() => {
-    setVrArr(Array.from({ length: showQtt - vidList?.length }, (_, i) => i));
-  }, [showQtt, vidList]);
-
   useLayoutEffect(() => {
     // Function to update state with current window width
     handleResize();
@@ -48,7 +42,6 @@ const CardRow = ({ vidList, handleResize, showQtt, openedMenu, showBtn }) => {
           />
         );
       })}
-
     </div>
   );
 };

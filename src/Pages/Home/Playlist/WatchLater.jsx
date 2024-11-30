@@ -5,23 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import { DownloadIcon } from "../../../Assets/Icons";
+import { IsEnd } from "../../../util/scrollPosition";
 
-const funcList = [
-  {
-    id: 1,
-    text: "Move to top",
-    icon: (
-      <div className='rotate-[180deg]'>
-        <DownloadIcon />
-      </div>
-    ),
-  },
-  {
-    id: 2,
-    text: "Move to bottom",
-    icon: <DownloadIcon />,
-  },
-];
 const WatchLater = () => {
   const { setFetchingState } = useAuthContext();
 
@@ -40,6 +25,8 @@ const WatchLater = () => {
   const [videoList, setVideoList] = useState([]);
 
   const [playlistInfo, setPlaylistInfo] = useState(undefined);
+
+  const [isEnd, setIsEnd] = useState(false);
 
   const {
     data: watchLaterData,
@@ -92,40 +79,97 @@ const WatchLater = () => {
     }
   }, [watchLaterData]);
 
-  const handleChangePosition = useCallback(async (from, to) => {
-    setVideoList((prev) => {
-      const videos = [...prev];
-      const temp = videos[from];
-      videos[from] = videos[to];
-      videos[to] = temp;
+  const handleChangePosition = useCallback(
+    async (from, to) => {
+      try {
+        await request
+          .patch(`/client/playlist/${playlistInfo?._id}`, {
+            move: {
+              from,
+              to,
+            },
+          })
+          .then((rsp) => {
+            setVideoList((prev) => {
+              const videos = [...prev];
+              const temp = videos[from];
+              videos[from] = videos[to];
+              videos[to] = temp;
 
-      return videos;
-    });
-    await request.patch(`/client/playlist/${playlistInfo._id}`, {
-      move: {
-        from,
-        to,
+              return videos;
+            });
+          });
+      } catch (error) {
+        alert("Failed to move position");
+        throw error;
+      }
+    },
+    [playlistInfo?._id]
+  );
+
+  const movePosition = useCallback(
+    async (data, productId, index) => {
+      await handleChangePosition(index, index + data.value);
+    },
+    [playlistInfo?._id]
+  );
+
+  const funcList = [
+    {
+      id: 1,
+      text: "Move to top",
+      icon: (
+        <div className='rotate-[180deg]'>
+          <DownloadIcon />
+        </div>
+      ),
+      value: -1,
+      handleOnClick: movePosition,
+      condition: (id, size) => {
+        return id === 0;
       },
-    });
-  });
+    },
+    {
+      id: 2,
+      text: "Move to bottom",
+      icon: <DownloadIcon />,
+      value: 1,
+      handleOnClick: movePosition,
+      condition: (id, size) => {
+        return id === size - 1;
+      },
+    },
+  ];
 
   useEffect(() => {
     setFetchingState(() => {
       if (isLoading) return "loading";
       if (isError) {
-        setTimeout(() => {
-          setFetchingState("none");
-        }, 1000);
         return "error";
       }
       if (isSuccess) {
-        setTimeout(() => {
-          setFetchingState("none");
-        }, 1000);
         return "success";
       }
     });
   }, [isLoading, isSuccess]);
+
+  useEffect(() => {
+    if (isEnd && watchLaterData && queriese.page < watchLaterData.totalPage) {
+      setQueriese((prev) => ({ ...prev, page: prev.page + 1 }));
+    }
+  }, [isEnd]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", () => {
+      IsEnd(setIsEnd);
+    });
+
+    return () => {
+      window.removeEventListener("scroll", () => {
+        IsEnd(setIsEnd);
+      });
+    };
+  }, []);
 
   return (
     <Display
@@ -134,12 +178,14 @@ const WatchLater = () => {
       size={playlistInfo?.size}
       videoList={videoList}
       handleSort={(type) => {
-        queryClient.removeQueries({
-          queryKey: [...Object.values(queriese), "watchlater"],
-          exact: true,
-        });
-        setQueriese((prev) => ({ ...prev, page: 1, type }));
-        setAddNew(true);
+        if (queriese.type !== type) {
+          queryClient.removeQueries({
+            queryKey: [...Object.values(queriese), "watchlater"],
+            exact: true,
+          });
+          setQueriese((prev) => ({ ...prev, page: 1, type }));
+          setAddNew(true);
+        }
       }}
       currSort={queriese.type}
       changePostion={handleChangePosition}

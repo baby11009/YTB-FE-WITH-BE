@@ -102,7 +102,6 @@ const HoverButton = ({ title, icon }) => {
 
 const VideoCard = ({
   data,
-  showBtn,
   showCloseBtn,
   layout,
   style,
@@ -123,10 +122,6 @@ const VideoCard = ({
   const containRef = useRef();
 
   const bgColorRef = useRef(getRandomHexColor());
-
-  const [showed, setShowed] = useState(false);
-
-  const [opened, setOpened] = useState(false);
 
   const navigate = useNavigate();
 
@@ -186,18 +181,8 @@ const VideoCard = ({
 
   return (
     <div
-      className={`flex-1 relative ${style || "mx-[8px] mb-[40px]"}`}
+      className={`flex-1 relative ${style || "mx-[8px] mb-[40px]"} group`}
       style={styleInline}
-      onMouseOver={() => {
-        if (!opened) {
-          setShowed(true);
-        }
-      }}
-      onMouseOut={() => {
-        if (!opened) {
-          setShowed(false);
-        }
-      }}
     >
       <Link to={`/video/${data?._id || 5}`}>
         <div
@@ -238,16 +223,13 @@ const VideoCard = ({
           ></div>
         </div> */}
 
-          {/* Hover things */}
-          {showed && showBtn && (
-            <div className='absolute right-0 top-0'>
-              <HoverButton title={"Xem sau"} icon={<LaterIcon />} />
-              <HoverButton
-                title={"Thêm vào danh sách chờ"}
-                icon={<PlayListIcon />}
-              />
-            </div>
-          )}
+          <div className='absolute right-0 top-0 group-hover:opacity-[1] opacity-0'>
+            <HoverButton title={"Xem sau"} icon={<LaterIcon />} />
+            <HoverButton
+              title={"Thêm vào danh sách chờ"}
+              icon={<PlayListIcon />}
+            />
+          </div>
         </div>
       </Link>
 
@@ -292,38 +274,37 @@ const VideoCard = ({
                   <CloseIcon />
                 </div>
               )}
-              {showed && (
-                <div
-                  className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center 
-                  absolute right-0 translate-x-[30%] translate-y-[-15%] z-[500] active:bg-black-0.2'
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleCursorPositon(e);
-                    setShowHover((prev) =>
-                      prev ? undefined : (
-                        <CustomeFuncBox
-                          style={`w-[270px] right-[20%] ${
-                            funcBoxPos
-                              ? funcBoxPos
-                              : "sm:left-[-20%] top-[100%] "
-                          }`}
-                          setOpened={setOpened}
-                          funcList1={funcList1}
-                          funcList2={!noFunc2 && funcList2}
-                        />
-                      )
-                    );
-                  }}
-                  ref={containRef}
-                >
-                  <Setting2Icon />
-                </div>
-              )}
+
+              <button
+                className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center 
+                  absolute right-0 translate-x-[30%] translate-y-[-15%] z-[500] active:bg-black-0.2 group-hover:opacity-[1] opacity-0'
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCursorPositon(e);
+                  setShowHover((prev) =>
+                    prev ? undefined : (
+                      <CustomeFuncBox
+                        style={`w-[270px] right-[20%] ${
+                          funcBoxPos ? funcBoxPos : "sm:left-[-20%] top-[100%] "
+                        }`}
+                        setOpened={() => {
+                          setShowHover(undefined);
+                        }}
+                        funcList1={funcList1}
+                        funcList2={!noFunc2 && funcList2}
+                      />
+                    )
+                  );
+                }}
+                ref={containRef}
+              >
+                <Setting2Icon />
+              </button>
             </div>
             <div
               className={` text-gray-A ${

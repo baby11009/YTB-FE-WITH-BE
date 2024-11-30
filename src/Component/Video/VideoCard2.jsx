@@ -11,8 +11,9 @@ import {
   DownloadIcon,
   ShareIcon,
 } from "../../Assets/Icons";
-import { useState, useRef, useEffect } from "react";
+import { useRef } from "react";
 import { getRandomHexColor } from "../../util/func";
+import { useAuthContext } from "../../Auth Provider/authContext";
 
 const funcList1 = [
   {
@@ -44,28 +45,10 @@ const funcList1 = [
 
 const randomColor = getRandomHexColor();
 
-const VideoCard2 = ({ data, funcList2 }) => {
-  console.log("🚀 ~ funcList2:", funcList2);
+const VideoCard2 = ({ index, size, data, funcList2, funcBoxPos }) => {
+  const { setShowHover, handleCursorPositon } = useAuthContext();
+
   const boxContainerRef = useRef();
-
-  const [opened, setOpened] = useState(false);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        boxContainerRef.current &&
-        !boxContainerRef.current.contains(e.target)
-      ) {
-        setOpened(false);
-      }
-    };
-
-    window.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      window.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   return (
     <Link
@@ -125,21 +108,28 @@ const VideoCard2 = ({ data, funcList2 }) => {
         <button
           className='size-[40px] rounded-[50%] flex items-center justify-center active:bg-black-0.2'
           onClick={(e) => {
-            e.stopPropagation();
             e.preventDefault();
-            setOpened((prev) => !prev);
+            e.stopPropagation();
+            handleCursorPositon(e);
+            setShowHover((prev) =>
+              prev ? undefined : (
+                <CustomeFuncBox
+                  style={`translate-x-[-100%]`}
+                  setOpened={() => {
+                    setShowHover(undefined);
+                  }}
+                  funcList1={funcList1}
+                  funcList2={funcList2 ? funcList2 : undefined}
+                  productData={data}
+                  productIndex={index}
+                  size={size}
+                />
+              )
+            );
           }}
         >
           <Setting2Icon />
         </button>
-        {opened && (
-          <CustomeFuncBox
-            funcList1={funcList1}
-            funcList2={funcList2 ? funcList2 : undefined}
-            setOpened={setOpened}
-            style={"right-0 top-[75%]"}
-          />
-        )}
       </div>
     </Link>
   );

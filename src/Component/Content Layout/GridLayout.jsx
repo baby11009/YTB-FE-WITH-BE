@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, Fragment } from "react";
 import ShortVids from "../Short/ShortVids";
 import CardRow from "../Video/CardRow";
-import { vidList2 as mockList } from "../../Mock Data/videoData";
 import { chunkArray } from "../../util/func";
 
 const GridLayout = ({ openedMenu, vidList, shortList }) => {

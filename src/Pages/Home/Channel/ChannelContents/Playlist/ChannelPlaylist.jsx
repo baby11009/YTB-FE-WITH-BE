@@ -79,7 +79,7 @@ const ChannelPlaylist = ({ channelEmail }) => {
   }, []);
 
   useEffect(() => {
-    if (isEnd && playlistData.totalPage > params.page) {
+    if (isEnd && playlistData && playlistData.totalPage > params.page) {
       setParams((prev) => ({ ...prev, page: prev.page + 1 }));
       setAddNew(false);
     }

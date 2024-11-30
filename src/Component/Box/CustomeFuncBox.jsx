@@ -1,4 +1,10 @@
-const CustomeFuncBtn = ({ data, currentId, setOpened }) => {
+const CustomeFuncBtn = ({
+  data,
+  currentId,
+  setOpened,
+  productData,
+  productIndex,
+}) => {
   return (
     <div
       className={`flex items-center h-[40px] px-[16px] py-[2px] cursor-pointer
@@ -12,7 +18,7 @@ const CustomeFuncBtn = ({ data, currentId, setOpened }) => {
         e.preventDefault();
         setOpened(false);
         if (data.handleOnClick) {
-          data.handleOnClick(data);
+          data.handleOnClick(data, productData, productIndex);
         }
       }}
     >
@@ -36,38 +42,65 @@ const CustomeFuncBox = ({
   currentId,
   funcList1,
   funcList2,
+  productData,
+  productIndex,
+  size,
 }) => {
   return (
     <div
-      className={`absolute bg-[#282828] rounded-[12px] flex flex-col overflow-hidden z-[2000] py-[8px]
+      className={`absolute bg-[#282828] rounded-[12px] z-[2000] py-[8px]
         ${style}
     `}
     >
-      {funcList1 &&
-        funcList1.map((item) => {
-          if (item.condition) {
-            return null;
-          }
+      <div className='flex flex-col overflow-hidden'>
+        {funcList1 &&
+          funcList1.map((item) => {
+            if (
+              typeof item.condition === "function" &&
+              item.condition(productIndex, size)
+            ) {
+              return null;
+            } else if (item.condition) {
+              return null;
+            }
 
-          return (
-            <CustomeFuncBtn
-              key={item.id}
-              data={item}
-              currentId={currentId}
-              setOpened={setOpened}
-            />
-          );
-        })}
-      {funcList2 && <hr className='border-[rgba(255,255,255,0.2)] my-[8px]' />}
-      {funcList2 &&
-        funcList2.map((item) => (
-          <CustomeFuncBtn
-            key={item.id}
-            data={item}
-            currentId={currentId}
-            setOpened={setOpened}
-          />
-        ))}
+            return (
+              <CustomeFuncBtn
+                key={item.id}
+                data={item}
+                currentId={currentId}
+                setOpened={setOpened}
+                productData={productData}
+                productIndex={productIndex}
+              />
+            );
+          })}
+        {funcList2 && (
+          <hr className='border-[rgba(255,255,255,0.2)] my-[8px]' />
+        )}
+        {funcList2 &&
+          funcList2.map((item) => {
+            if (
+              typeof item.condition === "function" &&
+              item.condition(productIndex, size)
+            ) {
+              return null;
+            } else if (typeof item.condition === "boolean" && item.condition) {
+              return null;
+            }
+
+            return (
+              <CustomeFuncBtn
+                key={item.id}
+                data={item}
+                currentId={currentId}
+                setOpened={setOpened}
+                productData={productData}
+                productIndex={productIndex}
+              />
+            );
+          })}
+      </div>
     </div>
   );
 };
