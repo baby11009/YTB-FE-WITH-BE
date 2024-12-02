@@ -26,7 +26,7 @@ const VideoCard = ({ data, handleRemoveVideo }) => {
       </div>
       <div className='w-[250px]'>
         <div className='text-nowrap overflow-hidden text-ellipsis'>
-          {data.title} 21 123123123 123 131313 131313
+          {data.title}
         </div>
       </div>
       <div className='w-[130px]'>{timeFormat3(data.createdAt)}</div>
@@ -60,6 +60,8 @@ const initPlaylistParams = {
   videoLimit: 4,
   videoPage: 1,
 };
+
+const maxLength = 255;
 
 const VideoUpsertModal = ({ title, id }) => {
   const queryClient = useQueryClient();
@@ -197,7 +199,10 @@ const VideoUpsertModal = ({ title, id }) => {
 
   useEffect(() => {
     return () => {
-      queryClient.clear();
+      queryClient.refetchQueries({
+        queryKey: [...Object.values(playlistPrs), `/client/playlist/${id}`],
+        exact: true,
+      });
     };
   }, []);
 
@@ -229,6 +234,8 @@ const VideoUpsertModal = ({ title, id }) => {
               <div className='basis-[100%] md:basis-[40%]'>
                 <div className='basis-[100%]  2md:basis-[49%]'>
                   <TextArea
+                    disabled={playlistData?.data?.type === "personal"}
+                    maxLength={maxLength}
                     title={"Title"}
                     name={"title"}
                     value={formData.title}
@@ -245,6 +252,7 @@ const VideoUpsertModal = ({ title, id }) => {
                 {/* Type*/}
                 <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[90]'>
                   <DropDown
+                    disabled={playlistData?.data?.type === "personal"}
                     list={typesRef.current}
                     title={"Type"}
                     value={formData.type}

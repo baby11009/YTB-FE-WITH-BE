@@ -65,7 +65,6 @@ const CreatePlaylist = ({ videoId }) => {
 
   useEffect(() => {
     textAreaRef.current.addEventListener("input", function () {
-      this.style.height = "22px";
       this.style.height = this.scrollHeight + "px";
     });
   }, []);

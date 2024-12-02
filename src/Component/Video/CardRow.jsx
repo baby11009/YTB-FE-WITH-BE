@@ -38,7 +38,6 @@ const CardRow = ({ vidList, handleResize, showQtt, openedMenu, showBtn }) => {
             key={index}
             showBtn={showBtn}
             descStyle={"!hidden"}
-            funcBoxPos={(index + 1) % showQtt === 0 && "sm:right-[20%]"}
           />
         );
       })}

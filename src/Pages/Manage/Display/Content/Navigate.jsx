@@ -14,12 +14,12 @@ const funcList = [
   },
   {
     id: 3,
-    title: "Danh sách phát",
+    title: "Playlists",
     param: "playlists",
   },
   {
     id: 4,
-    title: "Bài đăng",
+    title: "Comunity",
     param: "comunity",
   },
 ];
@@ -41,7 +41,7 @@ const CustomeButton = ({ data, pathParam }) => {
   );
 };
 
-const Navigate = ({ pathParam, refetch }) => {
+const Navigate = ({ pathParam }) => {
   return (
     <Swiper
       slidesPerView='auto'

@@ -16,6 +16,8 @@ const AuthProvider = ({ children }) => {
 
   const [showHover, setShowHover] = useState(undefined);
 
+  const [displayModal, setDisplayModal] = useState(undefined);
+
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 
   const [openedMenu, setOpenedMenu] = useState(true);
@@ -45,33 +47,30 @@ const AuthProvider = ({ children }) => {
       });
   };
 
-  const handleCursorPositon = (e) => {
-    console.dir(hoverContainerRef.current);
-    // [...hoverContainerRef.current.child].forEach((child) => {
-    //   console.log(child);
-    // });
+  const handleCursorPositon = async (e) => {
+    let child;
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        child = hoverContainerRef.current.children[0];
+        return resolve();
+      });
+    });
 
     const position = {
       x: e.pageX + 10,
       y: e.pageY - 10,
     };
 
-    if (
-      window.innerWidth - e.clientX <
-      hoverContainerRef.current.clientWidth + 20
-    ) {
-      position.x = e.pageX - hoverContainerRef.current.clientWidth;
+    if (window.innerWidth - e.clientX < child.clientWidth + 20) {
+      position.x = e.pageX - child.clientWidth;
     }
 
-    if (
-      window.innerHeight - e.clientY <
-      hoverContainerRef.current.clientHeight + 20
-    ) {
-      position.y = e.pageY - hoverContainerRef.current.clientHeight;
+    if (window.innerHeight - e.clientY < child.clientHeight) {
+      position.y = e.pageY - child.clientHeight;
     }
 
-    if (e.clientY - 56 < hoverContainerRef.current.clientHeight + 25) {
-      position.y = e.pageY + hoverContainerRef.current.clientHeight + 20;
+    if (e.clientY - 56 < child.clientHeight.clientHeight + 25) {
+      position.y = e.pageY + child.clientHeight;
     }
 
     setCursorPosition(position);
@@ -108,7 +107,7 @@ const AuthProvider = ({ children }) => {
         handleClickOutside(e);
       });
     };
-  }, [hoverContainerRef.current]);
+  }, [hoverContainerRef]);
 
   useEffect(() => {
     const disabledScroll = (e) => {
@@ -117,6 +116,8 @@ const AuthProvider = ({ children }) => {
     if (showHover) {
       document.addEventListener("scroll", disabledScroll, { passive: false });
       document.addEventListener("wheel", disabledScroll, { passive: false });
+    } else {
+      setDisplayModal(false);
     }
 
     return () => {
@@ -149,7 +150,7 @@ const AuthProvider = ({ children }) => {
   }, [fetchingState]);
 
   useEffect(() => {
-    console.log(cursorPosition);
+    setDisplayModal(showHover);
   }, [cursorPosition]);
 
   useEffect(() => {
@@ -208,19 +209,20 @@ const AuthProvider = ({ children }) => {
         ) : (
           children
         )}
-
-        <div
-          className={`fixed z-[9999] translate-y-[-100%]  ${
-            showHover ? "opacity-1" : "opacity-0"
-          }`}
-          style={{
-            left: cursorPosition.x,
-            top: cursorPosition.y,
-          }}
-          ref={hoverContainerRef}
-        >
-          {showHover}
-        </div>
+        {showHover && (
+          <div
+            className={`absolute z-[9999] translate-y-[-100%] ${
+              displayModal ? "opacity-[1]" : "opacity-0"
+            }`}
+            style={{
+              left: cursorPosition.x,
+              top: cursorPosition.y,
+            }}
+            ref={hoverContainerRef}
+          >
+            {showHover}
+          </div>
+        )}
       </div>
     </AuthContext.Provider>
   );

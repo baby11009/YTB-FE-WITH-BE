@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ThinArrowIcon } from "../../Assets/Icons";
 
-const DropDown = ({ title, list = [], handleOnClick, value }) => {
+const DropDown = ({ disabled, title, list = [], handleOnClick, value }) => {
   const [opened, setOpened] = useState(undefined);
 
   const containerRef = useRef();
@@ -31,6 +31,7 @@ const DropDown = ({ title, list = [], handleOnClick, value }) => {
     >
       <div className='border-b-[1px] pb-[8px] relative w-[100%] sm:max-w-[360px]'>
         <button
+          disabled={disabled}
           className='flex items-center justify-between w-full px-[8px]'
           type='button'
           onClick={() => {

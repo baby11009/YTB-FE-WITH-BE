@@ -11,21 +11,27 @@ export const getData = (
     return null;
   }
 
-  const paramsValue = Object.values(params);
-  const paramsKey = Object.keys(params);
+  const paramsValue = [...Object.values(params)];
+  const paramsKey = [...Object.keys(params)];
 
-  const notParamsResetKeys = Object.keys(params).filter(
+  const notParamsResetKeys = paramsKey.filter(
     (key) => key !== "refetch" && key !== "clearCache" && key !== "reset"
   );
 
   let finalParams = {};
 
-  if (paramsKey.length !== notParamsResetKeys.length) {
-    notParamsResetKeys.map((key) => {
-      finalParams[key] = params[key];
-    });
-  } else {
-    finalParams = params;
+  if (paramsKey.length > 0) {
+    const notParamsResetKeys = paramsKey.filter(
+      (key) => key !== "refetch" && key !== "clearCache" && key !== "reset"
+    );
+
+    if (paramsKey.length !== notParamsResetKeys.length) {
+      notParamsResetKeys.forEach((key) => {
+        finalParams[key] = params[key];
+      });
+    } else {
+      finalParams = params;
+    }
   }
 
   return useQuery({
@@ -46,9 +52,10 @@ export const getData = (
         throw error;
       }
     },
+
     enabled: condition,
     suspense,
-    cacheTime: 0, // Always fetch fresh data
+    cacheTime: 5 * 60 * 1000, // Always fetch fresh data
   });
 };
 
@@ -61,19 +68,21 @@ export const getDataWithAuth = (
   if (!path) {
     return null;
   }
-  const paramsValue = Object.values(params);
+  console.log(params, path);
 
-  const paramsKey = Object.keys(params);
+  const paramsValue = [...Object.values(params)];
+
+  const paramsKey = [...Object.keys(params)];
 
   let finalParams = {};
 
   if (paramsKey.length > 0) {
-    const notParamsResetKeys = Object.keys(params).filter(
-      (key) => !key.includes("reset") && !key.includes("clearCache")
+    const notParamsResetKeys = paramsKey.filter(
+      (key) => key !== "refetch" && key !== "clearCache" && key !== "reset"
     );
 
     if (paramsKey.length !== notParamsResetKeys.length) {
-      notParamsResetKeys.map((key) => {
+      notParamsResetKeys.forEach((key) => {
         finalParams[key] = params[key];
       });
     } else {
@@ -94,12 +103,15 @@ export const getDataWithAuth = (
         return res.data;
       } catch (error) {
         console.error(error);
-        alert(error.response.data.msg || error.response.data);
+        alert(
+          error.response?.data?.msg || error.response?.data || error.message
+        );
         throw error;
       }
     },
+
     enabled: condition,
     suspense: suspense,
-    cacheTime: 0,
+    cacheTime: 5 * 60 * 1000,
   });
 };

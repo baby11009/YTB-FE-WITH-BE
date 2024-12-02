@@ -59,8 +59,6 @@ const VideoUpsertModal = ({ title, id }) => {
     message: [],
   });
 
-  const types = useRef(["video", "short"]);
-
   const thumbRef = useRef();
 
   const videoRef = useRef();
@@ -80,14 +78,14 @@ const VideoUpsertModal = ({ title, id }) => {
     if (!file) {
       setError((prev) => ({
         inputName: [...prev?.inputName, "image"],
-        message: [...prev?.message, "Không thể tải file"],
+        message: [...prev?.message, "Failed to upload file"],
       }));
       return;
     }
     if (!file.type.startsWith("image/")) {
       setError((prev) => ({
         inputName: [...prev?.inputName, "image"],
-        message: [...prev?.message, "Chỉ nhận file hình ảnh"],
+        message: [...prev?.message, "Just accepted image file"],
       }));
       e.value = "";
       return;
@@ -97,12 +95,11 @@ const VideoUpsertModal = ({ title, id }) => {
     if (file.size > maxSize) {
       setError((prev) => ({
         inputName: [...prev?.inputName, "avatar"],
-        message: [...prev?.message, "Kích thước file lớn hơn 2MB"],
+        message: [...prev?.message, "File size exceeds maximum"],
       }));
       e.value = "";
       return;
     }
-    console.log(file);
 
     const reader = new FileReader();
     reader.addEventListener("load", () => {
@@ -147,14 +144,14 @@ const VideoUpsertModal = ({ title, id }) => {
     if (!file) {
       setError((prev) => ({
         inputName: [...prev?.inputName, "video"],
-        message: [...prev?.message, "Không thể tải file"],
+        message: [...prev?.message, "Failed to upload video"],
       }));
       return;
     }
     if (!file.type.startsWith("video/")) {
       setError((prev) => ({
         inputName: [...prev?.inputName, "video"],
-        message: [...prev?.message, "Chỉ nhận file video"],
+        message: [...prev?.message, "Just accepted video file"],
       }));
       e.value = "";
       return;
@@ -179,9 +176,9 @@ const VideoUpsertModal = ({ title, id }) => {
 
     keys.forEach((key) => {
       if (formData[key] === "" || !formData[key]) {
-        let errMsg = "Không được để trống";
+        let errMsg = "Cannot be empty";
         if (key === "image" || key === "video") {
-          errMsg = "Chưa upload file";
+          errMsg = "File not uploaded";
         }
         setError((prev) => ({
           inputName: [...prev?.inputName, key],
@@ -210,7 +207,7 @@ const VideoUpsertModal = ({ title, id }) => {
     );
     keys.forEach((key) => {
       if (formData[key] === "" || !formData[key]) {
-        let errMsg = "Không được để trống";
+        let errMsg = "Cannot be empty";
         setError((prev) => ({
           inputName: [...prev?.inputName, key],
           message: [...prev?.message, errMsg],
@@ -235,12 +232,12 @@ const VideoUpsertModal = ({ title, id }) => {
       data.append(key, formData[key]);
     }
 
-    await createData("/client/video/upload", data, "video",() => {
+    await createData("/client/video/upload", data, "video", () => {
       setFormData(init);
       setPreviewVideo(undefined);
       setPreviewThumb(undefined);
       thumbRef.current.value = undefined;
-    })
+    });
   };
 
   const update = async () => {
@@ -280,7 +277,7 @@ const VideoUpsertModal = ({ title, id }) => {
     }
 
     if (Object.keys(finalData).length === 0) {
-      alert("Không có gì thay đổi");
+      alert("Nothing changed!");
       return;
     }
 
@@ -414,10 +411,10 @@ const VideoUpsertModal = ({ title, id }) => {
                     handleUploadThumb(thumbRef.current);
                   }}
                 >
-                  <div className='flex items-center justify-center size-full'>
+                  <div className='flex items-center justify-center size-full aspect-video'>
                     {previewThumb ? (
                       <div
-                        className='size-full bg-contain bg-center bg-no-repeat aspect-video'
+                        className='size-full bg-contain bg-center bg-no-repeat'
                         style={{
                           backgroundImage: `url("${previewThumb}")`,
                         }}
@@ -428,10 +425,10 @@ const VideoUpsertModal = ({ title, id }) => {
                           <UploadImageIcon />
                         </div>
                         <h2 className='mt-[12px]'>
-                          Nhấn vào để tải thumbnail của video hoặc kéo thả
+                          Click to upload video's thumbnai or drag and drop
                         </h2>
                         <p className='text-gray-A text-[12px] leading-[18px]'>
-                          Chỉ hỗ trợ : JPG, PNG,.. (Tối đa 2MB)
+                          Just support : JPG, PNG,.. (Maximum 2MB)
                         </p>
                       </div>
                     )}
@@ -493,10 +490,10 @@ const VideoUpsertModal = ({ title, id }) => {
                           <UploadImageIcon />
                         </div>
                         <h2 className='mt-[12px]'>
-                          Nhấn vào để tải video hoặc kéo thả
+                          Click to upload video or drag and drop
                         </h2>
                         <p className='text-gray-A text-[12px] leading-[18px]'>
-                          Chỉ hỗ trợ : MP4, WEBM,...
+                          Just support : MP4, WEBM,...
                         </p>
                       </div>
                     )}

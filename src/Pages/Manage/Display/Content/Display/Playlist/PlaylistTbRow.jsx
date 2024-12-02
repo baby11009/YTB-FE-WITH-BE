@@ -7,11 +7,12 @@ import { dltData } from "../../../../../../Api/controller";
 import PlaylistUpsertModal from "./PlaylistUpsertModal";
 
 const PlaylistTbRow = ({ handleChecked, checked, data, od, refetch }) => {
+
   const { setIsShowing } = useAuthContext();
   const handleDelete = async () => {
-    await dltData("/client/playlist", data?._id, "playlist",() => {
+    await dltData("/client/playlist", data?._id, "playlist", () => {
       refetch();
-    })
+    });
   };
 
   const showDeleteConfirm = () => {
@@ -78,14 +79,16 @@ const PlaylistTbRow = ({ handleChecked, checked, data, od, refetch }) => {
             <EditIcon />
           </div>
         </button>
-        <button
-          className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-          onClick={showDeleteConfirm}
-        >
-          <div className='text-red-500'>
-            <TrashBinIcon />
-          </div>
-        </button>
+        {data.type !== "personal" && (
+          <button
+            className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
+            onClick={showDeleteConfirm}
+          >
+            <div className='text-red-500'>
+              <TrashBinIcon />
+            </div>
+          </button>
+        )}
       </div>
     </div>
   );

@@ -49,7 +49,7 @@ const WatchLater = () => {
       }
     },
     suspense: false,
-    cacheTime: 0,
+    cacheTime: 5 * 60 * 1000,
   });
 
   useEffect(() => {

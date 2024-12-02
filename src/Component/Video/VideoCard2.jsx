@@ -114,7 +114,6 @@ const VideoCard2 = ({ index, size, data, funcList2, funcBoxPos }) => {
             setShowHover((prev) =>
               prev ? undefined : (
                 <CustomeFuncBox
-                  style={`translate-x-[-100%]`}
                   setOpened={() => {
                     setShowHover(undefined);
                   }}

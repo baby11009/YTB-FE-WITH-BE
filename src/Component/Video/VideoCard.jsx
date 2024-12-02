@@ -114,7 +114,6 @@ const VideoCard = ({
   thumbStyleInline,
   imgStyle,
   noFunc2,
-  funcBoxPos,
 }) => {
   const { setShowHover, handleCursorPositon, setIsShowing, user } =
     useAuthContext();
@@ -285,21 +284,21 @@ const VideoCard = ({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleCursorPositon(e);
-                  setShowHover((prev) =>
-                    prev ? undefined : (
+
+                  setShowHover((prev) => {
+                    if (prev) return undefined;
+                    handleCursorPositon(e);
+                    return (
                       <CustomeFuncBox
-                        style={`w-[270px] right-[20%] ${
-                          funcBoxPos ? funcBoxPos : "sm:left-[-20%] top-[100%] "
-                        }`}
+                        style={`w-[270px]`}
                         setOpened={() => {
                           setShowHover(undefined);
                         }}
                         funcList1={funcList1}
                         funcList2={!noFunc2 && funcList2}
                       />
-                    )
-                  );
+                    );
+                  });
                 }}
                 ref={containRef}
               >

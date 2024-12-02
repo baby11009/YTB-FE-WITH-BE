@@ -8,7 +8,7 @@ import {
 } from "../../Assets/Icons";
 import request from "../../util/axios-base-url";
 import { getDataWithAuth } from "../../Api/getData";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useRef, useCallback } from "react";
 import CheckBox2 from "../CheckBox/CheckBox2";
 import { IsElementEnd } from "../../util/scrollPosition";
@@ -86,12 +86,30 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
     }
   }, []);
 
-  const { data, isLoading, isError, isSuccess } = getDataWithAuth(
-    "/client/playlist",
-    queries,
-    true,
-    false
-  );
+  // const { data, isLoading, isError, isSuccess } = getDataWithAuth(
+  //   "/client/playlist",
+  //   queries,
+  //   true,
+  //   false
+  // );
+
+  const { data, isLoading, isSuccess, isError, refetch } = useQuery({
+    queryKey: [JSON.stringify(queries), "watchlater"],
+    queryFn: async () => {
+      try {
+        const rsp = await request.get("/client/playlist", {
+          params: queries,
+        });
+
+        return rsp.data;
+      } catch (error) {
+        alert("Failed to get channel list");
+        console.error(error);
+      }
+    },
+    suspense: false,
+    cacheTime: 5 * 60 * 1000,
+  });
 
   useEffect(() => {
     if (data && data?.qtt > 0) {
