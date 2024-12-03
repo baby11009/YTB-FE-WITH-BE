@@ -51,6 +51,7 @@ const btnList = [
 ];
 
 const Display = ({
+  playlistId,
   title,
   updatedAt,
   size,
@@ -297,6 +298,7 @@ const Display = ({
                   {noDrag ? index + 1 : <EqualIcon />}
                 </div>
                 <VideoCard2
+                  playlistId={playlistId}
                   index={index}
                   data={item}
                   funcList2={funcList}

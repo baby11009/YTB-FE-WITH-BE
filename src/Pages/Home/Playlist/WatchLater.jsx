@@ -173,6 +173,7 @@ const WatchLater = () => {
 
   return (
     <Display
+      playlistId={playlistInfo?._id}
       title={playlistInfo?.title}
       updatedAt={playlistInfo?.updatedAt}
       size={playlistInfo?.size}

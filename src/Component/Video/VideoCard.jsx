@@ -114,6 +114,7 @@ const VideoCard = ({
   thumbStyleInline,
   imgStyle,
   noFunc2,
+  playlistId,
 }) => {
   const { setShowHover, handleCursorPositon, setIsShowing, user } =
     useAuthContext();
@@ -183,7 +184,13 @@ const VideoCard = ({
       className={`flex-1 relative ${style || "mx-[8px] mb-[40px]"} group`}
       style={styleInline}
     >
-      <Link to={`/video/${data?._id || 5}`}>
+      <Link
+        to={
+          playlistId
+            ? `/video/${data?._id}?list=${playlistId}`
+            : `/video/${data?._id}`
+        }
+      >
         <div
           className={`relative overflow-hidden ${
             thumbStyle || "mb-[12px] rounded-[12px]"

@@ -1,7 +1,8 @@
 import MainLayOut from "../../Layout/MainLayOut";
 import { Header, Body } from "../../Component";
 import { useState } from "react";
-import VideoPart from "./VideoContent/VideoPart";
+// import VideoPart from "./VideoContent/VideoPart";
+import VideoPart from "./NewLayout/VideoPart";
 import { useAuthContext } from "../../Auth Provider/authContext";
 
 const VideoPage = () => {

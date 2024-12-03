@@ -145,6 +145,7 @@ const LikedVideo = () => {
 
   return (
     <Display
+      playlistId={playlistInfo?._id}
       title={playlistInfo?.title}
       updatedAt={videoList[0]?.updatedAt}
       size={playlistInfo?.size}

@@ -45,7 +45,7 @@ const funcList1 = [
 
 const randomColor = getRandomHexColor();
 
-const VideoCard2 = ({ index, size, data, funcList2, funcBoxPos }) => {
+const VideoCard2 = ({ index, size, data, funcList2, playlistId }) => {
   const { setShowHover, handleCursorPositon } = useAuthContext();
 
   const boxContainerRef = useRef();
@@ -53,7 +53,11 @@ const VideoCard2 = ({ index, size, data, funcList2, funcBoxPos }) => {
   return (
     <Link
       className='inline-flex flex-1 py-[8px] cursor-pointer'
-      to={`/video/${data?._id}`}
+      to={
+        playlistId
+          ? `/video/${data?._id}?pl=${playlistId}`
+          : `/video/${data?._id}`
+      }
     >
       <div
         className='w-[160px] h-[90px] rounded-[12px] overflow-hidden mr-[8px] relative'
