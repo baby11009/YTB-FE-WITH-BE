@@ -358,3 +358,22 @@ th {
 .sd3 {
   box-shadow: 0px 0px 5px #aaaaaa, 0px 0px 10px #aaaaaa;
 }
+
+/* Ripple animation */
+.ripple {
+  --origin: "left";
+  --scale: 0;
+  position: relative;
+  isolation: isolate;
+}
+
+.ripple::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  z-index: -1;
+  scale: var(--scale) 1;
+  transform-origin: var(--origin);
+  transition: scale 450ms;
+}

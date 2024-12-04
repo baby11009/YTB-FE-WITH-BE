@@ -1,6 +1,7 @@
 import { useState } from "react";
 import InputBox from "./InputBox";
 import { useAuthContext } from "../../Auth Provider/authContext";
+import { MyChannel } from "../../Assets/Images";
 
 const CommentInput = ({
   refetchVideo,
@@ -35,9 +36,13 @@ const CommentInput = ({
         >
           <div>
             <img
-              src={`${import.meta.env.VITE_BASE_API_URI}${
-                import.meta.env.VITE_VIEW_AVA_API
-              }${user?.avatar}`}
+              src={
+                user
+                  ? `${import.meta.env.VITE_BASE_API_URI}${
+                      import.meta.env.VITE_VIEW_AVA_API
+                    }${user?.avatar}`
+                  : MyChannel
+              }
               alt=''
               className={`${imgSize || "size-[24px]"} rounded-[50%] bg-white`}
             />

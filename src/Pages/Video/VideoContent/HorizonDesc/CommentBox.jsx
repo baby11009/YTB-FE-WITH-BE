@@ -113,7 +113,6 @@ const CommentBox = ({
       </div>
       <div className='p-[16px] border-t-[1px] border-[rgba(255,255,255,0.2)]'>
         <CommentInput
-          myChannelImg={MyChannel}
           videoId={videoId}
           setAddNewCmt={setCmtAddNew}
           setCmtParams={setCmtParams}

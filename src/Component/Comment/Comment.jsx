@@ -75,7 +75,6 @@ const Comment = ({
   }, [showReply]);
 
   useEffect(() => {
-    // console.log(replyCmtModified);
     if (replyCmtModified && showReply) {
       switch (replyCmtModified.action) {
         case "create":

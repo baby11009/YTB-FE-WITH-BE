@@ -43,7 +43,7 @@ const Body = ({
       >
         <Suspense
           fallback={
-            <div className='w-full h-screen flex items-center justify-center'>
+            <div className='w-full flex items-center justify-center'>
               <h2 className='text-[30px] leading-[32px] font-[500]'>
                 Loading.....
               </h2>

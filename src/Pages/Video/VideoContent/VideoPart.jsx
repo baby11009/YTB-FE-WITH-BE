@@ -214,8 +214,6 @@ const VideoPart = ({ openedMenu }) => {
     }
 
     return () => {
-      queryClient.clear();
-
       window.removeEventListener("scroll", () => {
         IsEnd(setIsEnd);
       });
