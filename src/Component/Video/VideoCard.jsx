@@ -126,7 +126,7 @@ const VideoCard = ({
   const navigate = useNavigate();
 
   const handleNavigate = () => {
-    navigate(`/channel/${data?.user_info?.email}`);
+    navigate(`/channel/${data?.channel_info?.email}`);
   };
 
   const funcList1 = [
@@ -251,7 +251,7 @@ const VideoCard = ({
           <img
             src={`${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_AVA_API
-            }${data?.user_info?.avatar}`}
+            }${data?.channel_info?.avatar}`}
             alt='avatar'
           />
         </div>
@@ -320,10 +320,10 @@ const VideoCard = ({
             >
               <div className='flex items-center gap-[4px] mr-[8px]'>
                 <div
-                  title={data?.user_info?.name}
+                  title={data?.channel_info?.name}
                   className='hover:text-white-F1'
                 >
-                  {data?.user_info?.name}
+                  {data?.channel_info?.name}
                 </div>
 
                 <div>

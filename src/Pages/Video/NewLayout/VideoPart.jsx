@@ -19,6 +19,8 @@ const initVideoParams = {
 };
 
 const VideoPart = () => {
+  const queryClient = useQueryClient();
+
   const { id } = useParams();
 
   const { user } = useAuthContext();
@@ -50,6 +52,12 @@ const VideoPart = () => {
   }, [videoDetails]);
 
   useEffect(() => {
+    if (id && videoInfo) {
+      queryClient.clear();
+    }
+  }, [id]);
+
+  useEffect(() => {
     const handleOnScroll = (e) => {
       IsEnd(setIsEnd);
     };
@@ -72,7 +80,7 @@ const VideoPart = () => {
         <Video data={videoInfo} refetch={refetch} />
         <Description data={videoInfo} refetch={refetch} />
         <CommentSection
-          videoId={videoInfo?._id}
+          videoId={id}
           videoUserId={videoInfo?.channel_info._id}
           totalCmt={videoInfo?.totalCmt}
           refetch={refetch}
@@ -81,7 +89,7 @@ const VideoPart = () => {
       </div>
       {/* Right side */}
       <div className='hidden lg:block pt-[24px] pr-[24px] w-[402px] min-w-[300px] box-content'>
-        <Other />
+        <Other videoId={id} />
       </div>
     </div>
   );

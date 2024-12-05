@@ -124,7 +124,7 @@ const Description = ({ data, refetch }) => {
             </div>
             <button
               className='w-[36px] h-[36px] flex items-center justify-center rounded-[50%]
-                bg-hover-black hover:bg-[rgba(255,255,255,0.2)] ml-[8px]'
+                bg-hover-black hover:bg-[rgba(255,255,255,0.2)] ml-[8px] rotate-[90deg]'
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();

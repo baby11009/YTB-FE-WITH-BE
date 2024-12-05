@@ -45,14 +45,24 @@ const funcList1 = [
 
 const randomColor = getRandomHexColor();
 
-const VideoCard2 = ({ index, size, data, funcList2, playlistId }) => {
+const VideoCard2 = ({
+  index,
+  size,
+  data,
+  funcList2,
+  playlistId,
+  containerStyle,
+}) => {
+
   const { setShowHover, handleCursorPositon } = useAuthContext();
 
   const boxContainerRef = useRef();
 
   return (
     <Link
-      className='inline-flex flex-1 py-[8px] cursor-pointer'
+      className={`inline-flex flex-1 cursor-pointer w-full ${
+        containerStyle ? containerStyle : "py-[8px] "
+      }`}
       to={
         playlistId
           ? `/video/${data?._id}?pl=${playlistId}`
@@ -95,8 +105,8 @@ const VideoCard2 = ({ index, size, data, funcList2, playlistId }) => {
         <div className='mb-[8px] t-ellipsis text-[16px] leading-[22px] font-[500]'>
           {data?.title}
         </div>
-        <div className='flex items-center text-[12px] leading-[18px] text-gray-A text-nowrap'>
-          <div>{data?.channel_info.name}</div>
+        <div className='flex items-center flex-wrap text-[12px] leading-[18px] text-gray-A text-nowrap'>
+          <div>{data?.channel_info?.name}</div>
           <div className="hidden 2xsm:block before:content-['•'] before:mx-[4px]">
             {formatNumber(data?.view || 0)} lượt xem
           </div>

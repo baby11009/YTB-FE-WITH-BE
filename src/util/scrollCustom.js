@@ -13,15 +13,11 @@ export const checkScrollPosition = (ref, setAtStart, setAtEnd) => {
 
 export const smoothScroll = (direction, ref, dura, scrollDistance) => {
   const start = ref.current.scrollLeft;
+  const maxScrollLeft = Math.floor(
+    ref.current.scrollWidth - ref.current.clientWidth
+  );
 
-  const maxScrollLeft = ref.current.scrollWidth - ref.current.clientWidth;
   let distance = direction === "left" ? -scrollDistance : scrollDistance;
-
-  if (direction === "left" && start + distance < 0) {
-    distance = -start;
-  } else if (direction === "right" && start + distance > maxScrollLeft) {
-    distance = maxScrollLeft - start;
-  }
 
   const duration = dura || 100; // duration in ms
   const startTime = performance.now();

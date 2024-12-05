@@ -377,3 +377,80 @@ th {
   transform-origin: var(--origin);
   transition: scale 450ms;
 }
+
+.left-right-mask {
+  -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      transparent 51px,
+      #000 77px,
+      #000 50%,
+      transparent 50%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to left,
+      transparent 0,
+      transparent 51px,
+      #000 77px,
+      #000 50%,
+      transparent 50%,
+      transparent 100%
+    );
+  mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      transparent 51px,
+      #000 77px,
+      #000 50%,
+      transparent 50%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to left,
+      transparent 0,
+      transparent 51px,
+      #000 77px,
+      #000 50%,
+      transparent 50%,
+      transparent 100%
+    );
+
+  mask-repeat: no-repeat;
+}
+
+.right-mask {
+  -webkit-mask-image: linear-gradient(
+    to left,
+    transparent 0,
+    transparent 51px,
+    #000 77px,
+    #000 100%
+  );
+  mask-image: linear-gradient(
+    to left,
+    transparent 0,
+    transparent 51px,
+    #000 77px,
+    #000 100%
+  );
+  mask-repeat: no-repeat;
+}
+
+.left-mask {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    transparent 51px,
+    #000 77px,
+    #000 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    transparent 51px,
+    #000 77px,
+    #000 100%
+  );
+  mask-repeat: no-repeat;
+}

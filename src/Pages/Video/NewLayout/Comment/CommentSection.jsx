@@ -14,15 +14,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
 
   const [addNew, setAddNew] = useState(true);
 
-  const [commentQuery, setCommentQuery] = useState({
-    limit: 8,
-    page: 1,
-    sort: {
-      top: -1,
-    },
-    reset: user?._id,
-    clearCache: "comment",
-  });
+  const [commentQuery, setCommentQuery] = useState(undefined);
 
   const {
     data: cmtData,
@@ -32,7 +24,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
   } = getData(
     `/data/comment/video-cmt/${videoId}`,
     commentQuery,
-    videoId && isInViewPort ? true : false,
+    videoId && isInViewPort && commentQuery ? true : false,
     false
   );
 
@@ -56,6 +48,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
         page: 1,
         sort: { [data.id]: -1 },
       }));
+      setCmtList([]);
     }
   };
 
@@ -104,16 +97,34 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
   }, [isEnd]);
 
   useEffect(() => {
+    if (videoId) {
+      setCommentQuery({
+        limit: 8,
+        page: 1,
+        sort: {
+          top: -1,
+        },
+        reset: user?._id,
+        clearCache: "comment",
+      });
+      setAddNew(true);
+    }
+  }, [videoId]);
+
+  useEffect(() => {
     const handleScroll = () => {
-      const { top, bottom } = containerRef.current.getBoundingClientRect();
-      if (top < window.innerHeight && bottom > 0) {
-        SetIsInViewPort(true);
-      } else {
-        SetIsInViewPort(false);
+      if (containerRef.current) {
+        const { top, bottom } = containerRef.current.getBoundingClientRect();
+        if (top < window.innerHeight && bottom > 0) {
+          SetIsInViewPort(true);
+        } else {
+          SetIsInViewPort(false);
+        }
       }
     };
 
     window.addEventListener("scroll", handleScroll);
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
