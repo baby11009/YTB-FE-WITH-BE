@@ -53,14 +53,13 @@ const VideoCard2 = ({
   playlistId,
   containerStyle,
 }) => {
-
   const { setShowHover, handleCursorPositon } = useAuthContext();
 
   const boxContainerRef = useRef();
 
   return (
     <Link
-      className={`inline-flex flex-1 cursor-pointer w-full ${
+      className={`inline-flex flex-1 cursor-pointer w-full group relative ${
         containerStyle ? containerStyle : "py-[8px] "
       }`}
       to={
@@ -115,10 +114,7 @@ const VideoCard2 = ({
           </div>
         </div>
       </div>
-      <div
-        className='relative flex items-center justify-center'
-        ref={boxContainerRef}
-      >
+      <div className='relative flex justify-center' ref={boxContainerRef}>
         <button
           className='size-[40px] rounded-[50%] flex items-center justify-center active:bg-black-0.2'
           onClick={(e) => {
@@ -144,6 +140,9 @@ const VideoCard2 = ({
           <Setting2Icon />
         </button>
       </div>
+
+      {/* bg active */}
+      <div className='absolute inset-0  m-[-4px] rounded-[5px] group-active:bg-black-0.1'></div>
     </Link>
   );
 };

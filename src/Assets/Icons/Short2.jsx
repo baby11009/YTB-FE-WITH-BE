@@ -9,6 +9,8 @@ const Short2 = () => {
       style={{
         pointerEvents: "none",
         display: "inherit",
+        width: "100%",
+        height: "100%",
       }}
     >
       <g>

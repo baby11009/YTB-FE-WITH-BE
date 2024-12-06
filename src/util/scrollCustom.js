@@ -7,29 +7,54 @@ export const checkScrollPosition = (ref, setAtStart, setAtEnd) => {
 
   setAtEnd(
     Math.ceil(ref.current.scrollLeft + 1 + ref.current.clientWidth) >=
-      ref.current.scrollWidth
+      ref.current.scrollWidth,
   );
 };
 
-export const smoothScroll = (direction, ref, dura, scrollDistance) => {
-  const start = ref.current.scrollLeft;
-  const maxScrollLeft = Math.floor(
-    ref.current.scrollWidth - ref.current.clientWidth
-  );
+export const smoothScroll = (
+  direction,
+  ref,
+  duration = 100,
+  scrollDistance,
+) => {
+  if (!ref?.current) return;
 
+  const start = ref.current.scrollLeft;
+  const maxScrollLeft = ref.current.scrollWidth - ref.current.clientWidth;
+  console.log("🚀 ~  maxScrollLeft:", maxScrollLeft);
+
+  // Determine the scroll distance
   let distance = direction === "left" ? -scrollDistance : scrollDistance;
 
-  const duration = dura || 100; // duration in ms
+  if (
+    direction !== "left" &&
+    maxScrollLeft - (Math.ceil(start) + scrollDistance) < 3 &&
+    maxScrollLeft - (Math.ceil(start) + scrollDistance) >= 0
+  ) {
+    distance = direction = ref.current.scrollWidth - start;
+  }
+
+  // Clamp the target scroll position within bounds
+  const target = Math.min(
+    Math.max(0, start + distance), // Ensure it doesn't go below 0
+    maxScrollLeft, // Ensure it doesn't exceed maxScrollLeft
+  );
+
   const startTime = performance.now();
 
   const scroll = (currentTime) => {
     const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
+    const progress = Math.min(elapsed / duration, 1); // Ensure progress is within [0, 1]
 
-    const ease = (t) => t * (2 - t); // easeInOutQuad easing function
-    ref.current.scrollLeft = start + distance * ease(progress);
+    // Ease-in-out quad easing function
+    const ease = (t) => t * (2 - t);
+    const easedProgress = ease(progress);
 
-    if (elapsed < duration) {
+    // Calculate the next scroll position
+    ref.current.scrollLeft = start + (target - start) * easedProgress;
+
+    // Continue animation if not yet complete
+    if (progress < 1) {
       requestAnimationFrame(scroll);
     }
   };

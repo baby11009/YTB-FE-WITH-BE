@@ -1,8 +1,13 @@
 import { useRef, useEffect, useState } from "react";
-import { HorizonSlider, VideoCard2, PlaylistCard } from "../../../../Component";
+import {
+  HorizonSlider,
+  ShortHorizonSlider,
+  VideoCard2,
+  PlaylistCard,
+} from "../../../../Component";
 import { getData } from "../../../../Api/getData";
 
-const initVideoParams = {
+const initVideoQuery = {
   page: 1,
   limit: 12,
   type: "video",
@@ -10,7 +15,13 @@ const initVideoParams = {
   prevPlCount: 0,
 };
 
-const Other = ({ videoId }) => {
+const initShortQuery = {
+  page: 1,
+  limit: 12,
+  type: "short",
+};
+
+const Other = ({ videoId, isEnd }) => {
   const [addNew, setAddNew] = useState();
 
   const [videoQuery, setVideoQuery] = useState(undefined);
@@ -23,7 +34,20 @@ const Other = ({ videoId }) => {
     `/data/all`,
     videoQuery,
     videoId && videoQuery ? true : false,
-    false
+    false,
+  );
+
+  const [shortQuery, setShortQuery] = useState(undefined);
+
+  const [shortList, setShortList] = useState([]);
+
+  const shortIdList = useRef(new Set());
+
+  const { data: shortData } = getData(
+    `/data/all`,
+    shortQuery,
+    videoId && shortQuery ? true : false,
+    false,
   );
 
   const buttonList = [
@@ -46,13 +70,21 @@ const Other = ({ videoId }) => {
   ];
 
   useEffect(() => {
+    videoIdList.current.clear();
     setVideoQuery({
-      ...initVideoParams,
+      ...initVideoQuery,
       reset: videoId,
       watchedVideoIdList: [videoId],
     });
     setAddNew(true);
     setVideoList([]);
+
+    shortIdList.current.clear();
+    setShortQuery({
+      ...initShortQuery,
+      reset: videoId,
+    });
+    setShortList([]);
   }, [videoId]);
 
   useEffect(() => {
@@ -65,6 +97,7 @@ const Other = ({ videoId }) => {
           }
         });
         setVideoList(videoData?.data);
+        setAddNew(false);
       } else {
         const finalList = [];
         videoData?.data.forEach((video) => {
@@ -78,37 +111,69 @@ const Other = ({ videoId }) => {
     }
   }, [videoData]);
 
+  useEffect(() => {
+    if (shortData) {
+      const finalList = [];
+      shortData?.data.forEach((short) => {
+        if (!shortIdList.current.has(short?._id)) {
+          shortIdList.current.add(short?._id);
+          finalList.push(short);
+        }
+      });
+      setShortList(finalList);
+    }
+  }, [shortData]);
+
+  useEffect(() => {
+    if (isEnd && videoData && videoData?.data?.length === videoQuery.limit) {
+      setVideoQuery((prev) => ({
+        ...prev,
+        page: prev.page + 1,
+        watchedVideoIdList: [
+          ...prev.watchedVideoIdList,
+          ...[...videoIdList.current],
+        ],
+        prevPlCount: videoList.filter((data) => data.video_list).length,
+      }));
+    }
+  }, [isEnd]);
+
   return (
     <div>
       <HorizonSlider buttonList={buttonList} currentId={"all"} />
+      {videoList.length > 0 &&
+        (videoList[0].type === "video" ? (
+          <VideoCard2
+            data={videoList[0]}
+            index={0}
+            size={videoList.length}
+            containerStyle={"mt-[8px]"}
+          />
+        ) : (
+          <PlaylistCard data={videoList[0]} />
+        ))}
+
+      <ShortHorizonSlider
+        cardWidth={(402 - 8) / 3}
+        thumbnailHeight={(402 / 3 / 9) * 16}
+        shortList={shortList}
+      />
       {videoList.length > 0 && (
         <div>
-          {videoList[0].type === "video" ? (
-            <VideoCard2 data={videoList[0]} index={0} size={videoList.length} />
-          ) : (
-            <PlaylistCard data={videoList[0]} />
-          )}
-
-          {/* Short */}
-
-          {/* Video */}
-
-          <div>
-            {videoList.slice(1).map((item, index) => {
-              if (item.type === "video") {
-                return (
-                  <VideoCard2
-                    key={item?._id}
-                    data={item}
-                    index={index}
-                    size={videoList.length}
-                    containerStyle={"mt-[8px]"}
-                  />
-                );
-              }
-              return <PlaylistCard key={item?._id} data={item} />;
-            })}
-          </div>
+          {videoList.slice(1).map((item, index) => {
+            if (item.type === "video") {
+              return (
+                <VideoCard2
+                  key={item?._id}
+                  data={item}
+                  index={index}
+                  size={videoList.length}
+                  containerStyle={"mt-[8px]"}
+                />
+              );
+            }
+            return <PlaylistCard key={item?._id} data={item} />;
+          })}
         </div>
       )}
     </div>

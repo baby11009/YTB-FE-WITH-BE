@@ -36,7 +36,7 @@ const VideoPart = () => {
       id: id,
     },
     true,
-    true
+    true,
   );
 
   const [videoInfo, setVideoInfo] = useState(undefined);
@@ -46,7 +46,7 @@ const VideoPart = () => {
   useEffect(() => {
     if (videoDetails) {
       setVideoInfo((prev) =>
-        prev ? { ...prev, ...videoDetails.data } : { ...videoDetails.data }
+        prev ? { ...prev, ...videoDetails.data } : { ...videoDetails.data },
       );
     }
   }, [videoDetails]);
@@ -67,6 +67,7 @@ const VideoPart = () => {
       window.removeEventListener("scroll", handleOnScroll);
     };
   }, []);
+
   if (isError) {
     return <div>Failed to loading data</div>;
   }
@@ -89,7 +90,7 @@ const VideoPart = () => {
       </div>
       {/* Right side */}
       <div className='hidden lg:block pt-[24px] pr-[24px] w-[402px] min-w-[300px] box-content'>
-        <Other videoId={id} />
+        <Other videoId={id} isEnd={isEnd} />
       </div>
     </div>
   );
