@@ -80,6 +80,9 @@ const VideoPart = () => {
       >
         <Video data={videoInfo} refetch={refetch} />
         <Description data={videoInfo} refetch={refetch} />
+        <div className=' block lg:hidden  '>
+          <Other videoId={id} showMore={true} id={"small"} />
+        </div>
         <CommentSection
           videoId={id}
           videoUserId={videoInfo?.channel_info._id}
@@ -90,7 +93,7 @@ const VideoPart = () => {
       </div>
       {/* Right side */}
       <div className='hidden lg:block pt-[24px] pr-[24px] w-[402px] min-w-[300px] box-content'>
-        <Other videoId={id} isEnd={isEnd} />
+        <Other videoId={id} isEnd={isEnd} id={"large"} />
       </div>
     </div>
   );

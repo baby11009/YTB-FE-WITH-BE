@@ -3,7 +3,11 @@ import { short1 } from "../../Assets/Images";
 import { Link } from "react-router-dom";
 import { formatNumber } from "../../util/numberFormat";
 import Slider from "./Slider";
-const ShortHorizonSlider = ({ cardWidth, thumbnailHeight, shortList = [] }) => {
+const ShortHorizonSlider = ({ cardWidth, thumbnailHeight, shortList }) => {
+  if (!shortList) {
+    return;
+  }
+
   if (shortList.length < 1) {
     return <div>Failed to get shorts </div>;
   }
@@ -56,7 +60,10 @@ const ShortHorizonSlider = ({ cardWidth, thumbnailHeight, shortList = [] }) => {
                   </span>
 
                   {/* Setting */}
-                  <button className='size-[36px] rounded-[50%] p-[6px] active:bg-black-0.2 absolute right-0 top-[8px] z-[200]'>
+                  <button
+                    className='size-[36px] rounded-[50%] p-[6px] active:bg-black-0.2
+                   absolute right-0 top-[8px] z-[200]'
+                  >
                     <div className='w-[24px] '>
                       <Setting2Icon />
                     </div>

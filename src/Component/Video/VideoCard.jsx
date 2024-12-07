@@ -42,7 +42,7 @@ const HoverButton = ({ title, icon }) => {
           {
             duration: 0,
             type: "tween",
-          }
+          },
         );
         animate(
           "h3",
@@ -53,7 +53,7 @@ const HoverButton = ({ title, icon }) => {
             duration: 0.2,
             delay: 0.4,
             type: "tween",
-          }
+          },
         );
       } else {
         animate(
@@ -64,7 +64,7 @@ const HoverButton = ({ title, icon }) => {
           {
             duration: 0,
             type: "tween",
-          }
+          },
         );
         animate(
           "h3",
@@ -74,7 +74,7 @@ const HoverButton = ({ title, icon }) => {
           {
             duration: 0.3,
             type: "tween",
-          }
+          },
         );
       }
     }
@@ -118,8 +118,6 @@ const VideoCard = ({
 }) => {
   const { setShowHover, handleCursorPositon, setIsShowing, user } =
     useAuthContext();
-
-  const containRef = useRef();
 
   const bgColorRef = useRef(getRandomHexColor());
 
@@ -288,7 +286,7 @@ const VideoCard = ({
                   e.preventDefault();
                   e.stopPropagation();
                 }}
-                onClick={(e) => {
+                onMouseUp={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
 
@@ -307,7 +305,6 @@ const VideoCard = ({
                     );
                   });
                 }}
-                ref={containRef}
               >
                 <Setting2Icon />
               </button>

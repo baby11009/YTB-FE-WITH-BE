@@ -139,3 +139,4 @@ export { default as CurveArrowIcon } from "./CurveArrow.jsx";
 export { default as PrivateIcon } from "./Private.jsx";
 export { default as PublicIcon } from "./Public.jsx";
 export { default as CheckIcon } from "./Check.jsx";
+export { default as RepeatIcon } from "./Repeat.jsx";

@@ -2,7 +2,7 @@ import { useState, useRef, useLayoutEffect, useCallback } from "react";
 import { ThinArrowIcon } from "../../Assets/Icons";
 import { smoothScroll } from "../../util/scrollCustom";
 
-const HorizonSlider = ({ buttonList, currentId }) => {
+const ButtonHorizonSlider = ({ buttonList, currentId, id }) => {
   const [scrollPosition, setScrollPosition] = useState();
 
   const sliderRef = useRef();
@@ -19,30 +19,52 @@ const HorizonSlider = ({ buttonList, currentId }) => {
     smoothScroll(direction, sliderRef, 300, 160);
   }, []);
 
+  const handleManageScrollPos = useCallback(() => {
+    if (sliderRef.current.scrollLeft === 0) {
+      setScrollPosition("start");
+    } else if (
+      sliderRef.current.scrollWidth -
+        (Math.ceil(sliderRef.current.scrollLeft) +
+          sliderRef.current.clientWidth) <
+      3
+    ) {
+      setScrollPosition("end");
+    } else {
+      setScrollPosition("middle");
+    }
+  });
+
   useLayoutEffect(() => {
     enabledScrolling.current =
       sliderRef.current.scrollWidth > sliderRef.current.clientWidth;
 
+    const handleResize = () => {
+      if (sliderRef.current.scrollWidth === 0) return;
+      enabledScrolling.current =
+        sliderRef.current.scrollWidth > sliderRef.current.clientWidth;
+      if (enabledScrolling.current) {
+        handleManageScrollPos();
+      } else {
+        setScrollPosition(undefined);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
     if (enabledScrolling.current) {
       setScrollPosition("start");
-      sliderRef.current.addEventListener("scroll", (e) => {
-        console.log(
-          Math.ceil(e.target.scrollLeft) + e.target.clientWidth,
-          e.target.scrollWidth,
-        );
-        if (e.target.scrollLeft === 0) {
-          setScrollPosition("start");
-        } else if (
-          Math.ceil(e.target.scrollLeft) + e.target.clientWidth >=
-          e.target.scrollWidth
-        ) {
-          setScrollPosition("end");
-        } else {
-          setScrollPosition("middle");
-        }
-      });
+      sliderRef.current.addEventListener("scroll", handleManageScrollPos);
     }
-  }, []);
+
+    return () => {
+      sliderRef.current.removeEventListener("scroll", handleManageScrollPos);
+    };
+  }, [enabledScrolling.current]);
 
   return (
     <div className='relative'>
@@ -68,6 +90,7 @@ const HorizonSlider = ({ buttonList, currentId }) => {
             ? "left-mask"
             : "left-right-mask"
         }`}
+        key={id}
         ref={sliderRef}
         onMouseDown={(e) => {
           isDown.current = true;
@@ -123,4 +146,4 @@ const HorizonSlider = ({ buttonList, currentId }) => {
     </div>
   );
 };
-export default HorizonSlider;
+export default ButtonHorizonSlider;

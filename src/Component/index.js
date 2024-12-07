@@ -43,6 +43,7 @@ export { default as TextArea } from "./TextArea/TextArea.jsx";
 export { default as HovUserCard } from "./HoverCard/UserCard.jsx";
 export { default as HovVideorCard } from "./HoverCard/VideoCard.jsx";
 export { default as HovCommentCard } from "./HoverCard/CommentCard.jsx";
-export { default as HorizonSlider } from "./Slider/HorizonSlider.jsx";
+export { default as ButtonHorizonSlider } from "./Slider/ButtonHorizonSlider.jsx";
 export { default as ShortHorizonSlider } from "./Slider/ShortHorizonSlider.jsx";
 export { default as Slider } from "./Slider/Slider.jsx";
+export { default as PlaylistCard2 } from "./Playlist/PlaylistCard2.jsx";

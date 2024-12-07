@@ -55,12 +55,10 @@ const VideoCard2 = ({
 }) => {
   const { setShowHover, handleCursorPositon } = useAuthContext();
 
-  const boxContainerRef = useRef();
-
   return (
     <Link
-      className={`inline-flex flex-1 cursor-pointer w-full group relative ${
-        containerStyle ? containerStyle : "py-[8px] "
+      className={`inline-flex flex-1 cursor-pointer w-full group relative box-content ${
+        containerStyle ? containerStyle : "py-[8px] h-[90px] "
       }`}
       to={
         playlistId
@@ -69,7 +67,7 @@ const VideoCard2 = ({
       }
     >
       <div
-        className='w-[160px] h-[90px] rounded-[12px] overflow-hidden mr-[8px] relative'
+        className='h-full aspect-video rounded-[12px] overflow-hidden mr-[8px] relative'
         style={{ backgroundColor: randomColor }}
       >
         <img
@@ -114,7 +112,7 @@ const VideoCard2 = ({
           </div>
         </div>
       </div>
-      <div className='relative flex justify-center' ref={boxContainerRef}>
+      <div className='relative flex justify-center z-[200]'>
         <button
           className='size-[40px] rounded-[50%] flex items-center justify-center active:bg-black-0.2'
           onClick={(e) => {
@@ -133,7 +131,7 @@ const VideoCard2 = ({
                   productIndex={index}
                   size={size}
                 />
-              )
+              ),
             );
           }}
         >

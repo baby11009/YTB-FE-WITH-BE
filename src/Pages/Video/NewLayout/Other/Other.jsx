@@ -1,17 +1,26 @@
-import { useRef, useEffect, useState } from "react";
 import {
-  HorizonSlider,
+  useRef,
+  useEffect,
+  useState,
+  useLayoutEffect,
+  useCallback,
+} from "react";
+import {
+  ButtonHorizonSlider,
   ShortHorizonSlider,
   VideoCard2,
-  PlaylistCard,
+  PlaylistCard2,
 } from "../../../../Component";
 import { getData } from "../../../../Api/getData";
+import { useQueryClient } from "@tanstack/react-query";
+import PlayList from "./Playlist/Playlist";
 
 const initVideoQuery = {
   page: 1,
   limit: 12,
   type: "video",
   watchedVideoIdList: [],
+  sort: undefined,
   prevPlCount: 0,
 };
 
@@ -19,10 +28,15 @@ const initShortQuery = {
   page: 1,
   limit: 12,
   type: "short",
+  sort: undefined,
 };
 
-const Other = ({ videoId, isEnd }) => {
+const Other = ({ videoId, isEnd, showMore }) => {
+  const queryClient = useQueryClient();
+
   const [addNew, setAddNew] = useState();
+
+  const [shortAddNew, setShortAddNew] = useState();
 
   const [videoQuery, setVideoQuery] = useState(undefined);
 
@@ -43,33 +57,91 @@ const Other = ({ videoId, isEnd }) => {
 
   const shortIdList = useRef(new Set());
 
-  const { data: shortData } = getData(
+  const { data: shortData, isLoading } = getData(
     `/data/all`,
     shortQuery,
     videoId && shortQuery ? true : false,
     false,
   );
 
+  const currentSortId = useRef("all");
+
+  const handleSort = useCallback((data) => {
+    queryClient.removeQueries({
+      queryKey: [...Object.values(videoQuery), "/data/all"],
+      exact: true,
+    });
+    queryClient.removeQueries({
+      queryKey: [...Object.values(shortQuery), "/data/all"],
+      exact: true,
+    });
+    setVideoQuery({
+      ...initVideoQuery,
+      reset: videoId,
+      sort: data.value,
+    });
+    setShortQuery({
+      ...initShortQuery,
+      reset: videoId,
+      sort: data.value,
+    });
+    setAddNew(true);
+    setShortAddNew(true);
+    currentSortId.current = data.id;
+  });
+
   const buttonList = [
     {
       id: "all",
       title: "All",
+      value: undefined,
+      handleOnClick: handleSort,
     },
     {
-      id: "from",
-      title: "From THAY GIAOBA WITH LOVE",
+      id: "latest",
+      title: "Latest",
+      value: { createdAt: -1 },
+      handleOnClick: handleSort,
     },
     {
-      id: "from1",
-      title: "From THAY GIAOBA WITH LOVE",
+      id: "view",
+      title: "Popular",
+      value: { view: -1 },
+      handleOnClick: handleSort,
     },
     {
-      id: "from",
-      title: "From THAY GIAOBA WITH LOVE",
+      id: "oldest",
+      title: "Oldest",
+      value: { createdAt: 1 },
+      handleOnClick: handleSort,
+    },
+    {
+      id: "test1",
+      title: "Hello World",
+    },
+    {
+      id: "test2",
+      title: "Hello VOHUYTHANH",
+    },
+    {
+      id: "test3",
+      title: "THIS IS MY CODE",
     },
   ];
 
-  useEffect(() => {
+  const handleShowMore = () => {
+    setVideoQuery((prev) => ({
+      ...prev,
+      page: prev.page + 1,
+      watchedVideoIdList: [
+        ...prev.watchedVideoIdList,
+        ...[...videoIdList.current],
+      ],
+      prevPlCount: videoList.filter((data) => data.video_list).length,
+    }));
+  };
+
+  useLayoutEffect(() => {
     videoIdList.current.clear();
     setVideoQuery({
       ...initVideoQuery,
@@ -84,6 +156,7 @@ const Other = ({ videoId, isEnd }) => {
       ...initShortQuery,
       reset: videoId,
     });
+    setShortAddNew(true);
     setShortList([]);
   }, [videoId]);
 
@@ -113,44 +186,56 @@ const Other = ({ videoId, isEnd }) => {
 
   useEffect(() => {
     if (shortData) {
-      const finalList = [];
-      shortData?.data.forEach((short) => {
-        if (!shortIdList.current.has(short?._id)) {
-          shortIdList.current.add(short?._id);
-          finalList.push(short);
-        }
-      });
-      setShortList(finalList);
+      if (shortAddNew) {
+        shortIdList.current.clear();
+        shortData?.data.forEach((short) => {
+          if (!shortIdList.current.has(short?._id)) {
+            shortIdList.current.add(short?._id);
+          }
+        });
+        setShortList(shortData?.data);
+        setShortAddNew(false);
+      } else {
+        const finalList = [];
+        shortData?.data.forEach((short) => {
+          if (!shortIdList.current.has(short?._id)) {
+            shortIdList.current.add(short?._id);
+            finalList.push(short);
+          }
+        });
+        setShortList((prev) => [...prev, ...finalList]);
+      }
     }
   }, [shortData]);
 
   useEffect(() => {
-    if (isEnd && videoData && videoData?.data?.length === videoQuery.limit) {
-      setVideoQuery((prev) => ({
-        ...prev,
-        page: prev.page + 1,
-        watchedVideoIdList: [
-          ...prev.watchedVideoIdList,
-          ...[...videoIdList.current],
-        ],
-        prevPlCount: videoList.filter((data) => data.video_list).length,
-      }));
+    if (
+      !showMore &&
+      isEnd &&
+      videoData &&
+      videoData?.data?.length === videoQuery.limit
+    ) {
+      handleShowMore();
     }
   }, [isEnd]);
 
   return (
     <div>
-      <HorizonSlider buttonList={buttonList} currentId={"all"} />
+      <PlayList />
+      <ButtonHorizonSlider
+        buttonList={buttonList}
+        currentId={currentSortId.current}
+      />
       {videoList.length > 0 &&
         (videoList[0].type === "video" ? (
           <VideoCard2
             data={videoList[0]}
             index={0}
             size={videoList.length}
-            containerStyle={"mt-[8px]"}
+            containerStyle={"mt-[8px] h-[94px]"}
           />
         ) : (
-          <PlaylistCard data={videoList[0]} />
+          <PlaylistCard2 data={videoList[0]} containerStyle={"h-[94px]"} />
         ))}
 
       <ShortHorizonSlider
@@ -168,13 +253,35 @@ const Other = ({ videoId, isEnd }) => {
                   data={item}
                   index={index}
                   size={videoList.length}
-                  containerStyle={"mt-[8px]"}
+                  containerStyle={"mt-[8px] h-[94px]"}
                 />
               );
             }
-            return <PlaylistCard key={item?._id} data={item} />;
+            return (
+              <PlaylistCard2
+                key={item?._id}
+                data={item}
+                containerStyle={"h-[94px]"}
+              />
+            );
           })}
         </div>
+      )}
+      {showMore && videoData?.data?.length === videoQuery?.limit && (
+        <button
+          className='px-[15px] border-[1px] border-black-0.2 hover:bg-blue-26
+         hover:border-transparent w-full rounded-[18px]'
+          onClick={() => {
+            handleShowMore();
+          }}
+        >
+          <div
+            className=' whitespace-nowrap overflow-hidden text-ellipsis text-[14px] 
+          leading-[36px] font-[500] text-blue-3E'
+          >
+            Show more
+          </div>
+        </button>
       )}
     </div>
   );

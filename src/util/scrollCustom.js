@@ -21,7 +21,6 @@ export const smoothScroll = (
 
   const start = ref.current.scrollLeft;
   const maxScrollLeft = ref.current.scrollWidth - ref.current.clientWidth;
-  console.log("🚀 ~  maxScrollLeft:", maxScrollLeft);
 
   // Determine the scroll distance
   let distance = direction === "left" ? -scrollDistance : scrollDistance;
@@ -31,7 +30,7 @@ export const smoothScroll = (
     maxScrollLeft - (Math.ceil(start) + scrollDistance) < 3 &&
     maxScrollLeft - (Math.ceil(start) + scrollDistance) >= 0
   ) {
-    distance = direction = ref.current.scrollWidth - start;
+    distance = ref.current.scrollWidth - start;
   }
 
   // Clamp the target scroll position within bounds

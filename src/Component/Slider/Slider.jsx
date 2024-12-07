@@ -43,15 +43,13 @@ const Slider = ({
     if (enabledScrolling.current) {
       setScrollPosition("start");
       sliderRef.current.addEventListener("scroll", (e) => {
-        if (e.target.scrollLeft === 0) {
+        if (sliderRef.current.scrollLeft === 0) {
           setScrollPosition("start");
         } else if (
-          e.target.scrollWidth -
-            (Math.ceil(e.target.scrollLeft) + e.target.clientWidth) >=
-            0 &&
-          e.target.scrollWidth -
-            (Math.ceil(e.target.scrollLeft) + e.target.clientWidth) <
-            3
+          sliderRef.current.scrollWidth -
+            (Math.ceil(sliderRef.current.scrollLeft) +
+              sliderRef.current.clientWidth) <
+          3
         ) {
           setScrollPosition("end");
         } else {
