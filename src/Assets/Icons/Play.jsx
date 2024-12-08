@@ -1,4 +1,4 @@
-const Play = ({ color }) => {
+const Play = () => {
   return (
     <svg
       xmlns='http://www.w3.org/2000/svg'
@@ -9,8 +9,10 @@ const Play = ({ color }) => {
       style={{
         pointerEvents: "none",
         display: "inherit",
+        width: "100%",
+        height: "100%",
       }}
-      fill={color || "rgb(255,255,255)"}
+      fill='currentColor'
     >
       <path d='m7 4 12 8-12 8V4z'></path>
     </svg>

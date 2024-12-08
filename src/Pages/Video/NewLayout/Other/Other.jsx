@@ -31,7 +31,9 @@ const initShortQuery = {
   sort: undefined,
 };
 
-const Other = ({ videoId, isEnd, showMore }) => {
+const Other = ({ videoId, playlistId, isEnd, showMore }) => {
+  const [firstRender, setFirstRender] = useState(true);
+
   const queryClient = useQueryClient();
 
   const [addNew, setAddNew] = useState();
@@ -50,6 +52,8 @@ const Other = ({ videoId, isEnd, showMore }) => {
     videoId && videoQuery ? true : false,
     false,
   );
+  
+  console.log("🚀 ~ videoData:", videoData);
 
   const [shortQuery, setShortQuery] = useState(undefined);
 
@@ -142,22 +146,26 @@ const Other = ({ videoId, isEnd, showMore }) => {
   };
 
   useLayoutEffect(() => {
-    videoIdList.current.clear();
-    setVideoQuery({
-      ...initVideoQuery,
-      reset: videoId,
-      watchedVideoIdList: [videoId],
-    });
-    setAddNew(true);
-    setVideoList([]);
+    if (!playlistId || firstRender) {
+      setFirstRender(false);
 
-    shortIdList.current.clear();
-    setShortQuery({
-      ...initShortQuery,
-      reset: videoId,
-    });
-    setShortAddNew(true);
-    setShortList([]);
+      videoIdList.current.clear();
+      setVideoQuery({
+        ...initVideoQuery,
+        reset: videoId,
+        watchedVideoIdList: [videoId],
+      });
+      setAddNew(true);
+      setVideoList([]);
+
+      shortIdList.current.clear();
+      setShortQuery({
+        ...initShortQuery,
+        reset: videoId,
+      });
+      setShortAddNew(true);
+      setShortList([]);
+    }
   }, [videoId]);
 
   useEffect(() => {
@@ -221,7 +229,7 @@ const Other = ({ videoId, isEnd, showMore }) => {
 
   return (
     <div>
-      <PlayList />
+      {playlistId && <PlayList playlistId={playlistId} videoId={videoId} />}
       <ButtonHorizonSlider
         buttonList={buttonList}
         currentId={currentSortId.current}

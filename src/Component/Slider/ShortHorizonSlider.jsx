@@ -26,7 +26,11 @@ const ShortHorizonSlider = ({ cardWidth, thumbnailHeight, shortList }) => {
           buttonPosition={thumbnailHeight / 2}
         >
           {shortList.map((short, index) => (
-            <Link className='inline-flex ' key={short?._id}>
+            <Link
+              to={`/short/${short?._id}`}
+              className='inline-flex '
+              key={short?._id}
+            >
               <div
                 className={` ${
                   index + 1 !== shortList.length && "pr-[4px]"

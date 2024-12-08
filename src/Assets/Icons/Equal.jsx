@@ -9,8 +9,10 @@ const Equal = () => {
       style={{
         pointerEvents: "none",
         display: "inherit",
+        width: "100%",
+        height: "100%",
       }}
-      fill='rgb(255,255,255)'
+      fill='currentColor'
     >
       <path d='M21 10H3V9h18v1Zm0 4H3v1h18v-1Z'></path>
     </svg>

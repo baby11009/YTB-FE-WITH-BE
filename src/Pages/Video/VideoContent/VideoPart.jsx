@@ -10,6 +10,7 @@ import { useAuthContext } from "../../../Auth Provider/authContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { scrollToTop } from "../../../util/scrollCustom";
 import connectSocket from "../../../util/connectSocket";
+import { useSearchParams } from "react-router-dom";
 
 const initVideoParams = {
   page: 1,
@@ -21,7 +22,8 @@ const initVideoParams = {
 const VideoPart = ({ openedMenu }) => {
   const queryClient = useQueryClient();
 
-  const { id } = useParams();
+  let [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
 
   const { user } = useAuthContext();
 
@@ -63,7 +65,7 @@ const VideoPart = ({ openedMenu }) => {
       subscriberId: user?._id,
     },
     true,
-    true
+    true,
   );
 
   const { data: videoData } = getData(`/data/all`, videoParams, true, false);
@@ -72,7 +74,7 @@ const VideoPart = ({ openedMenu }) => {
     `/data/comment/video-cmt/${id}`,
     cmtParams,
     true,
-    false
+    false,
   );
 
   useEffect(() => {

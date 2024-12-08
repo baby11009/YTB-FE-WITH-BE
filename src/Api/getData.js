@@ -5,7 +5,7 @@ export const getData = (
   path,
   params = {},
   condition = true,
-  suspense = false
+  suspense = false,
 ) => {
   if (!path) {
     return null;
@@ -15,14 +15,14 @@ export const getData = (
   const paramsKey = [...Object.keys(params)];
 
   const notParamsResetKeys = paramsKey.filter(
-    (key) => key !== "refetch" && key !== "clearCache" && key !== "reset"
+    (key) => key !== "refetch" && key !== "clearCache" && key !== "reset",
   );
 
   let finalParams = {};
 
   if (paramsKey.length > 0) {
     const notParamsResetKeys = paramsKey.filter(
-      (key) => key !== "refetch" && key !== "clearCache" && key !== "reset"
+      (key) => key !== "refetch" && key !== "clearCache" && key !== "reset",
     );
 
     if (paramsKey.length !== notParamsResetKeys.length) {
@@ -47,7 +47,7 @@ export const getData = (
       } catch (error) {
         console.error(error);
         alert(
-          error.response?.data?.msg || error.response?.data || error.message
+          error.response?.data?.msg || error.response?.data || error.message,
         );
         throw error;
       }
@@ -55,7 +55,6 @@ export const getData = (
 
     enabled: condition,
     suspense,
-    cacheTime: 5 * 60 * 1000, // Always fetch fresh data
   });
 };
 
@@ -63,7 +62,7 @@ export const getDataWithAuth = (
   path,
   params = {},
   condition = true,
-  suspense = true
+  suspense = true,
 ) => {
   if (!path) {
     return null;
@@ -78,7 +77,7 @@ export const getDataWithAuth = (
 
   if (paramsKey.length > 0) {
     const notParamsResetKeys = paramsKey.filter(
-      (key) => key !== "refetch" && key !== "clearCache" && key !== "reset"
+      (key) => key !== "refetch" && key !== "clearCache" && key !== "reset",
     );
 
     if (paramsKey.length !== notParamsResetKeys.length) {
@@ -104,7 +103,7 @@ export const getDataWithAuth = (
       } catch (error) {
         console.error(error);
         alert(
-          error.response?.data?.msg || error.response?.data || error.message
+          error.response?.data?.msg || error.response?.data || error.message,
         );
         throw error;
       }
@@ -112,6 +111,5 @@ export const getDataWithAuth = (
 
     enabled: condition,
     suspense: suspense,
-    cacheTime: 5 * 60 * 1000,
   });
 };

@@ -4,24 +4,17 @@ import Description from "./Description/Description";
 import CommentSection from "./Comment/CommentSection";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { IsEnd } from "../../../util/scrollPosition";
-import { useParams } from "react-router-dom";
 import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import { useQueryClient } from "@tanstack/react-query";
-import { scrollToTop } from "../../../util/scrollCustom";
-import connectSocket from "../../../util/connectSocket";
-
-const initVideoParams = {
-  page: 1,
-  limit: 12,
-  createdAt: "mới nhất",
-  prevPlCount: 0,
-};
+import { useSearchParams } from "react-router-dom";
 
 const VideoPart = () => {
   const queryClient = useQueryClient();
 
-  const { id } = useParams();
+  let [searchParams] = useSearchParams();
+
+  const { id, list } = Object.fromEntries(searchParams.entries());
 
   const { user } = useAuthContext();
 
@@ -71,6 +64,7 @@ const VideoPart = () => {
   if (isError) {
     return <div>Failed to loading data</div>;
   }
+
   return (
     <div className='max-w-[1754px] flex sm:justify-center lg:min-w-min-360 1356:min-w-min-480 mx-auto'>
       {/* Left side */}
@@ -81,7 +75,7 @@ const VideoPart = () => {
         <Video data={videoInfo} refetch={refetch} />
         <Description data={videoInfo} refetch={refetch} />
         <div className=' block lg:hidden  '>
-          <Other videoId={id} showMore={true} id={"small"} />
+          <Other videoId={id} playlistId={list} showMore={true} id={"small"} />
         </div>
         <CommentSection
           videoId={id}
@@ -93,7 +87,7 @@ const VideoPart = () => {
       </div>
       {/* Right side */}
       <div className='hidden lg:block pt-[24px] pr-[24px] w-[402px] min-w-[300px] box-content'>
-        <Other videoId={id} isEnd={isEnd} id={"large"} />
+        <Other videoId={id} playlistId={list} isEnd={isEnd} id={"large"} />
       </div>
     </div>
   );

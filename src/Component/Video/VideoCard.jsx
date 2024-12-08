@@ -185,8 +185,8 @@ const VideoCard = ({
       <Link
         to={
           playlistId
-            ? `/video/${data?._id}?list=${playlistId}`
-            : `/video/${data?._id}`
+            ? `/video?id=${data?._id}&list=${playlistId}`
+            : `/video?id=${data?._id}`
         }
       >
         <div

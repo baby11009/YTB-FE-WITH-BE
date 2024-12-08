@@ -21,27 +21,8 @@ const router = createBrowserRouter([
     element: <ErrorPage />,
   },
   {
-    path: "/:path",
-    element: (
-      <ProtectedRoute
-        onlyAuthTheseRoutes={[
-          "/sub-content",
-          "/sub-channels",
-          "/my-channel",
-          "/watched/me",
-          "/playlists",
-          "/playlist/wl",
-          "/playlist/lv",
-        ]}
-        disableRouteAfterSigin={["/auth/login"]}
-      >
-        <HomePage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/:path/:id",
-    element: <HomePage />,
+    path: "/video",
+    element: <VideoPage />,
   },
   {
     path: "/auth/success/:msg",
@@ -57,10 +38,6 @@ const router = createBrowserRouter([
         <AuthPage />
       </ProtectedRoute>
     ),
-  },
-  {
-    path: "/video/:id",
-    element: <VideoPage />,
   },
   {
     path: "/account-setting/:id",
@@ -106,6 +83,29 @@ const router = createBrowserRouter([
         <ManagePage />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: "/:path",
+    element: (
+      <ProtectedRoute
+        onlyAuthTheseRoutes={[
+          "/sub-content",
+          "/sub-channels",
+          "/my-channel",
+          "/watched/me",
+          "/playlists",
+          "/playlist/wl",
+          "/playlist/lv",
+        ]}
+        disableRouteAfterSigin={["/auth/login"]}
+      >
+        <HomePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/:path/:id",
+    element: <HomePage />,
   },
 ]);
 

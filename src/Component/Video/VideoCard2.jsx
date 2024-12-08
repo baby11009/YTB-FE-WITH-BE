@@ -43,8 +43,6 @@ const funcList1 = [
   },
 ];
 
-const randomColor = getRandomHexColor();
-
 const VideoCard2 = ({
   index,
   size,
@@ -53,6 +51,8 @@ const VideoCard2 = ({
   playlistId,
   containerStyle,
 }) => {
+  const bgColor = useRef(getRandomHexColor());
+
   const { setShowHover, handleCursorPositon } = useAuthContext();
 
   return (
@@ -62,13 +62,13 @@ const VideoCard2 = ({
       }`}
       to={
         playlistId
-          ? `/video/${data?._id}?pl=${playlistId}`
-          : `/video/${data?._id}`
+          ? `/video?id=${data?._id}&list=${playlistId}`
+          : `/video?id=${data?._id}`
       }
     >
       <div
         className='h-full aspect-video rounded-[12px] overflow-hidden mr-[8px] relative'
-        style={{ backgroundColor: randomColor }}
+        style={{ backgroundColor: bgColor.current }}
       >
         <img
           src={`${import.meta.env.VITE_BASE_API_URI}${

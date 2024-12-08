@@ -1,4 +1,10 @@
-import { useState, useRef, useLayoutEffect, useCallback } from "react";
+import {
+  useState,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+  useEffect,
+} from "react";
 import { smoothScroll } from "../../util/scrollCustom";
 import { ThinArrowIcon } from "../../Assets/Icons";
 
@@ -21,11 +27,15 @@ const Slider = ({
 
   const enabledScrolling = useRef();
 
+  const isClicked = useRef(false);
+
   const visibleChildrenCount = Math.round(
     sliderRef.current?.clientWidth / sliderRef.current?.firstChild.clientWidth,
   );
 
   const handleScroll = (direction) => {
+    if (isClicked.current) return;
+    isClicked.current = true;
     smoothScroll(
       direction,
       sliderRef,
@@ -34,7 +44,16 @@ const Slider = ({
         ? scrollDistance
         : visibleChildrenCount * sliderRef.current?.firstChild.clientWidth, //caculate visible children width to scroll,
     );
+    setTimeout(() => {
+      isClicked.current = false;
+    }, scrollDuration + 20);
   };
+
+  useEffect(() => {
+    if (children) {
+      sliderRef.current.scrollLeft = 0;
+    }
+  }, [children]);
 
   useLayoutEffect(() => {
     enabledScrolling.current =
