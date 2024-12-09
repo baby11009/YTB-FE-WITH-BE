@@ -60,7 +60,7 @@ const CustomeFuncBox = ({
               item.condition(productIndex, size)
             ) {
               return null;
-            } else if (item.condition) {
+            } else if (typeof item.condition === "boolean" && !item.condition) {
               return null;
             }
 
@@ -85,7 +85,7 @@ const CustomeFuncBox = ({
               item.condition(productIndex, size)
             ) {
               return null;
-            } else if (typeof item.condition === "boolean" && item.condition) {
+            } else if (typeof item.condition === "boolean" && !item.condition) {
               return null;
             }
 

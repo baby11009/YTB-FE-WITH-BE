@@ -13,6 +13,7 @@ import CustomeFuncBox from "../Box/CustomeFuncBox";
 import { useCallback, useRef } from "react";
 import { getRandomHexColor } from "../../util/func";
 import { useSearchParams } from "react-router-dom";
+import request from "../../util/axios-base-url";
 
 const PlaylistVideoCard = ({
   containerStyle,
@@ -25,7 +26,7 @@ const PlaylistVideoCard = ({
 }) => {
   const { handleCursorPositon, setShowHover } = useAuthContext();
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [_, setSearchParams] = useSearchParams();
 
   const bgColor = useRef(getRandomHexColor());
 
@@ -33,11 +34,45 @@ const PlaylistVideoCard = ({
     setSearchParams({ id: data?._id, list: playlistInfo?._id });
   }, [playlistInfo?._id]);
 
+  const addToWatchLater = useCallback(async () => {}, []);
+
+  const removeFromPlaylist = useCallback(async (from, to) => {
+    try {
+      await request
+        .patch(`/client/playlist/${playlistInfo?._id}`, {
+          videoIdList: [data?._id],
+        })
+        .then((rsp) => {
+          console.log(rsp.data);
+        });
+    } catch (error) {
+      alert("Failed to move position");
+      throw error;
+    }
+  }, []);
+
+  const removeLikedVideos = useCallback(async (from, to) => {
+    try {
+      await request
+        .post("/client/react", {
+          videoId: data?._id,
+          type: "like",
+        })
+        .then((rsp) => console.log(rsp.data));
+    } catch (error) {
+      alert("Failed to move position");
+      throw error;
+    }
+  }, []);
+
   const funcList = [
     {
       id: 1,
       text: "Save to Watch later",
       icon: <LaterIcon />,
+      condition:
+        playlistInfo.type !== "personal" ||
+        playlistInfo.title !== "Watch later",
     },
     {
       id: 2,
@@ -48,6 +83,10 @@ const PlaylistVideoCard = ({
       id: 3,
       text: "Remove from playlist",
       icon: <TrashBinIcon />,
+      handleOnClick: removeFromPlaylist,
+      condition:
+        playlistInfo.type !== "personal" ||
+        playlistInfo.title !== "Liked videos",
     },
     {
       id: 4,
@@ -58,6 +97,18 @@ const PlaylistVideoCard = ({
       id: 5,
       text: "Share",
       icon: <ShareIcon />,
+    },
+  ];
+
+  const funcList2 = [
+    {
+      id: 1,
+      text: "Remove from Liked videos",
+      icon: <TrashBinIcon />,
+      handleOnClick: removeLikedVideos,
+      condition:
+        playlistInfo.type === "personal" &&
+        playlistInfo.title === "Liked videos",
     },
   ];
 
@@ -137,6 +188,7 @@ const PlaylistVideoCard = ({
                   setShowHover(undefined);
                 }}
                 funcList1={funcList}
+                funcList2={funcList2}
                 productData={data}
                 productIndex={index}
                 size={size}

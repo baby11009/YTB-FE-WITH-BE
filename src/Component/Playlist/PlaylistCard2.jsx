@@ -13,16 +13,15 @@ import { formatNumber } from "../../util/numberFormat";
 import { timeFormat2 } from "../../util/timeforMat";
 import { useAuthContext } from "../../Auth Provider/authContext";
 
-const PlaylistCard2 = ({
-  data,
-  containerStyle,
-  l3Color,
-  l2Color,
-}) => {
+const PlaylistCard2 = ({ data, containerStyle, l3Color, l2Color }) => {
+
   const { setShowHover, handleCursorPositon } = useAuthContext();
   const bgColorRef = useRef(getRandomHexColor());
   return (
-    <Link className='inline-block mt-[16px] cursor-pointer group w-full '>
+    <Link
+      to={`/video?id=${data?.video_list[0]?._id}&list=${data?._id}`}
+      className='inline-block mt-[16px] cursor-pointer group w-full '
+    >
       <div className={`${containerStyle} flex`}>
         <div className={`relative h-full aspect-video mr-[8px]`}>
           <div
@@ -62,7 +61,7 @@ const PlaylistCard2 = ({
             className='absolute bottom-0 right-0 mr-[8px] mb-[8px] 
         rounded-[4px] w-fit bg-[rgba(51,37,34,0.8)] z-[4] flex items-center justify-center'
           >
-            <div className='mx-[4px]'>
+            <div className='w-[24px] mx-[4px]'>
               <PlayListIcon />
             </div>
             <span className=' text-[12px] leading-[18px] text-white mr-[4px] py-[3px]'>
@@ -74,7 +73,9 @@ const PlaylistCard2 = ({
             className='absolute inset-0 bg-[rgba(0,0,0,0.8)] 
             z-[5] rounded-[12px] border-t-[1px] border-black flex items-center justify-center group-hover:opacity-[1] opacity-0'
           >
-            <PlayIcon />
+            <div className='w-[24px]'>
+              <PlayIcon />
+            </div>
             <span className='ml-[2px] text-[13px] font-[550]'>PHÁT TẤT CẢ</span>
           </div>
         </div>

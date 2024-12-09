@@ -25,7 +25,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
     `/data/comment/video-cmt/${videoId}`,
     commentQuery,
     videoId && isInViewPort && commentQuery ? true : false,
-    false
+    false,
   );
 
   const [replyCmtModified, setReplyCmtModified] = useState(null);
@@ -105,7 +105,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
           top: -1,
         },
         reset: user?._id,
-        clearCache: "comment",
+        clearCache: videoId,
       });
       setAddNew(true);
     }
@@ -115,7 +115,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
     const handleScroll = () => {
       if (containerRef.current) {
         const { top, bottom } = containerRef.current.getBoundingClientRect();
-        if (top < window.innerHeight && bottom > 0) {
+        if (top < window.innerHeight) {
           SetIsInViewPort(true);
         } else {
           SetIsInViewPort(false);

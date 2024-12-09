@@ -13,6 +13,8 @@ const Body = ({
 }) => {
   const location = useLocation();
 
+  window.scrollTo(0, 0);
+
   return (
     <div className={`pt-[56px] ${containerStyle}`}>
       {/* Large device Left Menu */}

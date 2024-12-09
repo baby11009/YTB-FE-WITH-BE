@@ -22,6 +22,7 @@ const PlayListCard = ({
   containerStyle,
   imgStyle,
 }) => {
+
   const { path } = useParams();
 
   const { setShowHover, handleCursorPositon } = useAuthContext();
@@ -81,7 +82,9 @@ const PlayListCard = ({
             className='absolute inset-0 bg-[rgba(0,0,0,0.8)] group-hover:opacity-[1] opacity-0
             z-[5] rounded-[12px] border-t-[1px] border-black flex items-center justify-center'
           >
-            <PlayIcon />
+            <div className='w-[24px]'>
+              <PlayIcon />
+            </div>
             <span className='ml-[2px] text-[13px] font-[550]'>PHÁT TẤT CẢ</span>
           </div>
         </div>

@@ -27,7 +27,7 @@ const LikedVideo = () => {
   const [playlistInfo, setPlaylistInfo] = useState(undefined);
 
   const [isEnd, setIsEnd] = useState(false);
-
+  
   const {
     data: likedVideosData,
     isLoading,
@@ -83,7 +83,7 @@ const LikedVideo = () => {
   useEffect(() => {
     if (likedVideosData) {
       setPlaylistInfo((prev) =>
-        prev ? { ...prev, ...likedVideosData?.data } : likedVideosData?.data
+        prev ? { ...prev, ...likedVideosData?.data } : likedVideosData?.data,
       );
       if (addNew) {
         videoIdsset.current.clear();
@@ -147,7 +147,7 @@ const LikedVideo = () => {
     <Display
       playlistId={playlistInfo?._id}
       title={playlistInfo?.title}
-      updatedAt={videoList[0]?.updatedAt}
+      updatedAt={playlistInfo?.updatedAt}
       size={playlistInfo?.size}
       videoList={videoList}
       isLoading={isLoading}

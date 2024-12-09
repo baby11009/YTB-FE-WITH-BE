@@ -34,6 +34,8 @@ const initShortQuery = {
 const Other = ({ videoId, playlistId, isEnd, showMore }) => {
   const [firstRender, setFirstRender] = useState(true);
 
+  const currPlaylistId = useRef();
+
   const queryClient = useQueryClient();
 
   const [addNew, setAddNew] = useState();
@@ -49,11 +51,9 @@ const Other = ({ videoId, playlistId, isEnd, showMore }) => {
   const { data: videoData } = getData(
     `/data/all`,
     videoQuery,
-    videoId && videoQuery ? true : false,
+    !!videoQuery,
     false,
   );
-  
-  console.log("🚀 ~ videoData:", videoData);
 
   const [shortQuery, setShortQuery] = useState(undefined);
 
@@ -64,7 +64,7 @@ const Other = ({ videoId, playlistId, isEnd, showMore }) => {
   const { data: shortData, isLoading } = getData(
     `/data/all`,
     shortQuery,
-    videoId && shortQuery ? true : false,
+    !!shortQuery,
     false,
   );
 
@@ -146,8 +146,9 @@ const Other = ({ videoId, playlistId, isEnd, showMore }) => {
   };
 
   useLayoutEffect(() => {
-    if (!playlistId || firstRender) {
+    if (!playlistId || firstRender || playlistId !== currPlaylistId.current) {
       setFirstRender(false);
+      currPlaylistId.current = playlistId;
 
       videoIdList.current.clear();
       setVideoQuery({

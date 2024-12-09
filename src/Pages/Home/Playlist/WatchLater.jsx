@@ -55,7 +55,7 @@ const WatchLater = () => {
   useEffect(() => {
     if (watchLaterData) {
       setPlaylistInfo((prev) =>
-        prev ? { ...prev, ...watchLaterData?.data } : watchLaterData?.data
+        prev ? { ...prev, ...watchLaterData?.data } : watchLaterData?.data,
       );
       if (addNew) {
         videoIdsset.current.clear();
@@ -104,14 +104,14 @@ const WatchLater = () => {
         throw error;
       }
     },
-    [playlistInfo?._id]
+    [playlistInfo?._id],
   );
 
   const movePosition = useCallback(
     async (data, productId, index) => {
       await handleChangePosition(index, index + data.value);
     },
-    [playlistInfo?._id]
+    [playlistInfo?._id],
   );
 
   const funcList = [

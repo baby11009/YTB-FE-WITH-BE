@@ -12,6 +12,10 @@ import { getData } from "../../../../../Api/getData";
 import { IsElementEnd } from "../../../../../util/scrollPosition";
 
 const Playlist = ({ playlistId, videoId }) => {
+  const [isEnd, setIsEnd] = useState(false);
+
+  const [addNew, setAddNew] = useState(true);
+
   const [show, setShow] = useState(true);
 
   const [playlistQuery, setPlaylistQuery] = useState({
@@ -30,6 +34,8 @@ const Playlist = ({ playlistId, videoId }) => {
 
   const nextVideo = useRef(undefined);
 
+  const container = useRef();
+
   const {
     data: playlistDetails,
     refetch,
@@ -38,13 +44,12 @@ const Playlist = ({ playlistId, videoId }) => {
   } = getData(
     `/data/playlist/${playlistId}`,
     playlistQuery,
-    playlistId ? true : false,
+    !!playlistId,
     false,
   );
 
   useLayoutEffect(() => {
     if (playlistDetails) {
-      const finalList = [];
       setPlaylistInfo((prev) => {
         if (prev) {
           return { ...prev, ...playlistDetails.data };
@@ -52,24 +57,72 @@ const Playlist = ({ playlistId, videoId }) => {
 
         return playlistDetails.data;
       });
-      playlistDetails.data.video_list?.forEach((item) => {
-        if (!videoIdList.current.has(item._id)) {
-          videoIdList.current.add(item._id);
-          finalList.push(item);
-        }
-      });
 
-      setVideoList((prev) => [...prev, ...finalList]);
+      if (addNew) {
+        const finalList = [];
+        videoIdList.current.clear();
+        playlistDetails.data.video_list?.forEach((item) => {
+          if (!videoIdList.current.has(item._id)) {
+            videoIdList.current.add(item._id);
+            finalList.push(item);
+          }
+        });
+        setVideoList([...finalList]);
+        setAddNew(false);
+      } else {
+        const finalList = [];
+
+        playlistDetails.data.video_list?.forEach((item) => {
+          if (!videoIdList.current.has(item._id)) {
+            videoIdList.current.add(item._id);
+            finalList.push(item);
+          }
+        });
+
+        setVideoList((prev) => [...prev, ...finalList]);
+      }
     }
   }, [playlistDetails]);
 
-  useEffect(() => {
-    if (videoId) {
+  useLayoutEffect(() => {
+    if (videoId && playlistDetails) {
       currentVideoIndex.current = [...videoIdList.current].indexOf(videoId) + 1;
 
       nextVideo.current = videoList[currentVideoIndex.current];
     }
-  }, [videoId]);
+  }, [videoId, playlistDetails]);
+
+  useLayoutEffect(() => {
+    if (playlistId) {
+      setAddNew(true);
+    }
+  }, [playlistId]);
+
+  useEffect(() => {
+    if (
+      isEnd &&
+      playlistDetails &&
+      playlistQuery.videoPage < playlistDetails.totalPages
+    ) {
+      setPlaylistQuery((prev) => ({ ...prev, videoPage: prev.videoPage + 1 }));
+    }
+  }, [isEnd]);
+
+  useEffect(() => {
+    const handleScorll = (e) => {
+      IsElementEnd(setIsEnd, e);
+    };
+
+    if (container.current) {
+      container.current.addEventListener("scroll", handleScorll);
+    }
+
+    return () => {
+      if (container.current) {
+        container.current.removeEventListener("scroll", handleScorll);
+      }
+    };
+  }, []);
 
   if (isError) {
     return <div>Failed to load playlist data</div>;
@@ -138,7 +191,7 @@ const Playlist = ({ playlistId, videoId }) => {
               </button>
             </div>
           </div>
-          <div className='flex-1 overflow-y-auto pr-[10px]'>
+          <div className='flex-1 overflow-y-auto pr-[10px]' ref={container}>
             {videoList.map((item, index) => (
               <PlaylistVideoCard
                 key={item?._id}
@@ -160,7 +213,7 @@ const Playlist = ({ playlistId, videoId }) => {
           <div className='flex items-center'>
             <div className='flex-1'>
               <div className='text-[14px] leading-[20px] text-[#E6E5FF] flex'>
-                {currentVideoIndex.current ? (
+                {nextVideo.current ? (
                   <>
                     <span className='font-[500] mr-[4px]'>Next: </span>
                     <div className='max-h-[20px] line-clamp-1 text-ellipsis overflow-hidden whitespace-nowrap'>
@@ -206,4 +259,5 @@ const Playlist = ({ playlistId, videoId }) => {
     </div>
   );
 };
+
 export default Playlist;

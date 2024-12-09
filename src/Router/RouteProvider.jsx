@@ -11,6 +11,10 @@ import {
 } from "../Pages";
 import ProtectedRoute from "./ProtectedRoute";
 
+const ScrollToTop = () => {
+  window.scrollTo(0, 0);
+};
+
 const router = createBrowserRouter([
   {
     path: "/",

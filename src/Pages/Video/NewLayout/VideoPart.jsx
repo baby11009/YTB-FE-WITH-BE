@@ -2,12 +2,13 @@ import Other from "./Other/Other";
 import Video from "./Video/Video";
 import Description from "./Description/Description";
 import CommentSection from "./Comment/CommentSection";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { IsEnd } from "../../../util/scrollPosition";
 import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const VideoPart = () => {
   const queryClient = useQueryClient();
@@ -18,6 +19,13 @@ const VideoPart = () => {
 
   const { user } = useAuthContext();
 
+  const navigate = useNavigate();
+
+  const [videoInfo, setVideoInfo] = useState(undefined);
+
+  const [isEnd, setIsEnd] = useState(false);
+
+  // Video details
   const {
     data: videoDetails,
     refetch,
@@ -28,13 +36,9 @@ const VideoPart = () => {
       subscriberId: user?._id,
       id: id,
     },
-    true,
-    true,
+    !!id,
+    false,
   );
-
-  const [videoInfo, setVideoInfo] = useState(undefined);
-
-  const [isEnd, setIsEnd] = useState(false);
 
   useEffect(() => {
     if (videoDetails) {
@@ -45,8 +49,15 @@ const VideoPart = () => {
   }, [videoDetails]);
 
   useEffect(() => {
-    if (id && videoInfo) {
-      queryClient.clear();
+    if (id) {
+      if (videoInfo) {
+        queryClient.invalidateQueries({
+          queryKey: [user?._id, id],
+          exact: true,
+        });
+      }
+    } else {
+      navigate("/");
     }
   }, [id]);
 
@@ -58,6 +69,7 @@ const VideoPart = () => {
 
     return () => {
       window.removeEventListener("scroll", handleOnScroll);
+      queryClient.clear();
     };
   }, []);
 
