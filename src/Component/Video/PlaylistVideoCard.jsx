@@ -188,7 +188,7 @@ const PlaylistVideoCard = ({
                   setShowHover(undefined);
                 }}
                 funcList1={funcList}
-                funcList2={funcList2}
+                funcList2={funcList2[0].condition ? funcList2 : undefined}
                 productData={data}
                 productIndex={index}
                 size={size}

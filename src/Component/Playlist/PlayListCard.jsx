@@ -22,7 +22,6 @@ const PlayListCard = ({
   containerStyle,
   imgStyle,
 }) => {
-
   const { path } = useParams();
 
   const { setShowHover, handleCursorPositon } = useAuthContext();
@@ -30,7 +29,10 @@ const PlayListCard = ({
   const bgColorRef = useRef(getRandomHexColor());
 
   return (
-    <Link className='cursor-pointer inline-block'>
+    <Link
+      to={`/video?id=${data?.video_list[0]?._id}&list=${data?._id}`}
+      className='cursor-pointer inline-block'
+    >
       <div className={`flex-1 mx-[8px] mb-[40px] ${containerStyle} group`}>
         <div className={`relative ${imgStyle || "w-full"} aspect-video`}>
           <div

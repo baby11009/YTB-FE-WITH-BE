@@ -25,6 +25,8 @@ const VideoPart = () => {
 
   const [isEnd, setIsEnd] = useState(false);
 
+  const [playlistStatus, setPlaylistStatus] = useState(undefined);
+
   // Video details
   const {
     data: videoDetails,
@@ -84,10 +86,20 @@ const VideoPart = () => {
         className='flex-1 min-w-240-16/9 lg:min-w-360-16/9 lg:max-w-max-16/9
          1356:min-w-480-16/9 ml-[24px] pt-[24px] pr-[24px] overflow-hidden'
       >
-        <Video data={videoInfo} refetch={refetch} />
+        <Video
+          data={videoInfo}
+          refetch={refetch}
+          playlistStatus={playlistStatus}
+        />
         <Description data={videoInfo} refetch={refetch} />
         <div className=' block lg:hidden  '>
-          <Other videoId={id} playlistId={list} showMore={true} id={"small"} />
+          <Other
+            videoId={id}
+            playlistId={list}
+            showMore={true}
+            id={"small"}
+            setPlaylistStatus={setPlaylistStatus}
+          />
         </div>
         <CommentSection
           videoId={id}
@@ -99,7 +111,13 @@ const VideoPart = () => {
       </div>
       {/* Right side */}
       <div className='hidden lg:block pt-[24px] pr-[24px] w-[402px] min-w-[300px] box-content'>
-        <Other videoId={id} playlistId={list} isEnd={isEnd} id={"large"} />
+        <Other
+          videoId={id}
+          playlistId={list}
+          isEnd={isEnd}
+          id={"large"}
+          setPlaylistStatus={setPlaylistStatus}
+        />
       </div>
     </div>
   );
