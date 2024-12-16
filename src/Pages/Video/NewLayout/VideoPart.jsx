@@ -9,8 +9,10 @@ import { useAuthContext } from "../../../Auth Provider/authContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-
+import { useLocation } from "react-router-dom";
 const VideoPart = () => {
+  const { state } = useLocation();
+
   const queryClient = useQueryClient();
 
   let [searchParams] = useSearchParams();
@@ -86,11 +88,7 @@ const VideoPart = () => {
         className='flex-1 min-w-240-16/9 lg:min-w-360-16/9 lg:max-w-max-16/9
          1356:min-w-480-16/9 ml-[24px] pt-[24px] pr-[24px] overflow-hidden'
       >
-        <Video
-          data={videoInfo}
-          refetch={refetch}
-          playlistStatus={playlistStatus}
-        />
+        <Video data={state} refetch={refetch} playlistStatus={playlistStatus} />
         <Description data={videoInfo} refetch={refetch} />
         <div className=' block lg:hidden  '>
           <Other

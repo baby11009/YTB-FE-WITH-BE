@@ -376,7 +376,7 @@ export const ChannelButton = ({ data }) => {
 
 export const SmButton = ({ data, path, handleOnClick }) => {
   return (
-    <li
+    <div
       className={`flex flex-col justify-center items-center pt-[16px] py-[14px]
           rounded-[10px] cursor-pointer
               ${
@@ -393,7 +393,7 @@ export const SmButton = ({ data, path, handleOnClick }) => {
     >
       {path === data?.path ? data.activeIcon || data?.icon : data?.icon}
       <span className='text-[10px] leading-[14px] mt-[6px]'>{data.title}</span>
-    </li>
+    </div>
   );
 };
 

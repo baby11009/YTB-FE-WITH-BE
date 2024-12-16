@@ -14,6 +14,7 @@ import { useCallback, useRef } from "react";
 import { getRandomHexColor } from "../../util/func";
 import { useSearchParams } from "react-router-dom";
 import request from "../../util/axios-base-url";
+import { Link } from "react-router-dom";
 
 const PlaylistVideoCard = ({
   containerStyle,
@@ -113,15 +114,14 @@ const PlaylistVideoCard = ({
   ];
 
   return (
-    <div
+    <Link
       className={`${containerStyle ? containerStyle : ""} ${
         currentId === data?._id
           ? "bg-[rgba(40,45,51,0.949)]"
           : "hover:bg-black-0.1"
       } box-content flex items-center cursor-grab group`}
-      onClick={() => {
-        handleNavigate();
-      }}
+      to={`/video?id=${data?._id}&list=${playlistInfo?._id}`}
+      state={{ stream: data?.stream, video: data.video }}
     >
       <div className='w-[24px] text-center'>
         {currentId === data?._id ? (
@@ -199,7 +199,7 @@ const PlaylistVideoCard = ({
       >
         <Setting2Icon />
       </button>
-    </div>
+    </Link>
   );
 };
 export default PlaylistVideoCard;

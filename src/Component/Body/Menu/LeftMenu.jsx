@@ -31,7 +31,7 @@ const LeftMenu = ({ openedMenu, path }) => {
   };
 
   return (
-    <div
+    <nav
       className={`fixed top-[56px] left-0  ${
         openedMenu ? "w-[240px]" : "w-[74px]"
       }  h-screen z-[9999]`}
@@ -180,7 +180,7 @@ const LeftMenu = ({ openedMenu, path }) => {
 
       {/* Small menu */}
       {!openedMenu && (
-        <ul className='mt-[4px] px-[4px]'>
+        <nav className='mt-[4px] px-[4px]'>
           {funcList1.map((item) => {
             if (item.condition && !user) {
               return;
@@ -194,9 +194,9 @@ const LeftMenu = ({ openedMenu, path }) => {
               />
             );
           })}
-        </ul>
+        </nav>
       )}
-    </div>
+    </nav>
   );
 };
 export default LeftMenu;

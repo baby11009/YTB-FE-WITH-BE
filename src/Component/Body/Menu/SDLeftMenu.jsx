@@ -19,7 +19,6 @@ import {
   SmButton,
   LinkComponent,
   ChannelButton,
-  channelList,
   footerList1,
   footerList2,
   funcList1,
@@ -86,7 +85,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                 </div>
               </div>
               <div className='text-[14px] font-[500] leading-[20px] h-full-minus-56 overflow-y-scroll overscroll-contain menu-scrollbar'>
-                <div className='p-[12px]'>
+                <nav className='p-[12px]'>
                   <ul>
                     {funcList1.slice(0, 3).map((item) => {
                       if (item.condition && !user) {
@@ -132,7 +131,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                         {user?.subscribed_list
                           ?.slice(
                             0,
-                            showMored ? user?.subscribed_list?.length : 7
+                            showMored ? user?.subscribed_list?.length : 7,
                           )
                           .map((channel, id) => (
                             <ChannelButton
@@ -227,7 +226,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                       © 2024 Google LLC
                     </div>
                   </div>
-                </div>
+                </nav>
               </div>
             </motion.div>
           </div>
@@ -235,7 +234,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
       </AnimatePresence>
       {!noIconMenu && (
         <div className='w-[74px] h-scrren hidden md:block fixed left-0'>
-          <ul className='mt-[4px] px-[4px]'>
+          <nav className='mt-[4px] px-[4px]'>
             {funcList1.map((item) => {
               if (item.condition && !user) {
                 return;
@@ -249,7 +248,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                 />
               );
             })}
-          </ul>
+          </nav>
         </div>
       )}
     </>

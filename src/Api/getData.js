@@ -67,7 +67,6 @@ export const getDataWithAuth = (
   if (!path) {
     return null;
   }
-  console.log(params, path);
 
   const paramsValue = [...Object.values(params)];
 

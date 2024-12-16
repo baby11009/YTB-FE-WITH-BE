@@ -12,11 +12,11 @@ const Body = ({
   noIconMenu,
 }) => {
   const location = useLocation();
-  
+
   window.scrollTo(0, 0);
 
   return (
-    <div className={`pt-[56px] ${containerStyle}`}>
+    <main className={`pt-[56px] ${containerStyle}`}>
       {/* Large device Left Menu */}
       {!noLDMenu && (
         <div className='hidden xl:block z-[9999]'>
@@ -55,7 +55,7 @@ const Body = ({
           {RenderContent}
         </Suspense>
       </div>
-    </div>
+    </main>
   );
 };
 export default Body;

@@ -65,6 +65,7 @@ const VideoCard2 = ({
           ? `/video?id=${data?._id}&list=${playlistId}`
           : `/video?id=${data?._id}`
       }
+      state={{ stream: data?.stream, video: data.video }}
     >
       <div
         className='h-full aspect-video rounded-[12px] overflow-hidden mr-[8px] relative'

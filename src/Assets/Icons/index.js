@@ -140,3 +140,8 @@ export { default as PrivateIcon } from "./Private.jsx";
 export { default as PublicIcon } from "./Public.jsx";
 export { default as CheckIcon } from "./Check.jsx";
 export { default as RepeatIcon } from "./Repeat.jsx";
+export { default as FillSettingIcon } from "./FillSetting.jsx";
+export { default as NextIcon } from "./Next.jsx";
+export { default as TheaterIcon } from "./Theater.jsx";
+export { default as FullScreenIcon } from "./FullScreen.jsx";
+export { default as PauseIcon } from "./Pause.jsx";

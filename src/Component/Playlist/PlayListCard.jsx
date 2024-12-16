@@ -31,6 +31,10 @@ const PlayListCard = ({
   return (
     <Link
       to={`/video?id=${data?.video_list[0]?._id}&list=${data?._id}`}
+      state={{
+        stream: data?.video_list[0]?.stream,
+        video: data?.video_list[0]?.video,
+      }}
       className='cursor-pointer inline-block'
     >
       <div className={`flex-1 mx-[8px] mb-[40px] ${containerStyle} group`}>

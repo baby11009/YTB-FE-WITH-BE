@@ -17,7 +17,9 @@ const initPrs = {
   title: "",
   email: "",
   type: "",
-  createdAt: "mới nhất",
+  sort: {
+    createdAt: -1,
+  },
 };
 
 const VideoPage = ({ openedMenu }) => {
@@ -62,7 +64,7 @@ const VideoPage = ({ openedMenu }) => {
     await dltManyData("video/delete-many", checkedList, "video", () => {
       setCheckedList([]);
       refetch();
-    })
+    });
   };
 
   useLayoutEffect(() => {
