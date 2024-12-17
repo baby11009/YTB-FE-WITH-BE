@@ -20,7 +20,7 @@ const AuthProvider = ({ children }) => {
 
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 
-  const [openedMenu, setOpenedMenu] = useState(true);
+  const [openedMenu, setOpenedMenu] = useState(false);
 
   const authTokenRef = useRef(getCookie(import.meta.env.VITE_AUTH_TOKEN));
 

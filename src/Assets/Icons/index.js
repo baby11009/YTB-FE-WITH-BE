@@ -145,3 +145,4 @@ export { default as NextIcon } from "./Next.jsx";
 export { default as TheaterIcon } from "./Theater.jsx";
 export { default as FullScreenIcon } from "./FullScreen.jsx";
 export { default as PauseIcon } from "./Pause.jsx";
+export { default as Play2Icon } from "./Play2.jsx";

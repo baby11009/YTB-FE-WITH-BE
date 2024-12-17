@@ -457,8 +457,10 @@ th {
 .time-line {
   --preview-progress: 0;
   --progress-position: 0;
+  --scale: 0;
   position: relative;
 }
+
 .time-line::before {
   content: "";
   position: absolute;
@@ -482,10 +484,9 @@ th {
 }
 
 .time-line .thumb-indicator {
-  --scale: 0;
   position: absolute;
   height: 200%;
-  transform: translateX(-50%)  scale(var(--scale));
+  transform: translateX(-50%) scale(var(--scale));
   top: -50%;
   left: calc(var(--progress-position, 0.25) * 100%);
   background-color: red;
@@ -494,6 +495,6 @@ th {
   aspect-ratio: 1/1;
 }
 
-.time-line:hover .thumb-indicator {
+.time-line:hover {
   --scale: 1;
 }
