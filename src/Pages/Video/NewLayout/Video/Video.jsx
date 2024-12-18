@@ -17,21 +17,28 @@ import {
   NextIcon,
 } from "../../../../Assets/Icons";
 import { durationCalc } from "../../../../util/durationCalc";
+import { AudioRange } from "../../../../Component";
 
 const Video = ({ data }) => {
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   const [videoState, setVideoState] = useState({ paused: true });
 
+  const container = useRef();
+
   const videoRef = useRef();
 
   const videoSrc = useRef();
+
+  const controls = useRef();
 
   const timeLineContainer = useRef();
 
   const timeline = useRef();
 
   const isScrubbing = useRef();
+
+  const audioScrubbing = useRef();
 
   const wasPaused = useRef();
 
@@ -99,7 +106,20 @@ const Video = ({ data }) => {
     }
   }, []);
 
+  const handleMouseOver = useCallback((e) => {
+    controls.current.style.opacity = 1;
+  }, []);
+
+  const handleMouseOut = useCallback((e) => {
+    if (isScrubbing.current || audioScrubbing.current) return;
+
+    controls.current.style.opacity = 0;
+  }, []);
+
   useLayoutEffect(() => {
+    container.current.addEventListener("mouseover", handleMouseOver);
+    container.current.addEventListener("mouseout", handleMouseOut);
+
     timeLineContainer.current.addEventListener(
       "mousemove",
       handleUpdateTimeLine,
@@ -107,11 +127,12 @@ const Video = ({ data }) => {
 
     timeLineContainer.current.addEventListener("mousedown", handleMouseDown);
     timeLineContainer.current.addEventListener("mouseup", handleMouseUp);
-    document.addEventListener("contextmenu", function (e) {
-      e.preventDefault(); // Ngừng sự kiện contextmenu, không hiển thị menu chuột phải
-    });
+    // document.addEventListener("contextmenu", function (e) {
+    //   e.preventDefault(); // Ngừng sự kiện contextmenu, không hiển thị menu chuột phải
+    // });
+
     timeLineContainer.current.addEventListener("mouseleave", (e) => {
-      if (!wasPaused.current) {
+      if (!wasPaused.current && isScrubbing.current) {
         wasPaused.current = false;
         videoRef.current.play();
       }
@@ -163,20 +184,22 @@ const Video = ({ data }) => {
   useLayoutEffect(() => {}, [videoState]);
 
   return (
-    <div className='bg-[#000000] rounded-[12px] overflow-hidden relative'>
+    <div
+      className='bg-[#000000] rounded-[12px] overflow-hidden relative'
+      ref={container}
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <div
-        className={`absolute inset-0 z-[99] flex flex-col ${
-          !videoLoaded && "opacity-0"
-        }`}
-        id='controls'
+        className={`absolute inset-0 z-[99] flex flex-col opacity-0 `}
+        ref={controls}
       >
         <div className='flex-1' onClick={handlePlayVideo}></div>
         <div
-          className='w-full group h-[9px]  px-[12px]'
+          className='w-full timeline-container h-[9px]  px-[12px]'
           ref={timeLineContainer}
         >
           <div
-            className='w-full h-[3px] bg-[rgba(100,100,100,.5)] cursor-pointer group-hover:h-full time-line'
+            className='w-full h-[3px] bg-[rgba(100,100,100,.5)] cursor-pointer  time-line'
             ref={timeline}
           >
             <div className='thumb-indicator'></div>
@@ -199,11 +222,8 @@ const Video = ({ data }) => {
                 <NextIcon />
               </div>
             </button>
-            <button type='button' className='p-[8px] 2xsm:p-[12px] fill-white'>
-              <div className='size-[20px] 2xsm:size-[24px]'>
-                <ThickAudioIcon />
-              </div>
-            </button>
+
+            <AudioRange videoRef={videoRef} audioScrubbing={audioScrubbing} />
 
             {videoState?.duration && (
               <div
@@ -239,7 +259,7 @@ const Video = ({ data }) => {
       </div>
 
       <video
-        muted
+        draggable={false}
         className={`${
           !videoState && "opacity-0"
         } w-full aspect-video object-contain`}

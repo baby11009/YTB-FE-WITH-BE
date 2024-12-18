@@ -454,6 +454,11 @@ th {
   );
   mask-repeat: no-repeat;
 }
+
+.timeline-container:hover .time-line {
+  height: 100%;
+}
+
 .time-line {
   --preview-progress: 0;
   --progress-position: 0;
@@ -497,4 +502,53 @@ th {
 
 .time-line:hover {
   --scale: 1;
+}
+
+.slider-container.slide-in {
+  width: 52px;
+  margin-right: 3px;
+  -webkit-transition: margin 0.2s cubic-bezier(0, 0, 0.2, 1),
+    width 0.2s cubic-bezier(0, 0, 0.2, 1);
+  transition: margin 0.2s cubic-bezier(0, 0, 0.2, 1),
+    width 0.2s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.slide-out {
+  width: 0;
+  height: 100%;
+  -webkit-transition: margin 0.2s cubic-bezier(0.4, 0, 1, 1),
+    width 0.2s cubic-bezier(0.4, 0, 1, 1);
+  transition: margin 0.2s cubic-bezier(0.4, 0, 1, 1),
+    width 0.2s cubic-bezier(0.4, 0, 1, 1);
+  outline: 0;
+}
+
+.slider {
+  --field-color: rgba(255, 255, 255, 0.2);
+  --track-color: #ffffff;
+  --value-position: 1;
+  position: relative;
+  background-color: var(--field-color);
+}
+
+.slider::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: calc(100% - var(--value-position) * 100%);
+  background-color: var(--track-color);
+}
+
+.slider .thumb-indicator {
+  position: absolute;
+  height: 200%;
+  transform: scale(2);
+  top: -50%;
+  left: calc(var(--value-position) * 100%);
+  background-color: var(--track-color);
+  border-radius: 50%;
+  transition: transform 150ms ease-in-out;
+  aspect-ratio: 1/1;
 }

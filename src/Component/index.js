@@ -65,3 +65,6 @@ export { default as HovCommentCard } from "./HoverCard/CommentCard.jsx";
 export { default as ButtonHorizonSlider } from "./Slider/ButtonHorizonSlider.jsx";
 export { default as ShortHorizonSlider } from "./Slider/ShortHorizonSlider.jsx";
 export { default as Slider } from "./Slider/Slider.jsx";
+
+export { default as Range } from "./Range/Range.jsx";
+export { default as AudioRange } from "./Range/AudioRange.jsx";
