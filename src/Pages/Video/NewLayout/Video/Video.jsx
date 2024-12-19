@@ -12,19 +12,40 @@ import {
   FullScreenIcon,
   Play2Icon,
   PauseIcon,
-  ThickAudioIcon,
-  MuteAudiIcon,
   NextIcon,
 } from "../../../../Assets/Icons";
 import { durationCalc } from "../../../../util/durationCalc";
 import { AudioRange } from "../../../../Component";
 
 const Video = ({ data }) => {
+  const [currTreePosition, setCurrTreePosition] = useState("default");
+
+  const settingTrees = {
+    default: {
+      quality: {
+        title: "Quality",
+        value: 1080,
+        handleOnClick: () => {
+          setCurrTreePosition("quality");
+        },
+      },
+    },
+    quality: {
+      display: [1080, 720, 480, 240],
+      handleOnClick: (quality) => {
+        setCurrTreePosition("default");
+      },
+    },
+  };
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   const [videoState, setVideoState] = useState({ paused: true });
 
+  const [openedSettings, setOpenSettings] = useState(false);
+
   const container = useRef();
+
+  const togglePlayArea = useRef();
 
   const videoRef = useRef();
 
@@ -42,7 +63,11 @@ const Video = ({ data }) => {
 
   const wasPaused = useRef();
 
-  const mouseButton = useRef();
+  const previewProgress = useRef();
+
+  const settingsModal = useRef();
+
+  const settingsBtn = useRef();
 
   const handlePlayVideo = useCallback(() => {
     videoRef.current.paused
@@ -71,40 +96,66 @@ const Video = ({ data }) => {
     }
   }, [data]);
 
-  const handleMouseUp = useCallback((e) => {
-    isScrubbing.current = false;
-    if (mouseButton.current === 1) {
-      const rect = timeLineContainer.current.getBoundingClientRect();
-      const percent =
-        Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+  const disableSelect = useCallback((event) => {
+    event.preventDefault();
+  }, []);
 
-      videoRef.current.currentTime = percent * videoRef.current.duration;
-      if (!wasPaused.current) videoRef.current.play();
+  const handleAddScrubbing = useCallback((e) => {
+    if (e.buttons !== 1) return;
+    isScrubbing.current = true;
+    if (isScrubbing.current) {
+      timeline.current.style.setProperty("--scale", 1);
+      timeline.current.style.height = "100%";
+      window.addEventListener("selectstart", disableSelect);
+    }
+    wasPaused.current = videoRef.current.paused;
+    if (!videoRef.current.paused) {
+      videoRef.current.pause();
+      setVideoState((prev) => ({ ...prev, paused: true }));
     }
   }, []);
 
-  const handleUpdateTimeLine = useCallback((e) => {
+  const handleRemoveScrubbing = useCallback((e) => {
+    if (isScrubbing.current) {
+      isScrubbing.current = false;
+      timeline.current.style.setProperty("--scale", 0);
+      timeline.current.style.height = "3px";
+      if (!wasPaused.current) {
+        videoRef.current.play();
+        setVideoState((prev) => ({ ...prev, paused: false }));
+      }
+      window.removeEventListener("selectstart", disableSelect);
+    }
+  }, []);
+
+  const handleScrubbingUpdateTimeline = useCallback((e) => {
+    if (!isScrubbing.current) return;
+
     const rect = timeLineContainer.current.getBoundingClientRect();
 
     const percent =
       Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
 
-    timeline.current.style.setProperty("--preview-progress", percent);
+    videoRef.current.currentTime = videoRef.current.duration * percent;
 
-    if (isScrubbing.current) {
-      e.preventDefault();
+    timeline.current.style.setProperty("--progress-position", percent);
+  }, []);
+
+  const handleWindowMouseDown = useCallback(
+    (e) => {
+      // Click Update Timeline
+      if (!e.target.contains(timeline.current)) return;
+      const rect = timeLineContainer.current.getBoundingClientRect();
+
+      const percent =
+        Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+
+      videoRef.current.currentTime = videoRef.current.duration * percent;
+
       timeline.current.style.setProperty("--progress-position", percent);
-    }
-  }, []);
-
-  const handleMouseDown = useCallback((e) => {
-    mouseButton.current = e.buttons;
-    isScrubbing.current = (e.buttons & 1) === 1;
-    if (isScrubbing.current) {
-      wasPaused.current = videoRef.current.paused;
-      videoRef.current.pause();
-    }
-  }, []);
+    },
+    [openedSettings],
+  );
 
   const handleMouseOver = useCallback((e) => {
     controls.current.style.opacity = 1;
@@ -116,27 +167,42 @@ const Video = ({ data }) => {
     controls.current.style.opacity = 0;
   }, []);
 
+  const handleContainerMouseDown = useCallback(
+    (e) => {
+      if (openedSettings) {
+        if (
+          settingsBtn.current.contains(e.target) ||
+          settingsModal.current.contains(e.target)
+        )
+          return;
+        setOpenSettings(false);
+      } else {
+        if (e.target.contains(togglePlayArea.current)) {
+          handlePlayVideo();
+        }
+      }
+    },
+    [openedSettings],
+  );
+
   useLayoutEffect(() => {
     container.current.addEventListener("mouseover", handleMouseOver);
     container.current.addEventListener("mouseout", handleMouseOut);
 
-    timeLineContainer.current.addEventListener(
-      "mousemove",
-      handleUpdateTimeLine,
-    );
+    timeLineContainer.current.addEventListener("mousedown", handleAddScrubbing);
 
-    timeLineContainer.current.addEventListener("mousedown", handleMouseDown);
-    timeLineContainer.current.addEventListener("mouseup", handleMouseUp);
-    // document.addEventListener("contextmenu", function (e) {
-    //   e.preventDefault(); // Ngừng sự kiện contextmenu, không hiển thị menu chuột phải
-    // });
+    timeLineContainer.current.addEventListener("mouseout", () => {
+      timeline.current.style.setProperty(
+        "--preview-progress",
+        previewProgress.current,
+      );
+    });
+    window.addEventListener("mousedown", handleWindowMouseDown);
+    window.addEventListener("mouseup", handleRemoveScrubbing);
+    window.addEventListener("mousemove", handleScrubbingUpdateTimeline);
 
-    timeLineContainer.current.addEventListener("mouseleave", (e) => {
-      if (!wasPaused.current && isScrubbing.current) {
-        wasPaused.current = false;
-        videoRef.current.play();
-      }
-      isScrubbing.current = false;
+    container.current.addEventListener("contextmenu", function (e) {
+      e.preventDefault(); // Ngừng sự kiện contextmenu, không hiển thị menu chuột phải
     });
 
     videoRef.current.addEventListener("loadedmetadata", () => {
@@ -163,7 +229,7 @@ const Video = ({ data }) => {
           videoRef.current.buffered.end(i) - videoRef.current.buffered.start(i);
       }
       const percent = Math.max(0, Math.min(bufferedTime / duration, 1));
-      setVideoState((prev) => ({ ...prev, previewProgress: percent }));
+      previewProgress.current = percent;
       timeline.current.style.setProperty("--preview-progress", percent);
     });
 
@@ -181,8 +247,16 @@ const Video = ({ data }) => {
     });
   }, []);
 
-  useLayoutEffect(() => {}, [videoState]);
+  useLayoutEffect(() => {
+    container.current.addEventListener("mousedown", handleContainerMouseDown);
 
+    return () => {
+      container.current.removeEventListener(
+        "mousedown",
+        handleContainerMouseDown,
+      );
+    };
+  }, [openedSettings]);
   return (
     <div
       className='bg-[#000000] rounded-[12px] overflow-hidden relative'
@@ -193,9 +267,9 @@ const Video = ({ data }) => {
         className={`absolute inset-0 z-[99] flex flex-col opacity-0 `}
         ref={controls}
       >
-        <div className='flex-1' onClick={handlePlayVideo}></div>
+        <div className='flex-1' ref={togglePlayArea}></div>
         <div
-          className='w-full timeline-container h-[9px]  px-[12px]'
+          className='w-full timeline-container h-[7px]  px-[12px]'
           ref={timeLineContainer}
         >
           <div
@@ -239,6 +313,10 @@ const Video = ({ data }) => {
             <button
               type='button'
               className='fill-white  px-[2px] size-[36px] 2xsm:size-[48px]'
+              onClick={(e) => {
+                setOpenSettings((prev) => !prev);
+              }}
+              ref={settingsBtn}
             >
               <FillSettingIcon />
             </button>
@@ -255,6 +333,32 @@ const Video = ({ data }) => {
               <FullScreenIcon />
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Setting Modal */}
+      <div
+        className={`${
+          openedSettings ? "opacity-[1]" : "opacity-0"
+        } absolute  h-[100px] overflow-hidden  bg-[rgba(28,28,28,.9)] 
+      z-[199] right-[15px] bottom-[75px] hover:h-[150px] duration-[0.1s] ease-cubic-bezier-[0,0,0.2,1] transition-all`}
+        ref={settingsModal}
+      >
+        <div className=' overflow-y-auto flex flex-col hover:h-[150px] duration-[0.1s] ease-cubic-bezier-[0,0,0.2,1] transition-all'>
+          {currTreePosition === "default"
+            ? Object.values(settingTrees.default).map((item, id) => (
+                <button key={id} onClick={item.handleOnClick}>
+                  {item.title}
+                </button>
+              ))
+            : settingTrees[currTreePosition].display.map((item, id) => (
+                <button
+                  key={id}
+                  onClick={settingTrees[currTreePosition].handleOnClick}
+                >
+                  {item}
+                </button>
+              ))}
         </div>
       </div>
 

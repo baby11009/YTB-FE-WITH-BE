@@ -456,7 +456,7 @@ th {
 }
 
 .timeline-container:hover .time-line {
-  height: 100%;
+  height: 100% !important;
 }
 
 .time-line {
@@ -501,7 +501,7 @@ th {
 }
 
 .time-line:hover {
-  --scale: 1;
+  --scale: 1 !important;
 }
 
 .slider-container.slide-in {

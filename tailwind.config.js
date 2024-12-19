@@ -1,5 +1,3 @@
-import { transform } from "framer-motion";
-
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
@@ -67,6 +65,10 @@ export default {
         "screen-w-minus-240": "calc(100vw - 240px)",
         "screen-w-minus-74": "calc(100vw - 74px)",
         "screen-w-16-9": "calc((100vh - 56px - 0px - 136px )*( 16 / 9 ))",
+      },
+      transitionTimingFunction: {
+        "cubic-bezier-[0,0,0.2,1]": "cubic-bezier(0,0,0.2,1)",
+        "cubic-bezier-[0.4,0,1,1]": "cubic-bezier(0.4, 0, 1, 1)",
       },
       keyframes: {
         slideIn: {
