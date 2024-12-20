@@ -16,27 +16,9 @@ import {
 } from "../../../../Assets/Icons";
 import { durationCalc } from "../../../../util/durationCalc";
 import { AudioRange } from "../../../../Component";
+import VideoSettingMenu from "./Setting menu/VideoSettingMenu";
 
 const Video = ({ data }) => {
-  const [currTreePosition, setCurrTreePosition] = useState("default");
-
-  const settingTrees = {
-    default: {
-      quality: {
-        title: "Quality",
-        value: 1080,
-        handleOnClick: () => {
-          setCurrTreePosition("quality");
-        },
-      },
-    },
-    quality: {
-      display: [1080, 720, 480, 240],
-      handleOnClick: (quality) => {
-        setCurrTreePosition("default");
-      },
-    },
-  };
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   const [videoState, setVideoState] = useState({ paused: true });
@@ -65,7 +47,7 @@ const Video = ({ data }) => {
 
   const previewProgress = useRef();
 
-  const settingsModal = useRef();
+  const settingMenuRef = useRef();
 
   const settingsBtn = useRef();
 
@@ -172,7 +154,7 @@ const Video = ({ data }) => {
       if (openedSettings) {
         if (
           settingsBtn.current.contains(e.target) ||
-          settingsModal.current.contains(e.target)
+          settingMenuRef.current.contains(e.target)
         )
           return;
         setOpenSettings(false);
@@ -212,9 +194,9 @@ const Video = ({ data }) => {
         currentTime: videoRef.current.currentTime,
       });
 
-      videoRef.current.play().catch((err) => {
-        setVideoState((prev) => ({ ...prev, paused: true }));
-      });
+      // videoRef.current.play().catch((err) => {
+      //   setVideoState((prev) => ({ ...prev, paused: true }));
+      // });
     });
 
     let duration;
@@ -336,31 +318,11 @@ const Video = ({ data }) => {
         </div>
       </div>
 
-      {/* Setting Modal */}
-      <div
-        className={`${
-          openedSettings ? "opacity-[1]" : "opacity-0"
-        } absolute  h-[100px] overflow-hidden  bg-[rgba(28,28,28,.9)] 
-      z-[199] right-[15px] bottom-[75px] hover:h-[150px] duration-[0.1s] ease-cubic-bezier-[0,0,0.2,1] transition-all`}
-        ref={settingsModal}
-      >
-        <div className=' overflow-y-auto flex flex-col hover:h-[150px] duration-[0.1s] ease-cubic-bezier-[0,0,0.2,1] transition-all'>
-          {currTreePosition === "default"
-            ? Object.values(settingTrees.default).map((item, id) => (
-                <button key={id} onClick={item.handleOnClick}>
-                  {item.title}
-                </button>
-              ))
-            : settingTrees[currTreePosition].display.map((item, id) => (
-                <button
-                  key={id}
-                  onClick={settingTrees[currTreePosition].handleOnClick}
-                >
-                  {item}
-                </button>
-              ))}
-        </div>
-      </div>
+      <VideoSettingMenu
+        settingRef={settingMenuRef}
+        openedSettings={openedSettings}
+        setOpenSettings={setOpenSettings}
+      />
 
       <video
         draggable={false}
