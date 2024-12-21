@@ -42,3 +42,34 @@ export function getRandomLinearGradient() {
 
   return `linear-gradient(to bottom, ${color1} 0%, ${color2} 33%, rgba(15,15,15,1) 100%)`;
 }
+
+export const getObjectChangedKeys = (obj1, obj2) => {
+  const result = Object.keys(obj1).filter((key) => {
+    const prevValue = obj2[key];
+    const currentValue = obj1[key];
+
+    // So sánh sâu đối với các đối tượng
+    if (typeof currentValue === "object" && currentValue !== null) {
+      return JSON.stringify(prevValue) !== JSON.stringify(currentValue);
+    }
+
+    return prevValue !== currentValue;
+  });
+
+  return result;
+};
+
+export const getObjectChangedKey = (obj1, obj2) => {
+  for (const key of Object.keys(obj1)) {
+    const prevValue = obj2[key];
+    const currentValue = obj1[key];
+
+    if (typeof currentValue === "object" && currentValue !== null) {
+      if (JSON.stringify(prevValue) !== JSON.stringify(currentValue)) {
+        return key;
+      }
+    } else if (prevValue !== currentValue) {
+      return key;
+    }
+  }
+};

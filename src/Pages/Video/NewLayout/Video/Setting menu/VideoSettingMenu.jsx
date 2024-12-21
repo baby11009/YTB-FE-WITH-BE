@@ -12,22 +12,29 @@ import PlaybackSpeed from "./PlaybackSpeed.jsx";
 import SleepTimer from "./SleepTimer.jsx";
 import Quality from "./Quality.jsx";
 
-const VideoSettingMenu = ({ settingRef, openedSettings, setOpenSettings }) => {
+const defaultSettings = {
+  stableVolume: true,
+  ambientMode: false,
+  subtitles: {
+    title: "Off",
+    value: false,
+  },
+  playbackSpeed: { title: "Normal", value: 1 },
+  sleepTimer: { title: "Off", value: false },
+  quality: { title: "1080 HD", value: 1080 },
+};
+
+const VideoSettingMenu = ({
+  settingRef,
+  openedSettings,
+  setOpenSettings,
+  videoSettings,
+  setVideoSettings,
+  qualityDisplay,
+}) => {
   const [currTreePosition, setCurrTreePosition] = useState("default");
 
   const [renderSettingOptions, setRenderSettingOptions] = useState();
-
-  const [videoSettings, setVideoSettings] = useState({
-    stableVolume: true,
-    ambientMode: false,
-    subtitles: {
-      title: "Off",
-      value: false,
-    },
-    playbackSpeed: { title: "Normal", value: 1 },
-    sleepTimer: { title: "Off", value: false },
-    quality: { title: "1080 HD", value: 1080 },
-  });
 
   const settingOptions = {
     default: (
@@ -72,13 +79,15 @@ const VideoSettingMenu = ({ settingRef, openedSettings, setOpenSettings }) => {
         setVideoSettings={setVideoSettings}
         setCurrTreePosition={setCurrTreePosition}
         setOpenSettings={setOpenSettings}
+        qualityDisplay={qualityDisplay}
       />
     ),
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     setRenderSettingOptions(settingOptions[currTreePosition]);
   }, [currTreePosition, videoSettings]);
+
 
   useEffect(() => {
     if (!openedSettings) {
@@ -95,7 +104,7 @@ const VideoSettingMenu = ({ settingRef, openedSettings, setOpenSettings }) => {
       className={` absolute  overflow-hidden  bg-[rgba(28,28,28,.9)] 
       z-[199] right-[15px] bottom-[75px]  duration-[0.1s] 
       ease-cubic-bezier-[0,0,0.2,1] transition-all rounded-[12px]
-      ${openedSettings ? "opacity-[1]" : "opacity-0"}`}
+      ${openedSettings ? "block" : "hidden"}`}
       ref={settingRef}
     >
       <div

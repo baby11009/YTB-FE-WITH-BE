@@ -104,6 +104,12 @@ const AudioRange = ({ videoRef, audioScrubbing }) => {
       videoRef.current.volume,
     );
     setVolume(videoRef.current.volume);
+
+    return () => {
+      window.removeEventListener("mousedown", hanldeClickUpdateValue);
+      window.removeEventListener("mouseup", handleRemoveScrubbing);
+      window.removeEventListener("mousemove", hanldeScrubbingUpdateValue);
+    };
   }, []);
 
   return (

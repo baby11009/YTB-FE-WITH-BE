@@ -7,22 +7,13 @@ const Quality = ({
   setVideoSettings,
   setCurrTreePosition,
   setOpenSettings,
+  qualityDisplay,
 }) => {
-  const qualityDisplay = useRef([
-    { title: "1080 HD", value: 1080 },
-    { title: "720p", value: 720 },
-    { title: "480p", value: 480 },
-    { title: "360p", value: 360 },
-    { title: "240p", value: 240 },
-    { title: "144p", value: 144 },
-    { title: "Auto", value: "auto" },
-  ]);
-
   useLayoutEffect(() => {
     if (settingRef.current) {
       settingRef.current.style.width = "261px";
       settingRef.current.style.height =
-        40 * qualityDisplay.current.length + 16 + "px";
+        40 * qualityDisplay.current.length + 16 + 53.6 + "px";
 
       settingRef.current.style.maxHeight = "328px";
     }
@@ -45,7 +36,7 @@ const Quality = ({
           </span>
         </button>
       </div>
-      <div className='flex-1 overflow-y-scroll w-full'>
+      <div className='flex-1 overflow-y-auto py-[8px] w-full'>
         {qualityDisplay.current.map((item, id) => (
           <button
             className='w-full h-[40px] flex items-center hover:bg-black-0.1'

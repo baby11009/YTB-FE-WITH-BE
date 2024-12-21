@@ -31,7 +31,7 @@ const Subtitles = ({
     if (settingRef.current) {
       settingRef.current.style.width = "251px";
       settingRef.current.style.height =
-        40 * subtitlesDisplay.current.length + 16 + "px";
+        40 * subtitlesDisplay.current.length + 16 + 53.6 + "px";
 
       settingRef.current.style.maxHeight = "237px";
     }
@@ -55,7 +55,7 @@ const Subtitles = ({
           </span>
         </button>
       </div>
-      <div className='flex-1 overflow-y-scroll w-full'>
+      <div className='flex-1  overflow-y-auto py-[8px] w-full'>
         {subtitlesDisplay.current.map((item, id) => (
           <button
             className='w-full h-[40px] flex items-center hover:bg-black-0.1'
