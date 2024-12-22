@@ -7,8 +7,8 @@ import {
   useCallback,
 } from "react";
 
-const AudioRange = ({ videoRef, audioScrubbing }) => {
-  const [volume, setVolume] = useState();
+const AudioRange = ({ videoRef, audioScrubbing, volume, setVolume }) => {
+  // const [volume, setVolume] = useState();
 
   const container = useRef();
 
@@ -50,9 +50,7 @@ const AudioRange = ({ videoRef, audioScrubbing }) => {
 
     const percent =
       Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
-    videoRef.current.volume = percent;
     setVolume(percent);
-    slider.current.style.setProperty("--value-position", percent);
   }, []);
 
   const hanldeClickUpdateValue = useCallback((e) => {
@@ -61,23 +59,12 @@ const AudioRange = ({ videoRef, audioScrubbing }) => {
 
     const percent =
       Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
-    videoRef.current.volume = percent;
+
     setVolume(percent);
-    slider.current.style.setProperty("--value-position", percent);
   }, []);
 
   const handleToggleMuted = useCallback((e) => {
-    e.preventDefault();
-
-    if (videoRef.current.volume > 0) {
-      videoRef.current.volume = 0;
-      slider.current.style.setProperty("--value-position", 0);
-      setVolume(0);
-    } else {
-      videoRef.current.volume = 1;
-      slider.current.style.setProperty("--value-position", 1);
-      setVolume(1);
-    }
+    setVolume((prev) => (prev === 0 ? 1 : 0));
   }, []);
 
   const handleMouseEnter = useCallback(() => {
@@ -111,6 +98,11 @@ const AudioRange = ({ videoRef, audioScrubbing }) => {
       window.removeEventListener("mousemove", hanldeScrubbingUpdateValue);
     };
   }, []);
+
+  useEffect(() => {
+    slider.current.style.setProperty("--value-position", volume);
+    videoRef.current.volume = volume;
+  }, [volume]);
 
   return (
     <div

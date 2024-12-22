@@ -12,17 +12,7 @@ import PlaybackSpeed from "./PlaybackSpeed.jsx";
 import SleepTimer from "./SleepTimer.jsx";
 import Quality from "./Quality.jsx";
 
-const defaultSettings = {
-  stableVolume: true,
-  ambientMode: false,
-  subtitles: {
-    title: "Off",
-    value: false,
-  },
-  playbackSpeed: { title: "Normal", value: 1 },
-  sleepTimer: { title: "Off", value: false },
-  quality: { title: "1080 HD", value: 1080 },
-};
+
 
 const VideoSettingMenu = ({
   settingRef,

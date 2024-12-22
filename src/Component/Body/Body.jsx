@@ -11,9 +11,9 @@ const Body = ({
   noLDMenu,
   noIconMenu,
 }) => {
-  const location = useLocation();
+  // const location = useLocation();
 
-  window.scrollTo(0, 0);
+  // window.scrollTo(0, 0);
 
   return (
     <main className={`pt-[56px] ${containerStyle}`}>
