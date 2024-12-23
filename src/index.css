@@ -462,7 +462,6 @@ th {
 .time-line {
   --preview-progress: 0;
   --progress-position: 0;
-  --scale: 0;
   position: relative;
 }
 
@@ -490,18 +489,14 @@ th {
 
 .time-line .thumb-indicator {
   position: absolute;
-  height: 200%;
-  transform: translateX(-50%) scale(var(--scale));
-  top: -50%;
+  height: 300%;
+  transform: translateX(-50%) translateY(-25%) scale(1);
+  top: -25%;
   left: calc(var(--progress-position, 0.25) * 100%);
   background-color: red;
   border-radius: 50%;
   transition: transform 150ms ease-in-out;
   aspect-ratio: 1/1;
-}
-
-.time-line:hover {
-  --scale: 1 !important;
 }
 
 .slider-container.slide-in {

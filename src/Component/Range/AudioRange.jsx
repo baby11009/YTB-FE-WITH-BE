@@ -7,8 +7,9 @@ import {
   useCallback,
 } from "react";
 
-const AudioRange = ({ videoRef, audioScrubbing, volume, setVolume }) => {
-  // const [volume, setVolume] = useState();
+const AudioRange = ({ videoRef, audioScrubbing }) => {
+  
+  const [volume, setVolume] = useState(1);
 
   const container = useRef();
 

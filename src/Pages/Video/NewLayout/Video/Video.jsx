@@ -10,14 +10,22 @@ import {
   FillSettingIcon,
   TheaterIcon,
   FullScreenIcon,
+  MiniPlayerIcon,
   Play2Icon,
   PauseIcon,
   NextIcon,
+  LoopIcon,
+  CopyUrlIcon,
+  CopyEmbedCodeIcon,
+  CopyDebugInfoIcon,
+  TroubleshootIcon,
+  ForTheNerdIcon,
 } from "../../../../Assets/Icons";
 import { durationCalc } from "../../../../util/durationCalc";
 import { getObjectChangedKey } from "../../../../util/func";
-import { AudioRange } from "../../../../Component";
+import { AudioRange, CustomeFuncBox } from "../../../../Component";
 import VideoSettingMenu from "./Setting menu/VideoSettingMenu";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const defaultQuality = [{ title: "Auto", value: -1, res: 1080 }];
 
@@ -33,25 +41,14 @@ const defaultSettings = {
   quality: { title: "1080 HD", value: 1080 },
 };
 
-const Video = ({
-  data,
-  playerMode,
-  videoMode,
-  setVideoMode,
-  videoSettings,
-  setVideoSettings,
-  volume,
-  setVolume,
-  prevVideoSettings,
-  containerStyle,
-}) => {
+const Video = ({ data, containerStyle }) => {
+  const { setShowHover, handleCursorPositon } = useAuthContext();
+
   const hlsRef = useRef();
 
   const isStreamingHls = useRef();
 
   const container = useRef();
-
-  const togglePlayArea = useRef();
 
   const videoRef = useRef();
 
@@ -77,11 +74,65 @@ const Video = ({
 
   const timeOut = useRef();
 
-  // const prevVideoSettings = useRef();
+  const prevVideoSettings = useRef();
 
   const qualityDisplay = useRef(defaultQuality);
 
   const firstTimeSetting = useRef(true);
+
+  const currentRightMenuId = useRef();
+
+  const funcList = useRef([
+    {
+      id: 1,
+      slug: "loop",
+      text: "Loop",
+      icon: <LoopIcon />,
+      handleOnClick: () => {
+        currentRightMenuId.current =
+          currentRightMenuId.current === 1 ? undefined : 1;
+      },
+    },
+    {
+      id: 2,
+      slug: "copyUrl",
+      text: "Copy video URL",
+      icon: <CopyUrlIcon />,
+      handleOnClick: () => {
+        navigator.clipboard.writeText(window.location);
+      },
+    },
+    {
+      id: 3,
+      slug: "copyUrlAtTime",
+      text: "Copy video URL at current time",
+      icon: <CopyUrlIcon />,
+    },
+    {
+      id: 4,
+      slug: "copyEmbed",
+      text: "Copy embed code",
+      icon: <CopyEmbedCodeIcon />,
+    },
+    {
+      id: 5,
+      slug: "copyDebug",
+      text: "Copy debug infooop",
+      icon: <CopyDebugInfoIcon />,
+    },
+    {
+      id: 6,
+      slug: "troubleshoot",
+      text: "Troubleshoot playback issue",
+      icon: <TroubleshootIcon />,
+    },
+    {
+      id: 7,
+      slug: "forTheNerd",
+      text: "Stats for nerds",
+      icon: <ForTheNerdIcon />,
+    },
+  ]);
 
   const [videoLoaded, setVideoLoaded] = useState(false);
 
@@ -89,32 +140,31 @@ const Video = ({
 
   const [openedSettings, setOpenSettings] = useState(false);
 
-  // const [videoSettings, setVideoSettings] = useState(() => {
-  //   if (
-  //     window.localStorage.getItem("video_player_settings") &&
-  //     window.localStorage.getItem("video_player_settings") !== "undefined"
-  //   ) {
-  //     const settings = JSON.parse(
-  //       localStorage.getItem("video_player_settings"),
-  //     );
+  const [videoSettings, setVideoSettings] = useState(() => {
+    if (
+      window.localStorage.getItem("video_player_settings") &&
+      window.localStorage.getItem("video_player_settings") !== "undefined"
+    ) {
+      const settings = JSON.parse(
+        localStorage.getItem("video_player_settings"),
+      );
 
-  //     prevVideoSettings.current = settings;
-  //     return settings;
-  //   } else {
-  //     localStorage.setItem(
-  //       "video_player_settings",
-  //       JSON.stringify(defaultSettings),
-  //     );
-  //     prevVideoSettings.current = defaultSettings;
-  //     return defaultSettings;
-  //   }
-  // });
+      prevVideoSettings.current = settings;
+      return settings;
+    } else {
+      localStorage.setItem(
+        "video_player_settings",
+        JSON.stringify(defaultSettings),
+      );
+      prevVideoSettings.current = defaultSettings;
+      return defaultSettings;
+    }
+  });
 
   // handle window events
   const handleWindowMouseDown = useCallback(
     (e) => {
       // Click Update Timeline
-
       // Close setting menu when user clicks outside of the menu and the setting button
       if (
         !settingsBtn.current.contains(e.target) &&
@@ -122,16 +172,12 @@ const Video = ({
       ) {
         setOpenSettings(false);
       }
-
-      // update video timline  when user left click the timeline ref
+      //update video timline  when user left click the timeline ref
       if (!e.target.contains(timeline.current)) return;
       const rect = timeLineContainer.current.getBoundingClientRect();
-
       const percent =
         Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
-
       videoRef.current.currentTime = videoRef.current.duration * percent;
-
       timeline.current.style.setProperty("--progress-position", percent);
     },
     [openedSettings],
@@ -142,13 +188,17 @@ const Video = ({
   }, []);
 
   const handleWindowKeyboardDown = useCallback((e) => {
-    e.preventDefault();
     switch (e.code) {
       case "ArrowLeft":
+        controls.current.style.opacity = 1;
+        videoRef.current.currentTime -= 10;
         break;
       case "ArrowRight":
+        controls.current.style.opacity = 1;
+        videoRef.current.currentTime += 10;
         break;
       case "Space":
+        e.preventDefault();
         if (videoRef.current.paused) {
           videoRef.current.play();
         } else {
@@ -159,7 +209,6 @@ const Video = ({
   }, []);
 
   //  handle  container ref events
-
   const handleContainerMouseOver = useCallback((e) => {
     // Show the controls UI when mouse is over the container
     controls.current.style.opacity = 1;
@@ -168,7 +217,7 @@ const Video = ({
   const handleContainerMouseOut = useCallback((e) => {
     // Hide the controls UI when mouse is not out the container and scrubbing event is not fired
     if (isScrubbing.current || audioScrubbing.current) return;
-
+    clearTimeout(timeOut.current);
     controls.current.style.opacity = 0;
   }, []);
 
@@ -181,17 +230,43 @@ const Video = ({
     timeOut.current = setTimeout(() => {
       if (isScrubbing.current || audioScrubbing.current) return;
       document.body.style.cursor = "none";
-      controls.current.style.opacity = 0;
+      if (controls.current) {
+        controls.current.style.opacity = 0;
+      }
     }, 2500);
   }, []);
 
   const handleContainerMouseDown = useCallback(
     (e) => {
-      // play video when user click on the container but not when the settings menu is opened
-      if (openedSettings) return;
+      switch (e.buttons) {
+        case 1:
+          // play video when user left click on the container but not when the settings menu is opened
+          if (openedSettings) return;
 
-      if (e.target.contains(togglePlayArea.current)) {
-        handlePlayVideo();
+          if (e.target.contains(videoRef.current)) {
+            handlePlayVideo();
+          }
+          break;
+        case 2:
+          // open custome menu when user right click'
+          e.preventDefault();
+          e.stopPropagation();
+          setShowHover((prev) => {
+            if (prev) return undefined;
+            handleCursorPositon(e);
+            return (
+              <CustomeFuncBox
+                style={`w-[293px] !rounded-[0] !bg-[rgba(28,28,28,.9)]`}
+                useCheckIcon={true}
+                currentId={currentRightMenuId.current}
+                setOpened={() => {
+                  setShowHover(undefined);
+                }}
+                funcList1={funcList.current}
+              />
+            );
+          });
+          break;
       }
     },
     [openedSettings],
@@ -212,7 +287,6 @@ const Video = ({
   }, []);
 
   // handle video ref events
-
   const handleVideoloaded = useCallback(() => {
     // Set video loaded state and calculate the video duration and current time
     // apply video local storage settings and autoplay
@@ -242,6 +316,13 @@ const Video = ({
 
   const handleVideoPlay = useCallback(() => {
     setVideoState((prev) => ({ ...prev, paused: false }));
+  }, []);
+
+  const handleVideoEnded = useCallback(() => {
+    // handle video ended event
+    if (currentRightMenuId.current === 1) {
+      videoRef.current.play();
+    }
   }, []);
 
   const handleVideoPause = useCallback(() => {
@@ -321,7 +402,6 @@ const Video = ({
     if (e.buttons !== 1) return;
     isScrubbing.current = true;
     if (isScrubbing.current) {
-      timeline.current.style.setProperty("--scale", 1);
       timeline.current.style.height = "100%";
       window.addEventListener("selectstart", handleWindowDisableSelects);
     }
@@ -336,7 +416,6 @@ const Video = ({
     // Remove scrubbing when mouse left button is up for window event
     if (isScrubbing.current) {
       isScrubbing.current = false;
-      timeline.current.style.setProperty("--scale", 0);
       timeline.current.style.height = "3px";
       if (!wasPaused.current) {
         videoRef.current.play();
@@ -358,6 +437,14 @@ const Video = ({
     videoRef.current.currentTime = videoRef.current.duration * percent;
 
     timeline.current.style.setProperty("--progress-position", percent);
+  }, []);
+
+  const handleMiniPlayerMode = useCallback(() => {
+    if (document.pictureInPictureElement === null) {
+      videoRef.current.requestPictureInPicture();
+    } else {
+      document.exitPictureInPicture();
+    }
   }, []);
 
   useLayoutEffect(() => {
@@ -423,26 +510,14 @@ const Video = ({
 
     return () => {
       timeline.current.style.setProperty("--progress-position", 0);
+      if (document.pictureInPictureElement !== null) {
+        document.exitPictureInPicture();
+      }
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
     };
   }, [data]);
-
-  useEffect(() => {
-    if (videoMode === playerMode) {
-      videoRef.current.play();
-      window.addEventListener("keydown", handleWindowKeyboardDown);
-    } else {
-      videoRef.current.pause();
-    }
-
-    return () => {
-      if (videoMode === playerMode) {
-        window.removeEventListener("keydown", handleWindowKeyboardDown);
-      }
-    };
-  }, [videoMode]);
 
   useLayoutEffect(() => {
     container.current.addEventListener("mouseover", handleContainerMouseOver);
@@ -470,8 +545,13 @@ const Video = ({
 
     videoRef.current.addEventListener("pause", handleVideoPause);
 
+    videoRef.current.addEventListener("ended", handleVideoEnded);
+
     window.addEventListener("mouseup", handleRemoveScrubbing);
+
     window.addEventListener("mousemove", handleScrubbingUpdateTimeline);
+
+    window.addEventListener("keydown", handleWindowKeyboardDown);
 
     return () => {
       container.current.removeEventListener(
@@ -501,7 +581,7 @@ const Video = ({
 
       timeLineContainer.current.removeEventListener(
         "mouseout",
-        handleContainerMouseDown,
+        handleTimelineContainerMouseOut,
       );
 
       videoRef.current.removeEventListener("progress", handleVideoProgress);
@@ -512,9 +592,13 @@ const Video = ({
 
       videoRef.current.removeEventListener("pause", handleVideoPause);
 
+      videoRef.current.removeEventListener("ended", handleVideoEnded);
+
       window.removeEventListener("mouseup", handleRemoveScrubbing);
 
       window.removeEventListener("mousemove", handleScrubbingUpdateTimeline);
+
+      window.removeEventListener("keydown", handleWindowKeyboardDown);
     };
   }, []);
 
@@ -597,17 +681,13 @@ const Video = ({
       ref={container}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <div
-        className={`absolute inset-0 z-[99] flex flex-col opacity-0 `}
-        ref={controls}
-      >
-        <div className='flex-1' ref={togglePlayArea}></div>
+      <div className={`absolute w-full bottom-0 z-[99] `} ref={controls}>
         <div
-          className='w-full timeline-container h-[7px]  px-[12px]'
+          className='w-full timeline-container h-[5px] px-[12px]'
           ref={timeLineContainer}
         >
           <div
-            className='w-full h-[3px] bg-[rgba(100,100,100,.5)] cursor-pointer  time-line'
+            className='w-full h-[3px] bg-[rgba(100,100,100,.5)] cursor-pointer time-line'
             ref={timeline}
           >
             <div className='thumb-indicator'></div>
@@ -631,12 +711,7 @@ const Video = ({
               </div>
             </button>
 
-            <AudioRange
-              videoRef={videoRef}
-              audioScrubbing={audioScrubbing}
-              volume={volume}
-              setVolume={setVolume}
-            />
+            <AudioRange videoRef={videoRef} audioScrubbing={audioScrubbing} />
 
             {videoState?.duration && (
               <div
@@ -648,7 +723,7 @@ const Video = ({
               </div>
             )}
           </div>
-          <div className='w-fit'>
+          <div className=''>
             <button
               type='button'
               className={`fill-white  px-[2px] size-[36px] 2xsm:size-[48px]
@@ -662,12 +737,14 @@ const Video = ({
             </button>
             <button
               type='button'
+              className='fill-white px-[2px] size-[36px] 2xsm:size-[48px]'
+              onClick={handleMiniPlayerMode}
+            >
+              <MiniPlayerIcon />
+            </button>
+            <button
+              type='button'
               className='fill-white  px-[2px] size-[36px] 2xsm:size-[48px]'
-              onClick={() => {
-                setVideoMode((prev) =>
-                  prev === "normal" ? "theater" : "normal",
-                );
-              }}
             >
               <TheaterIcon />
             </button>

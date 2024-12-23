@@ -1,5 +1,8 @@
+import { CheckIcon } from "../../Assets/Icons";
+
 const CustomeFuncBtn = ({
   data,
+  useCheckIcon,
   currentId,
   setOpened,
   productData,
@@ -7,9 +10,9 @@ const CustomeFuncBtn = ({
 }) => {
   return (
     <div
-      className={`flex items-center h-[40px] px-[16px] py-[2px] cursor-pointer
+      className={`flex items-center h-[40px] px-[16px] py-[2px] cursor-pointer w=full
         ${
-          currentId === data.id
+          currentId === data.id && !useCheckIcon
             ? "bg-hover-black hover:bg-[rgba(255,255,255,0.2)]"
             : "hover:bg-hover-black"
         } `}
@@ -32,12 +35,18 @@ const CustomeFuncBtn = ({
       >
         {data.text}
       </div>
+      {useCheckIcon && currentId === data.id && (
+        <div className='w-[24px] ml-auto'>
+          <CheckIcon />
+        </div>
+      )}
     </div>
   );
 };
 
 const CustomeFuncBox = ({
   style,
+  useCheckIcon,
   setOpened,
   currentId,
   funcList1,
@@ -68,6 +77,7 @@ const CustomeFuncBox = ({
               <CustomeFuncBtn
                 key={item.id}
                 data={item}
+                useCheckIcon={useCheckIcon}
                 currentId={currentId}
                 setOpened={setOpened}
                 productData={productData}
@@ -93,6 +103,7 @@ const CustomeFuncBox = ({
               <CustomeFuncBtn
                 key={item.id}
                 data={item}
+                useCheckIcon={useCheckIcon}
                 currentId={currentId}
                 setOpened={setOpened}
                 productData={productData}

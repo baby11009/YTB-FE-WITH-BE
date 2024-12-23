@@ -107,7 +107,7 @@ const AuthProvider = ({ children }) => {
         handleClickOutside(e);
       });
     };
-  }, [hoverContainerRef]);
+  }, []);
 
   useEffect(() => {
     const disabledScroll = (e) => {

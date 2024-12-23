@@ -51,7 +51,7 @@ const CommentBox = ({
     `/data/comment/video-cmt/${shortId}`,
     params,
     true,
-    false
+    false,
   );
 
   const handleChoseSort = (data) => {

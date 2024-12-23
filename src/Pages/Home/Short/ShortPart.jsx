@@ -6,6 +6,7 @@ import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import connectSocket from "../../../util/connectSocket";
 import { useParams } from "react-router-dom";
+
 const ShortPart = () => {
   const { id } = useParams();
 
@@ -78,9 +79,9 @@ const ShortPart = () => {
     });
 
     document.documentElement.style.setProperty("--scroll-bar-width", "none");
-    if (!socketRef.current) {
-      socketRef.current = connectSocket();
-    }
+
+    socketRef.current = connectSocket();
+
     return () => {
       // document.removeEventListener("wheel", disableScroll, { passive: false });
       // document.addEventListener("touchmove", disableScroll, { passive: false });
@@ -185,3 +186,65 @@ const ShortPart = () => {
   );
 };
 export default ShortPart;
+
+// const ShortPart = () => {
+//   const { id } = useParams();
+
+//   const { user } = useAuthContext();
+
+//   const [params, setParams] = useState({
+//     watchedIdList: [],
+//     shortId: id,
+//     reset: user?._id,
+//   });
+
+//   const { data, isLoading } = getData("/data/short", params);
+//   const videoRef = useRef();
+//   const videoRef2 = useRef();
+//   const videoRef3 = useRef();
+
+//   const fetchData = async (id) => {
+//     await request.get(`/data/video/${id}`).then((rsp) => {
+//       console.log(rsp.data.data.video);
+//       videoRef.current.src = `${import.meta.env.VITE_BASE_API_URI}${
+//         import.meta.env.VITE_VIEW_VIDEO_API
+//       }${rsp.data.data.video}?type=video`;
+//       videoRef2.current.src = `${import.meta.env.VITE_BASE_API_URI}${
+//         import.meta.env.VITE_VIEW_VIDEO_API
+//       }${rsp.data.data.video}?type=video`;
+//       videoRef3.current.src = `${import.meta.env.VITE_BASE_API_URI}${
+//         import.meta.env.VITE_VIEW_VIDEO_API
+//       }${rsp.data.data.video}?type=video`;
+//     });
+//   };
+
+//   useEffect(() => {
+//     if (data?.data) {
+//       fetchData(data.data[0]);
+//     }
+//   }, [data]);
+
+//   if (isLoading) {
+//     return <div>Loading</div>;
+//   }
+//   return (
+//     <div className='mx-auto'>
+//       <video
+//         controls={true}
+//         className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128'
+//         ref={videoRef}
+//       ></video>
+//       <video
+//         controls={true}
+//         className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128'
+//         ref={videoRef2}
+//       ></video>
+//       <video
+//         controls={true}
+//         className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128'
+//         ref={videoRef3}
+//       ></video>
+//     </div>
+//   );
+// };
+// export default ShortPart;

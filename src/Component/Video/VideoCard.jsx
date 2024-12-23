@@ -283,11 +283,7 @@ const VideoCard = ({
               <button
                 className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center 
                   absolute right-0 translate-x-[30%] translate-y-[-15%] z-[500] active:bg-black-0.2 group-hover:opacity-[1] opacity-0'
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-                onMouseUp={(e) => {
+                onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
 
