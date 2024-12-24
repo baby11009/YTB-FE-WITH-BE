@@ -1,16 +1,27 @@
 import LargeShortVid from "./LargeShortVid";
 import { LongArrowIcon } from "../../../Assets/Icons";
-import { useLayoutEffect, useState, useRef, useEffect } from "react";
+import {
+  useLayoutEffect,
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 import { IsEnd, IsTop } from "../../../util/scrollPosition";
 import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import connectSocket from "../../../util/connectSocket";
 import { useParams } from "react-router-dom";
+import request from "../../../util/axios-base-url";
 
 const ShortPart = () => {
   const { id } = useParams();
 
   const { user } = useAuthContext();
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [fetching, setFetching] = useState(true);
 
   const [isTop, setIsTop] = useState(true);
 
@@ -31,8 +42,33 @@ const ShortPart = () => {
   const [shortList, setShortList] = useState([]);
 
   const containerRef = useRef();
+
   const socketRef = useRef(null);
-  const { data } = getData("/data/short", params);
+
+  // const { data } = getData("/data/shorts", params);
+
+  const fetchRandomShort = useCallback(async () => {
+    let sessionId = sessionStorage.getItem("session-id") || "";
+    console.log(sessionId);
+    await request
+      .get(id ? `/data/short/${id}` : "/data/short/", {
+        headers: { "session-id": sessionId },
+      })
+      .then((rsp) => {
+        if (!sessionId) {
+          sessionStorage.setItem("session-id", rsp.headers["session-id"]);
+          console.log(rsp.headers["session-id"]);
+        }
+        console.log(rsp.data);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Failed to get short data");
+      })
+      .finally(() => {
+        setFetching(false);
+      });
+  }, [id]);
 
   const handleScrollPrev = () => {
     if (isScrolling) {
@@ -72,6 +108,19 @@ const ShortPart = () => {
     }, 500);
   };
 
+  useLayoutEffect(() => {
+    if (id) {
+      setFetching(true);
+    }
+  }, [id]);
+
+  useLayoutEffect(() => {
+    console.log(fetching);
+    if (fetching) {
+      fetchRandomShort();
+    }
+  }, [fetching, id]);
+
   useEffect(() => {
     document.addEventListener("scroll", () => {
       IsEnd(setIsEnd);
@@ -86,6 +135,13 @@ const ShortPart = () => {
       // document.removeEventListener("wheel", disableScroll, { passive: false });
       // document.addEventListener("touchmove", disableScroll, { passive: false });
 
+      // Remove session id to make watched data reset - should use this if doesn't have much data
+      if (sessionStorage.getItem("session-id")) {
+        sessionStorage.removeItem("session-id");
+        console.log("Removed session-id");
+      }
+
+      // off and disconect socket when not using
       if (socketRef.current && !socketRef.current.connected) {
         socketRef.current.off();
       }
@@ -104,25 +160,16 @@ const ShortPart = () => {
     };
   }, []);
 
-  useLayoutEffect(() => {
-    if (data) {
-      data?.data.forEach((item) => {
-        if (!shortIdSet.current.has(item)) {
-          setShortList((prev) => [...prev, item]);
-          shortIdSet.current.add(item);
-        }
-      });
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (shortList.length - currentIndex === 1) {
-      setParams((prev) => ({
-        ...prev,
-        watchedIdList: [...shortIdSet.current],
-      }));
-    }
-  }, [currentIndex, shortList.length]);
+  // useLayoutEffect(() => {
+  //   if (data) {
+  //     data?.data.forEach((item) => {
+  //       if (!shortIdSet.current.has(item)) {
+  //         setShortList((prev) => [...prev, item]);
+  //         shortIdSet.current.add(item);
+  //       }
+  //     });
+  //   }
+  // }, [data]);
 
   useEffect(() => {
     const handleScroll = (e) => {
@@ -140,17 +187,18 @@ const ShortPart = () => {
       window.removeEventListener("wheel", handleScroll, { passive: false });
     };
   }, [shortList.length, isScrolling]);
-
+  
+  // {shortList.map((item, index) => (
+  //   <LargeShortVid
+  //     key={index}
+  //     shortId={item}
+  //     socket={socketRef.current}
+  //   />
+  // ))}
   return (
     <div className='relative'>
       <div className='mx-auto w-fit' ref={containerRef}>
-        {shortList.map((item, index) => (
-          <LargeShortVid
-            key={index}
-            shortId={item}
-            socket={socketRef.current}
-          />
-        ))}
+        <button onClick={() => setFetching(true)}>Refetch</button>
       </div>
       <div className='hidden md:flex md:flex-col fixed top-[50%] translate-y-[-50%] right-0'>
         {!isTop && (
