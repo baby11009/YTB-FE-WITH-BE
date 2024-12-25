@@ -17,7 +17,7 @@ import request from "../../../util/axios-base-url";
 const ShortPart = () => {
   const { id } = useParams();
 
-  const { user } = useAuthContext();
+  const { setFetchingState, fetchingState } = useAuthContext();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -27,17 +27,12 @@ const ShortPart = () => {
 
   const [isEnd, setIsEnd] = useState(false);
 
-  const [isScrolling, setIsScrolling] = useState(false);
+  const isScrolling = useRef(false);
 
-  const [currentIndex, setCurrentIndex] = useState(1);
+  // Prevent React strict mode to fetch data 2 times in a row when first rendering
+  const firtTimeRender = useRef(true);
 
-  const shortIdSet = useRef(new Set());
-
-  const [params, setParams] = useState({
-    watchedIdList: [],
-    shortId: id,
-    reset: user?._id,
-  });
+  const remainData = useRef(1);
 
   const [shortList, setShortList] = useState([]);
 
@@ -45,11 +40,9 @@ const ShortPart = () => {
 
   const socketRef = useRef(null);
 
-  // const { data } = getData("/data/shorts", params);
-
   const fetchRandomShort = useCallback(async () => {
     let sessionId = sessionStorage.getItem("session-id") || "";
-    console.log(sessionId);
+    setFetchingState("loading");
     await request
       .get(id ? `/data/short/${id}` : "/data/short/", {
         headers: { "session-id": sessionId },
@@ -59,22 +52,42 @@ const ShortPart = () => {
           sessionStorage.setItem("session-id", rsp.headers["session-id"]);
           console.log(rsp.headers["session-id"]);
         }
-        console.log(rsp.data);
+        remainData.current = rsp.data.remain;
+        setShortList((prev) => [...prev, ...rsp.data.data]);
+        setFetchingState("success");
       })
       .catch((err) => {
         console.error(err);
         alert("Failed to get short data");
+        setFetchingState("false");
       })
       .finally(() => {
         setFetching(false);
       });
   }, [id]);
 
-  const handleScrollPrev = () => {
-    if (isScrolling) {
+  const removeRedisKey = useCallback(async () => {
+    let sessionId = sessionStorage.getItem("session-id");
+    if (!sessionId) return;
+    await request
+      .delete("/redis/remove", {
+        headers: { "session-id": sessionId },
+      })
+      .then((rsp) => {
+        console.log(rsp.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
+
+  const handleScrollPrev = useCallback(() => {
+    if (isScrolling.current) {
       return;
     }
-    setIsScrolling(true);
+
+    isScrolling.current = true;
+
     window.scrollTo({
       left: window.scrollX,
       top:
@@ -83,49 +96,46 @@ const ShortPart = () => {
         2,
       behavior: "smooth",
     });
-    setCurrentIndex((prev) => Math.max(1, prev - 1));
-    setTimeout(() => {
-      setIsScrolling(false);
-    }, 500);
-  };
 
-  const handleScrollNext = () => {
-    if (isScrolling) {
-      return;
-    }
-    setIsScrolling(true);
-    window.scrollTo({
-      left: window.scrollX,
-      top:
-        window.scrollY +
-        Math.ceil(containerRef.current?.clientHeight / shortList.length) +
-        2,
-      behavior: "smooth",
-    });
-    setCurrentIndex((prev) => Math.min(shortList.length, prev + 1));
     setTimeout(() => {
-      setIsScrolling(false);
+      isScrolling.current = false;
     }, 500);
-  };
+  }, [shortList]);
 
-  useLayoutEffect(() => {
-    if (id) {
+  const handleScrollNext = useCallback(() => {
+    if (remainData.current > 0) {
       setFetching(true);
+    } else {
+      if (isScrolling.current) {
+        return;
+      }
+
+      isScrolling.current = true;
+
+      window.scrollTo({
+        left: window.scrollX,
+        top:
+          window.scrollY +
+          Math.ceil(containerRef.current?.clientHeight / shortList.length) +
+          2,
+        behavior: "smooth",
+      });
+
+      setTimeout(() => {
+        isScrolling.current = false;
+      }, 500);
     }
-  }, [id]);
+  }, [shortList]);
+
+  const handleScrollEvent = useCallback(() => {
+    IsTop(setIsTop);
+    IsEnd(setIsEnd);
+  }, []);
 
   useLayoutEffect(() => {
-    console.log(fetching);
-    if (fetching) {
-      fetchRandomShort();
-    }
-  }, [fetching, id]);
+    window.addEventListener("beforeunload", removeRedisKey);
 
-  useEffect(() => {
-    document.addEventListener("scroll", () => {
-      IsEnd(setIsEnd);
-      IsTop(setIsTop);
-    });
+    document.addEventListener("scroll", handleScrollEvent);
 
     document.documentElement.style.setProperty("--scroll-bar-width", "none");
 
@@ -135,10 +145,10 @@ const ShortPart = () => {
       // document.removeEventListener("wheel", disableScroll, { passive: false });
       // document.addEventListener("touchmove", disableScroll, { passive: false });
 
-      // Remove session id to make watched data reset - should use this if doesn't have much data
-      if (sessionStorage.getItem("session-id")) {
-        sessionStorage.removeItem("session-id");
-        console.log("Removed session-id");
+      // Remove session-id key in redis to make watched data reset - should use this if doesn't have much data
+
+      if (!firtTimeRender.current) {
+        removeRedisKey();
       }
 
       // off and disconect socket when not using
@@ -149,10 +159,7 @@ const ShortPart = () => {
         socketRef.current.disconnect();
       }
 
-      document.removeEventListener("scroll", () => {
-        IsEnd(setIsEnd);
-        IsTop(setIsTop);
-      });
+      document.removeEventListener("scroll", handleScrollEvent);
 
       window.scrollTo(0, 0);
 
@@ -160,16 +167,30 @@ const ShortPart = () => {
     };
   }, []);
 
-  // useLayoutEffect(() => {
-  //   if (data) {
-  //     data?.data.forEach((item) => {
-  //       if (!shortIdSet.current.has(item)) {
-  //         setShortList((prev) => [...prev, item]);
-  //         shortIdSet.current.add(item);
-  //       }
-  //     });
-  //   }
-  // }, [data]);
+  useLayoutEffect(() => {
+    if (fetching && !firtTimeRender.current) {
+      fetchRandomShort();
+    } else if (!firtTimeRender.current && !fetching) {
+      isScrolling.current = true;
+
+      window.scrollTo({
+        left: window.scrollX,
+        top:
+          window.scrollY +
+          Math.ceil(containerRef.current?.clientHeight / shortList.length) +
+          2,
+        behavior: "smooth",
+      });
+
+      setTimeout(() => {
+        isScrolling.current = false;
+      }, 500);
+    }
+
+    return () => {
+      firtTimeRender.current = false;
+    };
+  }, [fetching]);
 
   useEffect(() => {
     const handleScroll = (e) => {
@@ -186,19 +207,18 @@ const ShortPart = () => {
     return () => {
       window.removeEventListener("wheel", handleScroll, { passive: false });
     };
-  }, [shortList.length, isScrolling]);
-  
-  // {shortList.map((item, index) => (
-  //   <LargeShortVid
-  //     key={index}
-  //     shortId={item}
-  //     socket={socketRef.current}
-  //   />
-  // ))}
+  }, [shortList]);
+
   return (
-    <div className='relative'>
+    <div className='relative mt-[8px]'>
       <div className='mx-auto w-fit' ref={containerRef}>
-        <button onClick={() => setFetching(true)}>Refetch</button>
+        {shortList.map((item, index) => (
+          <LargeShortVid
+            key={index}
+            shortData={item}
+            socket={socketRef.current}
+          />
+        ))}
       </div>
       <div className='hidden md:flex md:flex-col fixed top-[50%] translate-y-[-50%] right-0'>
         {!isTop && (
@@ -215,7 +235,8 @@ const ShortPart = () => {
             </button>
           </div>
         )}
-        {!isEnd && (
+        {/* Show scrollNext btn if remainData > 0 or remainData = 0 and not isEnd */}
+        {(remainData.current > 0 || (remainData.current === 0 && !isEnd)) && (
           <div className='px-[24px] py-[8px]'>
             <button
               className='w-[56px] h-[56px] rounded-[50%] bg-hover-black
@@ -234,65 +255,3 @@ const ShortPart = () => {
   );
 };
 export default ShortPart;
-
-// const ShortPart = () => {
-//   const { id } = useParams();
-
-//   const { user } = useAuthContext();
-
-//   const [params, setParams] = useState({
-//     watchedIdList: [],
-//     shortId: id,
-//     reset: user?._id,
-//   });
-
-//   const { data, isLoading } = getData("/data/short", params);
-//   const videoRef = useRef();
-//   const videoRef2 = useRef();
-//   const videoRef3 = useRef();
-
-//   const fetchData = async (id) => {
-//     await request.get(`/data/video/${id}`).then((rsp) => {
-//       console.log(rsp.data.data.video);
-//       videoRef.current.src = `${import.meta.env.VITE_BASE_API_URI}${
-//         import.meta.env.VITE_VIEW_VIDEO_API
-//       }${rsp.data.data.video}?type=video`;
-//       videoRef2.current.src = `${import.meta.env.VITE_BASE_API_URI}${
-//         import.meta.env.VITE_VIEW_VIDEO_API
-//       }${rsp.data.data.video}?type=video`;
-//       videoRef3.current.src = `${import.meta.env.VITE_BASE_API_URI}${
-//         import.meta.env.VITE_VIEW_VIDEO_API
-//       }${rsp.data.data.video}?type=video`;
-//     });
-//   };
-
-//   useEffect(() => {
-//     if (data?.data) {
-//       fetchData(data.data[0]);
-//     }
-//   }, [data]);
-
-//   if (isLoading) {
-//     return <div>Loading</div>;
-//   }
-//   return (
-//     <div className='mx-auto'>
-//       <video
-//         controls={true}
-//         className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128'
-//         ref={videoRef}
-//       ></video>
-//       <video
-//         controls={true}
-//         className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128'
-//         ref={videoRef2}
-//       ></video>
-//       <video
-//         controls={true}
-//         className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128'
-//         ref={videoRef3}
-//       ></video>
-//     </div>
-//   );
-// };
-// export default ShortPart;

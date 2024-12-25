@@ -184,6 +184,7 @@ const AuthProvider = ({ children }) => {
         setShowHover,
         handleCursorPositon,
         modalContainerRef,
+        fetchingState,
         setFetchingState,
       }}
     >

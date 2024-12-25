@@ -15,6 +15,7 @@ import {
   DiaryIcon,
   FeedBackIcon,
   MuteAudiIcon,
+  CloseIcon,
 } from "../../../Assets/Icons";
 
 import {
@@ -31,115 +32,184 @@ import { CustomeFuncBox } from "../../../Component";
 import request from "../../../util/axios-base-url";
 import CommentBox from "./CommentBox";
 import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 
-// const ConfirmUnsubscribe = ({
-//   handleSubscribe,
-//   channelEmail,
-//   handleCancel,
-// }) => {
-//   return (
-//     <div className=' max-w-[688px] bg-black-21 rounded-[10px]'>
-//       <div className='mt-[24px]'>
-//         <div className='px-[24px] mt-[4px] mb-[24px] text-nowrap'>
-//           Unsubscribe from {channelEmail} ?
-//         </div>
-//         <div className='flex justify-end items-center py-[8px]'>
-//           <button
-//             onClick={() => {
-//               handleCancel();
-//             }}
-//             className='px-[16px] leading-[36px] text-[14px] font-[500] rounded-[18px] hover:bg-black-0.1'
-//           >
-//             Cancel
-//           </button>
-//           <button
-//             onClick={async () => {
-//               await handleSubscribe();
-//               handleCancel();
-//             }}
-//             className='px-[16px] leading-[36px] text-[14px] font-[500] rounded-[18px] text-blue-3E hover:bg-[#263850'
-//           >
-//             Unsubscribe
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
+const ConfirmUnsubscribe = ({
+  handleSubscribe,
+  channelEmail,
+  handleCancel,
+}) => {
+  return (
+    <div className=' max-w-[688px] bg-black-21 rounded-[10px]'>
+      <div className='mt-[24px]'>
+        <div className='px-[24px] mt-[4px] mb-[24px] text-nowrap'>
+          Unsubscribe from {channelEmail} ?
+        </div>
+        <div className='flex justify-end items-center py-[8px]'>
+          <button
+            onClick={() => {
+              handleCancel();
+            }}
+            className='px-[16px] leading-[36px] text-[14px] font-[500] rounded-[18px] hover:bg-black-0.1'
+          >
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              await handleSubscribe();
+              handleCancel();
+            }}
+            className='px-[16px] leading-[36px] text-[14px] font-[500] rounded-[18px] text-blue-3E hover:bg-[#263850'
+          >
+            Unsubscribe
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-// const CustomeButton = ({
-//   Icon,
-//   text,
-//   title,
-//   handleOnClick,
-//   showedCmt,
-//   buttonCss,
-//   iconCss,
-// }) => {
-//   return (
-//     <div className='flex flex-col items-center w-[48px] '>
-//       <button
-//         className={`w-[48px] h-[48px] rounded-[50%] flex items-center justify-center
-//           ${
-//             buttonCss
-//               ? buttonCss
-//               : showedCmt
-//               ? "bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(40,40,40,0.6)]"
-//               : "bg-hover-black hover:bg-[rgba(255,255,255,0.2)]"
-//           }
-//           `}
-//         title={title}
-//         onClick={() => {
-//           if (handleOnClick) {
-//             handleOnClick();
-//           }
-//         }}
-//       >
-//         <div className={`${iconCss ? iconCss : ""}`}>
-//           <Icon />
-//         </div>
-//       </button>
-//       {text && (
-//         <span className='mt-[4px] text-[14px] leading-[20px] cursor-default overflow-hidden t-1-ellipsis'>
-//           {text}
-//         </span>
-//       )}
-//     </div>
-//   );
-// };
+const CustomeButton = ({
+  Icon,
+  text,
+  title,
+  handleOnClick,
+  showedCmt,
+  buttonCss,
+  iconCss,
+}) => {
+  return (
+    <div className='flex flex-col items-center w-[48px] '>
+      <button
+        className={`w-[48px] h-[48px] rounded-[50%] flex items-center justify-center
+          ${
+            buttonCss
+              ? buttonCss
+              : showedCmt
+              ? "bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(40,40,40,0.6)]"
+              : "bg-hover-black hover:bg-[rgba(255,255,255,0.2)]"
+          }
+          `}
+        title={title}
+        onClick={() => {
+          if (handleOnClick) {
+            handleOnClick();
+          }
+        }}
+      >
+        <div className={`${iconCss ? iconCss : ""}`}>
+          <Icon />
+        </div>
+      </button>
+      {text && (
+        <span className='mt-[4px] text-[14px] leading-[20px] cursor-default overflow-hidden t-1-ellipsis'>
+          {text}
+        </span>
+      )}
+    </div>
+  );
+};
 
-// const funcList = [
-//   {
-//     id: 1,
-//     text: "Thông tin mô tả",
-//     icon: <DescriptionIcon />,
-//   },
-//   {
-//     id: 2,
-//     text: "Lưu vào danh sách phát",
-//     icon: <AddPLIcon />,
-//   },
-//   {
-//     id: 3,
-//     text: "Phụ đề",
-//     icon: <SubtitlesIcon />,
-//   },
-//   {
-//     id: 4,
-//     text: "Không đề xuất kênh này",
-//     icon: <NoSuggetIcon />,
-//   },
-//   {
-//     id: 5,
-//     text: "Báo cáo vi phạm",
-//     icon: <DiaryIcon />,
-//   },
-//   {
-//     id: 6,
-//     text: "Gửi ý kiến phản hồi",
-//     icon: <FeedBackIcon />,
-//   },
-// ];
+const DescriptionModal = ({ shortData, handleClose }) => {
+  // return array with this structure [year,month,day]
+  const createdDate = useRef(new Date(shortData.createdAt));
+
+  // convert time to get month in text
+  const monthName = useRef(
+    new Intl.DateTimeFormat("en-US", { month: "long" }).format(
+      createdDate.current,
+    ),
+  );
+
+  return (
+    <div className='w-[480px] h-[calc((100vh-96px)*0.8)] bg-black-21 rounded-[12px]'>
+      <div className='px-[16px] py-[4px] flex items-center justify-between border-b-[1px] border-black-0.2'>
+        <span className='text-[20px] leading-[28px] font-bold my-[10px]'>
+          Description
+        </span>
+        <button
+          type='button'
+          className='size-[40px] p-[8px] rounded-[50%] hover:bg-black-0.2'
+          onClick={handleClose}
+        >
+          <div className='w-[24px]'>
+            <CloseIcon />
+          </div>
+        </button>
+      </div>
+      <div className='pt-[16px] px-[16px]'>
+        <div
+          className='pb-[16px] border-b-[1px] border-black-0.2 
+        line-clamp-5 text-ellipsis whitespace-pre-wrap'
+        >
+          <span className='text-[14px] leading-[20px]'>
+            {shortData.description ||
+              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur"}
+          </span>
+        </div>
+        <div className='py-[16px] flex items-center justify-evenly'>
+          <div className='flex flex-col  items-center'>
+            <span className='text-[18px] leading-[26px] font-[500]'>
+              {formatNumber(shortData.like)}
+            </span>
+            <span className='text-[12px] leading-[18px] font-[500] text-gray-A'>
+              Likes
+            </span>
+          </div>
+          <div className='flex flex-col  items-center'>
+            <span className='text-[18px] leading-[26px] font-[500]'>
+              {formatNumber(shortData.view)}
+            </span>
+            <span className='text-[12px] leading-[18px] font-[500] text-gray-A'>
+              Views
+            </span>
+          </div>
+          <div className='flex flex-col  items-center'>
+            <span className='text-[18px] leading-[26px] font-[500]'>
+              {monthName.current} {createdDate.current.getDay()}
+            </span>
+            <span className='text-[12px] leading-[18px] font-[500] text-gray-A'>
+              {createdDate.current.getFullYear()}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const funcList = [
+  {
+    id: 1,
+    text: "Thông tin mô tả",
+    icon: <DescriptionIcon />,
+  },
+  {
+    id: 2,
+    text: "Lưu vào danh sách phát",
+    icon: <AddPLIcon />,
+  },
+  {
+    id: 3,
+    text: "Phụ đề",
+    icon: <SubtitlesIcon />,
+  },
+  {
+    id: 4,
+    text: "Không đề xuất kênh này",
+    icon: <NoSuggetIcon />,
+  },
+  {
+    id: 5,
+    text: "Báo cáo vi phạm",
+    icon: <DiaryIcon />,
+  },
+  {
+    id: 6,
+    text: "Gửi ý kiến phản hồi",
+    icon: <FeedBackIcon />,
+  },
+];
 
 // const LargeShortVid = ({ shortId, socket }) => {
 //   const queryClient = useQueryClient();
@@ -672,64 +742,242 @@ import { useQueryClient } from "@tanstack/react-query";
 //   );
 // };
 
-const LargeShortVid = ({ shortId, socket }) => {
+const LargeShortVid = ({ shortData, socket }) => {
+  const { setIsShowing, user } = useAuthContext();
+
   const videoRef = useRef();
 
   const [shortDetails, setShortDetails] = useState(undefined);
 
-  const [refetch, setRefetch] = useState(true);
+  const [refetch, setRefetch] = useState(false);
 
-  const fetchData = async () => {
+  const [showedCmt, setShowedCmt] = useState(false);
+
+  const [opened, setOpened] = useState(false);
+
+  // const fetchData = async () => {
+  //   await request
+  //     .get(`/data/video/${shortId}`)
+  //     .then(({ data }) => {
+  //       if (!shortDetails) {
+  //         setShortDetails(data?.data);
+  //       } else {
+  //         setShortDetails((prev) => {
+  //           const datakeys = Object.keys(data?.data);
+  //           const finalData = { ...prev };
+  //           datakeys.forEach((key) => {
+  //             if (
+  //               prev[key] !== data?.data[key] ||
+  //               typeof prev[key] === "object" ||
+  //               Array.isArray(prev[key])
+  //             ) {
+  //               finalData[key] = data?.data[key];
+  //             }
+  //           });
+
+  //           return finalData;
+  //         });
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       alert(err.response.data.msg);
+  //       console.error(err);
+  //     })
+  //     .finally(() => {
+  //       setRefetch(false);
+  //     });
+  // };
+
+  // useLayoutEffect(() => {
+  //   if (refetch) {
+  //     fetchData();
+  //   }
+  // }, [refetch]);
+
+  const containRef = useRef();
+
+  const handleToggleReact = useCallback(async (type) => {
     await request
-      .get(`/data/video/${shortId}`)
-      .then(({ data }) => {
-        if (!shortDetails) {
-          setShortDetails(data?.data);
-        } else {
-          setShortDetails((prev) => {
-            const datakeys = Object.keys(data?.data);
-            const finalData = { ...prev };
-            datakeys.forEach((key) => {
-              if (
-                prev[key] !== data?.data[key] ||
-                typeof prev[key] === "object" ||
-                Array.isArray(prev[key])
-              ) {
-                finalData[key] = data?.data[key];
-              }
-            });
-
-            return finalData;
-          });
-        }
-      })
-      .catch((err) => {
-        alert(err.response.data.msg);
-        console.error(err);
-      })
-      .finally(() => {
-        setRefetch(false);
+      .post("/client/react", { videoId: shortData._id, type: type })
+      .then((rsp) => {
+        console.log(rsp.data);
+        setRefetch(true);
       });
-  };
+  }, []);
 
-  useLayoutEffect(() => {
-    if (refetch) {
-      fetchData();
+  const handleSubscribe = useCallback(async () => {
+    if (!user) {
+      alert(`Please login to subscribe to ${shortData?.channel_info?.email}`);
+      return;
     }
-  }, [refetch]);
+    await request
+      .post("/client/subscribe", {
+        userId: user?._id,
+        channelId: shortData?.channel_info?._id,
+      })
+      .then(() => {
+        setRefetch(true);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
+  const handleToggleCmt = useCallback(() => {}, []);
 
   return (
-    <div className='flex'>
-      <video
-        controls={true}
-        className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128'
-        src={`${import.meta.env.VITE_BASE_API_URI}${
-          import.meta.env.VITE_VIEW_VIDEO_API
-        }${shortDetails?.video}?type=video`}
-        ref={videoRef}
-      ></video>
-      //{" "}
-      <CommentBox
+    <div className='flex w-[calc(56.25vh-54px)] h-[calc(100vh-96px)]  box-content px-[12px] pb-[16px]'>
+      <div className='w-full h-full relative'>
+        <video
+          className='h-full object-cover object-center rounded-[12px]'
+          src={`${import.meta.env.VITE_BASE_API_URI}${
+            import.meta.env.VITE_VIEW_VIDEO_API
+          }${shortData?.video}?type=video`}
+          ref={videoRef}
+        ></video>
+        <div
+          className='absolute z-[99] left-0 w-full h-full flex top-0
+       '
+        >
+          <div className='min-w-full h-full rounded-[12px] flex flex-col'>
+            <div className='flex-1 '></div>
+            <div className='px-[16px] pt-[16px]'>
+              <div className='pt-[8px] flex items-center'>
+                <Link>
+                  <img
+                    src={`${import.meta.env.VITE_BASE_API_URI}${
+                      import.meta.env.VITE_VIEW_AVA_API
+                    }${shortData?.channel_info?.avatar}`}
+                    alt=''
+                    className='size-[32px] rounded-[50%] bg-[#ccc]'
+                  />
+                </Link>
+                <Link className='px-[8px]'>
+                  <span className='leading-[20px] text-[14px] font-[500]'>
+                    {shortData?.channel_info?.email}
+                  </span>
+                </Link>
+                {shortData?.subscription_info ? (
+                  <button
+                    className=' hover:bg-[rgba(255,255,255,0.2)]
+               bg-hover-black text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
+                    onClick={() => {
+                      setIsShowing(
+                        <ConfirmUnsubscribe
+                          handleSubscribe={handleSubscribe}
+                          channelEmail={shortData?.channel_info?.email}
+                          handleCancel={() => {
+                            setIsShowing(undefined);
+                          }}
+                        />,
+                      );
+                    }}
+                  >
+                    <span>Subscribed</span>
+                  </button>
+                ) : (
+                  <button
+                    className=' hover:bg-[#e6e6e6] text-black
+               bg-white text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
+                    onClick={async () => {
+                      await handleSubscribe();
+                    }}
+                  >
+                    <span>Subscribe</span>
+                  </button>
+                )}
+              </div>
+              <div
+                className='pt-[8px] line-clamp-3 text-ellipsis whitespace-pre-wrap'
+                onClick={() => {
+                  setIsShowing(
+                    <DescriptionModal
+                      shortData={shortData}
+                      handleClose={() => setIsShowing(undefined)}
+                    />,
+                  );
+                }}
+              >
+                <span className='text-[14px] leading-[20px]'>
+                  {shortData.title}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className='flex flex-col justify-end items-center px-[12px] pt-[12px] w-fit gap-[16px]'>
+            <CustomeButton
+              text={formatNumber(shortData?.like)}
+              Icon={LikeIcon}
+              title='Tôi thích video này'
+              showedCmt={showedCmt}
+              buttonCss={
+                shortData?.react_info?.type === "like"
+                  ? "bg-white-F1 hover:bg-white-D9"
+                  : undefined
+              }
+              iconCss={
+                shortData?.react_info?.type === "like"
+                  ? "text-black"
+                  : undefined
+              }
+              handleOnClick={() => {
+                handleToggleReact("like");
+              }}
+            />
+            <CustomeButton
+              text={formatNumber(shortData?.dislike)}
+              Icon={DisLikeIcon}
+              title='Tôi không thích video này'
+              showedCmt={showedCmt}
+              buttonCss={
+                shortData?.react_info?.type === "dislike"
+                  ? "bg-white-F1 hover:bg-white-D9"
+                  : undefined
+              }
+              iconCss={
+                shortData?.react_info?.type === "dislike"
+                  ? "text-black"
+                  : undefined
+              }
+              handleOnClick={() => {
+                handleToggleReact("dislike");
+              }}
+            />
+            <CustomeButton
+              text={formatNumber(shortData?.totalCmt)}
+              Icon={CommentIcon}
+              title={"Bình luận"}
+              handleOnClick={handleToggleCmt}
+              showedCmt={showedCmt}
+            />
+            <CustomeButton
+              text='Chia sẻ'
+              Icon={ThickShareIcon}
+              title={"Chia sẻ"}
+              showedCmt={showedCmt}
+            />
+            <div className='relative' ref={containRef}>
+              <CustomeButton
+                Icon={Setting2Icon}
+                showedCmt={showedCmt}
+                handleOnClick={() => {
+                  setOpened((prev) => !prev);
+                }}
+              />
+              {opened && (
+                <CustomeFuncBox
+                  style={"w-[241px] left-0 bottom-[100%]"}
+                  setOpened={setOpened}
+                  funcList1={funcList}
+                />
+              )}
+            </div>
+            <div className='w-[40px] h-[40px] border-[1px] border-white rounded-[6px] flex items-center justify-center'>
+              <LoadShortImgIcon />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* <CommentBox
         handleCloseCmt={() => {
           213;
         }}
@@ -738,9 +986,9 @@ const LargeShortVid = ({ shortId, socket }) => {
         handleRefetch={() => {
           12312
         }}
-        totalCmt={formatNumber(shortDetails?.totalCmt)}
+        totalCmt={formatNumber(shortData?.totalCmt)}
         socket={socket}
-      />
+      /> */}
     </div>
   );
 };
