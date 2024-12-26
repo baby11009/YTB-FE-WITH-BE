@@ -10,7 +10,7 @@ const MainLayOut = ({ children, style }) => {
     scrollToTop();
   }, []);
 
-  const { isShowing } = useAuthContext();
+  const { isShowing, modalContainerRef } = useAuthContext();
 
   return (
     <div className='min-h-screen text-white-F1 relative'>
@@ -18,7 +18,7 @@ const MainLayOut = ({ children, style }) => {
       {isShowing && (
         <div className=' fixed z-[9999] inset-0 bg-[rgba(0,0,0,0.3)]'>
           <div className='w-screen h-screen flex items-center justify-center'>
-            {isShowing}
+            <div ref={modalContainerRef}>{isShowing}</div>
           </div>
         </div>
       )}

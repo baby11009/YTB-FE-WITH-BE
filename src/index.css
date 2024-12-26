@@ -92,10 +92,10 @@ button:focus {
 
 /* custome range slider */
 .cs-range {
-  width: 85%;
+  width: 100%;
   height: 5px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+
   accent-color: white;
   outline: none;
   border: none;
@@ -462,6 +462,7 @@ th {
 .time-line {
   --preview-progress: 0;
   --progress-position: 0;
+  --scale: 1;
   position: relative;
 }
 
@@ -490,7 +491,7 @@ th {
 .time-line .thumb-indicator {
   position: absolute;
   height: 300%;
-  transform: translateX(-50%) translateY(-25%) scale(1);
+  transform: translateX(-50%) translateY(-25%) scale(var(--scale));
   top: -25%;
   left: calc(var(--progress-position, 0.25) * 100%);
   background-color: red;

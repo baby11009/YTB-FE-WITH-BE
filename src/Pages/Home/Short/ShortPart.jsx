@@ -8,7 +8,6 @@ import {
   useCallback,
 } from "react";
 import { IsEnd, IsTop } from "../../../util/scrollPosition";
-import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import connectSocket from "../../../util/connectSocket";
 import { useParams } from "react-router-dom";
@@ -17,7 +16,7 @@ import request from "../../../util/axios-base-url";
 const ShortPart = () => {
   const { id } = useParams();
 
-  const { setFetchingState, fetchingState } = useAuthContext();
+  const { setFetchingState, fetchingState, user } = useAuthContext();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -38,9 +37,15 @@ const ShortPart = () => {
 
   const containerRef = useRef();
 
+  const listContainerRef = useRef();
+
   const socketRef = useRef(null);
 
   const fetchRandomShort = useCallback(async () => {
+    if (user) {
+      // set session-id is user _id if user already signed in
+      sessionStorage.setItem("session-id", user._id);
+    }
     let sessionId = sessionStorage.getItem("session-id") || "";
     setFetchingState("loading");
     await request
@@ -92,7 +97,7 @@ const ShortPart = () => {
       left: window.scrollX,
       top:
         window.scrollY -
-        Math.ceil(containerRef.current?.clientHeight / shortList.length) -
+        Math.ceil(listContainerRef.current?.clientHeight / shortList.length) -
         2,
       behavior: "smooth",
     });
@@ -116,7 +121,7 @@ const ShortPart = () => {
         left: window.scrollX,
         top:
           window.scrollY +
-          Math.ceil(containerRef.current?.clientHeight / shortList.length) +
+          Math.ceil(listContainerRef.current?.clientHeight / shortList.length) +
           2,
         behavior: "smooth",
       });
@@ -130,6 +135,22 @@ const ShortPart = () => {
   const handleScrollEvent = useCallback(() => {
     IsTop(setIsTop);
     IsEnd(setIsEnd);
+  }, []);
+
+  const handleToggleFullScreen = useCallback(() => {
+    if (document.fullscreenElement == null) {
+      if (containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen();
+      } else if (containerRef.current.webkitRequestFullscreen) {
+        // Safari
+        containerRef.current.webkitRequestFullscreen();
+      } else if (containerRef.current.msRequestFullscreen) {
+        // IE/Edge
+        containerRef.current.msRequestFullscreen();
+      }
+    } else {
+      document.exitFullscreen();
+    }
   }, []);
 
   useLayoutEffect(() => {
@@ -177,7 +198,7 @@ const ShortPart = () => {
         left: window.scrollX,
         top:
           window.scrollY +
-          Math.ceil(containerRef.current?.clientHeight / shortList.length) +
+          Math.ceil(listContainerRef.current?.clientHeight / shortList.length) +
           2,
         behavior: "smooth",
       });
@@ -210,13 +231,22 @@ const ShortPart = () => {
   }, [shortList]);
 
   return (
-    <div className='relative mt-[8px]'>
-      <div className='mx-auto w-fit' ref={containerRef}>
+    <div className='relative mt-[8px]' ref={containerRef}>
+      <div className='mx-auto w-fit' ref={listContainerRef}>
         {shortList.map((item, index) => (
           <LargeShortVid
             key={index}
             shortData={item}
             socket={socketRef.current}
+            handleRefetchShortData={(newShortData) => {
+              setShortList((prev) => {
+                let list = [...prev];
+                list[index] = newShortData;
+
+                return list;
+              });
+            }}
+            handleToggleFullScreen={handleToggleFullScreen}
           />
         ))}
       </div>

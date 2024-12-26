@@ -303,9 +303,9 @@ const Video = ({ data, containerStyle }) => {
       handleChangeVideoSettings(key, value.value);
     }
 
-    // videoRef.current.play().catch((err) => {
-    //   setVideoState((prev) => ({ ...prev, paused: true }));
-    // });
+    videoRef.current.play().catch((err) => {
+      setVideoState((prev) => ({ ...prev, paused: true }));
+    });
   }, []);
 
   const handlePlayVideo = useCallback(() => {
@@ -408,7 +408,6 @@ const Video = ({ data, containerStyle }) => {
     wasPaused.current = videoRef.current.paused;
     if (!videoRef.current.paused) {
       videoRef.current.pause();
-      setVideoState((prev) => ({ ...prev, paused: true }));
     }
   }, []);
 

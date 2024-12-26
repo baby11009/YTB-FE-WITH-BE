@@ -160,3 +160,5 @@ export { default as CopyDebugInfoIcon } from "./CopyDebugInfo.jsx";
 export { default as TroubleshootIcon } from "./Troubleshoot.jsx";
 export { default as ForTheNerdIcon } from "./ForTheNerd.jsx";
 export { default as MiniPlayerIcon } from "./MiniPlayer.jsx";
+export { default as ShortFullScreenIcon } from "./ShortFullScreen.jsx";
+export { default as ShortFullScreenExitIcon } from "./ShortFullScreenExit.jsx";

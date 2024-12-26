@@ -5,17 +5,21 @@ import {
   ThickShareIcon,
   Setting2Icon,
   LoadShortImgIcon,
-  PlayIcon,
-  ThickAudioIcon,
-  StopIcon,
   DescriptionIcon,
   SubtitlesIcon,
   AddPLIcon,
   NoSuggetIcon,
   DiaryIcon,
   FeedBackIcon,
-  MuteAudiIcon,
   CloseIcon,
+  MuteAudiIcon,
+  LowAudioIcon,
+  PlayIcon,
+  ThickAudioIcon,
+  StopIcon,
+  PauseIcon,
+  ShortFullScreenIcon,
+  ShortFullScreenExitIcon,
 } from "../../../Assets/Icons";
 
 import {
@@ -742,10 +746,27 @@ const funcList = [
 //   );
 // };
 
-const LargeShortVid = ({ shortData, socket }) => {
-  const { setIsShowing, user } = useAuthContext();
+const LargeShortVid = ({
+  shortData,
+  socket,
+  handleRefetchShortData,
+  handleToggleFullScreen,
+}) => {
+  const { setIsShowing, modalContainerRef, user } = useAuthContext();
 
   const videoRef = useRef();
+
+  const containRef = useRef();
+
+  const controlRef = useRef();
+
+  const timelineContainerRef = useRef();
+
+  const timelineRef = useRef();
+
+  const isScrubbing = useRef();
+
+  const wasPaused = useRef();
 
   const [shortDetails, setShortDetails] = useState(undefined);
 
@@ -755,52 +776,39 @@ const LargeShortVid = ({ shortData, socket }) => {
 
   const [opened, setOpened] = useState(false);
 
-  // const fetchData = async () => {
-  //   await request
-  //     .get(`/data/video/${shortId}`)
-  //     .then(({ data }) => {
-  //       if (!shortDetails) {
-  //         setShortDetails(data?.data);
-  //       } else {
-  //         setShortDetails((prev) => {
-  //           const datakeys = Object.keys(data?.data);
-  //           const finalData = { ...prev };
-  //           datakeys.forEach((key) => {
-  //             if (
-  //               prev[key] !== data?.data[key] ||
-  //               typeof prev[key] === "object" ||
-  //               Array.isArray(prev[key])
-  //             ) {
-  //               finalData[key] = data?.data[key];
-  //             }
-  //           });
+  const [videoState, setVideoState] = useState({ paused: true });
 
-  //           return finalData;
-  //         });
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       alert(err.response.data.msg);
-  //       console.error(err);
-  //     })
-  //     .finally(() => {
-  //       setRefetch(false);
-  //     });
-  // };
+  const [volume, setVolume] = useState(1);
 
-  // useLayoutEffect(() => {
-  //   if (refetch) {
-  //     fetchData();
-  //   }
-  // }, [refetch]);
+  const fetchData = async () => {
+    await request
+      .get(`/data/video/${shortData._id}`)
+      .then(({ data }) => {
+        handleRefetchShortData(data.data);
+      })
+      .catch((err) => {
+        alert(err.response.data.msg);
+        console.error(err);
+      })
+      .finally(() => {
+        setRefetch(false);
+      });
+  };
 
-  const containRef = useRef();
+  useLayoutEffect(() => {
+    if (refetch) {
+      fetchData();
+    }
+  }, [refetch]);
 
   const handleToggleReact = useCallback(async (type) => {
+    if (!user) {
+      alert(`Signed in to ${type} the short`);
+      return;
+    }
     await request
       .post("/client/react", { videoId: shortData._id, type: type })
       .then((rsp) => {
-        console.log(rsp.data);
         setRefetch(true);
       });
   }, []);
@@ -823,9 +831,205 @@ const LargeShortVid = ({ shortData, socket }) => {
 
   const handleToggleCmt = useCallback(() => {}, []);
 
+  const handleTogglePlayPause = useCallback(() => {
+    if (videoRef.current.paused) {
+      videoRef.current.play();
+    } else {
+      videoRef.current.pause();
+    }
+  }, []);
+
+  const handleVideoloaded = useCallback((e) => {
+    videoRef.current.play().catch((err) => {
+      // setVideoState((prev) => ({ ...prev, paused: true }));
+    });
+  }, []);
+
+  const handleVideoPlay = useCallback((e) => {
+    setVideoState((prev) => ({ ...prev, paused: false }));
+  }, []);
+
+  const handleVideoPause = useCallback((e) => {
+    setVideoState((prev) => ({ ...prev, paused: true }));
+  }, []);
+
+  const handleVideoTimeUpdate = useCallback((e) => {
+    const percent = videoRef.current.currentTime / videoRef.current.duration;
+    timelineRef.current.style.setProperty("--progress-position", percent);
+  }, []);
+
+  const handleTimelineContainerMouseOver = useCallback((e) => {
+    // Show thumb indicator
+    timelineRef.current.style.setProperty("--scale", 1);
+  }, []);
+
+  const handleTimelineContainerMouseOut = useCallback((e) => {
+    // hidden thumb indicator
+    timelineRef.current.style.setProperty("--scale", 0);
+  }, []);
+
+  const handleWindowDisableSelects = useCallback((event) => {
+    event.preventDefault();
+  }, []);
+
+  const handleTimelineMouseDown = useCallback((e) => {
+    // handle when user want to seek to timeline
+    if (e.buttons !== 1) return;
+    // add scrubbing event when user left click
+    isScrubbing.current = true;
+
+    if (isScrubbing.current) {
+      window.addEventListener("selectstart", handleWindowDisableSelects);
+    }
+
+    wasPaused.current = videoRef.current.paused;
+    if (!wasPaused.current) {
+      videoRef.current.pause();
+    }
+  }, []);
+
+  const handleWindowMouseUp = useCallback(() => {
+    // remove scrubbing if mouse is out of timeline position
+    if (isScrubbing.current) {
+      isScrubbing.current = false;
+
+      if (!wasPaused.current) {
+        videoRef.current.play();
+      }
+      window.removeEventListener("selectstart", handleWindowDisableSelects);
+    }
+  }, []);
+
+  const handleWindowMouseMove = useCallback((e) => {
+    // seek to the timeline that user end scrubbing
+    if (!isScrubbing.current) return;
+
+    const rect = timelineContainerRef.current.getBoundingClientRect();
+
+    const percent =
+      Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+
+    videoRef.current.currentTime = videoRef.current.duration * percent;
+
+    timelineRef.current.style.setProperty("--progress-position", percent);
+  }, []);
+
+  const handleWindowMouseDown = useCallback((e) => {
+    //update video timline  when user left click the timeline ref
+
+    if (!(e.target === timelineRef.current)) return;
+    const rect = timelineContainerRef.current.getBoundingClientRect();
+    const percent =
+      Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+    videoRef.current.currentTime = videoRef.current.duration * percent;
+    timelineRef.current.style.setProperty("--progress-position", percent);
+  }, []);
+
+  const isElementInView = (element, threshold = 1) => {
+    return new Promise((resolve) => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.intersectionRatio >= threshold) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+          observer.disconnect();
+        },
+        { threshold: [threshold] },
+      );
+      observer.observe(element);
+    });
+  };
+
+  const checkVisibility = useCallback(async () => {
+    if (containRef.current) {
+      const isInView = await isElementInView(controlRef.current);
+
+      if (!isInView && !videoRef.current.paused) {
+        videoRef.current.pause();
+      } else if (isInView) {
+        videoRef.current.play();
+      }
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    videoRef.current.addEventListener("loadedmetadata", handleVideoloaded);
+
+    videoRef.current.addEventListener("play", handleVideoPlay);
+
+    videoRef.current.addEventListener("pause", handleVideoPause);
+
+    videoRef.current.addEventListener("timeupdate", handleVideoTimeUpdate);
+
+    timelineContainerRef.current.addEventListener(
+      "mouseover",
+      handleTimelineContainerMouseOver,
+    );
+
+    timelineContainerRef.current.addEventListener(
+      "mouseout",
+      handleTimelineContainerMouseOut,
+    );
+
+    timelineRef.current.style.setProperty("--scale", 0);
+
+    timelineRef.current.addEventListener("mousedown", handleTimelineMouseDown);
+
+    window.addEventListener("mouseup", handleWindowMouseUp);
+
+    window.addEventListener("mousemove", handleWindowMouseMove);
+
+    window.addEventListener("mousedown", handleWindowMouseDown);
+
+    window.addEventListener("scroll", checkVisibility);
+
+    window.addEventListener("resize", checkVisibility);
+
+    return () => {
+      videoRef.current.removeEventListener("loadedmetadata", handleVideoloaded);
+
+      videoRef.current.removeEventListener("play", handleVideoPlay);
+
+      videoRef.current.removeEventListener("pause", handleVideoPause);
+
+      videoRef.current.removeEventListener("timeupdate", handleVideoTimeUpdate);
+
+      timelineContainerRef.current.removeEventListener(
+        "mouseover",
+        handleTimelineContainerMouseOver,
+      );
+
+      timelineContainerRef.current.removeEventListener(
+        "mouseout",
+        handleTimelineContainerMouseOut,
+      );
+
+      timelineRef.current.style.setProperty("--scale", 1);
+
+      window.removeEventListener("mouseup", handleWindowMouseUp);
+
+      window.removeEventListener("mousemove", handleWindowMouseMove);
+
+      window.removeEventListener("mousedown", handleWindowMouseDown);
+
+      window.removeEventListener("scroll", checkVisibility);
+
+      window.removeEventListener("resize", checkVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
+    videoRef.current.volume = volume;
+  }, [volume]);
+
   return (
-    <div className='flex w-[calc(56.25vh-54px)] h-[calc(100vh-96px)]  box-content px-[12px] pb-[16px]'>
-      <div className='w-full h-full relative'>
+    <div
+      className='flex w-[calc(56.25vh-54px)] h-[calc(100vh-96px)]  box-content px-[12px] pb-[16px]'
+      ref={containRef}
+    >
+      <div className='relative h-full'>
         <video
           className='h-full object-cover object-center rounded-[12px]'
           src={`${import.meta.env.VITE_BASE_API_URI}${
@@ -833,13 +1037,86 @@ const LargeShortVid = ({ shortData, socket }) => {
           }${shortData?.video}?type=video`}
           ref={videoRef}
         ></video>
-        <div
-          className='absolute z-[99] left-0 w-full h-full flex top-0
-       '
-        >
-          <div className='min-w-full h-full rounded-[12px] flex flex-col'>
-            <div className='flex-1 '></div>
-            <div className='px-[16px] pt-[16px]'>
+
+        {/* Overlay */}
+        <div className='absolute z-[99] left-0 w-full h-full flex top-0'>
+          <div
+            className={`min-w-full h-full rounded-[12px] flex flex-col ${
+              videoState.paused ? "opacity-[1]" : " opacity-0 hover:opacity-[1]"
+            }`}
+            ref={controlRef}
+          >
+            <div className='flex-1 flex flex-col'>
+              <div className='px-[16px] pt-[16px] pb-[32px] flex items-center gap-[16px]'>
+                <button
+                  className='size-[48px] rounded-[50%] bg-[rgba(0,0,0,0.3)] hover:bg-[rgba(40,40,40,0.6)] p-[12px]'
+                  onClick={handleTogglePlayPause}
+                >
+                  <div className='w-[24px]'>
+                    {videoState.paused ? <PlayIcon /> : <StopIcon />}
+                  </div>
+                </button>
+                <div className='flex-1'>
+                  <div
+                    className='w-[48px] h-[48px] rounded-[50px] bg-[rgba(0,0,0,0.3)] hover:bg-[rgba(40,40,40,0.6)] 
+                    transition-[width] duration-[0.25s] ease-linear group hover:w-full flex items-center'
+                  >
+                    <button
+                      className='size-[48px] p-[12px]'
+                      onClick={() => setVolume((prev) => (prev > 0 ? 0 : 1))}
+                    >
+                      <div className='w-[24px]'>
+                        {volume === 0 ? (
+                          <MuteAudiIcon />
+                        ) : volume < 0.5 ? (
+                          <LowAudioIcon />
+                        ) : (
+                          <ThickAudioIcon />
+                        )}
+                      </div>
+                    </button>
+                    <div
+                      className='w-0 h-full overflow-hidden opacity-0 group-hover:opacity-[1] group-hover:flex-1 
+                        flex items-center justify-center pr-[12px]'
+                    >
+                      <input
+                        type='range'
+                        max={1}
+                        min={0}
+                        step={0.01}
+                        className='cursor-pointer cs-range'
+                        value={volume}
+                        onChange={(e) => setVolume(Number(e.target.value))}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  className='size-[48px] rounded-[50%] bg-[rgba(0,0,0,0.3)] hover:bg-[rgba(40,40,40,0.6)] p-[12px]'
+                  onClick={handleToggleFullScreen}
+                >
+                  <div className='w-[24px]'>
+                    <ShortFullScreenIcon />
+                  </div>
+                </button>
+              </div>
+              <div className='flex-1' onClick={handleTogglePlayPause}></div>
+              <div className='absolute bottom-0 w-full px-[8px]'>
+                <div
+                  className=' w-full h-[3px] timeline-container cursor-pointer'
+                  ref={timelineContainerRef}
+                >
+                  <div
+                    className='w-full h-[3px] bg-[rgba(255,255,255,0.3)] cursor-pointer time-line'
+                    ref={timelineRef}
+                  >
+                    <div className='thumb-indicator'></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className='px-[16px] pt-[16px] mb-[24px]'>
               <div className='pt-[8px] flex items-center'>
                 <Link>
                   <img
@@ -858,7 +1135,7 @@ const LargeShortVid = ({ shortData, socket }) => {
                 {shortData?.subscription_info ? (
                   <button
                     className=' hover:bg-[rgba(255,255,255,0.2)]
-               bg-hover-black text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
+                  bg-hover-black text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
                     onClick={() => {
                       setIsShowing(
                         <ConfirmUnsubscribe
@@ -867,6 +1144,7 @@ const LargeShortVid = ({ shortData, socket }) => {
                           handleCancel={() => {
                             setIsShowing(undefined);
                           }}
+                          modalContainerRef={modalContainerRef}
                         />,
                       );
                     }}
@@ -886,7 +1164,7 @@ const LargeShortVid = ({ shortData, socket }) => {
                 )}
               </div>
               <div
-                className='pt-[8px] line-clamp-3 text-ellipsis whitespace-pre-wrap'
+                className='pt-[8px] line-clamp-3 text-ellipsis whitespace-pre-wrap cursor-pointer'
                 onClick={() => {
                   setIsShowing(
                     <DescriptionModal
@@ -954,7 +1232,7 @@ const LargeShortVid = ({ shortData, socket }) => {
               title={"Chia sẻ"}
               showedCmt={showedCmt}
             />
-            <div className='relative' ref={containRef}>
+            <div className='relative'>
               <CustomeButton
                 Icon={Setting2Icon}
                 showedCmt={showedCmt}
