@@ -750,7 +750,9 @@ const LargeShortVid = ({
   shortData,
   socket,
   handleRefetchShortData,
+  handleSetCurrentShort,
   handleToggleFullScreen,
+  handleToggleSideMenu,
 }) => {
   const { setIsShowing, modalContainerRef, user } = useAuthContext();
 
@@ -828,8 +830,6 @@ const LargeShortVid = ({
       })
       .catch((err) => console.log(err));
   }, []);
-
-  const handleToggleCmt = useCallback(() => {}, []);
 
   const handleTogglePlayPause = useCallback(() => {
     if (videoRef.current.paused) {
@@ -949,6 +949,7 @@ const LargeShortVid = ({
       if (!isInView && !videoRef.current.paused) {
         videoRef.current.pause();
       } else if (isInView) {
+        handleSetCurrentShort();
         videoRef.current.play();
       }
     }
@@ -1223,7 +1224,9 @@ const LargeShortVid = ({
               text={formatNumber(shortData?.totalCmt)}
               Icon={CommentIcon}
               title={"Bình luận"}
-              handleOnClick={handleToggleCmt}
+              handleOnClick={() => {
+                handleToggleSideMenu("comment");
+              }}
               showedCmt={showedCmt}
             />
             <CustomeButton
@@ -1254,15 +1257,15 @@ const LargeShortVid = ({
           </div>
         </div>
       </div>
-
-      {/* <CommentBox
+      {/* 
+      <CommentBox
         handleCloseCmt={() => {
           213;
         }}
         showedContent={true}
-        shortId={shortId}
+        shortId={shortData._id}
         handleRefetch={() => {
-          12312
+          12312;
         }}
         totalCmt={formatNumber(shortData?.totalCmt)}
         socket={socket}

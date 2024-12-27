@@ -12,6 +12,8 @@ import { useAuthContext } from "../../../Auth Provider/authContext";
 import connectSocket from "../../../util/connectSocket";
 import { useParams } from "react-router-dom";
 import request from "../../../util/axios-base-url";
+import CommentBox from "./CommentBox";
+import { formatNumber } from "../../../util/numberFormat";
 
 const ShortPart = () => {
   const { id } = useParams();
@@ -35,11 +37,19 @@ const ShortPart = () => {
 
   const [shortList, setShortList] = useState([]);
 
+  const [openedSideMenu, setOpenedSideMenu] = useState(false);
+
+  const [currentShort, setCurrentShort] = useState(0);
+
+  const [deviceType, setDeviceType] = useState();
+
   const containerRef = useRef();
 
   const listContainerRef = useRef();
 
   const socketRef = useRef(null);
+
+  const outSideAreaRef = useRef();
 
   const fetchRandomShort = useCallback(async () => {
     if (user) {
@@ -153,16 +163,40 @@ const ShortPart = () => {
     }
   }, []);
 
+  const handleResize = useCallback(() => {
+    let width = 361;
+    if (window.innerWidth > 1156) {
+      width = window.innerWidth / 3.05;
+      setDeviceType("large");
+    } else {
+      setDeviceType("small");
+    }
+
+    document.body.style.setProperty("--short-sideMenu-width", `${width}px`);
+  }, []);
+
+  const handleClickOutsideArea = useCallback((e) => {
+    setOpenedSideMenu("");
+  }, []);
+
   useLayoutEffect(() => {
     window.addEventListener("beforeunload", removeRedisKey);
 
     document.addEventListener("scroll", handleScrollEvent);
 
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
     document.documentElement.style.setProperty("--scroll-bar-width", "none");
+
+    outSideAreaRef.current.addEventListener("click", handleClickOutsideArea);
 
     socketRef.current = connectSocket();
 
     return () => {
+      window.removeEventListener("beforeunload", removeRedisKey);
+
       // document.removeEventListener("wheel", disableScroll, { passive: false });
       // document.addEventListener("touchmove", disableScroll, { passive: false });
 
@@ -182,7 +216,14 @@ const ShortPart = () => {
 
       document.removeEventListener("scroll", handleScrollEvent);
 
+      window.removeEventListener("resize", handleResize);
+
       window.scrollTo(0, 0);
+
+      outSideAreaRef.current.removeEventListener(
+        "click",
+        handleClickOutsideArea,
+      );
 
       document.documentElement.style.setProperty("--scroll-bar-width", "auto");
     };
@@ -214,6 +255,17 @@ const ShortPart = () => {
   }, [fetching]);
 
   useEffect(() => {
+    if (deviceType === "small" && openedSideMenu) {
+      console.log(1);
+      document.body.style.overflow = "hidden";
+    } else {
+      console.log(2);
+
+      document.body.style.overflow = "auto";
+    }
+  }, [deviceType, openedSideMenu]);
+
+  useEffect(() => {
     const handleScroll = (e) => {
       e.preventDefault();
       if (e.deltaY >= 100) {
@@ -223,16 +275,20 @@ const ShortPart = () => {
       }
     };
 
-    window.addEventListener("wheel", handleScroll, { passive: false });
+    if (deviceType !== "small" || !openedSideMenu) {
+      window.addEventListener("wheel", handleScroll, { passive: false });
+    }
 
     return () => {
-      window.removeEventListener("wheel", handleScroll, { passive: false });
+      if (deviceType !== "small" || !openedSideMenu) {
+        window.removeEventListener("wheel", handleScroll, { passive: false });
+      }
     };
-  }, [shortList]);
+  }, [shortList, deviceType, openedSideMenu]);
 
   return (
-    <div className='relative mt-[8px]' ref={containerRef}>
-      <div className='mx-auto w-fit' ref={listContainerRef}>
+    <div className='relative mt-[8px] flex ' ref={containerRef}>
+      <div className='mx-auto w-fit relative z-[1000]' ref={listContainerRef}>
         {shortList.map((item, index) => (
           <LargeShortVid
             key={index}
@@ -246,13 +302,70 @@ const ShortPart = () => {
                 return list;
               });
             }}
+            handleSetCurrentShort={() => {
+              setCurrentShort(index);
+            }}
+            handleToggleSideMenu={(menuName) => {
+              setOpenedSideMenu((prev) => (prev ? "" : menuName));
+            }}
             handleToggleFullScreen={handleToggleFullScreen}
           />
         ))}
       </div>
+      {deviceType === "large" && (
+        <div
+          className={`max-w-[480px] transition-all duration-[0.3s] ease-linear `}
+          style={{
+            width: openedSideMenu
+              ? "calc(var(--short-sideMenu-width) + 96px)"
+              : "0",
+          }}
+        ></div>
+      )}
+      <div className={`absolute inset-0 ${openedSideMenu && ""}`}>
+        <div
+          className={`fixed ${
+            openedSideMenu ? "inset-0 1156:hidden" : ""
+          } bg-[rgba(0,0,0,0.6)] z-[3000] `}
+          ref={outSideAreaRef}
+        ></div>
+        <div
+          className={`fixed right-[50%] translate-x-[50%] 1156:translate-x-0 1156:right-[96px] max-w-[480px] min-w-[250px] 
+          h-[calc((100vh-96px)*0.8)] 1156:h-[calc(100vh-96px)]  
+          overflow-hidden  box-content ${openedSideMenu && "z-[3000]"}`}
+          style={{
+            width: "var(--short-sideMenu-width)",
+          }}
+        >
+          <div
+            className={`${
+              openedSideMenu
+                ? " visible 1156:right-[0]"
+                : " invisible 1156:right-[-100%]"
+            } fixed size-full transition-[right] 
+          duration-[0.3s] ease-linear `}
+          >
+            {shortList.length > 0 && (
+              <CommentBox
+                handleCloseCmt={() => {
+                  setOpenedSideMenu("");
+                }}
+                showedContent={true}
+                shortId={shortList[currentShort]._id}
+                handleRefetch={() => {
+                  12312;
+                }}
+                totalCmt={formatNumber(shortList[currentShort]?.totalCmt)}
+                socket={socketRef.current}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className='hidden md:flex md:flex-col fixed top-[50%] translate-y-[-50%] right-0'>
         {!isTop && (
-          <div className='px-[24px] py-[8px]'>
+          <div className='pl-[16px] pr-[24px] py-[8px]'>
             <button
               className='w-[56px] h-[56px] rounded-[50%] bg-hover-black
            hover:bg-[rgba(255,255,255,0.2)] rotate-180 flex items-center justify-center'
@@ -267,7 +380,7 @@ const ShortPart = () => {
         )}
         {/* Show scrollNext btn if remainData > 0 or remainData = 0 and not isEnd */}
         {(remainData.current > 0 || (remainData.current === 0 && !isEnd)) && (
-          <div className='px-[24px] py-[8px]'>
+          <div className='pl-[16px] pr-[24px] py-[8px]'>
             <button
               className='w-[56px] h-[56px] rounded-[50%] bg-hover-black
              hover:bg-[rgba(255,255,255,0.2)] flex items-center justify-center'

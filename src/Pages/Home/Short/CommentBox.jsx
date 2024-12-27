@@ -47,7 +47,7 @@ const CommentBox = ({
 
   const [replyCmtModified, setReplyCmtModified] = useState(null);
 
-  const { data } = getData(
+  const { data, isLoading } = getData(
     `/data/comment/video-cmt/${shortId}`,
     params,
     true,
@@ -84,6 +84,23 @@ const CommentBox = ({
     }
   }, []);
 
+  useLayoutEffect(() => {
+    queryClient.removeQueries({
+      queryKey: [Object.values(params)],
+      exact: true,
+    });
+    setParams({
+      limit: 8,
+      page: 1,
+      sort: {
+        createdAt: -1,
+      },
+      reset: shortId,
+      clearCache: "comment",
+    });
+    setAddNew(true);
+  }, [shortId]);
+
   useEffect(() => {
     if (data) {
       if (addNew) {
@@ -104,6 +121,10 @@ const CommentBox = ({
       }
     }
   }, [data]);
+
+  useEffect(() => {
+    console.log("🚀 ~ commentList:", commentList);
+  }, [commentList]);
 
   useEffect(() => {
     const updateComment = (data) => {
@@ -182,23 +203,9 @@ const CommentBox = ({
   }, [isEnd]);
 
   return (
-    <motion.div
-      className='w-[450px]  h-screen-h-minus-128 min-h-[616px] 
-   rounded-r-[12px] flex flex-col cursor-auto'
-      initial={{
-        width: 0,
-      }}
-      animate={{
-        width: "450px",
-        background: "#000000",
-      }}
-      exit={{
-        width: 0,
-        background: "#1c1b1b",
-      }}
-      transition={{
-        duration: 0.3,
-      }}
+    <div
+      className='size-full flex flex-col cursor-auto bg-black-21 1156:bg-transparent 
+    1156:border-[1px] 1156:border-black-0.2 rounded-[12px]'
     >
       {showedContent && (
         <>
@@ -265,7 +272,7 @@ const CommentBox = ({
           </div>
         </>
       )}
-    </motion.div>
+    </div>
   );
 };
 export default CommentBox;
