@@ -102,12 +102,23 @@ export default {
 
           "100%": { left: "8px", top: "0px", transform: "scale(0.95)" },
         },
+        btnPing: {
+          "0%": {
+            opacity: 1,
+            transform: "scale(1)",
+          },
+          "100%": {
+            opacity: 0,
+            transform: "scale(1.4)",
+          },
+        },
       },
       animation: {
         slideIn: "slideIn 0.3s ease-out forwards",
         slideOut: "slideOut 0.3s ease-out forwards",
         labelMoveUp: "labelMoveUp 0.25s ease-out forwards",
         labelMoveDown: "labelMoveDown 0.25s ease-out forwards",
+        buttonPing: "btnPing 0.4s ease-out forwards",
       },
     },
   },

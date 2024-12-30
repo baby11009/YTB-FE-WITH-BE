@@ -14,8 +14,8 @@ import { IsElementEnd } from "../../../util/scrollPosition";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 
 const CommentBox = ({
-  handleCloseCmt,
-  showedContent,
+  openedSideMenu,
+  handleClose,
   shortId,
   handleRefetch,
   totalCmt,
@@ -47,10 +47,10 @@ const CommentBox = ({
 
   const [replyCmtModified, setReplyCmtModified] = useState(null);
 
-  const { data, isLoading } = getData(
+  const { data } = getData(
     `/data/comment/video-cmt/${shortId}`,
     params,
-    true,
+    openedSideMenu ? true : false,
     false,
   );
 
@@ -80,6 +80,9 @@ const CommentBox = ({
     if (e) {
       e.addEventListener("scroll", (e) => {
         IsElementEnd(setIsEnd, e);
+      });
+      e.addEventListener("wheel", (e) => {
+        e.stopPropagation();
       });
     }
   }, []);
@@ -121,10 +124,6 @@ const CommentBox = ({
       }
     }
   }, [data]);
-
-  useEffect(() => {
-    console.log("🚀 ~ commentList:", commentList);
-  }, [commentList]);
 
   useEffect(() => {
     const updateComment = (data) => {
@@ -207,71 +206,67 @@ const CommentBox = ({
       className='size-full flex flex-col cursor-auto bg-black-21 1156:bg-transparent 
     1156:border-[1px] 1156:border-black-0.2 rounded-[12px]'
     >
-      {showedContent && (
-        <>
-          <div className='px-[16px] py-[4px] flex items-center justify-between '>
-            <div className='my-[10px] flex items-center gap-[8px]'>
-              <h4 className='text-[20px] leading-[28px] font-bold'>Comment</h4>
-              <span className=' text-gray-A'>{totalCmt}</span>
-            </div>
-            <div className='flex gap-[8px]'>
-              <button
-                className='w-[40px] h-[40px] flex items-center justify-center rounded-[50%] 
+      <div className='px-[16px] py-[4px] flex items-center justify-between '>
+        <div className='my-[10px] flex items-center gap-[8px]'>
+          <h4 className='text-[20px] leading-[28px] font-bold'>Comment</h4>
+          <span className=' text-gray-A'>{totalCmt}</span>
+        </div>
+        <div className='flex gap-[8px]'>
+          <button
+            className='w-[40px] h-[40px] flex items-center justify-center rounded-[50%] 
               hover:bg-[rgba(255,255,255,0.2)] relative'
-                onClick={() => {
-                  setSortOpened((prev) => !prev);
-                }}
-              >
-                <div>
-                  <SortIcon />
-                </div>
-                {sortOpened && (
-                  <CustomeFuncBox
-                    style={"w-[156px] right-0 top-[100%]"}
-                    setOpened={setSortOpened}
-                    funcList1={funcList}
-                    currentId={Object.keys(params.sort)[0]}
-                  />
-                )}
-              </button>
-              <button
-                className='w-[40px] h-[40px] rounded-[50%] hover:bg-[rgba(255,255,255,0.2)]
-                    flex items-center justify-center'
-                onClick={() => handleCloseCmt()}
-              >
-                <CloseIcon />
-              </button>
-            </div>
-          </div>
-
-          {/* Comment list */}
-          <div
-            className='px-[16px] flex-1 overflow-y-auto menu-scrollbar overscroll-contain'
-            ref={refscroll}
-            id='cmtBox'
+            onClick={() => {
+              setSortOpened((prev) => !prev);
+            }}
           >
-            {commentList.map((item, id) => (
-              <Comment
-                data={item}
-                videoId={shortId}
-                videoUserId={data?.channel_info?._id}
-                setAddNewCmt={setAddNew}
-                refetchVideo={handleRefetch}
-                key={item?._id}
-                replyCmtModified={replyCmtModified}
+            <div>
+              <SortIcon />
+            </div>
+            {sortOpened && (
+              <CustomeFuncBox
+                style={"w-[156px] right-0 top-[100%]"}
+                setOpened={setSortOpened}
+                funcList1={funcList}
+                currentId={Object.keys(params.sort)[0]}
               />
-            ))}
-          </div>
-          <div className='p-[16px] border-t-[1px] border-[rgba(255,255,255,0.2)]'>
-            <CommentInput
-              videoId={shortId}
-              setAddNewCmt={setAddNew}
-              setCmtParams={setParams}
-              refetchVideo={handleRefetch}
-            />
-          </div>
-        </>
-      )}
+            )}
+          </button>
+          <button
+            className='w-[40px] h-[40px] rounded-[50%] hover:bg-[rgba(255,255,255,0.2)]
+                    flex items-center justify-center'
+            onClick={() => handleClose()}
+          >
+            <CloseIcon />
+          </button>
+        </div>
+      </div>
+
+      {/* Comment list */}
+      <div
+        className='px-[16px] flex-1 overflow-y-auto menu-scrollbar overscroll-contain'
+        ref={refscroll}
+        id='cmtBox'
+      >
+        {commentList.map((item, id) => (
+          <Comment
+            data={item}
+            videoId={shortId}
+            videoUserId={data?.channel_info?._id}
+            setAddNewCmt={setAddNew}
+            refetchVideo={handleRefetch}
+            key={item?._id}
+            replyCmtModified={replyCmtModified}
+          />
+        ))}
+      </div>
+      <div className='p-[16px] border-t-[1px] border-[rgba(255,255,255,0.2)]'>
+        <CommentInput
+          videoId={shortId}
+          setAddNewCmt={setAddNew}
+          setCmtParams={setParams}
+          refetchVideo={handleRefetch}
+        />
+      </div>
     </div>
   );
 };

@@ -13,6 +13,7 @@ import connectSocket from "../../../util/connectSocket";
 import { useParams } from "react-router-dom";
 import request from "../../../util/axios-base-url";
 import CommentBox from "./CommentBox";
+import DetailsBox from "./DetailsBox";
 import { formatNumber } from "../../../util/numberFormat";
 
 const ShortPart = () => {
@@ -20,9 +21,9 @@ const ShortPart = () => {
 
   const { setFetchingState, fetchingState, user } = useAuthContext();
 
-  const [isLoading, setIsLoading] = useState(true);
-
   const [fetching, setFetching] = useState(true);
+
+  const [refetchSingleShort, setRefetchSingleShort] = useState(false);
 
   const [isTop, setIsTop] = useState(true);
 
@@ -37,7 +38,11 @@ const ShortPart = () => {
 
   const [shortList, setShortList] = useState([]);
 
+  const [sideMenu, setSideMenu] = useState("comment");
+
   const [openedSideMenu, setOpenedSideMenu] = useState(false);
+
+  const [fullScreen, setFullScreen] = useState(false);
 
   const [currentShort, setCurrentShort] = useState(0);
 
@@ -131,8 +136,7 @@ const ShortPart = () => {
         left: window.scrollX,
         top:
           window.scrollY +
-          Math.ceil(listContainerRef.current?.clientHeight / shortList.length) +
-          2,
+          Math.ceil(listContainerRef.current?.clientHeight / shortList.length),
         behavior: "smooth",
       });
 
@@ -147,8 +151,21 @@ const ShortPart = () => {
     IsEnd(setIsEnd);
   }, []);
 
+  const handleWheelScroll = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (e.deltaY >= 100) {
+        handleScrollNext();
+      } else {
+        handleScrollPrev();
+      }
+    },
+    [shortList],
+  );
+
   const handleToggleFullScreen = useCallback(() => {
-    if (document.fullscreenElement == null) {
+    setFullScreen((prev) => !prev);
+    if (document.fullscreenElement === null) {
       if (containerRef.current.requestFullscreen) {
         containerRef.current.requestFullscreen();
       } else if (containerRef.current.webkitRequestFullscreen) {
@@ -164,7 +181,8 @@ const ShortPart = () => {
   }, []);
 
   const handleResize = useCallback(() => {
-    let width = 361;
+    let width;
+
     if (window.innerWidth > 1156) {
       width = window.innerWidth / 3.05;
       setDeviceType("large");
@@ -173,7 +191,7 @@ const ShortPart = () => {
     }
 
     document.body.style.setProperty("--short-sideMenu-width", `${width}px`);
-  }, []);
+  }, [sideMenu]);
 
   const handleClickOutsideArea = useCallback((e) => {
     setOpenedSideMenu("");
@@ -185,8 +203,6 @@ const ShortPart = () => {
     document.addEventListener("scroll", handleScrollEvent);
 
     handleResize();
-
-    window.addEventListener("resize", handleResize);
 
     document.documentElement.style.setProperty("--scroll-bar-width", "none");
 
@@ -216,8 +232,6 @@ const ShortPart = () => {
 
       document.removeEventListener("scroll", handleScrollEvent);
 
-      window.removeEventListener("resize", handleResize);
-
       window.scrollTo(0, 0);
 
       outSideAreaRef.current.removeEventListener(
@@ -229,12 +243,19 @@ const ShortPart = () => {
     };
   }, []);
 
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [sideMenu]);
+
   useLayoutEffect(() => {
     if (fetching && !firtTimeRender.current) {
       fetchRandomShort();
     } else if (!firtTimeRender.current && !fetching) {
       isScrolling.current = true;
-
       window.scrollTo({
         left: window.scrollX,
         top:
@@ -243,7 +264,6 @@ const ShortPart = () => {
           2,
         behavior: "smooth",
       });
-
       setTimeout(() => {
         isScrolling.current = false;
       }, 500);
@@ -255,33 +275,15 @@ const ShortPart = () => {
   }, [fetching]);
 
   useEffect(() => {
-    if (deviceType === "small" && openedSideMenu) {
-      console.log(1);
-      document.body.style.overflow = "hidden";
-    } else {
-      console.log(2);
-
-      document.body.style.overflow = "auto";
-    }
-  }, [deviceType, openedSideMenu]);
-
-  useEffect(() => {
-    const handleScroll = (e) => {
-      e.preventDefault();
-      if (e.deltaY >= 100) {
-        handleScrollNext();
-      } else {
-        handleScrollPrev();
-      }
-    };
-
     if (deviceType !== "small" || !openedSideMenu) {
-      window.addEventListener("wheel", handleScroll, { passive: false });
+      window.addEventListener("wheel", handleWheelScroll, { passive: false });
     }
 
     return () => {
       if (deviceType !== "small" || !openedSideMenu) {
-        window.removeEventListener("wheel", handleScroll, { passive: false });
+        window.removeEventListener("wheel", handleWheelScroll, {
+          passive: false,
+        });
       }
     };
   }, [shortList, deviceType, openedSideMenu]);
@@ -293,7 +295,8 @@ const ShortPart = () => {
           <LargeShortVid
             key={index}
             shortData={item}
-            socket={socketRef.current}
+            refetch={refetchSingleShort}
+            setRefetch={setRefetchSingleShort}
             handleRefetchShortData={(newShortData) => {
               setShortList((prev) => {
                 let list = [...prev];
@@ -306,8 +309,10 @@ const ShortPart = () => {
               setCurrentShort(index);
             }}
             handleToggleSideMenu={(menuName) => {
-              setOpenedSideMenu((prev) => (prev ? "" : menuName));
+              setSideMenu(menuName);
+              setOpenedSideMenu((prev) => !prev);
             }}
+            fullScreen={fullScreen}
             handleToggleFullScreen={handleToggleFullScreen}
           />
         ))}
@@ -329,41 +334,56 @@ const ShortPart = () => {
           } bg-[rgba(0,0,0,0.6)] z-[3000] `}
           ref={outSideAreaRef}
         ></div>
+
         <div
-          className={`fixed right-[50%] translate-x-[50%] 1156:translate-x-0 1156:right-[96px] max-w-[480px] min-w-[250px] 
-          h-[calc((100vh-96px)*0.8)] 1156:h-[calc(100vh-96px)]  
-          overflow-hidden  box-content ${openedSideMenu && "z-[3000]"}`}
+          className={`${
+            openedSideMenu
+              ? "visible right-[50%] translate-x-[50%] top-[13%] 1156:top-0 1156:translate-x-0  1156:right-[96px]"
+              : "invisible 1156:visible 1156:right-[-100%]"
+          } 
+         
+          absolute transition-[right] max-w-[480px] h-[calc((100vh-96px)*0.8)] 1156:h-[calc(100vh-96px)]
+          duration-[0.3s] ease-linear z-[3001]`}
           style={{
-            width: "var(--short-sideMenu-width)",
+            width:
+              deviceType === "large"
+                ? "var(--short-sideMenu-width)"
+                : sideMenu === "comment"
+                ? "450px"
+                : "480px",
           }}
         >
-          <div
-            className={`${
-              openedSideMenu
-                ? " visible 1156:right-[0]"
-                : " invisible 1156:right-[-100%]"
-            } fixed size-full transition-[right] 
-          duration-[0.3s] ease-linear `}
-          >
-            {shortList.length > 0 && (
-              <CommentBox
-                handleCloseCmt={() => {
+          {shortList.length > 0 && sideMenu === "comment" ? (
+            <CommentBox
+              openedSideMenu={openedSideMenu}
+              handleClose={() => {
+                setOpenedSideMenu("");
+              }}
+              shortId={shortList[currentShort]._id}
+              handleRefetch={() => {
+                setRefetchSingleShort(true);
+              }}
+              totalCmt={formatNumber(shortList[currentShort]?.totalCmt)}
+              socket={socketRef.current}
+            />
+          ) : (
+            shortList.length > 0 &&
+            sideMenu === "details" && (
+              <DetailsBox
+                shortData={shortList[currentShort]}
+                handleClose={() => {
                   setOpenedSideMenu("");
                 }}
-                showedContent={true}
-                shortId={shortList[currentShort]._id}
-                handleRefetch={() => {
-                  12312;
-                }}
-                totalCmt={formatNumber(shortList[currentShort]?.totalCmt)}
-                socket={socketRef.current}
               />
-            )}
-          </div>
+            )
+          )}
         </div>
       </div>
 
-      <div className='hidden md:flex md:flex-col fixed top-[50%] translate-y-[-50%] right-0'>
+      <div
+        className='hidden md:flex md:flex-col md:justify-center fixed 
+      right-0 h-[calc(100%-56px)] bg-black 1156:z-[3001]'
+      >
         {!isTop && (
           <div className='pl-[16px] pr-[24px] py-[8px]'>
             <button

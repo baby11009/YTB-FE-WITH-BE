@@ -11,7 +11,6 @@ import {
   NoSuggetIcon,
   DiaryIcon,
   FeedBackIcon,
-  CloseIcon,
   MuteAudiIcon,
   LowAudioIcon,
   PlayIcon,
@@ -29,14 +28,12 @@ import {
   useLayoutEffect,
   useCallback,
 } from "react";
-import { useAnimate, AnimatePresence, motion } from "framer-motion";
 import { formatNumber } from "../../../util/numberFormat";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import { CustomeFuncBox } from "../../../Component";
 import request from "../../../util/axios-base-url";
-import CommentBox from "./CommentBox";
-import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import Hls from "hls.js";
 
 const ConfirmUnsubscribe = ({
   handleSubscribe,
@@ -78,7 +75,6 @@ const CustomeButton = ({
   text,
   title,
   handleOnClick,
-  showedCmt,
   buttonCss,
   iconCss,
 }) => {
@@ -89,8 +85,6 @@ const CustomeButton = ({
           ${
             buttonCss
               ? buttonCss
-              : showedCmt
-              ? "bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(40,40,40,0.6)]"
               : "bg-hover-black hover:bg-[rgba(255,255,255,0.2)]"
           }
           `}
@@ -110,74 +104,6 @@ const CustomeButton = ({
           {text}
         </span>
       )}
-    </div>
-  );
-};
-
-const DescriptionModal = ({ shortData, handleClose }) => {
-  // return array with this structure [year,month,day]
-  const createdDate = useRef(new Date(shortData.createdAt));
-
-  // convert time to get month in text
-  const monthName = useRef(
-    new Intl.DateTimeFormat("en-US", { month: "long" }).format(
-      createdDate.current,
-    ),
-  );
-
-  return (
-    <div className='w-[480px] h-[calc((100vh-96px)*0.8)] bg-black-21 rounded-[12px]'>
-      <div className='px-[16px] py-[4px] flex items-center justify-between border-b-[1px] border-black-0.2'>
-        <span className='text-[20px] leading-[28px] font-bold my-[10px]'>
-          Description
-        </span>
-        <button
-          type='button'
-          className='size-[40px] p-[8px] rounded-[50%] hover:bg-black-0.2'
-          onClick={handleClose}
-        >
-          <div className='w-[24px]'>
-            <CloseIcon />
-          </div>
-        </button>
-      </div>
-      <div className='pt-[16px] px-[16px]'>
-        <div
-          className='pb-[16px] border-b-[1px] border-black-0.2 
-        line-clamp-5 text-ellipsis whitespace-pre-wrap'
-        >
-          <span className='text-[14px] leading-[20px]'>
-            {shortData.description ||
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur"}
-          </span>
-        </div>
-        <div className='py-[16px] flex items-center justify-evenly'>
-          <div className='flex flex-col  items-center'>
-            <span className='text-[18px] leading-[26px] font-[500]'>
-              {formatNumber(shortData.like)}
-            </span>
-            <span className='text-[12px] leading-[18px] font-[500] text-gray-A'>
-              Likes
-            </span>
-          </div>
-          <div className='flex flex-col  items-center'>
-            <span className='text-[18px] leading-[26px] font-[500]'>
-              {formatNumber(shortData.view)}
-            </span>
-            <span className='text-[12px] leading-[18px] font-[500] text-gray-A'>
-              Views
-            </span>
-          </div>
-          <div className='flex flex-col  items-center'>
-            <span className='text-[18px] leading-[26px] font-[500]'>
-              {monthName.current} {createdDate.current.getDay()}
-            </span>
-            <span className='text-[12px] leading-[18px] font-[500] text-gray-A'>
-              {createdDate.current.getFullYear()}
-            </span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
@@ -215,546 +141,19 @@ const funcList = [
   },
 ];
 
-// const LargeShortVid = ({ shortId, socket }) => {
-//   const queryClient = useQueryClient();
-
-//   const { setIsShowing, user } = useAuthContext();
-
-//   const [firstTimeRender, setFirstTimeRender] = useState(true);
-
-//   const [moveBtn, setMoveBtn] = useState(false);
-
-//   const [audioValue, setAudioValue] = useState(100);
-
-//   const [videoProgress, setVideoProgress] = useState(0);
-
-//   const [hoverAudio, setHoverAudio] = useState(false);
-
-//   const [showedCmt, setShowedCmt] = useState(false);
-
-//   const [showContent, setShowContent] = useState(false);
-
-//   const [opened, setOpened] = useState(false);
-
-//   const [clicked, setClicked] = useState({
-//     state: false,
-//     type: "pause",
-//   });
-
-//   const [scope, animate] = useAnimate();
-
-//   const elementRef = useRef(null);
-
-//   const containRef = useRef();
-
-//   const videoRef = useRef();
-
-//   const timeOutRef = useRef();
-
-//   const [shortDetails, setShortDetails] = useState(undefined);
-
-//   const [refetch, setRefetch] = useState(true);
-
-//   const handleClick = () => {
-//     setClicked((prev) => {
-//       return {
-//         state: !prev.state,
-//         type: prev.type === "play" ? "stop" : "play",
-//       };
-//     });
-//     setTimeout(() => {
-//       setClicked((prev) => {
-//         return {
-//           ...prev,
-//           state: !prev.state,
-//         };
-//       });
-//     }, 400);
-//   };
-
-//   const handleSubscribe = async () => {
-//     if (!user) {
-//       alert(
-//         `Please login to subscribe to ${shortDetails?.channel_info?.email}`,
-//       );
-//       return;
-//     }
-//     await request
-//       .post("/client/subscribe", {
-//         userId: user?._id,
-//         channelId: shortDetails?.channel_info?._id,
-//       })
-//       .then(() => {
-//         setRefetch(true);
-//       })
-//       .catch((err) => console.log(err));
-//   };
-
-//   const handleToggleReact = async (type) => {
-//     await request
-//       .post("/client/react", { videoId: shortId, type: type })
-//       .then(() => {
-//         setRefetch(true);
-//       });
-//   };
-
-//   const handleToggleCmt = () => {
-//     if (timeOutRef.current) {
-//       clearTimeout(timeOutRef.current);
-//     }
-//     if (showedCmt) {
-//       setShowContent(false);
-//       setTimeout(() => {
-//         setShowedCmt(false);
-//       }, 20);
-//       timeOutRef.current = setTimeout(() => {
-//         setMoveBtn(false);
-//       }, 310);
-//     } else {
-//       setShowedCmt(true);
-//       timeOutRef.current = setTimeout(() => {
-//         setMoveBtn(true);
-//         setShowContent(true);
-//       }, 310);
-//     }
-//   };
-
-//   const fetchData = async () => {
-//     await request
-//       .get(`/data/video/${shortId}`)
-//       .then(({ data }) => {
-//         if (!shortDetails) {
-//           setShortDetails(data?.data);
-//         } else {
-//           setShortDetails((prev) => {
-//             const datakeys = Object.keys(data?.data);
-//             const finalData = { ...prev };
-//             datakeys.forEach((key) => {
-//               if (
-//                 prev[key] !== data?.data[key] ||
-//                 typeof prev[key] === "object" ||
-//                 Array.isArray(prev[key])
-//               ) {
-//                 finalData[key] = data?.data[key];
-//               }
-//             });
-
-//             return finalData;
-//           });
-//         }
-//       })
-//       .catch((err) => {
-//         alert(err.response.data.msg);
-//         console.error(err);
-//       })
-//       .finally(() => {
-//         setRefetch(false);
-//       });
-//   };
-
-//   useLayoutEffect(() => {
-//     if (refetch) {
-//       fetchData();
-//     }
-//   }, [refetch]);
-
-//   useEffect(() => {
-//     if (scope.current) {
-//       if (hoverAudio) {
-//         animate(
-//           scope.current,
-//           {
-//             width: "180px",
-//             backgroundColor: "rgba(40,40,40,0.6)",
-//           },
-//           {
-//             type: "tween",
-//             duration: 0.3,
-//           },
-//         );
-//       } else {
-//         animate(
-//           scope.current,
-//           {
-//             width: "48px",
-//             backgroundColor: "rgba(0,0,0,0.4)",
-//           },
-//           {
-//             type: "tween",
-//             duration: 0.3,
-//           },
-//         );
-//       }
-//     }
-//   }, [hoverAudio]);
-
-//   useEffect(() => {
-//     const handleClickOutside = (event) => {
-//       if (containRef.current && !containRef.current.contains(event.target)) {
-//         setOpened("");
-//       }
-//     };
-
-//     document.addEventListener("mousedown", handleClickOutside);
-
-//     const handleUpdateTime = () => {
-//       const percent =
-//         (videoRef.current.currentTime / videoRef.current.duration) * 100;
-//       setVideoProgress(percent);
-//     };
-//     if (videoRef.current) {
-//       videoRef.current.addEventListener("timeupdate", () => {
-//         handleUpdateTime();
-//       });
-//     }
-
-//     const checkVisibility = () => {
-//       if (elementRef.current) {
-//         const rect = elementRef.current.getBoundingClientRect();
-//         const windowHeight =
-//           window.innerHeight || document.documentElement.clientHeight;
-
-//         // Check if at least 70% of the element is within the viewport
-//         const isInView =
-//           rect.bottom >= windowHeight * 0.9 && rect.bottom < windowHeight;
-
-//         if (!isInView) {
-//           setClicked({ state: false, type: "stop" });
-//         }
-//       }
-//     };
-
-//     window.addEventListener("scroll", checkVisibility);
-//     window.addEventListener("resize", checkVisibility);
-
-//     // Initial visibility check
-//     checkVisibility();
-
-//     return () => {
-//       document.removeEventListener("mousedown", handleClickOutside);
-//       if (videoRef.current) {
-//         videoRef.current.removeEventListener("timeupdate", () => {
-//           handleUpdateTime();
-//         });
-//       }
-//       window.removeEventListener("scroll", checkVisibility);
-//       window.removeEventListener("resize", checkVisibility);
-//     };
-//   }, []);
-
-//   useEffect(() => {
-//     if (firstTimeRender) {
-//       setFirstTimeRender(false);
-//     }
-//   }, [firstTimeRender]);
-
-//   useEffect(() => {
-//     if (videoRef.current) {
-//       if (clicked.type === "play") {
-//         videoRef.current.play();
-//       } else {
-//         videoRef.current.pause();
-//       }
-//     }
-//   }, [clicked]);
-
-//   useEffect(() => {
-//     if (videoRef.current) {
-//       videoRef.current.volume = audioValue / 100;
-//     }
-//   }, [audioValue]);
-
-//   useEffect(() => {
-//     if (videoRef.current && videoRef.current.duration) {
-//       videoRef.current.currentTime =
-//         (videoProgress / 100) * videoRef.current.duration;
-//     }
-//   }, [videoProgress]);
-
-//   return (
-//     <div className='flex cursor-pointer relative mb-[16px]' ref={elementRef}>
-//       <div className='relative'>
-//         <div
-//           className={` relative overflow-hidden bg-[rgb(0,0,0)] group ${
-//             showedCmt ? "rounded-l-[12px]" : "rounded-[12px]"
-//           } `}
-//           onClick={handleClick}
-//         >
-//           <video
-//             className='w-[20vw] min-w-[331px] min-h-[616px] h-screen-h-minus-128'
-//             src={`${import.meta.env.VITE_BASE_API_URI}${
-//               import.meta.env.VITE_VIEW_VIDEO_API
-//             }${shortDetails?.video}?type=video`}
-//             ref={videoRef}
-//           ></video>
-
-//           <div className='absolute top-0 left-0 pt-[16px] pb-[32px] px-[16px] w-full group-hover:flex hidden items-center gap-[16px]'>
-//             <div className=' bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(40,40,40,0.6)] rounded-[50%]'>
-//               <button
-//                 className='w-[48px] h-[48px] flex items-center justify-center'
-//                 title='Play'
-//               >
-//                 <div className='w-[24px]'>
-//                   {clicked.type === "play" ? <StopIcon /> : <PlayIcon />}
-//                 </div>
-//               </button>
-//             </div>
-//             <div
-//               className='flex items-center bg-[rgba(0,0,0,0.4)] rounded-[30px] w-[48px]'
-//               onMouseOver={() => setHoverAudio(true)}
-//               onMouseOut={() => setHoverAudio(false)}
-//               ref={scope}
-//             >
-//               <button
-//                 className='!w-[48px] h-[48px] flex items-center justify-center'
-//                 title='Audio'
-//                 onClick={(e) => {
-//                   e.stopPropagation();
-//                   setAudioValue((prev) => {
-//                     if (prev === 0) {
-//                       return 100;
-//                     }
-//                     return 0;
-//                   });
-//                 }}
-//               >
-//                 <div className='w-[24px]'>
-//                   {audioValue === 0 ? <MuteAudiIcon /> : <ThickAudioIcon />}
-//                 </div>
-//               </button>
-//               <AnimatePresence>
-//                 {hoverAudio && (
-//                   <motion.div
-//                     className='flex items-center relative'
-//                     initial={{
-//                       width: 0,
-//                     }}
-//                     animate={{
-//                       width: "calc(100% - 48px)",
-//                       opacity: 1,
-//                     }}
-//                     exit={{
-//                       width: 0,
-//                       opacity: 0,
-//                     }}
-//                     transition={{
-//                       type: "tween",
-//                       duration: 0.3,
-//                     }}
-//                   >
-//                     <input
-//                       type='range'
-//                       max={100}
-//                       min={0}
-//                       step={1}
-//                       className='cursor-pointer cs-range'
-//                       value={audioValue}
-//                       onChange={(e) => setAudioValue(Number(e.target.value))}
-//                       onClick={(e) => e.stopPropagation()}
-//                     />
-//                   </motion.div>
-//                 )}
-//               </AnimatePresence>
-//             </div>
-//           </div>
-
-//           <AnimatePresence>
-//             {clicked.state && (
-//               <motion.div
-//                 className='absolute w-[60px] h-[60px] bg-[rgba(0,0,0,0.5)] rounded-[50%] top-[45%] left-[44%]
-//             flex items-center justify-center'
-//                 animate={{
-//                   scale: 1.4,
-//                   opacity: 1,
-//                 }}
-//                 exit={{
-//                   opacity: 0,
-//                 }}
-//                 transition={{
-//                   duration: 0.4,
-//                   type: "tween",
-//                 }}
-//               >
-//                 <div className='w-[24px]'>
-//                   {clicked.type === "play" ? <StopIcon /> : <PlayIcon />}
-//                 </div>
-//               </motion.div>
-//             )}
-//           </AnimatePresence>
-//         </div>
-//         <div
-//           className={`pb-[24px] pl-[16px] ${
-//             moveBtn ? "pr-[60px]" : "pr-[16px]"
-//           } absolute bottom-0 left-0 w-full text-white`}
-//         >
-//           <div className='flex items-center gap-[6px] bg- '>
-//             <img
-//               src={`${import.meta.env.VITE_BASE_API_URI}${
-//                 import.meta.env.VITE_VIEW_AVA_API
-//               }${shortDetails?.channel_info?.avatar}`}
-//               alt=''
-//               className='w-[36px] h-[36px] rounded-[50%] bg-[#ccc]'
-//             />
-//             <span className='text-[14px] leading-[20px] '>
-//               {shortDetails?.channel_info?.email}
-//             </span>
-//             {shortDetails?.subscription_info ? (
-//               <button
-//                 className=' hover:bg-[rgba(255,255,255,0.2)]
-//                bg-hover-black text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
-//                 onClick={() => {
-//                   setIsShowing(
-//                     <ConfirmUnsubscribe
-//                       handleSubscribe={handleSubscribe}
-//                       channelEmail={shortDetails?.channel_info?.email}
-//                       handleCancel={() => {
-//                         setIsShowing(undefined);
-//                       }}
-//                     />,
-//                   );
-//                 }}
-//               >
-//                 <span>Subscribed</span>
-//               </button>
-//             ) : (
-//               <button
-//                 className=' hover:bg-[#e6e6e6] text-black
-//                bg-white text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
-//                 onClick={async () => {
-//                   await handleSubscribe();
-//                 }}
-//               >
-//                 <span>Subscribe</span>
-//               </button>
-//             )}
-//           </div>
-//           <div className='py-[4px]'>
-//             <h3 className='text-[14px] leading-[20px]'>
-//               {shortDetails?.title}
-//             </h3>
-//           </div>
-//         </div>
-//         <div className='px-[12px] absolute bottom-0 w-full '>
-//           <input
-//             type='range'
-//             className='video-range'
-//             max={100}
-//             min={0}
-//             step={1}
-//             onChange={(e) => {
-//               setVideoProgress(Number(e.target.value));
-//             }}
-//             value={videoProgress}
-//           />
-//         </div>
-//       </div>
-
-//       <div
-//         className={`h-screen-h-minus-128 min-h-[616px] px-[12px]
-//         flex flex-col items-center justify-end gap-[16px]
-//         ${moveBtn && "absolute left-[42%] translate-x-[-100%] pb-[24px]"}
-//         ${showedCmt && !moveBtn && "!hidden"}
-//         ${!showedCmt && moveBtn && "!hidden"}
-//         `}
-//       >
-//         <CustomeButton
-//           text={formatNumber(shortDetails?.like)}
-//           Icon={LikeIcon}
-//           title='Tôi thích video này'
-//           showedCmt={showedCmt}
-//           buttonCss={
-//             shortDetails?.react_info?.type === "like"
-//               ? "bg-white-F1 hover:bg-white-D9"
-//               : undefined
-//           }
-//           iconCss={
-//             shortDetails?.react_info?.type === "like" ? "text-black" : undefined
-//           }
-//           handleOnClick={() => {
-//             handleToggleReact("like");
-//           }}
-//         />
-//         <CustomeButton
-//           text={formatNumber(shortDetails?.dislike)}
-//           Icon={DisLikeIcon}
-//           title='Tôi không thích video này'
-//           showedCmt={showedCmt}
-//           buttonCss={
-//             shortDetails?.react_info?.type === "dislike"
-//               ? "bg-white-F1 hover:bg-white-D9"
-//               : undefined
-//           }
-//           iconCss={
-//             shortDetails?.react_info?.type === "dislike"
-//               ? "text-black"
-//               : undefined
-//           }
-//           handleOnClick={() => {
-//             handleToggleReact("dislike");
-//           }}
-//         />
-//         <CustomeButton
-//           text={formatNumber(shortDetails?.totalCmt)}
-//           Icon={CommentIcon}
-//           title={"Bình luận"}
-//           handleOnClick={handleToggleCmt}
-//           showedCmt={showedCmt}
-//         />
-//         <CustomeButton
-//           text='Chia sẻ'
-//           Icon={ThickShareIcon}
-//           title={"Chia sẻ"}
-//           showedCmt={showedCmt}
-//         />
-//         <div className='relative' ref={containRef}>
-//           <CustomeButton
-//             Icon={Setting2Icon}
-//             showedCmt={showedCmt}
-//             handleOnClick={() => {
-//               setOpened((prev) => !prev);
-//             }}
-//           />
-//           {opened && (
-//             <CustomeFuncBox
-//               style={"w-[241px] left-0 bottom-[100%]"}
-//               setOpened={setOpened}
-//               funcList1={funcList}
-//             />
-//           )}
-//         </div>
-//         <div className='w-[40px] h-[40px] border-[1px] border-white rounded-[6px] flex items-center justify-center'>
-//           <LoadShortImgIcon />
-//         </div>
-//       </div>
-//       <AnimatePresence>
-//         {showedCmt && (
-//           <CommentBox
-//             handleCloseCmt={() => {
-//               handleToggleCmt();
-//             }}
-//             showedContent={showContent}
-//             shortId={shortId}
-//             handleRefetch={() => {
-//               setRefetch(true);
-//             }}
-//             totalCmt={formatNumber(shortDetails?.totalCmt)}
-//             socket={socket}
-//           />
-//         )}
-//       </AnimatePresence>
-//     </div>
-//   );
-// };
-
 const LargeShortVid = ({
   shortData,
-  socket,
+  refetch,
+  setRefetch,
   handleRefetchShortData,
   handleSetCurrentShort,
+  fullScreen,
   handleToggleFullScreen,
   handleToggleSideMenu,
 }) => {
   const { setIsShowing, modalContainerRef, user } = useAuthContext();
+
+  const hlsRef = useRef();
 
   const videoRef = useRef();
 
@@ -770,19 +169,34 @@ const LargeShortVid = ({
 
   const wasPaused = useRef();
 
-  const [shortDetails, setShortDetails] = useState(undefined);
-
-  const [refetch, setRefetch] = useState(false);
-
-  const [showedCmt, setShowedCmt] = useState(false);
-
   const [opened, setOpened] = useState(false);
 
   const [videoState, setVideoState] = useState({ paused: true });
 
   const [volume, setVolume] = useState(1);
 
-  const fetchData = async () => {
+  const handleStreamingVideo = useCallback(() => {
+    if (Hls.isSupported() && shortData?.stream) {
+      const hls = new Hls();
+      hlsRef.current = hls;
+      hls.loadSource(
+        `${import.meta.env.VITE_BASE_API_URI}/file/videomaster/${
+          shortData?.stream
+        }`,
+      );
+      hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+        console.log(data.levels.length);
+      });
+
+      hls.attachMedia(videoRef.current);
+    } else {
+      videoRef.current.src = `${import.meta.env.VITE_BASE_API_URI}${
+        import.meta.env.VITE_VIEW_VIDEO_API
+      }${shortData?.video}?type=video`;
+    }
+  }, []);
+
+  const fetchData = useCallback(async () => {
     await request
       .get(`/data/video/${shortData._id}`)
       .then(({ data }) => {
@@ -795,13 +209,7 @@ const LargeShortVid = ({
       .finally(() => {
         setRefetch(false);
       });
-  };
-
-  useLayoutEffect(() => {
-    if (refetch) {
-      fetchData();
-    }
-  }, [refetch]);
+  }, []);
 
   const handleToggleReact = useCallback(async (type) => {
     if (!user) {
@@ -840,9 +248,7 @@ const LargeShortVid = ({
   }, []);
 
   const handleVideoloaded = useCallback((e) => {
-    videoRef.current.play().catch((err) => {
-      // setVideoState((prev) => ({ ...prev, paused: true }));
-    });
+    videoRef.current.play().catch((err) => {});
   }, []);
 
   const handleVideoPlay = useCallback((e) => {
@@ -854,7 +260,8 @@ const LargeShortVid = ({
   }, []);
 
   const handleVideoTimeUpdate = useCallback((e) => {
-    const percent = videoRef.current.currentTime / videoRef.current.duration;
+    const percent =
+      videoRef.current.currentTime / videoRef.current.duration || 0;
     timelineRef.current.style.setProperty("--progress-position", percent);
   }, []);
 
@@ -956,6 +363,10 @@ const LargeShortVid = ({
   }, []);
 
   useLayoutEffect(() => {
+    handleStreamingVideo();
+
+    timelineRef.current.style.setProperty("--scale", 0);
+
     videoRef.current.addEventListener("loadedmetadata", handleVideoloaded);
 
     videoRef.current.addEventListener("play", handleVideoPlay);
@@ -974,8 +385,6 @@ const LargeShortVid = ({
       handleTimelineContainerMouseOut,
     );
 
-    timelineRef.current.style.setProperty("--scale", 0);
-
     timelineRef.current.addEventListener("mousedown", handleTimelineMouseDown);
 
     window.addEventListener("mouseup", handleWindowMouseUp);
@@ -986,9 +395,11 @@ const LargeShortVid = ({
 
     window.addEventListener("scroll", checkVisibility);
 
-    window.addEventListener("resize", checkVisibility);
-
     return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
+
       videoRef.current.removeEventListener("loadedmetadata", handleVideoloaded);
 
       videoRef.current.removeEventListener("play", handleVideoPlay);
@@ -1016,10 +427,14 @@ const LargeShortVid = ({
       window.removeEventListener("mousedown", handleWindowMouseDown);
 
       window.removeEventListener("scroll", checkVisibility);
-
-      window.removeEventListener("resize", checkVisibility);
     };
   }, []);
+
+  useLayoutEffect(() => {
+    if (refetch) {
+      fetchData();
+    }
+  }, [refetch]);
 
   useEffect(() => {
     videoRef.current.volume = volume;
@@ -1033,9 +448,6 @@ const LargeShortVid = ({
       <div className='relative h-full'>
         <video
           className='h-full object-cover object-center rounded-[12px]'
-          src={`${import.meta.env.VITE_BASE_API_URI}${
-            import.meta.env.VITE_VIEW_VIDEO_API
-          }${shortData?.video}?type=video`}
           ref={videoRef}
         ></video>
 
@@ -1098,11 +510,41 @@ const LargeShortVid = ({
                   onClick={handleToggleFullScreen}
                 >
                   <div className='w-[24px]'>
-                    <ShortFullScreenIcon />
+                    {fullScreen ? (
+                      <ShortFullScreenExitIcon />
+                    ) : (
+                      <ShortFullScreenIcon />
+                    )}
                   </div>
                 </button>
               </div>
-              <div className='flex-1' onClick={handleTogglePlayPause}></div>
+              <div className='flex-1 relative' onClick={handleTogglePlayPause}>
+                <div className='absolute left-[50%] translate-x-[-50%] top-[50%] translate-y-[-50%]'>
+                  {videoState.paused ? (
+                    <div
+                      key={"play"}
+                      className={` animate-buttonPing
+                size-[60px] bg-[rgba(0,0,0,0.5)] rounded-[50%] origin-center 
+                flex items-center justify-center`}
+                    >
+                      <div className='w-[36px]'>
+                        <PlayIcon />
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      key={"pause"}
+                      className={`  animate-buttonPing
+                  size-[60px] bg-[rgba(0,0,0,0.5)] rounded-[50%]  origin-center 
+                  flex items-center justify-center  `}
+                    >
+                      <div className='w-[36px]'>
+                        <PauseIcon />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className='absolute bottom-0 w-full px-[8px]'>
                 <div
                   className=' w-full h-[3px] timeline-container cursor-pointer'
@@ -1167,12 +609,7 @@ const LargeShortVid = ({
               <div
                 className='pt-[8px] line-clamp-3 text-ellipsis whitespace-pre-wrap cursor-pointer'
                 onClick={() => {
-                  setIsShowing(
-                    <DescriptionModal
-                      shortData={shortData}
-                      handleClose={() => setIsShowing(undefined)}
-                    />,
-                  );
+                  handleToggleSideMenu("details");
                 }}
               >
                 <span className='text-[14px] leading-[20px]'>
@@ -1186,7 +623,6 @@ const LargeShortVid = ({
               text={formatNumber(shortData?.like)}
               Icon={LikeIcon}
               title='Tôi thích video này'
-              showedCmt={showedCmt}
               buttonCss={
                 shortData?.react_info?.type === "like"
                   ? "bg-white-F1 hover:bg-white-D9"
@@ -1205,7 +641,6 @@ const LargeShortVid = ({
               text={formatNumber(shortData?.dislike)}
               Icon={DisLikeIcon}
               title='Tôi không thích video này'
-              showedCmt={showedCmt}
               buttonCss={
                 shortData?.react_info?.type === "dislike"
                   ? "bg-white-F1 hover:bg-white-D9"
@@ -1227,18 +662,15 @@ const LargeShortVid = ({
               handleOnClick={() => {
                 handleToggleSideMenu("comment");
               }}
-              showedCmt={showedCmt}
             />
             <CustomeButton
               text='Chia sẻ'
               Icon={ThickShareIcon}
               title={"Chia sẻ"}
-              showedCmt={showedCmt}
             />
             <div className='relative'>
               <CustomeButton
                 Icon={Setting2Icon}
-                showedCmt={showedCmt}
                 handleOnClick={() => {
                   setOpened((prev) => !prev);
                 }}
@@ -1257,19 +689,6 @@ const LargeShortVid = ({
           </div>
         </div>
       </div>
-      {/* 
-      <CommentBox
-        handleCloseCmt={() => {
-          213;
-        }}
-        showedContent={true}
-        shortId={shortData._id}
-        handleRefetch={() => {
-          12312;
-        }}
-        totalCmt={formatNumber(shortData?.totalCmt)}
-        socket={socket}
-      /> */}
     </div>
   );
 };
