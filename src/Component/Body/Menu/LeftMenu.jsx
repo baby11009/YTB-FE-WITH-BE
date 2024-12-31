@@ -16,7 +16,7 @@ import {
   funcList5,
 } from "./Component";
 
-import { useState } from "react";
+import { useState, useLayoutEffect } from "react";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 
 const LeftMenu = ({ openedMenu, path }) => {
@@ -35,6 +35,13 @@ const LeftMenu = ({ openedMenu, path }) => {
       className={`fixed top-[56px] left-0  ${
         openedMenu ? "w-[240px]" : "w-[74px]"
       }  h-screen z-[9999]`}
+      ref={(e) => {
+        if (e) {
+          e.addEventListener("wheel", (e) => {
+            e.stopPropagation();
+          });
+        }
+      }}
     >
       {/* Big menu */}
       {openedMenu && (

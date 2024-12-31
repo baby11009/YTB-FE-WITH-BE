@@ -16,12 +16,13 @@ import CommentBox from "./CommentBox";
 import DetailsBox from "./DetailsBox";
 import { formatNumber } from "../../../util/numberFormat";
 
+const fetchingShortQtt = 2;
+
 const ShortPart = () => {
   const { id } = useParams();
 
-  const { setFetchingState, fetchingState, user } = useAuthContext();
-
-  const [fetching, setFetching] = useState(true);
+  const { setFetchingState, fetchingState, user, openedMenu } =
+    useAuthContext();
 
   const [refetchSingleShort, setRefetchSingleShort] = useState(false);
 
@@ -64,9 +65,14 @@ const ShortPart = () => {
     let sessionId = sessionStorage.getItem("session-id") || "";
     setFetchingState("loading");
     await request
-      .get(id ? `/data/short/${id}` : "/data/short/", {
-        headers: { "session-id": sessionId },
-      })
+      .get(
+        id
+          ? `/data/short/${id}?size=${fetchingShortQtt}`
+          : `/data/short?size=${fetchingShortQtt}`,
+        {
+          headers: { "session-id": sessionId },
+        },
+      )
       .then((rsp) => {
         if (!sessionId) {
           sessionStorage.setItem("session-id", rsp.headers["session-id"]);
@@ -80,9 +86,6 @@ const ShortPart = () => {
         console.error(err);
         alert("Failed to get short data");
         setFetchingState("false");
-      })
-      .finally(() => {
-        setFetching(false);
       });
   }, [id]);
 
@@ -112,8 +115,7 @@ const ShortPart = () => {
       left: window.scrollX,
       top:
         window.scrollY -
-        Math.ceil(listContainerRef.current?.clientHeight / shortList.length) -
-        2,
+        Math.ceil(listContainerRef.current?.clientHeight / shortList.length),
       behavior: "smooth",
     });
 
@@ -122,33 +124,34 @@ const ShortPart = () => {
     }, 500);
   }, [shortList]);
 
-  const handleScrollNext = useCallback(() => {
+  const handleScrollNext = useCallback(async () => {
     if (remainData.current > 0) {
-      setFetching(true);
-    } else {
-      if (isScrolling.current) {
-        return;
-      }
-
-      isScrolling.current = true;
-
-      window.scrollTo({
-        left: window.scrollX,
-        top:
-          window.scrollY +
-          Math.ceil(listContainerRef.current?.clientHeight / shortList.length),
-        behavior: "smooth",
-      });
-
-      setTimeout(() => {
-        isScrolling.current = false;
-      }, 500);
+      await fetchRandomShort();
     }
+    if (isScrolling.current) {
+      return;
+    }
+
+    isScrolling.current = true;
+
+    window.scrollTo({
+      left: window.scrollX,
+      top: Math.min(
+        listContainerRef.current?.clientHeight,
+        window.scrollY +
+          Math.ceil(listContainerRef.current?.clientHeight / shortList.length),
+      ),
+      behavior: "smooth",
+    });
+
+    setTimeout(() => {
+      isScrolling.current = false;
+    }, 500);
   }, [shortList]);
 
   const handleScrollEvent = useCallback(() => {
     IsTop(setIsTop);
-    IsEnd(setIsEnd);
+    IsEnd(setIsEnd, 24);
   }, []);
 
   const handleWheelScroll = useCallback(
@@ -213,9 +216,6 @@ const ShortPart = () => {
     return () => {
       window.removeEventListener("beforeunload", removeRedisKey);
 
-      // document.removeEventListener("wheel", disableScroll, { passive: false });
-      // document.addEventListener("touchmove", disableScroll, { passive: false });
-
       // Remove session-id key in redis to make watched data reset - should use this if doesn't have much data
 
       if (!firtTimeRender.current) {
@@ -252,36 +252,25 @@ const ShortPart = () => {
   }, [sideMenu]);
 
   useLayoutEffect(() => {
-    if (fetching && !firtTimeRender.current) {
+    if (!firtTimeRender.current) {
       fetchRandomShort();
-    } else if (!firtTimeRender.current && !fetching) {
-      isScrolling.current = true;
-      window.scrollTo({
-        left: window.scrollX,
-        top:
-          window.scrollY +
-          Math.ceil(listContainerRef.current?.clientHeight / shortList.length) +
-          2,
-        behavior: "smooth",
-      });
-      setTimeout(() => {
-        isScrolling.current = false;
-      }, 500);
     }
 
     return () => {
       firtTimeRender.current = false;
     };
-  }, [fetching]);
+  }, []);
 
   useEffect(() => {
     if (deviceType !== "small" || !openedSideMenu) {
-      window.addEventListener("wheel", handleWheelScroll, { passive: false });
+      containerRef.current.addEventListener("wheel", handleWheelScroll, {
+        passive: false,
+      });
     }
 
     return () => {
-      if (deviceType !== "small" || !openedSideMenu) {
-        window.removeEventListener("wheel", handleWheelScroll, {
+      if ((deviceType !== "small" || !openedSideMenu) && containerRef.current) {
+        containerRef.current.removeEventListener("wheel", handleWheelScroll, {
           passive: false,
         });
       }
@@ -289,8 +278,11 @@ const ShortPart = () => {
   }, [shortList, deviceType, openedSideMenu]);
 
   return (
-    <div className='relative mt-[8px] flex ' ref={containerRef}>
-      <div className='mx-auto w-fit relative z-[1000]' ref={listContainerRef}>
+    <div className='relative mt-[8px] flex' ref={containerRef}>
+      <div
+        className='mx-auto w-fit relative z-[1000] mb-[24px]'
+        ref={listContainerRef}
+      >
         {shortList.map((item, index) => (
           <LargeShortVid
             key={index}
@@ -327,11 +319,15 @@ const ShortPart = () => {
           }}
         ></div>
       )}
-      <div className={`absolute inset-0 ${openedSideMenu && ""}`}>
+      <div
+        className={`fixed top-[56px]  ${
+          openedMenu ? "left-[74px] xl:left-[230px]" : "left-[74px]"
+        } bottom-0 right-0 inset-0 ${openedSideMenu && "z-[2001] 1156:z-[1]"}`}
+      >
         <div
           className={`fixed ${
             openedSideMenu ? "inset-0 1156:hidden" : ""
-          } bg-[rgba(0,0,0,0.6)] z-[3000] `}
+          } bg-[rgba(0,0,0,0.6)] z-[3000]`}
           ref={outSideAreaRef}
         ></div>
 
@@ -382,7 +378,7 @@ const ShortPart = () => {
 
       <div
         className='hidden md:flex md:flex-col md:justify-center fixed 
-      right-0 h-[calc(100%-56px)] bg-black 1156:z-[3001]'
+      right-0 h-[calc(100%-56px)] bg-black 1156:z-[2001]'
       >
         {!isTop && (
           <div className='pl-[16px] pr-[24px] py-[8px]'>

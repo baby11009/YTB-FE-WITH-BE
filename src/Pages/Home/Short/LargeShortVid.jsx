@@ -141,6 +141,7 @@ const funcList = [
   },
 ];
 
+
 const LargeShortVid = ({
   shortData,
   refetch,
@@ -185,7 +186,7 @@ const LargeShortVid = ({
         }`,
       );
       hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-        console.log(data.levels.length);
+        console.log("video resolution levels", data.levels.length);
       });
 
       hls.attachMedia(videoRef.current);
@@ -259,6 +260,10 @@ const LargeShortVid = ({
     setVideoState((prev) => ({ ...prev, paused: true }));
   }, []);
 
+  const handleVideoEnd = useCallback((e) => {
+    videoRef.current.play();
+  });
+
   const handleVideoTimeUpdate = useCallback((e) => {
     const percent =
       videoRef.current.currentTime / videoRef.current.duration || 0;
@@ -273,6 +278,16 @@ const LargeShortVid = ({
   const handleTimelineContainerMouseOut = useCallback((e) => {
     // hidden thumb indicator
     timelineRef.current.style.setProperty("--scale", 0);
+
+    timelineRef.current.style.setProperty("--preview-progress", 0);
+  }, []);
+
+  const handleTimelineContainerMouseMove = useCallback((e) => {
+    const rect = timelineContainerRef.current.getBoundingClientRect();
+    const percent =
+      Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+
+    timelineRef.current.style.setProperty("--preview-progress", percent);
   }, []);
 
   const handleWindowDisableSelects = useCallback((event) => {
@@ -290,7 +305,7 @@ const LargeShortVid = ({
     }
 
     wasPaused.current = videoRef.current.paused;
-    if (!wasPaused.current) {
+    if (!videoRef.current.paused) {
       videoRef.current.pause();
     }
   }, []);
@@ -375,6 +390,8 @@ const LargeShortVid = ({
 
     videoRef.current.addEventListener("timeupdate", handleVideoTimeUpdate);
 
+    videoRef.current.addEventListener("ended", handleVideoEnd);
+
     timelineContainerRef.current.addEventListener(
       "mouseover",
       handleTimelineContainerMouseOver,
@@ -383,6 +400,11 @@ const LargeShortVid = ({
     timelineContainerRef.current.addEventListener(
       "mouseout",
       handleTimelineContainerMouseOut,
+    );
+
+    timelineContainerRef.current.addEventListener(
+      "mousemove",
+      handleTimelineContainerMouseMove,
     );
 
     timelineRef.current.addEventListener("mousedown", handleTimelineMouseDown);

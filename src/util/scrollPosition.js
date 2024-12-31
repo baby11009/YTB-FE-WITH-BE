@@ -1,4 +1,4 @@
-export const IsEnd = (setIsEnd) => {
+export const IsEnd = (setIsEnd, tolerance = 0) => {
   const documentHeight = document.documentElement.scrollHeight;
   // The current vertical position of the scroll bar
   const scrollTop = window.scrollY;
@@ -7,7 +7,8 @@ export const IsEnd = (setIsEnd) => {
 
   const isScrollable = documentHeight > viewportHeight;
 
-  const isEnd = Math.ceil(scrollTop + viewportHeight) >= documentHeight;
+  const isEnd =
+    Math.ceil(scrollTop + viewportHeight + tolerance) >= documentHeight;
 
   // Check if the scroll position is at the bottom of the page
   setIsEnd(isScrollable && isEnd);

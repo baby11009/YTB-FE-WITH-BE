@@ -2,8 +2,6 @@ import {
   MenuIcon,
   YoutubeIcon,
   ThinArrowIcon,
-  LiveStreamIcon,
-  DotIcon,
   AllIcon,
 } from "../../../Assets/Icons";
 
@@ -13,6 +11,8 @@ import { useState } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthContext } from "../../../Auth Provider/authContext";
+
+import { useLayoutEffect, useCallback } from "react";
 
 import {
   Button,
@@ -33,18 +33,38 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
 
   const [showMored, setShowMored] = useState(false);
 
-  const navigate = useNavigate();
+  const navigate = useCallback(useNavigate(), []);
 
-  const handleNav = (link) => {
+  const handleNav = useCallback((link) => {
     navigate(link);
-  };
+  }, []);
+
+  const handlePreventDefault = useCallback((e) => {
+    e.preventDefault();
+  }, []);
+
+  useLayoutEffect(() => {
+    if (openedMenu) {
+      window.addEventListener("wheel", handlePreventDefault, {
+        passive: false,
+      });
+    }
+
+    return () => {
+      if (openedMenu) {
+        window.removeEventListener("wheel", handlePreventDefault, {
+          passive: false,
+        });
+      }
+    };
+  }, [openedMenu]);
 
   return (
     <>
       <AnimatePresence>
         {openedMenu && (
           <div
-            className='fixed z-[3000] inset-0 bg-[rgba(0,0,0,0.5)]'
+            className='fixed z-[9999] inset-0 bg-[rgba(0,0,0,0.5)]'
             onClick={() => setOpenedMenu((prev) => !prev)}
           >
             <motion.div
@@ -63,6 +83,13 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                 type: "tween",
               }}
               onClick={(e) => e.stopPropagation()}
+              ref={(e) => {
+                if (e) {
+                  e.addEventListener("wheel", (e) => {
+                    e.stopPropagation();
+                  });
+                }
+              }}
             >
               <div className='flex items-center  h-[56px] pl-[16px]'>
                 <div
