@@ -5,7 +5,13 @@ import {
   GotoIcon,
 } from "../../../../../../Assets/Icons";
 import { TextArea, DropDown, Pagination } from "../../../../../../Component";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import { getDataWithAuth } from "../../../../../../Api/getData";
 import { updateData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
@@ -70,6 +76,14 @@ const VideoUpsertModal = ({ title, id }) => {
 
   const [playlistPrs, setPlaylistPrs] = useState(initPlaylistParams);
 
+  const [videoList, setVideoList] = useState([]);
+
+  const [formData, setFormData] = useState(init);
+
+  const [submitLoading, setSubmitLoading] = useState(false);
+
+  const typesRef = useRef(["public", "private"]);
+
   const {
     data: playlistData,
     refetch,
@@ -80,73 +94,84 @@ const VideoUpsertModal = ({ title, id }) => {
     `/client/playlist/${id}`,
     playlistPrs,
     id !== undefined,
-    false
+    false,
   );
-  const [videoList, setVideoList] = useState([]);
-
-  const [formData, setFormData] = useState(init);
-
-  const typesRef = useRef(["public", "private"]);
 
   const [error, setError] = useState({
     inputName: [],
     message: [],
   });
 
-  const handleOnChange = (name, value) => {
+  const handleOnChange = useCallback((name, value) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
-  const handleValidateUpdate = () => {
-    if (error.inputName.length > 0) {
-      setError({ inputName: [], message: [] });
-    }
-    let hasErrors = false;
-    const keys = Object.keys(formData);
-    keys.forEach((key) => {
-      if (formData[key] === "" || !formData[key]) {
-        let errMsg = "Không được để trống";
-        setError((prev) => ({
-          inputName: [...prev?.inputName, key],
-          message: [...prev?.message, errMsg],
-        }));
-        hasErrors = true;
+  const handleValidateUpdate = useCallback(
+    (formData) => {
+      if (error.inputName.length > 0) {
+        setError({ inputName: [], message: [] });
       }
-    });
-    if (hasErrors) {
-      return true;
-    }
-  };
 
-  const update = async () => {
-    const error = handleValidateUpdate();
+      let hasErrors = false;
 
-    if (error) {
-      return;
-    }
+      const keys = Object.keys(formData);
 
-    let finalData = {
-      title: formData.title,
-      type: formData.type,
-    };
+      keys.forEach((key) => {
+        if (formData[key] === "" || !formData[key]) {
+          let errMsg = "Không được để trống";
+          setError((prev) => ({
+            inputName: [...prev?.inputName, key],
+            message: [...prev?.message, errMsg],
+          }));
+          hasErrors = true;
+        }
+      });
 
-    for (const key in finalData) {
-      if (
-        playlistData?.data?.hasOwnProperty(key) &&
-        playlistData?.data[key] === finalData[key]
-      ) {
-        delete finalData[key];
+      if (hasErrors) {
+        return true;
       }
-    }
-    await updateData("/client/playlist", id, finalData, "playlist", () => {
-      refetch();
-    });
-  };
+    },
+    [error],
+  );
 
-  const handleRemoveVideo = async (videoId) => {
+  const update = useCallback(
+    async (formData, playlistData) => {
+      const error = handleValidateUpdate(formData);
+
+      if (error) {
+        return;
+      }
+
+      let finalData = {
+        title: formData.title,
+        type: formData.type,
+      };
+
+      for (const key in finalData) {
+        if (
+          playlistData?.data?.hasOwnProperty(key) &&
+          playlistData?.data[key] === finalData[key]
+        ) {
+          delete finalData[key];
+        }
+      }
+
+      if (Object.keys(finalData).length === 0) {
+        alert("Không có gì thay đổi");
+        return;
+      }
+
+      await updateData("/client/playlist", id, finalData, "playlist", () => {
+        refetch();
+      });
+    },
+    [error],
+  );
+
+  const handleRemoveVideo = useCallback(async (videoId) => {
     await updateData(
       "/client/playlist",
       id,
@@ -154,17 +179,21 @@ const VideoUpsertModal = ({ title, id }) => {
       "playlist",
       () => {
         refetch();
-      }
+      },
     );
-  };
+  }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setSubmitLoading(true);
 
-    if (id) {
-      await update();
-    }
-  };
+      await update(formData, playlistData);
+
+      setSubmitLoading(false);
+    },
+    [error, formData, playlistData],
+  );
 
   useLayoutEffect(() => {
     if (playlistData) {
@@ -199,18 +228,15 @@ const VideoUpsertModal = ({ title, id }) => {
 
   useEffect(() => {
     return () => {
-      queryClient.refetchQueries({
-        queryKey: [...Object.values(playlistPrs), `/client/playlist/${id}`],
-        exact: true,
-      });
+      queryClient.clear();
     };
   }, []);
 
   return (
-    <div className='size-full max-w-[1500px] p-[8px] md:p-[24px]'>
-      <div className='bg-black size-full overflow-auto rounded-[5px] shadow-[0_0_8px_#f1f1f1]'>
-        <div className='p-[8px] xl:p-[20px]'>
-          <div className='flex justify-between'>
+    <div className='size-full max-w-[1500px] h-screen p-[12px] lg:p-[24px]'>
+      <div className='bg-black size-full overflow-auto rounded-[5px] shadow-[0_0_8px_#f1f1f1] relative'>
+        <div className='relative  px-[16px] pb-[16px] xl:pb-[20px] xl:px-[20px]'>
+          <div className='sticky top-[0] h-[68px] xl:h-[72px] flex items-center justify-between bg-black z-[2]'>
             <h1 className='text-nowrap text-[25px] leading-[32px] font-[600]'>
               {title}
             </h1>
@@ -225,11 +251,7 @@ const VideoUpsertModal = ({ title, id }) => {
               </div>
             </button>
           </div>
-          <form
-            noValidate
-            onSubmit={handleSubmit}
-            className=' mb-[20px] my-[24px]'
-          >
+          <form noValidate onSubmit={handleSubmit} className=' mb-[20px'>
             <div className='flex flex-wrap gap-[24px] mt-[48px]'>
               <div className='basis-[100%] md:basis-[40%]'>
                 <div className='basis-[100%]  2md:basis-[49%]'>
@@ -311,7 +333,14 @@ const VideoUpsertModal = ({ title, id }) => {
                 type='submit'
                 className='w-full max-w-[160px] btn1 relative'
               >
-                <span className='z-[50] relative'>Submit</span>
+                {submitLoading ? (
+                  <div
+                    className='size-[30px] rounded-[50%] border-[3px] border-l-transparent 
+              border-b-transparent animate-spin mx-auto'
+                  ></div>
+                ) : (
+                  <span className='z-[50] relative'>Submit</span>
+                )}{" "}
               </button>
             </div>
           </form>

@@ -49,6 +49,8 @@ const ShortPart = () => {
 
   const [deviceType, setDeviceType] = useState();
 
+  const [volume, setVolume] = useState(1);
+
   const containerRef = useRef();
 
   const listContainerRef = useRef();
@@ -289,6 +291,8 @@ const ShortPart = () => {
             shortData={item}
             refetch={refetchSingleShort}
             setRefetch={setRefetchSingleShort}
+            volume={volume}
+            setVolume={setVolume}
             handleRefetchShortData={(newShortData) => {
               setShortList((prev) => {
                 let list = [...prev];
@@ -301,8 +305,12 @@ const ShortPart = () => {
               setCurrentShort(index);
             }}
             handleToggleSideMenu={(menuName) => {
-              setSideMenu(menuName);
-              setOpenedSideMenu((prev) => !prev);
+              if (menuName === sideMenu && openedSideMenu) {
+                setOpenedSideMenu(false);
+              } else {
+                setSideMenu(menuName);
+                setOpenedSideMenu(true);
+              }
             }}
             fullScreen={fullScreen}
             handleToggleFullScreen={handleToggleFullScreen}

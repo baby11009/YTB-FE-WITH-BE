@@ -141,17 +141,19 @@ const funcList = [
   },
 ];
 
-
 const LargeShortVid = ({
   shortData,
   refetch,
   setRefetch,
+  volume,
+  setVolume,
   handleRefetchShortData,
   handleSetCurrentShort,
   fullScreen,
   handleToggleFullScreen,
   handleToggleSideMenu,
 }) => {
+  
   const { setIsShowing, modalContainerRef, user } = useAuthContext();
 
   const hlsRef = useRef();
@@ -173,8 +175,6 @@ const LargeShortVid = ({
   const [opened, setOpened] = useState(false);
 
   const [videoState, setVideoState] = useState({ paused: true });
-
-  const [volume, setVolume] = useState(1);
 
   const handleStreamingVideo = useCallback(() => {
     if (Hls.isSupported() && shortData?.stream) {
@@ -378,6 +378,12 @@ const LargeShortVid = ({
   }, []);
 
   useLayoutEffect(() => {
+    if (refetch) {
+      fetchData();
+    }
+  }, [refetch]);
+
+  useLayoutEffect(() => {
     handleStreamingVideo();
 
     timelineRef.current.style.setProperty("--scale", 0);
@@ -451,12 +457,6 @@ const LargeShortVid = ({
       window.removeEventListener("scroll", checkVisibility);
     };
   }, []);
-
-  useLayoutEffect(() => {
-    if (refetch) {
-      fetchData();
-    }
-  }, [refetch]);
 
   useEffect(() => {
     videoRef.current.volume = volume;

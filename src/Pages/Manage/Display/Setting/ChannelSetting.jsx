@@ -1,6 +1,6 @@
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { Input, ImageCropper, TextArea } from "../../../../Component";
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { useState, useLayoutEffect, useEffect, useCallback } from "react";
 import { PlusIcon } from "../../../../Assets/Icons";
 import { updateData } from "../../../../Api/controller";
 
@@ -13,9 +13,11 @@ const initForm = {
 };
 
 const ChannelSetting = () => {
-  const { openedMenu, setIsShowing, user, setRefetch } = useAuthContext();
+  const { setIsShowing, user, setRefetch } = useAuthContext();
 
   const [formData, setFormData] = useState(initForm);
+
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const [previewAva, setPreviewAva] = useState("");
 
@@ -30,110 +32,124 @@ const ChannelSetting = () => {
     message: [],
   });
 
-  const handleOnChange = (name, value) => {
+  const handleOnChange = useCallback((name, value) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
-  const handleValidateUpdate = () => {
-    if (error.inputName.length > 0) {
-      setError({ inputName: [], message: [] });
-    }
-    let hasErrors = false;
-    const keys = Object.keys(formData).filter(
-      (key) =>
-        key !== "avatar" &&
-        key !== "banner" &&
-        key !== "password" &&
-        key !== "confirm" &&
-        key !== "description"
-    );
-    keys.forEach((key) => {
-      if (formData[key] === "") {
+  const handleValidateUpdate = useCallback(
+    (formData) => {
+      if (error.inputName.length > 0) {
+        setError({ inputName: [], message: [] });
+      }
+      let hasErrors = false;
+      const keys = Object.keys(formData).filter(
+        (key) =>
+          key !== "avatar" &&
+          key !== "banner" &&
+          key !== "password" &&
+          key !== "confirm" &&
+          key !== "description",
+      );
+      keys.forEach((key) => {
+        if (formData[key] === "") {
+          setError((prev) => ({
+            inputName: [...prev.inputName, key],
+            message: [...prev.message, "Không được để trống"],
+          }));
+          hasErrors = true;
+        }
+      });
+
+      if (
+        (formData.password || formData.confirm) &&
+        formData.password !== formData.confirm
+      ) {
         setError((prev) => ({
-          inputName: [...prev.inputName, key],
-          message: [...prev.message, "Không được để trống"],
+          inputName: [...prev.inputName, "confirm"],
+          message: [...prev.message, "Mật khẩu xác nhận không đúng"],
         }));
         hasErrors = true;
       }
-    });
+      if (hasErrors) {
+        return true;
+      }
+    },
+    [error],
+  );
 
-    if (
-      (formData.password || formData.confirm) &&
-      formData.password !== formData.confirm
-    ) {
-      setError((prev) => ({
-        inputName: [...prev.inputName, "confirm"],
-        message: [...prev.message, "Mật khẩu xác nhận không đúng"],
-      }));
-      hasErrors = true;
-    }
-    if (hasErrors) {
-      return true;
-    }
-  };
+  const update = useCallback(
+    async (formData, user) => {
+      const error = handleValidateUpdate(formData);
 
-  const update = async () => {
-    const error = handleValidateUpdate();
+      if (error) {
+        return;
+      }
 
-    if (error) {
-      return;
-    }
+      let finalData = {
+        name: formData.name,
+        password: formData.password,
+        description: formData.description,
+      };
 
-    let finalData = {
-      name: formData.name,
-      password: formData.password,
-      description: formData.description,
-    };
-
-    for (const key in finalData) {
-      if (user.hasOwnProperty(key)) {
-        if (user[key] === finalData[key]) {
-          delete finalData[key];
+      for (const key in finalData) {
+        if (user.hasOwnProperty(key)) {
+          if (user[key] === finalData[key]) {
+            delete finalData[key];
+          }
         }
       }
-    }
 
-    if (finalData.password === "") {
-      delete finalData.password;
-    }
-
-    if (formData.image) {
-      finalData.image = formData.image;
-    }
-
-    if (formData.banner) {
-      finalData.banner = formData.banner;
-    }
-
-    if (Object.keys(finalData).length === 0) {
-      alert("Không có gì thay đổi");
-      return;
-    }
-
-    let data = new FormData();
-    for (const key in finalData) {
-      if (key === "image") {
-        data.append(key, finalData[key], avaName);
-      } else if (key === "banner") {
-        data.append(key, finalData[key], bannerName);
-      } else {
-        data.append(key, finalData[key]);
+      if (finalData.password === "") {
+        delete finalData.password;
       }
-    }
 
-    await updateData("/client/user/me", undefined, data, "user", () => {
-      setRefetch(true);
-    });
-  };
+      if (formData.image) {
+        finalData.image = formData.image;
+      }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+      if (formData.banner) {
+        finalData.banner = formData.banner;
+      }
 
-    await update();
-  };
+      if (Object.keys(finalData).length === 0) {
+        alert("Không có gì thay đổi");
+        return;
+      }
+
+      let data = new FormData();
+
+      for (const key in finalData) {
+        if (key === "image") {
+          data.append(key, finalData[key], avaName);
+        } else if (key === "banner") {
+          data.append(key, finalData[key], bannerName);
+        } else {
+          data.append(key, finalData[key]);
+        }
+      }
+      console.log(finalData);
+      await updateData("/client/user/me", undefined, data, "user", () => {
+        setRefetch(true);
+      });
+    },
+    [error],
+  );
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+
+      setSubmitLoading(true);
+
+      await update(formData, user);
+
+      setSubmitLoading(false);
+    },
+    [error, formData, user],
+  );
 
   useEffect(() => {
     let timeOut;
@@ -162,12 +178,12 @@ const ChannelSetting = () => {
       setPreviewAva(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_AVA_API
-        }${user.avatar}`
+        }${user.avatar}`,
       );
       setPreviewBanner(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_AVA_API
-        }${user.banner}`
+        }${user.banner}`,
       );
     }
 
@@ -216,7 +232,7 @@ const ChannelSetting = () => {
                         banner: file,
                       }));
                     }}
-                  />
+                  />,
                 );
               }}
             >
@@ -249,7 +265,7 @@ const ChannelSetting = () => {
                           image: file,
                         }));
                       }}
-                    />
+                    />,
                   );
                 }}
               >
@@ -358,7 +374,14 @@ const ChannelSetting = () => {
                 type='submit'
                 className='w-full max-w-[160px] btn1 relative'
               >
-                <span className='z-[50] relative'>Submit</span>
+                {submitLoading ? (
+                  <div
+                    className='size-[30px] rounded-[50%] border-[3px] border-l-transparent 
+                    border-b-transparent animate-spin mx-auto'
+                  ></div>
+                ) : (
+                  <span className='z-[50] relative'>Submit</span>
+                )}
               </button>
             </div>
           </form>

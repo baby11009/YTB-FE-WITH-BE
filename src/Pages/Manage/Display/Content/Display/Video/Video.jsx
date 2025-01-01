@@ -47,11 +47,6 @@ const Video = () => {
   const [dataList, setDataList] = useState([]);
 
   const handleCheckedAll = () => {
-    // if (checkedList.length === dataLength) {
-    //   setCheckedList([]);
-    // } else {
-    //   setCheckedList([1, 2]);
-    // }
     if (checkedList.length === data?.data?.length) {
       setCheckedList([]);
     } else {
@@ -136,7 +131,7 @@ const Video = () => {
     await dltManyData("/client/video/delete-many", checkedList, "video", () => {
       setCheckedList([]);
       refetch();
-    })
+    });
   };
 
   const showDltConfirm = () => {
@@ -149,7 +144,7 @@ const Video = () => {
         handleDelete={handleDeleteMany}
         type={"Video"}
         data={checkedList.join(", ")}
-      />
+      />,
     );
   };
 
@@ -307,7 +302,7 @@ const Video = () => {
                 onClick={() => {
                   handleSortUnique(
                     "dislike",
-                    params.sort["dislike"] === -1 ? 1 : -1
+                    params.sort["dislike"] === -1 ? 1 : -1,
                   );
                 }}
                 className={`flex items-center justify-center gap-[8px] ${
@@ -331,7 +326,7 @@ const Video = () => {
                 onClick={() => {
                   handleSortUnique(
                     "totalCmt",
-                    params.sort["totalCmt"] === -1 ? 1 : -1
+                    params.sort["totalCmt"] === -1 ? 1 : -1,
                   );
                 }}
                 className={`flex items-center justify-center gap-[8px] ${
@@ -355,7 +350,7 @@ const Video = () => {
                 onClick={() => {
                   handleSortUnique(
                     "createdAt",
-                    params.sort["createdAt"] === -1 ? 1 : -1
+                    params.sort["createdAt"] === -1 ? 1 : -1,
                   );
                 }}
                 className={`flex items-center justify-center gap-[8px] ${

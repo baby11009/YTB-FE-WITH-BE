@@ -60,15 +60,17 @@ const TextArea = ({
         className='bg-transparent outline-none border-[2px] rounded-[5px] resize-none p-[8px]
         focus:border-white-F1 border-gray-A leading-[22px] min-h-[127px] max-h-[255px] overflow-hidden relative'
       ></textarea>
-      <div
-        className={`self-end text-[14px]  ${
-          value.length === maxLength ? "text-red-FF" : "text-gray-A"
-        }`}
-      >
-        {value.length}/{maxLength}
-      </div>
-      <div className='text-[12px]  font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-        <span>{errMsg}</span>
+      <div className='flex justify-between'>
+        <div className='text-[12px]  font-[500] leading-[16px] h-[16px] text-red-FF'>
+          <span>{errMsg}</span>
+        </div>
+        <div
+          className={`self-end text-[14px]  ${
+            value.length === maxLength ? "text-red-FF" : "text-gray-A"
+          }`}
+        >
+          {value.length}/{maxLength}
+        </div>
       </div>
     </div>
   );

@@ -1,21 +1,25 @@
 import { ThinArrowIcon } from "../../Assets/Icons";
-import { useState, useLayoutEffect } from "react";
+import { useState, useLayoutEffect, useCallback } from "react";
 
 const Pagination = ({ setParams, currPage, totalPage, handleSetPage }) => {
   const [pageArr, setPageArr] = useState([]);
 
-  const handleNavPage = (pageNum) => {
-    if (!totalPage) {
-      return;
-    }
-    if (setParams) {
-      setParams((prev) => ({ ...prev, page: pageNum }));
-    } else {
-      handleSetPage(pageNum);
-    }
-  };
+  const handleNavPage = useCallback(
+    (pageNum) => {
+      if (!totalPage) {
+        return;
+      }
 
-  const getPagesToShow = (page, totalPage) => {
+      if (setParams) {
+        setParams((prev) => ({ ...prev, page: pageNum }));
+      } else {
+        handleSetPage(pageNum);
+      }
+    },
+    [totalPage],
+  );
+
+  const getPagesToShow = useCallback((page, totalPage) => {
     let startPage = page - 2;
     let endPage = page + 2;
 
@@ -29,9 +33,9 @@ const Pagination = ({ setParams, currPage, totalPage, handleSetPage }) => {
 
     return Array.from(
       { length: endPage - startPage + 1 },
-      (_, i) => startPage + i
+      (_, i) => startPage + i,
     );
-  };
+  }, []);
 
   useLayoutEffect(() => {
     setPageArr(getPagesToShow(currPage, totalPage));
@@ -45,7 +49,11 @@ const Pagination = ({ setParams, currPage, totalPage, handleSetPage }) => {
             (!totalPage || currPage === 1) &&
             "cursor-default border-[rgba(255,255,255,0.4)] text-[rgba(255,255,255,0.4)]"
           }`}
-        onClick={() => handleNavPage(Math.max(1, currPage - 1))}
+        onClick={() => {
+          if (totalPage && currPage !== 1) {
+            handleNavPage(currPage - 1);
+          }
+        }}
         type='button'
       >
         <div className='rotate-180'>
@@ -68,7 +76,7 @@ const Pagination = ({ setParams, currPage, totalPage, handleSetPage }) => {
             }`}
               onClick={() => {
                 if (page !== currPage) {
-                  setParams((prev) => ({ ...prev, page: page }));
+                  handleNavPage(page);
                 }
               }}
             >
@@ -87,7 +95,11 @@ const Pagination = ({ setParams, currPage, totalPage, handleSetPage }) => {
             (currPage === totalPage || !totalPage) &&
             "cursor-default border-[rgba(255,255,255,0.4)] text-[rgba(255,255,255,0.4)]"
           }`}
-        onClick={() => handleNavPage(Math.min(totalPage, currPage + 1))}
+        onClick={() => {
+          if (totalPage && currPage !== totalPage) {
+            handleNavPage(currPage + 1);
+          }
+        }}
         type='button'
       >
         <div>

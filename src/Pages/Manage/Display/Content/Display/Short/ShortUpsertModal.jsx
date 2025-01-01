@@ -4,11 +4,17 @@ import {
   InfiniteDropDownWithCheck,
   TextArea,
 } from "../../../../../../Component";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import { getDataWithAuth } from "../../../../../../Api/getData";
 import { createData, updateData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
-
+import Hls from "hls.js";
 const init = {
   title: "",
   image: undefined,
@@ -29,9 +35,32 @@ const ShortUpsertModal = ({ title, id }) => {
 
   const { setIsShowing } = useAuthContext();
 
-  const [openedTags, setOpenedTags] = useState(false);
+  const thumbInputRef = useRef();
+
+  const videoInputRef = useRef();
+
+  const videoRef = useRef();
+
+  const hlsRef = useRef();
+
+  const defaultTagRef = useRef([]);
 
   const [tagParams, setTagParams] = useState(initTagParams);
+
+  const [formData, setFormData] = useState(init);
+
+  const [submitLoading, setSubmitLoading] = useState(false);
+
+  const [previewThumb, setPreviewThumb] = useState("");
+
+  const [previewVideo, setPreviewVideo] = useState("");
+
+  const [openedTags, setOpenedTags] = useState(false);
+
+  const [error, setError] = useState({
+    inputName: [],
+    message: [],
+  });
 
   const {
     data: shortData,
@@ -48,31 +77,14 @@ const ShortUpsertModal = ({ title, id }) => {
     isError: tagIsErr,
   } = getDataWithAuth("tag", tagParams, openedTags, false);
 
-  const [formData, setFormData] = useState(init);
-
-  const [previewThumb, setPreviewThumb] = useState("");
-
-  const [previewVideo, setPreviewVideo] = useState("");
-
-  const [error, setError] = useState({
-    inputName: [],
-    message: [],
-  });
-
-  const thumbRef = useRef();
-
-  const videoRef = useRef();
-
-  const defaultTagRef = useRef([]);
-
-  const handleOnChange = (name, value) => {
+  const handleOnChange = useCallback((name, value) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
-  const handleUploadThumb = (e) => {
+  const handleUploadThumb = useCallback((e) => {
     const file = e.files[0];
 
     if (!file) {
@@ -114,12 +126,7 @@ const ShortUpsertModal = ({ title, id }) => {
             message: [],
           });
         const { naturalWidth, naturalHeight } = e.currentTarget;
-        console.log(
-          "🚀 ~ naturalWidth, naturalHeight:",
-          naturalWidth,
 
-          naturalHeight
-        );
         if (
           naturalWidth < 404 ||
           Number((naturalWidth / naturalHeight).toFixed(4)) !== 9 / 16
@@ -142,9 +149,9 @@ const ShortUpsertModal = ({ title, id }) => {
       });
     });
     reader.readAsDataURL(file);
-  };
+  }, []);
 
-  const handleUploadVideo = (e) => {
+  const handleUploadVideo = useCallback((e) => {
     const file = e.files[0];
 
     if (!file) {
@@ -168,149 +175,167 @@ const ShortUpsertModal = ({ title, id }) => {
       video: file,
     }));
     setPreviewVideo(URL.createObjectURL(file));
-  };
+  }, []);
 
-  const handleValidate = () => {
-    if (error.inputName.length > 0) {
-      setError({ inputName: [], message: [] });
-    }
-    let hasErrors = false;
-
-    const keys = Object.keys(formData).filter(
-      (key) => key !== "type" && key !== "description"
-    );
-
-    keys.forEach((key) => {
-      if (formData[key] === "" || !formData[key]) {
-        let errMsg = "Không được để trống";
-        if (key === "image" || key === "video") {
-          errMsg = "Chưa upload file";
-        }
-        setError((prev) => ({
-          inputName: [...prev?.inputName, key],
-          message: [...prev?.message, errMsg],
-        }));
-        hasErrors = true;
+  const handleValidate = useCallback(
+    (formData) => {
+      if (error.inputName.length > 0) {
+        setError({ inputName: [], message: [] });
       }
-    });
+      let hasErrors = false;
 
-    if (hasErrors) {
-      return true;
-    }
-  };
-
-  const handleValidateUpdate = () => {
-    if (error.inputName.length > 0) {
-      setError({ inputName: [], message: [] });
-    }
-    let hasErrors = false;
-    const keys = Object.keys(formData).filter(
-      (key) =>
-        key !== "type" &&
-        key !== "image" &&
-        key !== "video" &&
-        key !== "description"
-    );
-    keys.forEach((key) => {
-      if (formData[key] === "" || !formData[key]) {
-        let errMsg = "Không được để trống";
-        setError((prev) => ({
-          inputName: [...prev?.inputName, key],
-          message: [...prev?.message, errMsg],
-        }));
-        hasErrors = true;
-      }
-    });
-    if (hasErrors) {
-      return true;
-    }
-  };
-
-  const create = async () => {
-    const error = handleValidate();
-
-    if (error) {
-      return;
-    }
-
-    let data = new FormData();
-    for (const key in formData) {
-      data.append(key, formData[key]);
-    }
-
-    await createData("/client/video/upload", data, "short",() => {
-      setFormData(init);
-      setPreviewVideo(undefined);
-      setPreviewThumb(undefined);
-      thumbRef.current.files = undefined;
-    })
-  };
-
-  const update = async () => {
-    const error = handleValidateUpdate();
-
-    if (error) {
-      return;
-    }
-
-    let finalData = {
-      title: formData.title,
-      type: formData.type,
-      description: formData.description,
-    };
-
-    for (const key in finalData) {
-      if (
-        shortData?.data?.hasOwnProperty(key) &&
-        shortData?.data[key] === finalData[key]
-      ) {
-        delete finalData[key];
-      }
-    }
-
-    if (formData.tag.length === defaultTagRef.current.length) {
-      let test = formData.tag.filter((id) =>
-        defaultTagRef.current.includes(id)
+      const keys = Object.keys(formData).filter(
+        (key) => key !== "type" && key !== "description",
       );
-      if (test.length !== defaultTagRef.current.length) {
+
+      keys.forEach((key) => {
+        if (formData[key] === "" || !formData[key]) {
+          let errMsg = "Không được để trống";
+          if (key === "image" || key === "video") {
+            errMsg = "Chưa upload file";
+          }
+          setError((prev) => ({
+            inputName: [...prev?.inputName, key],
+            message: [...prev?.message, errMsg],
+          }));
+          hasErrors = true;
+        }
+      });
+
+      if (hasErrors) {
+        return true;
+      }
+    },
+    [error],
+  );
+
+  const handleValidateUpdate = useCallback(
+    (formData) => {
+      if (error.inputName.length > 0) {
+        setError({ inputName: [], message: [] });
+      }
+      let hasErrors = false;
+      const keys = Object.keys(formData).filter(
+        (key) =>
+          key !== "type" &&
+          key !== "image" &&
+          key !== "video" &&
+          key !== "description",
+      );
+      keys.forEach((key) => {
+        if (formData[key] === "" || !formData[key]) {
+          let errMsg = "Không được để trống";
+          setError((prev) => ({
+            inputName: [...prev?.inputName, key],
+            message: [...prev?.message, errMsg],
+          }));
+          hasErrors = true;
+        }
+      });
+      if (hasErrors) {
+        return true;
+      }
+    },
+    [error],
+  );
+
+  const create = useCallback(
+    async (formData) => {
+      const error = handleValidate(formData);
+
+      if (error) {
+        return;
+      }
+
+      let data = new FormData();
+      for (const key in formData) {
+        data.append(key, formData[key]);
+      }
+
+      await createData("/client/video/upload", data, "short", () => {
+        setFormData(init);
+        setPreviewVideo(undefined);
+        setPreviewThumb(undefined);
+        thumbInputRef.current.files = undefined;
+      });
+    },
+    [error],
+  );
+
+  const update = useCallback(
+    async (formData, shortData) => {
+      const error = handleValidateUpdate(formData);
+
+      if (error) {
+        return;
+      }
+
+      let finalData = {
+        title: formData.title,
+        type: formData.type,
+        description: formData.description,
+      };
+
+      for (const key in finalData) {
+        if (
+          shortData?.data?.hasOwnProperty(key) &&
+          shortData?.data[key] === finalData[key]
+        ) {
+          delete finalData[key];
+        }
+      }
+
+      if (formData.tag.length === defaultTagRef.current.length) {
+        let test = formData.tag.filter((id) =>
+          defaultTagRef.current.includes(id),
+        );
+        if (test.length !== defaultTagRef.current.length) {
+          finalData.tag = formData.tag;
+        }
+      } else {
         finalData.tag = formData.tag;
       }
-    } else {
-      finalData.tag = formData.tag;
-    }
-    if (formData.image) {
-      finalData.image = formData.image;
-    }
-
-    if (Object.keys(finalData).length === 0) {
-      alert("Không có gì thay đổi");
-      return;
-    }
-
-    let data = new FormData();
-    for (const key in finalData) {
-      if (key === "tag") {
-        // Chuyển mảng thành json để dữ nguyên giá trị trong FormData
-        data.append(key, JSON.stringify(finalData[key]));
-      } else {
-        data.append(key, finalData[key]);
+      if (formData.image) {
+        finalData.image = formData.image;
       }
-    }
 
-    await updateData("/client/video", id, data, "short",() => {
-      refetch();
-    })
-  };
+      if (Object.keys(finalData).length === 0) {
+        alert("Không có gì thay đổi");
+        return;
+      }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+      let data = new FormData();
+      for (const key in finalData) {
+        if (key === "tag") {
+          // Chuyển mảng thành json để dữ nguyên giá trị trong FormData
+          data.append(key, JSON.stringify(finalData[key]));
+        } else {
+          data.append(key, finalData[key]);
+        }
+      }
 
-    if (id) {
-      await update();
-    } else {
-      await create();
-    }
-  };
+      await updateData("/client/video", id, data, "short", () => {
+        refetch();
+      });
+    },
+    [error],
+  );
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setSubmitLoading(true);
+
+      if (id) {
+        await update(formData, shortData);
+      } else {
+        await create(formData);
+      }
+
+      setSubmitLoading(false);
+    },
+    [error, formData, shortData],
+  );
 
   useLayoutEffect(() => {
     if (shortData) {
@@ -330,21 +355,45 @@ const ShortUpsertModal = ({ title, id }) => {
       setPreviewThumb(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_THUMB_API
-        }${shortData?.data?.thumb}`
+        }${shortData?.data?.thumb}`,
       );
-      setPreviewVideo(
-        `${import.meta.env.VITE_BASE_API_URI}${
+      setPreviewVideo(() => {
+        if (Hls.isMSESupported() && shortData?.data?.stream) {
+          return `stream:${
+            import.meta.env.VITE_BASE_API_URI
+          }/file/videomaster/${shortData?.data?.stream}`;
+        }
+
+        return `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_VIDEO_API
-        }${shortData?.data?.video}`
-      );
+        }${shortData?.data?.video}?type=video`;
+      });
     }
 
     return () => {
       setFormData(init);
-      setPreviewVideo(undefined);
-      setPreviewThumb(undefined);
     };
   }, [shortData]);
+
+  useLayoutEffect(() => {
+    if (previewVideo) {
+      if (id && previewVideo.startsWith("stream:")) {
+        const streamUrl = previewVideo.split("stream:")[1];
+
+        const hls = new Hls();
+        hlsRef.current = hls;
+        hls.loadSource(streamUrl);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+          console.log("video resolution levels", data.levels.length);
+        });
+
+        hls.attachMedia(videoRef.current);
+      } else {
+        videoRef.current.src = previewVideo;
+      }
+    }
+  }, [previewVideo]);
 
   useEffect(() => {
     if (!openedTags) {
@@ -371,14 +420,17 @@ const ShortUpsertModal = ({ title, id }) => {
   useEffect(() => {
     return () => {
       queryClient.clear();
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+      }
     };
   }, []);
 
   return (
-    <div className='size-full  max-w-[1500px] p-[12px] lg:p-[24px]'>
+    <div className='size-full  max-w-[1500px] h-screen p-[12px] lg:p-[24px]'>
       <div className='bg-black size-full overflow-auto rounded-[5px] shadow-[0_0_8px_#f1f1f1]'>
-        <div className='p-[12px] xl:p-[20px]'>
-          <div className='flex justify-between'>
+        <div className='relative  px-[16px] pb-[16px] xl:pb-[20px] xl:px-[20px]'>
+          <div className='sticky top-[0] h-[68px] xl:h-[72px] flex items-center justify-between bg-black z-[2]'>
             <h1 className='text-nowrap text-[25px] leading-[32px] font-[600]'>
               {title}
             </h1>
@@ -393,11 +445,7 @@ const ShortUpsertModal = ({ title, id }) => {
               </div>
             </button>
           </div>
-          <form
-            noValidate
-            onSubmit={handleSubmit}
-            className=' mb-[20px] my-[24px]'
-          >
+          <form noValidate onSubmit={handleSubmit} className='mb-[20px]'>
             <div className='flex gap-[24px] flex-col ite md:flex-row '>
               <div
                 className='basis-[70%] md:basis-[55%]  2lg:basis-[60%] flex items-center justify-center
@@ -416,8 +464,8 @@ const ShortUpsertModal = ({ title, id }) => {
                     }}
                     onDrop={(e) => {
                       e.preventDefault();
-                      thumbRef.current.files = e.dataTransfer.files;
-                      handleUploadThumb(thumbRef.current);
+                      thumbInputRef.current.files = e.dataTransfer.files;
+                      handleUploadThumb(thumbInputRef.current);
                     }}
                   >
                     <div className='flex items-center justify-center size-full'>
@@ -447,7 +495,7 @@ const ShortUpsertModal = ({ title, id }) => {
                       name='thumbnail'
                       id='thumbnail'
                       accept='image/*'
-                      ref={thumbRef}
+                      ref={thumbInputRef}
                       onChange={(e) => handleUploadThumb(e.target)}
                       className='hidden'
                     />
@@ -480,14 +528,14 @@ const ShortUpsertModal = ({ title, id }) => {
                         return;
                       }
                       e.preventDefault();
-                      videoRef.current.files = e.dataTransfer.files;
-                      handleUploadVideo(videoRef.current);
+                      videoInputRef.current.files = e.dataTransfer.files;
+                      handleUploadVideo(videoInputRef.current);
                     }}
                   >
                     <div className='flex items-center justify-center size-full'>
                       {previewVideo ? (
                         <video
-                          src={previewVideo}
+                          ref={videoRef}
                           className='h-full object-contain'
                           controls
                         ></video>
@@ -511,7 +559,7 @@ const ShortUpsertModal = ({ title, id }) => {
                       id='video'
                       readOnly={id ? false : true}
                       accept='video/*'
-                      ref={videoRef}
+                      ref={videoInputRef}
                       disabled={id ? true : false}
                       onChange={(e) => handleUploadVideo(e.target)}
                       className='hidden'
@@ -608,7 +656,14 @@ const ShortUpsertModal = ({ title, id }) => {
                 type='submit'
                 className='w-full max-w-[160px] btn1 relative'
               >
-                <span className='z-[50] relative'>Submit</span>
+                {submitLoading ? (
+                  <div
+                    className='size-[30px] rounded-[50%] border-[3px] border-l-transparent 
+              border-b-transparent animate-spin mx-auto'
+                  ></div>
+                ) : (
+                  <span className='z-[50] relative'>Submit</span>
+                )}
               </button>
             </div>
           </form>

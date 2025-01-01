@@ -1,7 +1,13 @@
 import request from "../util/axios-base-url";
 import { getCookie } from "../util/tokenHelpers";
 
-export const createData = async (path, data, dataType, handleSuccess) => {
+export const createData = async (
+  path,
+  data,
+  dataType,
+  handleSuccess,
+  handleFinally,
+) => {
   const cfirm = confirm(`Are you sure you want to create new ${dataType}?`);
 
   if (!cfirm) {
@@ -14,13 +20,18 @@ export const createData = async (path, data, dataType, handleSuccess) => {
       .post(path, data, {
         headers: {
           Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-            import.meta.env.VITE_AUTH_TOKEN
+            import.meta.env.VITE_AUTH_TOKEN,
           )}`,
         },
       })
       .then((rsp) => {
         if (handleSuccess) {
           handleSuccess(rsp);
+        }
+      })
+      .finally(() => {
+        if (handleFinally) {
+          handleFinally();
         }
       });
 
@@ -33,7 +44,13 @@ export const createData = async (path, data, dataType, handleSuccess) => {
   }
 };
 
-export const dltData = async (path, id, dataType, handleSuccess) => {
+export const dltData = async (
+  path,
+  id,
+  dataType,
+  handleSuccess,
+  handleFinally,
+) => {
   const cfirm = confirm(`Are you sure you want to delete this ${dataType}?`);
 
   if (!cfirm) {
@@ -46,7 +63,7 @@ export const dltData = async (path, id, dataType, handleSuccess) => {
       .delete(`${path}/${id}`, {
         headers: {
           Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-            import.meta.env.VITE_AUTH_TOKEN
+            import.meta.env.VITE_AUTH_TOKEN,
           )}`,
         },
       })
@@ -54,10 +71,14 @@ export const dltData = async (path, id, dataType, handleSuccess) => {
         if (handleSuccess) {
           handleSuccess(rsp);
         }
+      })
+      .finally(() => {
+        if (handleFinally) {
+          handleFinally();
+        }
       });
 
     alert(`Delete ${dataType} successfully`);
-
   } catch (error) {
     console.log("🚀 ~ error:", error);
     alert(error?.response?.data?.msg);
@@ -68,7 +89,8 @@ export const dltManyData = async (
   path,
   idList = [],
   dataType,
-  handleSuccess
+  handleSuccess,
+  handleFinally,
 ) => {
   if (idList.length === 0) {
     alert(`Must choose at least one ${dataType}`);
@@ -92,14 +114,19 @@ export const dltManyData = async (
         {
           headers: {
             Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-              import.meta.env.VITE_AUTH_TOKEN
+              import.meta.env.VITE_AUTH_TOKEN,
             )}`,
           },
-        }
+        },
       )
       .then((rsp) => {
         if (handleSuccess) {
           handleSuccess(rsp);
+        }
+      })
+      .finally(() => {
+        if (handleFinally) {
+          handleFinally();
         }
       });
 
@@ -116,7 +143,8 @@ export const updateData = async (
   id,
   bodyData,
   dataType,
-  handleSuccess
+  handleSuccess,
+  handleFinally,
 ) => {
   const cfirm = confirm(`Are you sure you want to change these ${dataType}?`);
 
@@ -134,13 +162,18 @@ export const updateData = async (
       .patch(apiPath, bodyData, {
         headers: {
           Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-            import.meta.env.VITE_AUTH_TOKEN
+            import.meta.env.VITE_AUTH_TOKEN,
           )}`,
         },
       })
       .then((rsp) => {
         if (handleSuccess) {
           handleSuccess(rsp);
+        }
+      })
+      .finally(() => {
+        if (handleFinally) {
+          handleFinally();
         }
       });
 
