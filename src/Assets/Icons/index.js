@@ -162,3 +162,5 @@ export { default as ForTheNerdIcon } from "./ForTheNerd.jsx";
 export { default as MiniPlayerIcon } from "./MiniPlayer.jsx";
 export { default as ShortFullScreenIcon } from "./ShortFullScreen.jsx";
 export { default as ShortFullScreenExitIcon } from "./ShortFullScreenExit.jsx";
+export { default as YoutubeBlankIcon } from "./YoutubeBlankIcon.jsx";
+export { default as YourChannelIcon } from "./YourChannel.jsx";

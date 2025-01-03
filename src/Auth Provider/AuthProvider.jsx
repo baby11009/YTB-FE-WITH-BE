@@ -1,6 +1,12 @@
 import { AuthContext } from "./authContext";
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
-import { getCookie } from "../util/tokenHelpers";
+import {
+  useState,
+  useRef,
+  useLayoutEffect,
+  useEffect,
+  useCallback,
+} from "react";
+import { getCookie, removeCookie } from "../util/tokenHelpers";
 import request from "../util/axios-base-url";
 
 const AuthProvider = ({ children }) => {
@@ -28,7 +34,7 @@ const AuthProvider = ({ children }) => {
 
   const modalContainerRef = useRef();
 
-  const getUserInfo = async (token) => {
+  const getUserInfo = useCallback(async (token) => {
     await request
       .get("/client/user/me", {
         headers: {
@@ -45,7 +51,7 @@ const AuthProvider = ({ children }) => {
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, []);
 
   const handleCursorPositon = async (e) => {
     let child;

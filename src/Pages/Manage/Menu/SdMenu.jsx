@@ -1,7 +1,7 @@
 import { YoutubeIcon, MenuIcon } from "../../../Assets/Icons";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button, SmallButton, BtnList, FuncBtnList } from "./Component";
+import { Button, SmallButton, BtnList } from "./Component";
 
 const SdMenu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
   return (
@@ -73,11 +73,6 @@ const SdMenu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
                   <Button data={btn} currPath={currPath} key={id} />
                 ))}
               </div>
-              <div className='flex flex-col  mt-auto'>
-                {FuncBtnList.map((btn, id) => (
-                  <Button data={btn} key={id} />
-                ))}
-              </div>
             </motion.div>
           </div>
         )}
@@ -98,11 +93,6 @@ const SdMenu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
           <div className='flex-1 overflow-auto w-full flex flex-col gap-[6px]'>
             {BtnList.map((btn, id) => (
               <SmallButton data={btn} currPath={currPath} key={id} />
-            ))}
-          </div>
-          <div className='flex flex-col  mt-auto pb-[8px]'>
-            {FuncBtnList.map((btn, id) => (
-              <SmallButton data={btn} key={id} />
             ))}
           </div>
         </div>

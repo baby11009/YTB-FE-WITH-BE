@@ -40,13 +40,6 @@ export const BtnList = [
   },
 ];
 
-export const FuncBtnList = [
-  {
-    title: "Đăng xuất",
-    icon: <LogOutIcon />,
-  },
-];
-
 export const Button = ({ data, currPath }) => {
   const navigate = useNavigate();
 

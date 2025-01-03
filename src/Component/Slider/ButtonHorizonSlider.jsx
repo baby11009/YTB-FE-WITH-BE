@@ -2,7 +2,7 @@ import { useState, useRef, useLayoutEffect, useCallback } from "react";
 import { ThinArrowIcon } from "../../Assets/Icons";
 import { smoothScroll } from "../../util/scrollCustom";
 
-const ButtonHorizonSlider = ({ buttonList, currentId, id }) => {
+const ButtonHorizonSlider = ({ buttonList, currentId }) => {
   const [scrollPosition, setScrollPosition] = useState();
 
   const sliderRef = useRef();
@@ -37,7 +37,6 @@ const ButtonHorizonSlider = ({ buttonList, currentId, id }) => {
   useLayoutEffect(() => {
     enabledScrolling.current =
       sliderRef.current.scrollWidth > sliderRef.current.clientWidth;
-
     const handleResize = () => {
       if (sliderRef.current.scrollWidth === 0) return;
       enabledScrolling.current =
@@ -90,7 +89,6 @@ const ButtonHorizonSlider = ({ buttonList, currentId, id }) => {
             ? "left-mask"
             : "left-right-mask"
         }`}
-        key={id}
         ref={sliderRef}
         onMouseDown={(e) => {
           isDown.current = true;
@@ -120,7 +118,7 @@ const ButtonHorizonSlider = ({ buttonList, currentId, id }) => {
             }`}
             key={index}
             onClick={() => {
-              if (button.handleOnClick) {
+              if (button.handleOnClick && currentId !== button.id) {
                 button.handleOnClick(button);
               }
             }}

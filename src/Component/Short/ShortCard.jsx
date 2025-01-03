@@ -6,8 +6,6 @@ import CustomeFuncBox from "../Box/CustomeFuncBox";
 import { useState, useEffect, useRef } from "react";
 import { getRandomHexColor } from "../../util/func";
 
-const view = 120000;
-
 const funcList1 = [
   {
     id: 1,
@@ -65,7 +63,7 @@ const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle, noDesc }) => {
               <h3 className='t-ellipsis '>{data.title}</h3>
             </div>
             <div className='text-[14px] leading-[20px] text-gray-A'>
-              {formatNumber(data.view || view)} lượt xem
+              {formatNumber(data.view)} lượt xem
             </div>
           </div>
           <motion.div

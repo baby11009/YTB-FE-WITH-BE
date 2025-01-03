@@ -1,77 +1,30 @@
-import { useEffect, useLayoutEffect, useState, useRef } from "react";
-import { GridLayout } from "../../../Component";
+import {
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useRef,
+  useCallback,
+} from "react";
+import { GridLayout, ButtonHorizonSlider } from "../../../Component";
 import { IsEnd } from "../../../util/scrollPosition";
 import { useQueryClient } from "@tanstack/react-query";
 import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 
-import CategoryPart from "./CategoryPart";
-
-const categoryList = [
-  {
-    id: 1,
-    title: "Tất cả",
-  },
-  {
-    id: 2,
-    title: "Trò chơi",
-  },
-  {
-    id: 3,
-    title: "trực tiếp",
-  },
-  {
-    id: 4,
-    title: "Âm nhạc",
-  },
-  {
-    id: 5,
-    title: "Danh sách kết hợp",
-  },
-  {
-    id: 6,
-    title: "Trò chơi hành động phiêu lưu",
-  },
-  {
-    id: 7,
-    title: "Nấu ăn",
-  },
-  {
-    id: 8,
-    title: "Đọc rap",
-  },
-  {
-    id: 9,
-    title: "Mới tải lên gần đây",
-  },
-  {
-    id: 10,
-    title: "Đã xem",
-  },
-  {
-    id: 11,
-    title: "Đề xuất mới",
-  },
-];
-
-const videoParams = {
+const initVideoQuery = {
   page: 1,
   limit: 16,
-  sort: {
-    createdAt: -1,
-  },
+  sort: undefined,
   type: "video",
   prevPlCount: 0,
   watchedVideoIdList: [],
   watchedPlIdList: [],
 };
 
-const shortParams = {
+const initShortQuery = {
   page: 1,
   limit: 12,
-  sort: {
-    createdAt: -1,
-  },
+  sort: undefined,
   type: "short",
   watchedVideoIdList: [],
 };
@@ -83,11 +36,9 @@ const MainPart = ({ openedMenu }) => {
 
   const queryClient = useQueryClient();
 
-  const [activeIndex, setActiveIndex] = useState(1);
+  const [videoQuery, setVideoQuery] = useState(initVideoQuery);
 
-  const [vidPrs, setVidPrs] = useState(videoParams);
-
-  const [shortPrs, setShortPrs] = useState(shortParams);
+  const [shortQuery, setShortQuery] = useState(initShortQuery);
 
   const [vidList, setVidList] = useState([]);
 
@@ -101,18 +52,81 @@ const MainPart = ({ openedMenu }) => {
 
   const watchedShortIdSet = useRef(new Set());
 
+  const currentSortId = useRef("all");
+
   const {
     data: videos,
     isLoading,
     isSuccess,
-  } = getData("/data/all", vidPrs, true);
+  } = getData("/data/all", videoQuery, true);
 
-  const { data: shorts } = getData("/data/all", shortPrs, true);
+  const { data: shorts } = getData("/data/all", shortQuery, true);
+
+  const handleSort = useCallback((data) => {
+    queryClient.removeQueries({
+      queryKey: [...Object.values(videoQuery), "/data/all"],
+      exact: true,
+    });
+    queryClient.removeQueries({
+      queryKey: [...Object.values(shortQuery), "/data/all"],
+      exact: true,
+    });
+    setVideoQuery({
+      ...initVideoQuery,
+      sort: data.value,
+    });
+    setShortQuery({
+      ...initShortQuery,
+      sort: data.value,
+    });
+    setAddNew(true);
+
+    currentSortId.current = data.id;
+  });
+
+  const buttonList = [
+    {
+      id: "all",
+      title: "All",
+      value: undefined,
+      handleOnClick: handleSort,
+    },
+    {
+      id: "latest",
+      title: "Latest",
+      value: { createdAt: -1 },
+      handleOnClick: handleSort,
+    },
+    {
+      id: "view",
+      title: "Popular",
+      value: { view: -1 },
+      handleOnClick: handleSort,
+    },
+    {
+      id: "oldest",
+      title: "Oldest",
+      value: { createdAt: 1 },
+      handleOnClick: handleSort,
+    },
+    {
+      id: "test1",
+      title: "Hello World",
+    },
+    {
+      id: "test2",
+      title: "Hello VOHUYTHANH",
+    },
+    {
+      id: "test3",
+      title: "THIS IS MY CODE",
+    },
+  ];
 
   useEffect(() => {
     if (isEnd) {
       if (videos?.data?.length > 0) {
-        setVidPrs((prev) => ({
+        setVideoQuery((prev) => ({
           ...prev,
           page: prev.page + 1,
           prevPlCount: vidList.filter((videos) => videos.video_list).length,
@@ -125,7 +139,7 @@ const MainPart = ({ openedMenu }) => {
       }
 
       if (shorts?.data?.length > 0) {
-        setShortPrs((prev) => ({
+        setShortQuery((prev) => ({
           ...prev,
           page: prev.page + 1,
           watchedVideoIdList: [
@@ -151,14 +165,14 @@ const MainPart = ({ openedMenu }) => {
   }, [isLoading, isSuccess]);
 
   useLayoutEffect(() => {
-    window.addEventListener("scroll", () => {
+    const handleScroll = () => {
       IsEnd(setIsEnd);
-    });
+    };
+
+    window.addEventListener("scroll", handleScroll);
     return () => {
       queryClient.clear();
-      window.removeEventListener("scroll", () => {
-        IsEnd(setIsEnd);
-      });
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -207,11 +221,16 @@ const MainPart = ({ openedMenu }) => {
 
   return (
     <div className=' pb-[40px]'>
-      <CategoryPart
-        categoryList={categoryList}
-        activeIndex={activeIndex}
-        setActiveIndex={setActiveIndex}
-      />
+      <div
+        className={`h-[56px] left-0 md:left-[74px] ${
+          openedMenu && "xl:!left-[227px]"
+        } right-0 px-[24px] fixed top-[56px] z-[200] bg-black overflow-hidden`}
+      >
+        <ButtonHorizonSlider
+          buttonList={buttonList}
+          currentId={currentSortId.current}
+        />
+      </div>
       <div className='mt-[80px] px-[16px]'>
         <GridLayout
           openedMenu={openedMenu}

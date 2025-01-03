@@ -69,8 +69,8 @@ const ShortPart = () => {
     await request
       .get(
         id
-          ? `/data/short/${id}?size=${fetchingShortQtt}`
-          : `/data/short?size=${fetchingShortQtt}`,
+          ? `/data/shorts/${id}?size=${fetchingShortQtt}`
+          : `/data/shorts?size=${fetchingShortQtt}`,
         {
           headers: { "session-id": sessionId },
         },

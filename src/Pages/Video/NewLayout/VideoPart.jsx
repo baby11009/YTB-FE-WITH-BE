@@ -14,7 +14,6 @@ import { useLocation } from "react-router-dom";
 // video mode : normal , theater , fullscreen
 
 const VideoPart = () => {
-
   const { state } = useLocation();
 
   const queryClient = useQueryClient();
@@ -119,10 +118,7 @@ const VideoPart = () => {
         >
           {/* ${videoMode !== "normal" && "hidden"} */}
           <div className={`w-full `}>
-            <Video
-              data={state}
-              playlistStatus={playlistStatus}
-            />
+            <Video data={state} playlistStatus={playlistStatus} />
           </div>
           <Description data={videoInfo} refetch={refetch} />
           <div className=' block lg:hidden  '>
