@@ -135,3 +135,69 @@ export const ytbSportChannel = {
   subbed: false,
   vidList: vidList5,
 };
+
+export const relativeChannelList = [
+  {
+    id: 1,
+    channelName: "iLoda",
+    img: iloda,
+    sub: 195000,
+    isSub: true,
+  },
+  {
+    id: 2,
+    channelName: "zeros",
+    img: zeros,
+    sub: 154000,
+    isSub: false,
+  },
+  {
+    id: 3,
+    channelName: "levi",
+    img: levi,
+    sub: 254000,
+    isSub: true,
+  },
+  {
+    id: 4,
+    channelName: "sangtraan",
+    img: sangtraan,
+    sub: 450000,
+    isSub: false,
+  },
+  {
+    id: 5,
+    channelName: "Thế Anh 96",
+    img: theanh,
+    sub: 182000,
+    isSub: true,
+  },
+  {
+    id: 6,
+    channelName: "Vui vẻ",
+    img: vuive,
+    sub: 328000,
+    isSub: false,
+  },
+  {
+    id: 7,
+    channelName: "Thebauffs",
+    img: bauffs,
+    sub: 480000,
+    isSub: true,
+  },
+  {
+    id: 8,
+    channelName: "asoken",
+    img: asoken,
+    sub: 78200,
+    isSub: false,
+  },
+  {
+    id: 9,
+    channelName: "ll stylish",
+    img: llstylish,
+    sub: 765000,
+    isSub: true,
+  },
+];

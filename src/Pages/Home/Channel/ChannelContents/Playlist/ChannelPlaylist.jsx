@@ -21,7 +21,7 @@ const ChannelPlaylist = ({ channelEmail }) => {
   const { data: playlistData, isLoading } = getData(
     "/data/playlists",
     params,
-    true
+    true,
   );
 
   const [dataList, setDataList] = useState([]);
@@ -40,13 +40,13 @@ const ChannelPlaylist = ({ channelEmail }) => {
   const funcList = [
     {
       id: 1,
-      text: "Ngày thêm (mới nhất)",
+      text: "Date added (newest)",
       handleOnClick: handleFuncClick,
       sort: { createdAt: -1 },
     },
     {
       id: 2,
-      text: "Video đã thêm lần cuối",
+      text: "Last video added",
       handleOnClick: handleFuncClick,
       sort: { updatedAt: -1 },
     },
@@ -104,7 +104,7 @@ const ChannelPlaylist = ({ channelEmail }) => {
             backgroundColor: "rgba(255,255,255,0.2)",
           }}
         >
-          Danh sách phát đã tạo
+          Created playlists
         </motion.div>
         <motion.div
           className='cursor-pointer relative'
@@ -118,7 +118,7 @@ const ChannelPlaylist = ({ channelEmail }) => {
             <div className='mr-[8px]'>
               <SortIcon />
             </div>
-            <span className='text-nowrap'>Sắp xếp theo</span>
+            <span className='text-nowrap'>Sort by</span>
           </div>
           {opened && (
             <CustomeFuncBox

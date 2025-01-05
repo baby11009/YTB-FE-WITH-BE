@@ -4,20 +4,21 @@ import {
   ThinArrowIcon,
 } from "../../../../Assets/Icons";
 import { formatNumber } from "../../../../util/numberFormat";
-import { CustomeFuncBox, SubscribeBtn } from "../../../../Component";
+import { SubscribeBtn, Slider } from "../../../../Component";
+import { getData } from "../../../../Api/getData";
 import { SwiperSlide, Swiper } from "swiper/react";
 import { motion } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
-
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 const funcList = [
   {
     id: 1,
-    title: "Trang chủ",
+    title: "Home",
     slug: "home",
   },
   {
     id: 2,
-    title: "Video",
+    title: "Videos",
     slug: "video",
   },
   {
@@ -27,25 +28,25 @@ const funcList = [
   },
   {
     id: 4,
-    title: "Sự kiện trực tiếp",
+    title: "Live",
     slug: "live",
   },
   {
     id: 5,
-    title: "Danh sách phát",
+    title: "Playlists",
     slug: "playlist",
   },
   {
     id: 6,
-    title: "Cộng đồng",
-    slug: "comunity",
+    title: "Community",
+    slug: "community",
   },
 ];
 
 const CustomeButton = ({ data, display, setDisplay }) => {
   return (
     <div
-      className={`border-b-[3px] cursor-pointer
+      className={`border-b-[3px] cursor-pointer h-[48px]
             ${
               display.title === data.slug
                 ? " border-white-F1"
@@ -64,15 +65,27 @@ const CustomeButton = ({ data, display, setDisplay }) => {
   );
 };
 
-const ChannelInfor = ({ data, openedMenu, display, setDisplay, refetch }) => {
-  
+const ChannelInfor = ({ channelEmail, openedMenu, display, setDisplay }) => {
+  const { user } = useAuthContext();
+
   const inputBox = useRef();
 
   const inputRef = useRef();
 
+  const swiperRef = useRef();
+
   const [focused, setFocused] = useState(false);
 
   const [value, setValue] = useState("");
+
+  const [channelData, setChannelData] = useState(undefined);
+
+  const { data, refetch } = getData(
+    `/data/channels/${channelEmail}`,
+    { userId: user?._id, id: channelEmail },
+    channelEmail ? true : false,
+    false,
+  );
 
   const handlePressEnter = (e) => {
     if (e.key === "Enter" && value !== "") {
@@ -85,11 +98,19 @@ const ChannelInfor = ({ data, openedMenu, display, setDisplay, refetch }) => {
     }
   };
 
+  useLayoutEffect(() => {
+    if (data) {
+      setChannelData(data.data[0]);
+    }
+  }, [data]);
+
   useEffect(() => {
     if (focused && inputRef.current) {
       inputRef.current.focus();
     }
   }, [focused]);
+
+  if (!channelData) return;
 
   return (
     <div
@@ -107,7 +128,7 @@ const ChannelInfor = ({ data, openedMenu, display, setDisplay, refetch }) => {
           style={{
             backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_AVA_API
-            }${data.banner}')`,
+            }${channelData?.banner}')`,
           }}
         ></div>
       </div>
@@ -117,7 +138,7 @@ const ChannelInfor = ({ data, openedMenu, display, setDisplay, refetch }) => {
         <img
           src={`${import.meta.env.VITE_BASE_API_URI}${
             import.meta.env.VITE_VIEW_AVA_API
-          }${data.avatar}`}
+          }${channelData?.avatar}`}
           alt=''
           className='hidden sm:inline-block w-[160px] h-[160px] rounded-[50%] mr-[24px]'
         />
@@ -125,25 +146,25 @@ const ChannelInfor = ({ data, openedMenu, display, setDisplay, refetch }) => {
         <div className='flex-1 text-[14px] leading-[20px]'>
           <div className='flex items-center gap-[5px] mb-[4px]'>
             <div className='text-[24px] leading-[32px] sm:text-[36px] sm:leading-[50px] font-bold'>
-              {data?.name}
+              {channelData?.name}
             </div>
-            {data?.subscriber > 100000 && <Verification size={"14"} />}
+            {channelData?.subscriber > 100000 && <Verification size={"14"} />}
           </div>
 
           <div className='flex flex-col items-start sm:flex-row sm:items-center text-gray-A'>
             <span className=" after:content-['‧'] after:mx-[4px]">
-              @{data?.email}
+              @{channelData?.email}
             </span>
             <span className=" after:content-['‧'] after:mx-[4px]">
-              {formatNumber(data?.subscriber)} người đăng ký
+              {formatNumber(channelData?.subscriber)} subscribers
             </span>
-            <span>{formatNumber(data?.totalVids)} video</span>
+            <span>{formatNumber(channelData?.totalVids)} videos</span>
           </div>
 
-          {data?.description && (
+          {channelData?.description && (
             <div className='flex items-center py-[10px] text-gray-A'>
               <span className='t-1-ellipsis flex-1 text-nowrap'>
-                {data?.description}
+                {channelData?.description}
               </span>
 
               <div className='w-[24px] h-[24px] flex items-center justify-center cursor-pointer'>
@@ -163,10 +184,12 @@ const ChannelInfor = ({ data, openedMenu, display, setDisplay, refetch }) => {
           {/* Func Btn */}
           <div className='pt-[10px] pb-[6px] flex flex-col items-start sm:flex-row sm:items-center gap-[8px]'>
             <SubscribeBtn
-              sub={data?.subscription_info?.notify !== null ? true : false}
-              notify={data?.subscription_info?.notify}
-              id={data?.subscription_info?._id}
-              channelId={data?._id}
+              sub={
+                channelData?.subscription_info?.notify !== null ? true : false
+              }
+              notify={channelData?.subscription_info?.notify}
+              id={channelData?.subscription_info?._id}
+              channelId={channelData?._id}
               refetch={refetch}
             />
 
@@ -174,27 +197,20 @@ const ChannelInfor = ({ data, openedMenu, display, setDisplay, refetch }) => {
               className='leading-[36px] font-bold px-[15px] rounded-[18px]
               border-[1px] border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.2)] hover:border-[transparent]'
             >
-              Tham gia
+              Join
             </button>
           </div>
         </div>
       </div>
-      <Swiper
-        slidesPerView='auto'
-        className='flex !mx-0 w-full text-[16px] leading-[48px] font-[500]'
-        spaceBetween={24}
-        resistanceRatio={0.5}
-      >
-        {funcList.map((item) => (
-          <SwiperSlide className='!w-fit' key={item.id}>
+      <Slider dragScroll={true} buttonType={2}>
+        <div className='flex !mx-0 w-full text-[16px] leading-[48px] font-[500] gap-[24px]'>
+          {funcList.map((item) => (
             <CustomeButton
               data={item}
               display={display}
               setDisplay={setDisplay}
             />
-          </SwiperSlide>
-        ))}
-        <SwiperSlide className='!w-fit'>
+          ))}
           <div className='h-[48px] flex items-center !w-fit' ref={inputBox}>
             <motion.button
               className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center'
@@ -243,8 +259,8 @@ const ChannelInfor = ({ data, openedMenu, display, setDisplay, refetch }) => {
               </div>
             )}
           </div>
-        </SwiperSlide>
-      </Swiper>
+        </div>
+      </Slider>
     </div>
   );
 };

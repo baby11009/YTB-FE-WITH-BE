@@ -179,7 +179,7 @@ const VideoCard = ({
 
   return (
     <div
-      className={`flex-1 relative ${style || "mx-[8px] mb-[40px]"} group`}
+      className={`relative ${style || "mx-[8px] mb-[40px]"} group box-content`}
       style={styleInline}
     >
       <Link
@@ -228,13 +228,12 @@ const VideoCard = ({
           ></div>
         </div> */}
 
-          <div className='absolute right-0 top-0 group-hover:opacity-[1] opacity-0'>
-            <HoverButton title={"Xem sau"} icon={<LaterIcon />} />
-            <HoverButton
-              title={"Thêm vào danh sách chờ"}
-              icon={<PlayListIcon />}
-            />
-          </div>
+          {user && (
+            <div className='absolute right-0 top-0 group-hover:opacity-[1] opacity-0'>
+              <HoverButton title={"Watch later"} icon={<LaterIcon />} />
+              <HoverButton title={"Add to playlist"} icon={<PlayListIcon />} />
+            </div>
+          )}
         </div>
       </Link>
 
@@ -282,7 +281,7 @@ const VideoCard = ({
 
               <button
                 className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center 
-                  absolute right-0 translate-x-[30%] translate-y-[-15%] z-[500] active:bg-black-0.2 group-hover:opacity-[1] opacity-0'
+                  absolute right-0  translate-y-[-15%] z-[500] active:bg-black-0.2 group-hover:opacity-[1] opacity-0'
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

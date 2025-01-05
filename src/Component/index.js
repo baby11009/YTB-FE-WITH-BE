@@ -17,7 +17,6 @@ export { default as VideoCard3 } from "./Video/VideoCard3.jsx";
 export { default as PlaylistVideoCard } from "./Video/PlaylistVideoCard.jsx";
 export { default as CardRow } from "./Video/CardRow.jsx";
 export { default as CardRow2 } from "./Video/CardRow2.jsx";
-export { default as VideoRow } from "./Video/VideoRow.jsx";
 
 export { default as PlaylistCard } from "./Playlist/PlayListCard.jsx";
 export { default as PlaylistCard2 } from "./Playlist/PlaylistCard2.jsx";
@@ -68,3 +67,5 @@ export { default as Slider } from "./Slider/Slider.jsx";
 
 export { default as Range } from "./Range/Range.jsx";
 export { default as AudioRange } from "./Range/AudioRange.jsx";
+
+export { default as RelativeCard } from "./Card/RelativeCard.jsx";

@@ -1,9 +1,11 @@
 import { PlayIcon } from "../../../../../Assets/Icons";
-import ShortVidsRow from "./ShortVidsRow";
-import RelativeRow from "./RelativeRow";
-import { VideoCard, VideoRow } from "../../../../../Component";
 import {
-  iloda_v1,
+  VideoCard,
+  Slider,
+  SmallShortCard,
+  RelativeCard,
+} from "../../../../../Component";
+import {
   iloda,
   zeros,
   levi,
@@ -13,8 +15,10 @@ import {
   vuive,
   bauffs,
 } from "../../../../../Assets/Images";
+import { shortList2 } from "../../../../../Mock Data/shortData";
+import { relativeChannelList } from "../../../../../Mock Data/channelData";
 import { getData } from "../../../../../Api/getData";
-import { useEffect, useRef, useLayoutEffect } from "react";
+import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 const membersList = [
@@ -52,23 +56,37 @@ const membersList = [
   },
 ];
 
-const RowLayout = ({ title, noBtn, children }) => {
+const RowLayout = ({ title, type, children }) => {
   return (
     <div className='border-b-[1px] border-black-0.2'>
-      <div className='mt-[24px] mb-[12px] text-[20px] leading-[28px] font-bold flex items-center gap-[6px] cursor-pointer'>
+      <div
+        className={`mt-[24px] mb-[12px] text-[20px] leading-[28px] font-bold flex items-center ${
+          type === "channel" && "justify-between"
+        } gap-[6px] cursor-pointer`}
+      >
         <div className=' text-nowrap t-1-ellipsis'>{title}</div>
-        {!noBtn && (
+        {type === "playlist" ? (
           <div className='flex items-center cursor-pointer px-[16px] rounded-[18px] hover:bg-black-0.2'>
             <div className='ml-[-6px] mr-[6px]'>
               <PlayIcon />
             </div>
             <span className='text-[14px] leading-[36px] font-[500] text-nowrap'>
-              Phát tất cả
+              Play all
             </span>
           </div>
+        ) : (
+          type === "channel" && (
+            <button
+              className='px-[16px] rounded-[18px] text-[14px] leading-[36px] text-[#0000EE] font-[500]
+            hover:bg-[#263850]
+        '
+            >
+              Xem tất cả
+            </button>
+          )
         )}
       </div>
-      {children}
+      <div className='pt-[12px] mb-[24px]'>{children}</div>
     </div>
   );
 };
@@ -76,31 +94,33 @@ const RowLayout = ({ title, noBtn, children }) => {
 const ChannelHome = ({ channelEmail }) => {
   const queryClient = useQueryClient();
 
-  const channelEmailRef = useRef(channelEmail);
+  const { data: playlistData } = getData(
+    "/data/playlists",
+    {
+      channelEmail: channelEmail,
+      clearCache: "playlist",
+    },
+    channelEmail ? true : false,
+    false,
+  );
 
-  const { data: playlistData } = getData("/data/playlists", {
-    channelEmail: channelEmailRef.current,
-    clearCache: "playlist",
-  });
-
-  const { data: videosData } = getData("/data/videos", {
-    channelEmail: channelEmailRef.current,
-    limit: 12,
-    sort: { view: -1, createdAt: -1 },
-    clearCache: "video",
-  });
+  const { data: videosData } = getData(
+    "/data/videos",
+    {
+      channelEmail: channelEmail,
+      limit: 12,
+      sort: { view: -1, createdAt: -1 },
+      clearCache: "video",
+    },
+    channelEmail ? true : false,
+    false,
+  );
 
   useEffect(() => {
     return () => {
       queryClient.clear();
     };
   }, []);
-
-  useLayoutEffect(() => {
-    if (channelEmail) {
-      channelEmailRef.current = channelEmail;
-    }
-  }, [channelEmail]);
 
   return (
     <div className='w-full'>
@@ -117,7 +137,7 @@ const ChannelHome = ({ channelEmail }) => {
                 "min-w-[246px] w-[246px] h-[138px] mb-0 rounded-[8px]"
               }
               titleStyle={"text-[18px] leading-[26px] font-[400] max-h-[56px]"}
-              infoStyle={"flex text-[12px] leading-[18px]"}
+              infoStyle={"flex text-[12px] leading-[18px] flex-wrap"}
             />
           </div>
         </div>
@@ -129,10 +149,10 @@ const ChannelHome = ({ channelEmail }) => {
         <div className='flex flex-wrap items-center '>
           <div className='flex-1 py-[6px] mr-[40px] text-nowrap'>
             <span className='text-[16px] leading-[22px] text-white-F1 block'>
-              Hội viên của chúng tôi
+              Our members
             </span>
             <span className='text-[14px] leading-[20px] text-gray-A'>
-              Chân thành cảm ơn các hội viên của kênh!
+              Thank you, channel members!
             </span>
           </div>
 
@@ -152,7 +172,7 @@ const ChannelHome = ({ channelEmail }) => {
             hover:border-[transparent] hover:bg-[#263850]
           '
           >
-            Tham gia
+            Join
           </button>
         </div>
       </div>
@@ -160,14 +180,28 @@ const ChannelHome = ({ channelEmail }) => {
       {/* Recommend & List  */}
 
       {videosData?.data?.length > 0 && (
-        <RowLayout title={"Dành cho bạn"} noBtn={true}>
-          <VideoRow
-            showBtn={true}
-            width={354}
-            marginX={2}
-            top={"top-[30%]"}
-            vidList={videosData?.data}
-          />
+        <RowLayout title={"For you"} type={"video"}>
+          <Slider buttonPosition={"35%"} scrollDuration={120}>
+            {videosData?.data.map((video, id) => (
+              <VideoCard
+                key={video._id}
+                data={video}
+                showBtn={true}
+                style={`inline-block mb-[24px]`}
+                styleInline={{
+                  width: 354 + "px",
+                  paddingRight: id !== videosData.data.length - 1 ? "4px" : 0,
+                }}
+                thumbStyleInline={{
+                  borderRadius: 8,
+                }}
+                descStyle={"!hidden"}
+                imgStyle={"hidden"}
+                infoStyle={"text-[12px] leading-[18px]"}
+                noFuncBox={true}
+              />
+            ))}
+          </Slider>
         </RowLayout>
       )}
 
@@ -175,26 +209,62 @@ const ChannelHome = ({ channelEmail }) => {
         playlistData?.data.map((playlist) => {
           if (playlist?.itemList?.length > 0) {
             return (
-              <RowLayout title={playlist?.title} key={playlist?._id}>
-                <VideoRow
-                  showBtn={true}
-                  width={210}
-                  marginX={2}
-                  top={"top-[30%]"}
-                  thumbRound={"8px"}
-                  vidList={playlist?.video_list}
-                />
+              <RowLayout
+                title={playlist?.title}
+                type={"playlist"}
+                key={playlist?._id}
+              >
+                <Slider buttonPosition={"35%"} scrollDuration={120}>
+                  {playlist?.video_list.map((video, id) => (
+                    <VideoCard
+                      key={video._id}
+                      data={video}
+                      showBtn={true}
+                      style={`inline-block mb-[24px]`}
+                      styleInline={{
+                        width: 210 + "px",
+                        paddingRight: "4px",
+                      }}
+                      thumbStyleInline={{
+                        borderRadius: 8,
+                      }}
+                      descStyle={"!hidden"}
+                      imgStyle={"hidden"}
+                      infoStyle={"text-[12px] leading-[18px]"}
+                      noFuncBox={true}
+                    />
+                  ))}
+                </Slider>
               </RowLayout>
             );
           }
         })}
 
-      <RowLayout title={"Short Videos"}>
-        <ShortVidsRow width={210} marginX={2} top={"top-[15%]"} />
+      <RowLayout title={"Short Videos"} type={"video"}>
+        <Slider buttonPosition={"35%"} scrollDuration={120}>
+          {shortList2.map((item) => (
+            <SmallShortCard
+              data={item}
+              key={item.id}
+              style={{
+                display: "inline-block",
+                width: "210px",
+                paddingRight: "2px",
+              }}
+            />
+          ))}
+        </Slider>
       </RowLayout>
 
       {/* Relative */}
-      <RelativeRow />
+
+      <RowLayout title={"CKG"} type={"channel"}>
+        <Slider buttonPosition={"35%"} scrollDuration={120}>
+          {relativeChannelList.map((item) => (
+            <RelativeCard key={item.id} data={item} />
+          ))}
+        </Slider>
+      </RowLayout>
     </div>
   );
 };

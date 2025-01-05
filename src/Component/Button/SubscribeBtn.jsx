@@ -34,10 +34,10 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
         {
           headers: {
             Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-              import.meta.env.VITE_AUTH_TOKEN
+              import.meta.env.VITE_AUTH_TOKEN,
             )}`,
           },
-        }
+        },
       )
       .then((rsp) => {
         refetch(rsp.data);
@@ -62,10 +62,10 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
         {
           headers: {
             Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-              import.meta.env.VITE_AUTH_TOKEN
+              import.meta.env.VITE_AUTH_TOKEN,
             )}`,
           },
-        }
+        },
       )
       .then((rsp) => refetch(rsp.data))
       .catch((err) => console.log(err))
@@ -81,7 +81,7 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
   const funcList2 = [
     {
       id: 1,
-      text: "Tất cả",
+      text: "All",
       icon: <ThickBellIcon />,
       handleOnClick: () => {
         handleChangeNotify(1);
@@ -89,7 +89,7 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
     },
     {
       id: 2,
-      text: "Không nhận thông báo",
+      text: "None",
       icon: <SlashBellIcon />,
       handleOnClick: () => {
         handleChangeNotify(2);
@@ -97,7 +97,7 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
     },
     {
       id: 3,
-      text: "Hủy đăng ký",
+      text: "Unsubscribe",
       icon: <UnSubIcon />,
       handleOnClick: handleSubscribBtn,
     },
@@ -145,7 +145,7 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
       {notify === 1 ? <BellIcon /> : notify === 2 && <SlashBellIcon />}
 
       <span className='text-[14px] leading-[36px] font-[500] text-nowrap'>
-        {sub ? "Đã Đăng ký" : "Đăng ký"}
+        {sub ? "Subscribed" : "Subscribe"}
       </span>
       {sub && (
         <div className='rotate-90 ml-[6px] mr-[-6px]'>

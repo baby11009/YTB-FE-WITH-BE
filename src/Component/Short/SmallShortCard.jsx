@@ -27,7 +27,7 @@ const HoverButton = ({ title, icon }) => {
           {
             duration: 0,
             type: "tween",
-          }
+          },
         );
         animate(
           "h3",
@@ -38,7 +38,7 @@ const HoverButton = ({ title, icon }) => {
             duration: 0.2,
             delay: 0.4,
             type: "tween",
-          }
+          },
         );
       } else {
         animate(
@@ -49,7 +49,7 @@ const HoverButton = ({ title, icon }) => {
           {
             duration: 0,
             type: "tween",
-          }
+          },
         );
         animate(
           "h3",
@@ -59,7 +59,7 @@ const HoverButton = ({ title, icon }) => {
           {
             duration: 0.3,
             type: "tween",
-          }
+          },
         );
       }
     }
@@ -135,7 +135,7 @@ const SmallShortCard = ({ style, data }) => {
         </div>
 
         <motion.div
-          className='absolute w-[40px] h-[40px] rounded-[50%] right-0 translate-x-[30%] 
+          className='absolute w-[40px] h-[40px] rounded-[50%] right-0  
           top-0 flex items-center justify-center'
           whileTap={{
             backgroundColor: "rgba(255,255,255,0.2)",
@@ -147,11 +147,8 @@ const SmallShortCard = ({ style, data }) => {
 
       {showed && (
         <div className='absolute right-0 top-0'>
-          <HoverButton title={"Xem sau"} icon={<LaterIcon />} />
-          <HoverButton
-            title={"Thêm vào danh sách chờ"}
-            icon={<PlayListIcon />}
-          />
+          <HoverButton title={"Watch later"} icon={<LaterIcon />} />
+          <HoverButton title={"Add to watch later"} icon={<PlayListIcon />} />
         </div>
       )}
     </Link>

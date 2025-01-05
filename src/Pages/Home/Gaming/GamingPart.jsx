@@ -1,6 +1,6 @@
 import { gaming_img } from "../../../Assets/Images";
 import { shortList1 } from "../../../Mock Data/shortData";
-import { HorizonShorts, VideoRow, GamingRow } from "../../../Component";
+import { HorizonShorts, GamingRow } from "../../../Component";
 import { Link } from "react-router-dom";
 import { vidList3, vidList4 } from "../../../Mock Data/videoData";
 import { gameList } from "../../../Mock Data/gamesData";
@@ -58,14 +58,14 @@ const GamingPart = ({ openedMenu }) => {
           }}
           noBtn={true}
         >
-          <VideoRow
+          {/* <VideoRow
             containerStyle={"pt-[12px] my-[24px]"}
             showBtn={true}
             width={210}
             marginX={2}
             top={"top-[20%]"}
             thumbRound={"8px"}
-          />
+          /> */}
         </Layout>
         <Layout
           data={{

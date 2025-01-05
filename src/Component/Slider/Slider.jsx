@@ -14,6 +14,7 @@ const Slider = ({
   scrollDistance,
   scrollDuration = 300,
   buttonPosition,
+  buttonType = 1,
 }) => {
   const [scrollPosition, setScrollPosition] = useState();
 
@@ -29,76 +30,109 @@ const Slider = ({
 
   const isClicked = useRef(false);
 
-  const visibleChildrenCount = Math.round(
-    sliderRef.current?.clientWidth / sliderRef.current?.firstChild.clientWidth,
+  const visibleChildrenCount = useRef();
+
+  const handleScroll = useCallback(
+    (direction) => {
+      if (isClicked.current) return;
+      isClicked.current = true;
+
+      smoothScroll(
+        direction,
+        sliderRef,
+        scrollDuration,
+        scrollDistance
+          ? scrollDistance
+          : visibleChildrenCount.current *
+              sliderRef.current?.firstChild.clientWidth, //caculate visible children width to scroll,
+      );
+      setTimeout(() => {
+        isClicked.current = false;
+      }, scrollDuration + 20);
+    },
+    [visibleChildrenCount.current],
   );
 
-  const handleScroll = (direction) => {
-    if (isClicked.current) return;
-    isClicked.current = true;
-    smoothScroll(
-      direction,
-      sliderRef,
-      scrollDuration,
-      scrollDistance
-        ? scrollDistance
-        : visibleChildrenCount * sliderRef.current?.firstChild.clientWidth, //caculate visible children width to scroll,
-    );
-    setTimeout(() => {
-      isClicked.current = false;
-    }, scrollDuration + 20);
-  };
-
-  useEffect(() => {
-    if (children) {
-      sliderRef.current.scrollLeft = 0;
-    }
-  }, [children]);
-
-  useLayoutEffect(() => {
-    enabledScrolling.current =
-      sliderRef.current.scrollWidth > sliderRef.current.clientWidth;
-
-    if (enabledScrolling.current) {
+  const handleScrollEvent = useCallback((e) => {
+    if (sliderRef.current.scrollLeft === 0) {
       setScrollPosition("start");
-      sliderRef.current.addEventListener("scroll", (e) => {
-        if (sliderRef.current.scrollLeft === 0) {
-          setScrollPosition("start");
-        } else if (
-          sliderRef.current.scrollWidth -
-            (Math.ceil(sliderRef.current.scrollLeft) +
-              sliderRef.current.clientWidth) <
-          3
-        ) {
-          setScrollPosition("end");
-        } else {
-          setScrollPosition("middle");
-        }
-      });
+    } else if (
+      sliderRef.current.scrollWidth -
+        (Math.ceil(sliderRef.current.scrollLeft) +
+          sliderRef.current.clientWidth) <
+      3
+    ) {
+      setScrollPosition("end");
+    } else {
+      setScrollPosition("middle");
     }
   }, []);
+
+  const handleResizeEvent = useCallback(() => {
+    if (!sliderRef.current) return;
+    enabledScrolling.current =
+      sliderRef.current.scrollWidth > sliderRef.current.clientWidth;
+    visibleChildrenCount.current = Math.round(
+      sliderRef.current?.clientWidth /
+        sliderRef.current?.firstChild.clientWidth,
+    );
+    if (enabledScrolling.current) {
+      handleScrollEvent();
+    } else {
+      setScrollPosition();
+    }
+  }, []);
+
+  useEffect(() => {
+    handleResizeEvent();
+    sliderRef.current.addEventListener("scroll", handleScrollEvent);
+
+    window.addEventListener("resize", handleResizeEvent);
+  }, []);
+
   return (
     <div className='relative '>
-      {scrollPosition && scrollPosition !== "start" && (
-        <div
-          className={`absolute flex items-center z-[200] bg-black-21 
-            rounded-[50%] overflow-hidden translate-x-[-50%] translate-y-[-50%]`}
-          style={{
-            top: buttonPosition
-              ? buttonPosition
-              : sliderRef.current?.clientHeight / 2,
-          }}
-        >
-          <button
-            className='size-[40px] p-[8px] hover:bg-black-0.2'
-            onClick={() => handleScroll("left")}
+      {scrollPosition &&
+        scrollPosition !== "start" &&
+        (buttonType === 1 ? (
+          <div
+            className={`absolute flex items-center z-[200] bg-black-21
+          rounded-[50%] overflow-hidden translate-x-[-50%] translate-y-[-50%]`}
+            style={{
+              top: buttonPosition
+                ? buttonPosition
+                : sliderRef.current?.clientHeight / 2,
+            }}
           >
-            <div className='rotate-[180deg] w-[24px]'>
-              <ThinArrowIcon />
-            </div>
-          </button>
-        </div>
-      )}
+            <button
+              className='size-[40px] p-[8px] hover:bg-black-0.2'
+              onClick={() => handleScroll("left")}
+            >
+              <div className='rotate-[180deg] w-[24px]'>
+                <ThinArrowIcon />
+              </div>
+            </button>
+          </div>
+        ) : (
+          <div
+            className={`absolute flex items-center left-0 z-[200] bg-black 
+         translate-y-[-50%]`}
+            style={{
+              top: buttonPosition
+                ? buttonPosition
+                : sliderRef.current?.clientHeight / 2,
+            }}
+          >
+            <button
+              className='size-[40px] p-[8px] '
+              onClick={() => handleScroll("left")}
+            >
+              <div className='rotate-[180deg] w-[24px] text-gray-A '>
+                <ThinArrowIcon />
+              </div>
+            </button>
+          </div>
+        ))}
       <div
         className='overflow-y-hidden hidden-scorllbar 
         overflow-x-auto whitespace-nowrap touch-pan-y e'
@@ -125,26 +159,47 @@ const Slider = ({
       >
         {children}
       </div>
-      {scrollPosition && scrollPosition !== "end" && (
-        <div
-          className={`absolute flex items-center right-0 z-[200] bg-black-21 
+      {scrollPosition &&
+        scrollPosition !== "end" &&
+        (buttonType === 1 ? (
+          <div
+            className={`absolute flex items-center right-0 z-[200] bg-black-21
             rounded-[50%] overflow-hidden translate-x-[50%] translate-y-[-50%]`}
-          style={{
-            top: buttonPosition
-              ? buttonPosition
-              : sliderRef.current?.clientHeight / 2,
-          }}
-        >
-          <button
-            className='size-[40px] p-[8px] hover:bg-black-0.2 '
-            onClick={() => handleScroll("right")}
+            style={{
+              top: buttonPosition
+                ? buttonPosition
+                : sliderRef.current?.clientHeight / 2,
+            }}
           >
-            <div className=' w-[24px]'>
-              <ThinArrowIcon />
-            </div>
-          </button>
-        </div>
-      )}
+            <button
+              className='size-[40px] p-[8px] hover:bg-black-0.2 '
+              onClick={() => handleScroll("right")}
+            >
+              <div className=' w-[24px]'>
+                <ThinArrowIcon />
+              </div>
+            </button>
+          </div>
+        ) : (
+          <div
+            className={`absolute flex items-center right-0 z-[200] bg-black 
+           translate-y-[-50%]`}
+            style={{
+              top: buttonPosition
+                ? buttonPosition
+                : sliderRef.current?.clientHeight / 2,
+            }}
+          >
+            <button
+              className='size-[40px] p-[8px] '
+              onClick={() => handleScroll("right")}
+            >
+              <div className=' w-[24px] text-gray-A '>
+                <ThinArrowIcon />
+              </div>
+            </button>
+          </div>
+        ))}
     </div>
   );
 };
