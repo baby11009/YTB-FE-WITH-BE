@@ -1,4 +1,4 @@
-import { ChannelCard, CustomeFuncBox,PlaylistCard } from "../../../Component";
+import { ChannelCard, CustomeFuncBox, PlaylistCard } from "../../../Component";
 import { useQuery } from "@tanstack/react-query";
 import request from "../../../util/axios-base-url";
 import { getCookie } from "../../../util/tokenHelpers";
@@ -22,14 +22,14 @@ const SubscribeChannel = ({ openedMenu }) => {
 
   const [isEnd, setIsEnd] = useState(false);
 
-  const { data, isSuccess } = useQuery({
+  const { data, isSuccess, isLoading } = useQuery({
     queryKey: [...Object.values(queries)],
     queryFn: async () => {
       try {
         const rsp = await request.get("/client/user/subscribed-channels", {
           headers: {
             Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-              import.meta.env.VITE_AUTH_TOKEN
+              import.meta.env.VITE_AUTH_TOKEN,
             )}`,
           },
           params: queries,
@@ -41,7 +41,6 @@ const SubscribeChannel = ({ openedMenu }) => {
         console.error(error);
       }
     },
-    suspense: true,
     cacheTime: 0,
   });
 

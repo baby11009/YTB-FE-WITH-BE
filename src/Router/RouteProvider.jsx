@@ -44,7 +44,7 @@ const router = createBrowserRouter([
     element: <SettingPage />,
   },
   {
-    path: "/admin/:data",
+    path: "/admin/:data/:func?/:id?",
     element: (
       <ProtectedRoute requiredRole={"admin"}>
         <AdminHomePage />
@@ -52,32 +52,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/:data/:func",
-    element: (
-      <ProtectedRoute requiredRole={"admin"}>
-        <AdminHomePage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/admin/:data/:func/:id",
-    element: (
-      <ProtectedRoute requiredRole={"admin"}>
-        <AdminHomePage />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: "/manage/:func",
-    element: (
-      <ProtectedRoute authAll={true} disableRouteAfterSigin={["/auth/login"]}>
-        <ManagePage />
-      </ProtectedRoute>
-    ),
-  },
-  ,
-  {
-    path: "/manage/:func/:data",
+    path: "/manage/:func/:data?",
     element: (
       <ProtectedRoute authAll={true} disableRouteAfterSigin={["/auth/login"]}>
         <ManagePage />
@@ -104,7 +79,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/:path/:id",
+    path: "/:path/:id/:feature?",
     element: <HomePage />,
   },
 ]);

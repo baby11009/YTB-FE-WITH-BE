@@ -124,7 +124,7 @@ const VideoCard = ({
   const navigate = useNavigate();
 
   const handleNavigate = () => {
-    navigate(`/channel/${data?.channel_info?.email}`);
+    navigate(`/channel/${data?.channel_info?.email}/home`);
   };
 
   const funcList1 = [

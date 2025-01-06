@@ -57,11 +57,11 @@ const AllContent = ({ openedMenu }) => {
           {
             headers: {
               Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-                import.meta.env.VITE_AUTH_TOKEN
+                import.meta.env.VITE_AUTH_TOKEN,
               )}`,
             },
             params: videoQueriese,
-          }
+          },
         );
 
         return rsp.data;
@@ -70,7 +70,6 @@ const AllContent = ({ openedMenu }) => {
         console.error(error);
       }
     },
-    suspense: true,
     cacheTime: 0,
   });
 
@@ -83,11 +82,11 @@ const AllContent = ({ openedMenu }) => {
           {
             headers: {
               Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-                import.meta.env.VITE_AUTH_TOKEN
+                import.meta.env.VITE_AUTH_TOKEN,
               )}`,
             },
             params: shortQueriese,
-          }
+          },
         );
 
         return rsp.data;
@@ -96,7 +95,6 @@ const AllContent = ({ openedMenu }) => {
         console.error(error);
       }
     },
-    suspense: true,
     cacheTime: 0,
   });
 
@@ -160,6 +158,8 @@ const AllContent = ({ openedMenu }) => {
       }
     }
   }, [isEnd]);
+
+  if (isLoading || !shortData || !videoData) return;
 
   return (
     <div>

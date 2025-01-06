@@ -4,7 +4,6 @@ import CardRow from "../Video/CardRow";
 import { chunkArray } from "../../util/func";
 
 const GridLayout = ({ openedMenu, vidList, shortList }) => {
-  
   const [showQtt, setShowQtt] = useState(1);
 
   const [showCard, setShowCard] = useState(1);
@@ -106,7 +105,7 @@ const GridLayout = ({ openedMenu, vidList, shortList }) => {
                   openedMenu={openedMenu}
                   vidList={videoRows[row]?.slice(
                     item * showCard,
-                    item * showCard + showCard
+                    item * showCard + showCard,
                   )}
                 />
               ))}

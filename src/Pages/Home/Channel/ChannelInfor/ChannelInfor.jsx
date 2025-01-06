@@ -6,58 +6,74 @@ import {
 import { formatNumber } from "../../../../util/numberFormat";
 import { SubscribeBtn, Slider } from "../../../../Component";
 import { getData } from "../../../../Api/getData";
-import { SwiperSlide, Swiper } from "swiper/react";
 import { motion } from "framer-motion";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
+import { useLocation, useNavigate } from "react-router-dom";
+
 const funcList = [
   {
-    id: 1,
+    id: "home",
     title: "Home",
-    slug: "home",
+    handleCheckCurr: (feature) => {
+      return feature === "home" || !feature;
+    },
   },
   {
-    id: 2,
+    id: "videos",
     title: "Videos",
-    slug: "video",
+    handleCheckCurr: (feature) => {
+      return feature === "videos";
+    },
   },
   {
-    id: 3,
+    id: "shorts",
     title: "Shorts",
-    slug: "short",
+    handleCheckCurr: (feature) => {
+      return feature === "shorts";
+    },
   },
   {
-    id: 4,
+    id: "lives",
     title: "Live",
-    slug: "live",
+    handleCheckCurr: (feature) => {
+      return feature === "lives";
+    },
   },
   {
-    id: 5,
+    id: "playlists",
     title: "Playlists",
-    slug: "playlist",
+    handleCheckCurr: (feature) => {
+      return feature === "playlists";
+    },
   },
   {
-    id: 6,
+    id: "community",
     title: "Community",
-    slug: "community",
+    handleCheckCurr: (feature) => {
+      return feature === "community";
+    },
   },
 ];
 
-const CustomeButton = ({ data, display, setDisplay }) => {
+const CustomeButton = ({ data, feature, handleNavigate }) => {
   return (
     <div
       className={`border-b-[3px] cursor-pointer h-[48px]
             ${
-              display.title === data.slug
+              data.handleCheckCurr(feature)
                 ? " border-white-F1"
                 : "border-[transparent] hover:border-gray-71"
             }
             `}
       onClick={() => {
-        setDisplay({
-          title: data.slug,
-          payload: undefined,
-        });
+        handleNavigate(data.id);
       }}
     >
       {data.title}
@@ -65,18 +81,16 @@ const CustomeButton = ({ data, display, setDisplay }) => {
   );
 };
 
-const ChannelInfor = ({ channelEmail, openedMenu, display, setDisplay }) => {
+const ChannelInfor = ({ channelEmail, openedMenu, feature }) => {
   const { user } = useAuthContext();
 
-  const inputBox = useRef();
+  const location = useLocation();
+
+  const navigate = useNavigate();
 
   const inputRef = useRef();
 
-  const swiperRef = useRef();
-
   const [focused, setFocused] = useState(false);
-
-  const [value, setValue] = useState("");
 
   const [channelData, setChannelData] = useState(undefined);
 
@@ -87,16 +101,20 @@ const ChannelInfor = ({ channelEmail, openedMenu, display, setDisplay }) => {
     false,
   );
 
-  const handlePressEnter = (e) => {
-    if (e.key === "Enter" && value !== "") {
-      setDisplay({
-        title: "search",
-        payload: {
-          text: value,
-        },
-      });
+  const handleNavigate = useCallback((newPath) => {
+    const currFeature = location.pathname.split("/")[3];
+    navigate(location.pathname.replace(currFeature, newPath));
+  }, []);
+
+  const handlePressEnter = useCallback((e) => {
+    if (e.key === "Enter" && inputRef.current.value !== "") {
+      const currFeature = location.pathname.split("/")[3];
+      const query = new URLSearchParams({
+        title: inputRef.current.value,
+      }).toString();
+      navigate(location.pathname.replace(currFeature, "search") + "?" + query);
     }
-  };
+  }, []);
 
   useLayoutEffect(() => {
     if (data) {
@@ -206,12 +224,13 @@ const ChannelInfor = ({ channelEmail, openedMenu, display, setDisplay }) => {
         <div className='flex !mx-0 w-full text-[16px] leading-[48px] font-[500] gap-[24px]'>
           {funcList.map((item) => (
             <CustomeButton
+              key={item.id}
               data={item}
-              display={display}
-              setDisplay={setDisplay}
+              feature={feature}
+              handleNavigate={handleNavigate}
             />
           ))}
-          <div className='h-[48px] flex items-center !w-fit' ref={inputBox}>
+          <div className='h-[48px] flex items-center !w-fit'>
             <motion.button
               className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center'
               whileTap={{
@@ -237,8 +256,7 @@ const ChannelInfor = ({ channelEmail, openedMenu, display, setDisplay }) => {
                   placeholder='Tìm kiếm'
                   className='outline-none bg-[transparent] text-[14px] 
                     leading-[20px] font-normal py-[4px]'
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
+                  onBlur={() => setFocused(false)}
                   onKeyDown={handlePressEnter}
                 />
                 <div className='relative w-full'>

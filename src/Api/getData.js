@@ -52,7 +52,7 @@ export const getData = (
         throw error;
       }
     },
-
+    refetchOnWindowFocus: false,
     enabled: condition,
     suspense,
   });
@@ -107,7 +107,7 @@ export const getDataWithAuth = (
         throw error;
       }
     },
-
+    refetchOnWindowFocus: false,
     enabled: condition,
     suspense: suspense,
   });

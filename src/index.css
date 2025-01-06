@@ -549,3 +549,29 @@ th {
   transition: transform 150ms ease-in-out;
   aspect-ratio: 1/1;
 }
+
+.toaster-animation {
+  --delay: 0s;
+  opacity: 0;
+  transform: translateY(100%);
+  animation: showUpAndDisappear 6s ease-in-out var(--delay) forwards;
+}
+
+@keyframes showUpAndDisappear {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  16.66% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  83.34% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}

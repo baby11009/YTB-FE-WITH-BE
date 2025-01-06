@@ -1,45 +1,60 @@
 import ChannelInfor from "./ChannelInfor/ChannelInfor";
-import ChannelDisplay from "./ChannelContents/ChannelDisplay";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import ChannelHome from "./ChannelContents/Home/ChannelHome";
+import ChannelVideo from "./ChannelContents/Video/ChannelVideo";
+import ChannelShort from "./ChannelContents/Short/ChannelShort";
+import ChannelLive from "./ChannelContents/Live/ChannelLive";
+import ChannelPlaylist from "./ChannelContents/Playlist/ChannelPlaylist";
+import ChannelComunity from "./ChannelContents/Comunity/ChannelComunity";
+import ChannelSearch from "./ChannelContents/Search/ChannelSearch";
 
 const ChannelPart = ({ openedMenu }) => {
-  const queryClient = useQueryClient();
+  const { id, feature } = useParams();
 
-  const { id } = useParams();
+  const [renderComponent, setRenderComponent] = useState();
 
-  const [display, setDisplay] = useState({
-    title: "home",
-    payload: undefined,
-  });
+  const displayList = useRef();
 
-  useEffect(() => {
-    setDisplay({
-      title: "home",
-      payload: undefined,
-    });
+  useLayoutEffect(() => {
+    if (id) {
+      displayList.current = {
+        home: <ChannelHome channelEmail={id} />,
+        videos: <ChannelVideo channelEmail={id} />,
+        shorts: <ChannelShort channelEmail={id} />,
+        live: <ChannelLive channelEmail={id} />,
+        playlists: <ChannelPlaylist channelEmail={id} />,
+        community: <ChannelComunity channelEmail={id} />,
+        search: <ChannelSearch channelEmail={id} />,
+      };
+    }
   }, [id]);
 
-  useEffect(() => {
-    return () => {
-      queryClient.clear();
-    };
-  }, []);
+  useLayoutEffect(() => {
+    if (displayList.current && displayList.current[feature]) {
+      setRenderComponent(displayList.current[feature]);
+    } else {
+      setRenderComponent(displayList.current["home"]);
+    }
+  }, [feature]);
 
   return (
     <div className='flex flex-col items-center justify-center'>
       <ChannelInfor
         channelEmail={id}
         openedMenu={openedMenu}
-        display={display}
-        setDisplay={setDisplay}
+        feature={feature}
       />
-      <ChannelDisplay
-        openedMenu={openedMenu}
-        display={display}
-        channelEmail={id}
-      />
+      <div
+        className={`w-[214px] xsm:w-[428px] sm:w-[642px] 2md:w-[856px]  
+      ${
+        openedMenu
+          ? "1336:w-[1070px] xl 2xl:w-[1284px]"
+          : "2lg:w-[1070px] 1-5xl:w-[1284px]"
+      }`}
+      >
+        {renderComponent}
+      </div>
     </div>
   );
 };
