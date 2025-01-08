@@ -32,7 +32,7 @@ const initParams = {
 const Short = () => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, openedMenu } = useAuthContext();
+  const { setIsShowing, openedMenu, setNotifyMessage } = useAuthContext();
 
   const [sort, setSort] = useState(undefined);
 
@@ -126,10 +126,17 @@ const Short = () => {
   ]);
 
   const handleDeleteMany = async () => {
-    await dltManyData("/client/video/delete-many", checkedList, "short", () => {
-      setCheckedList([]);
-      refetch();
-    });
+    await dltManyData(
+      "/client/video/delete-many",
+      checkedList,
+      "short",
+      () => {
+        setCheckedList([]);
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const showDltConfirm = () => {
@@ -142,7 +149,7 @@ const Short = () => {
         handleDelete={handleDeleteMany}
         type={"Short"}
         data={checkedList.join(", ")}
-      />
+      />,
     );
   };
 
@@ -300,7 +307,7 @@ const Short = () => {
                 onClick={() => {
                   handleSortUnique(
                     "dislike",
-                    params.sort["dislike"] === -1 ? 1 : -1
+                    params.sort["dislike"] === -1 ? 1 : -1,
                   );
                 }}
                 className={`flex items-center justify-center gap-[8px] ${
@@ -324,7 +331,7 @@ const Short = () => {
                 onClick={() => {
                   handleSortUnique(
                     "totalCmt",
-                    params.sort["totalCmt"] === -1 ? 1 : -1
+                    params.sort["totalCmt"] === -1 ? 1 : -1,
                   );
                 }}
                 className={`flex items-center justify-center gap-[8px] ${
@@ -348,7 +355,7 @@ const Short = () => {
                 onClick={() => {
                   handleSortUnique(
                     "createdAt",
-                    params.sort["createdAt"] === -1 ? 1 : -1
+                    params.sort["createdAt"] === -1 ? 1 : -1,
                   );
                 }}
                 className={`flex items-center justify-center gap-[8px] ${

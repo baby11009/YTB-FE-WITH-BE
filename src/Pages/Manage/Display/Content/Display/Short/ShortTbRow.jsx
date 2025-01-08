@@ -5,28 +5,38 @@ import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
 import ShortUpsertModal from "./ShortUpsertModal";
+import { useCallback } from "react";
 
 const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
-  const { setIsShowing } = useAuthContext();
-  const handleDelete = async () => {
-    await dltData("/client/video", data?._id, "short", () => {
-      refetch();
-    });
-  };
+  const { setIsShowing, setNotifyMessage } = useAuthContext();
 
-  const showDeleteConfirm = () => {
+  const handleDelete = useCallback(async () => {
+    await dltData(
+      "/client/video",
+      data?._id,
+      "short",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
+  });
+
+  const showDeleteConfirm = useCallback(() => {
     setIsShowing(
       <DeleteConfirm
         handleDelete={handleDelete}
         type={"Short"}
         data={data?._id}
-      />
+      />,
     );
-  };
+  }, [data?._id]);
 
-  const showUpsertModal = () => {
+  const showUpsertModal = useCallback(() => {
     setIsShowing(<ShortUpsertModal title={"Editing short"} id={data?._id} />);
-  };
+  }, [data?._id]);
+
   return (
     <div className='text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px] py-[10px] h-[270px]'>
       <div className='w-[70px] flex items-center gap-[12px] absolute left-0 bg-black h-[270px] border-r-[2px] '>

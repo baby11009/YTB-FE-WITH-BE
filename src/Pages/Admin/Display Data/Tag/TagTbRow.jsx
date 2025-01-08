@@ -3,6 +3,7 @@ import { CheckBox2 } from "../../../../Component";
 import { EditIcon, DeleteIcon } from "../../../../Assets/Icons";
 import { Link } from "react-router-dom";
 import { timeFormat3 } from "../../../../util/timeforMat";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const TagTbRow = ({
   data,
@@ -14,6 +15,9 @@ const TagTbRow = ({
   refetch,
   checkedList = [],
 }) => {
+
+  const { setNotifyMessage } = useAuthContext();
+
   return (
     <tr className={`${od + 1 !== length && "border-b-[1px]"} `}>
       <th>
@@ -70,9 +74,16 @@ const TagTbRow = ({
             <div
               className='text-[rgba(255,255,255,0.4)] group-hover:text-red-500  transition-all duration-[0.2s]'
               onClick={async () => {
-                await dltData("tag", data?._id, "tag", () => {
-                  refetch();
-                });
+                await dltData(
+                  "tag",
+                  data?._id,
+                  "tag",
+                  () => {
+                    refetch();
+                  },
+                  undefined,
+                  setNotifyMessage,
+                );
               }}
             >
               <DeleteIcon />

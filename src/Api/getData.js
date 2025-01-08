@@ -1,5 +1,6 @@
 import request from "../util/axios-base-url";
 import { useQuery } from "@tanstack/react-query";
+import { useAuthContext } from "../Auth Provider/authContext";
 
 export const getData = (
   path,
@@ -11,12 +12,10 @@ export const getData = (
     return null;
   }
 
+  const { setNotifyMessage } = useAuthContext();
+
   const paramsValue = [...Object.values(params)];
   const paramsKey = [...Object.keys(params)];
-
-  const notParamsResetKeys = paramsKey.filter(
-    (key) => key !== "refetch" && key !== "clearCache" && key !== "reset",
-  );
 
   let finalParams = {};
 
@@ -46,10 +45,17 @@ export const getData = (
         return res.data;
       } catch (error) {
         console.error(error);
-        alert(
-          error.response?.data?.msg || error.response?.data || error.message,
-        );
-        throw error;
+
+        setNotifyMessage((prev) => [
+          ...prev,
+          {
+            id: prev.length + 1,
+            msg:
+              error.response?.data?.msg ||
+              error.response?.data ||
+              error.message,
+          },
+        ]);
       }
     },
     refetchOnWindowFocus: false,
@@ -67,6 +73,7 @@ export const getDataWithAuth = (
   if (!path) {
     return null;
   }
+  const { setNotifyMessage } = useAuthContext();
 
   const paramsValue = [...Object.values(params)];
 
@@ -101,10 +108,16 @@ export const getDataWithAuth = (
         return res.data;
       } catch (error) {
         console.error(error);
-        alert(
-          error.response?.data?.msg || error.response?.data || error.message,
-        );
-        throw error;
+        setNotifyMessage((prev) => [
+          ...prev,
+          {
+            id: prev.length + 1,
+            msg:
+              error.response?.data?.msg ||
+              error.response?.data ||
+              error.message,
+          },
+        ]);
       }
     },
     refetchOnWindowFocus: false,

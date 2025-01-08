@@ -33,7 +33,7 @@ const initTagParams = {
 const ShortUpsertModal = ({ title, id }) => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing } = useAuthContext();
+  const { setIsShowing, setNotifyMessage } = useAuthContext();
 
   const thumbInputRef = useRef();
 
@@ -252,12 +252,19 @@ const ShortUpsertModal = ({ title, id }) => {
         data.append(key, formData[key]);
       }
 
-      await createData("/client/video/upload", data, "short", () => {
-        setFormData(init);
-        setPreviewVideo(undefined);
-        setPreviewThumb(undefined);
-        thumbInputRef.current.files = undefined;
-      });
+      await createData(
+        "/client/video/upload",
+        data,
+        "short",
+        () => {
+          setFormData(init);
+          setPreviewVideo(undefined);
+          setPreviewThumb(undefined);
+          thumbInputRef.current.files = undefined;
+        },
+        undefined,
+        setNotifyMessage,
+      );
     },
     [error],
   );
@@ -314,9 +321,17 @@ const ShortUpsertModal = ({ title, id }) => {
         }
       }
 
-      await updateData("/client/video", id, data, "short", () => {
-        refetch();
-      });
+      await updateData(
+        "/client/video",
+        id,
+        data,
+        "short",
+        () => {
+          refetch();
+        },
+        undefined,
+        setNotifyMessage,
+      );
     },
     [error],
   );

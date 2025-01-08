@@ -65,11 +65,14 @@ const CustomeFuncBox = ({
         {funcList1 &&
           funcList1.map((item) => {
             if (
-              typeof item.condition === "function" &&
-              item.condition(productIndex, size)
+              typeof item.renderCondition === "function" &&
+              item.renderCondition(productIndex, size)
             ) {
               return null;
-            } else if (typeof item.condition === "boolean" && !item.condition) {
+            } else if (
+              typeof item.renderCondition === "boolean" &&
+              !item.renderCondition
+            ) {
               return null;
             }
 
@@ -91,11 +94,14 @@ const CustomeFuncBox = ({
         {funcList2 &&
           funcList2.map((item) => {
             if (
-              typeof item.condition === "function" &&
-              item.condition(productIndex, size)
+              typeof item.renderCondition === "function" &&
+              item.renderCondition(productIndex, size)
             ) {
               return null;
-            } else if (typeof item.condition === "boolean" && !item.condition) {
+            } else if (
+              typeof item.renderCondition === "boolean" &&
+              !item.renderCondition
+            ) {
               return null;
             }
 

@@ -8,6 +8,7 @@ import Search from "./Search";
 import Display from "./Display";
 import { Pagination } from "../../../../Component";
 import Filter from "./Filter";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const limit = 8;
 
@@ -19,6 +20,8 @@ const initPrs = {
 };
 
 const PlaylistPage = ({ openedMenu }) => {
+  const { setNotifyMessage } = useAuthContext();
+
   const queryClient = useQueryClient();
 
   const [totalPage, setTotalPage] = useState(1);
@@ -53,10 +56,17 @@ const PlaylistPage = ({ openedMenu }) => {
   };
 
   const handleDeleteMany = async () => {
-    await dltManyData("playlist/delete-many", checkedList, "playlist", () => {
-      setCheckedList([]);
-      refetch();
-    })
+    await dltManyData(
+      "playlist/delete-many",
+      checkedList,
+      "playlist",
+      () => {
+        setCheckedList([]);
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   useLayoutEffect(() => {
@@ -64,7 +74,7 @@ const PlaylistPage = ({ openedMenu }) => {
       setTotalPage(playlistsData?.totalPages);
       if (limit - playlistsData.qtt > 0) {
         setMockArr(
-          Array.from({ length: limit - playlistsData.qtt }, (_, i) => i)
+          Array.from({ length: limit - playlistsData.qtt }, (_, i) => i),
         );
       } else {
         setMockArr([]);

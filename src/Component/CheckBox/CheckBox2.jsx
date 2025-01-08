@@ -30,9 +30,13 @@ const CheckBox2 = ({ checked, setChecked }) => {
         `}
         onMouseDown={() => setClicked(true)}
         onMouseUp={() => setClicked(false)}
-        onClick={() => {
+        onClick={async () => {
           if (setChecked) {
-            setChecked();
+            if (setChecked instanceof Promise) {
+              await setChecked();
+            } else {
+              setChecked();
+            }
           }
         }}
       >

@@ -1,7 +1,6 @@
 import {
   SortIcon2,
   CloseIcon,
-  CreateIcon,
   TrashBinIcon,
   LongArrowIcon,
 } from "../../../../../../Assets/Icons";
@@ -40,12 +39,12 @@ const VideoComment = () => {
 
   const { data, refetch, isLoading } = getDataWithAuth(
     "/client/comment/video-comments",
-    params
+    params,
   );
 
   const [dataList, setDataList] = useState([]);
 
-  const { setIsShowing, openedMenu } = useAuthContext();
+  const { setIsShowing, openedMenu, setNotifyMessage } = useAuthContext();
 
   const handleCheckedAll = () => {
     if (checkedList.length === data?.data?.length) {
@@ -132,7 +131,9 @@ const VideoComment = () => {
       () => {
         setCheckedList([]);
         refetch();
-      }
+      },
+      undefined,
+      setNotifyMessage,
     );
   };
 
@@ -146,7 +147,7 @@ const VideoComment = () => {
         handleDelete={handleDeleteMany}
         type={"Comment"}
         data={checkedList.join(", ")}
-      />
+      />,
     );
   };
 
@@ -254,7 +255,7 @@ const VideoComment = () => {
                 onClick={() => {
                   handleSortUnique(
                     "createdAt",
-                    params.sort["createdAt"] === -1 ? 1 : -1
+                    params.sort["createdAt"] === -1 ? 1 : -1,
                   );
                 }}
                 className={`flex items-center justify-center gap-[8px] ${

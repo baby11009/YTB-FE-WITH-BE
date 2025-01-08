@@ -1,8 +1,9 @@
-import { dltData } from "../../../../Api/controller";
+import {dltData } from "../../../../Api/controller";
 import { CheckBox2 } from "../../../../Component";
 import { EditIcon, DeleteIcon } from "../../../../Assets/Icons";
 import { Link } from "react-router-dom";
 import { timeFormat3 } from "../../../../util/timeforMat";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const CommentTbRow = ({
   data,
@@ -14,6 +15,8 @@ const CommentTbRow = ({
   checkedList = [],
   handleChecked,
 }) => {
+  const { setNotifyMessage } = useAuthContext();
+
   return (
     <tr className={`${od + 1 !== length && "border-b-[1px]"} `}>
       <th>
@@ -77,9 +80,16 @@ const CommentTbRow = ({
             <div
               className='text-[rgba(255,255,255,0.4)] group-hover:text-red-500  transition-all duration-[0.2s]'
               onClick={async () => {
-                await dltData("comment", data?._id, "comment", () => {
-                  refetch();
-                });
+                await dltData(
+                  "comment",
+                  data?._id,
+                  "comment",
+                  () => {
+                    refetch();
+                  },
+                  undefined,
+                  setNotifyMessage,
+                );
               }}
             >
               <DeleteIcon />

@@ -1,10 +1,11 @@
-import { useRef, useState, useEffect, useLayoutEffect, Suspense } from "react";
+import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { UploadImageIcon } from "../../../../Assets/Icons";
-import { Input, DropDown } from "../../../../Component";
+import { Input } from "../../../../Component";
 import { createData, updateData } from "../../../../Api/controller";
 import { getDataWithAuth } from "../../../../Api/getData";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const initForm = {
   title: "",
@@ -13,6 +14,8 @@ const initForm = {
 
 const UpsertTag = () => {
   const { id } = useParams();
+
+  const { setNotifyMessage } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -23,7 +26,6 @@ const UpsertTag = () => {
   } = getDataWithAuth(`tag/${id}`, {}, id !== undefined, false);
 
   const [formData, setFormData] = useState(initForm);
-  console.log("🚀 ~ ormData:", formData);
 
   const [previewImg, setPreviewImg] = useState("");
 
@@ -150,10 +152,17 @@ const UpsertTag = () => {
       finalData.append(key, alowedData[key]);
     }
 
-    await createData("tag", finalData, "tag", () => {
-      setFormData(initForm);
-      setPreviewImg("");
-    });
+    await createData(
+      "tag",
+      finalData,
+      "tag",
+      () => {
+        setFormData(initForm);
+        setPreviewImg("");
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const update = async () => {
@@ -195,9 +204,17 @@ const UpsertTag = () => {
       data.append(key, finalData[key]);
     }
 
-    await updateData("tag", id, data, "tag", () => {
-      refetch();
-    });
+    await updateData(
+      "tag",
+      id,
+      data,
+      "tag",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -234,7 +251,7 @@ const UpsertTag = () => {
       setPreviewImg(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_TAG_API
-        }${tagData.data.icon}`
+        }${tagData.data.icon}`,
       );
     }
 

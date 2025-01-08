@@ -4,6 +4,7 @@ import { CheckBox2 } from "../../../../Component";
 import { EditIcon, DeleteIcon, ThinArrowIcon } from "../../../../Assets/Icons";
 import { Link } from "react-router-dom";
 import { timeFormat3 } from "../../../../util/timeforMat";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const UserTbRow = ({
   data,
@@ -15,7 +16,10 @@ const UserTbRow = ({
   handleChecked,
   checkedList = [],
 }) => {
+  const { setNotifyMessage } = useAuthContext();
+
   const containerRef = useRef();
+
   const [opened, setOpened] = useState(false);
 
   const roleList = ["admin", "user"];
@@ -30,9 +34,17 @@ const UserTbRow = ({
       role,
     };
 
-    await updateData("user", id, body, "user", () => {
-      refetch();
-    });
+    await updateData(
+      "user",
+      id,
+      body,
+      "user",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   useEffect(() => {
@@ -143,9 +155,16 @@ const UserTbRow = ({
             <div
               className='text-[rgba(255,255,255,0.4)] group-hover:text-red-500  transition-all duration-[0.2s]'
               onClick={async () => {
-                await dltData("user", data?._id, "user", () => {
-                  refetch();
-                });
+                await dltData(
+                  "user",
+                  data?._id,
+                  "user",
+                  () => {
+                    refetch();
+                  },
+                  undefined,
+                  setNotifyMessage,
+                );
               }}
             >
               <DeleteIcon />

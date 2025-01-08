@@ -1,16 +1,23 @@
 import { CheckBox2, DeleteConfirm } from "../../../../../../Component";
-import { TrashBinIcon, EditIcon } from "../../../../../../Assets/Icons";
+import { TrashBinIcon } from "../../../../../../Assets/Icons";
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
 
 const VideoCmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
-  const { setIsShowing } = useAuthContext();
+  const { setIsShowing, setNotifyMessage } = useAuthContext();
 
   const handleDelete = async () => {
-    await dltData("/client/comment", data?._id, "comment", () => {
-      refetch();
-    });
+    await dltData(
+      "/client/comment",
+      data?._id,
+      "comment",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const showDeleteConfirm = () => {
@@ -19,7 +26,7 @@ const VideoCmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         handleDelete={handleDelete}
         type={"Comment"}
         data={data?._id}
-      />
+      />,
     );
   };
 

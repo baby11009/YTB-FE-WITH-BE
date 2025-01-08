@@ -4,6 +4,7 @@ import { DeleteAllIcon, CreateIcon } from "../../../../Assets/Icons";
 import { getDataWithAuth } from "../../../../Api/getData";
 import { dltManyData } from "../../../../Api/controller";
 import { Pagination } from "../../../../Component";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { Link } from "react-router-dom";
 import Search from "./Search";
 import Filter from "./Filter";
@@ -20,6 +21,8 @@ const initPrs = {
 };
 
 const DisplayUser = ({ openedMenu }) => {
+  const { setNotifyMessage } = useAuthContext();
+
   const queryClient = useQueryClient();
 
   const [totalPage, setTotalPage] = useState(1);
@@ -58,10 +61,17 @@ const DisplayUser = ({ openedMenu }) => {
   };
 
   const handleDeleteMany = async () => {
-    await dltManyData("user/delete-many", checkedList, "user", () => {
-      setCheckedList([]);
-      refetch();
-    });
+    await dltManyData(
+      "user/delete-many",
+      checkedList,
+      "user",
+      () => {
+        setCheckedList([]);
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   useLayoutEffect(() => {

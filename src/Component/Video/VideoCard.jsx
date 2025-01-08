@@ -23,6 +23,7 @@ import { durationCalc } from "../../util/durationCalc";
 import { getRandomHexColor } from "../../util/func";
 import { useAuthContext } from "../../Auth Provider/authContext";
 import PlaylistModal from "../Modal/PlaylistModal";
+import request from "../../util/axios-base-url";
 
 const duration = 12500;
 
@@ -116,8 +117,13 @@ const VideoCard = ({
   noFunc2,
   playlistId,
 }) => {
-  const { setShowHover, handleCursorPositon, setIsShowing, user } =
-    useAuthContext();
+  const {
+    setShowHover,
+    handleCursorPositon,
+    setIsShowing,
+    user,
+    setNotifyMessage,
+  } = useAuthContext();
 
   const bgColorRef = useRef(getRandomHexColor());
 
@@ -137,6 +143,22 @@ const VideoCard = ({
       id: 2,
       text: "Save to watch later",
       icon: <WatchedIcon />,
+      renderCondition: !!user,
+      handleOnClick: async () => {
+        await request
+          .patch("/client/playlist/watchlater", {
+            videoIdList: [data?._id],
+          })
+          .then((rsp) => {
+            setNotifyMessage((prev) => [
+              ...prev,
+              { id: prev.length + 1, msg: rsp.data.msg },
+            ]);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      },
     },
     {
       id: 3,
@@ -145,7 +167,7 @@ const VideoCard = ({
       handleOnClick: () => {
         setIsShowing(<PlaylistModal videoId={data?._id} />);
       },
-      condition: user ? false : true,
+      renderCondition: !!user,
     },
     {
       id: 4,

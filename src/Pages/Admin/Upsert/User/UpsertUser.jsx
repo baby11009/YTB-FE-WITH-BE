@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useLayoutEffect } from "react";
-import { UploadImageIcon, PlusIcon } from "../../../../Assets/Icons";
+import { PlusIcon } from "../../../../Assets/Icons";
 import { Input, DropDown, ImageCropper } from "../../../../Component";
 import { createData, updateData } from "../../../../Api/controller";
 import { getDataWithAuth } from "../../../../Api/getData";
@@ -16,7 +16,7 @@ const initForm = {
 };
 
 const UpsertUser = () => {
-  const { setIsShowing } = useAuthContext();
+  const { setIsShowing, setNotifyMessage } = useAuthContext();
 
   const { id } = useParams();
 
@@ -25,7 +25,7 @@ const UpsertUser = () => {
     `user/${id}`,
     {},
     id !== undefined,
-    false
+    false,
   );
 
   const [formData, setFormData] = useState(initForm);
@@ -69,7 +69,7 @@ const UpsertUser = () => {
         key !== "role" &&
         key !== "confirmed" &&
         key !== "image" &&
-        key !== "banner"
+        key !== "banner",
     );
 
     keys.forEach((key) => {
@@ -83,7 +83,7 @@ const UpsertUser = () => {
     });
 
     const emailRegex = new RegExp(
-      "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$"
+      "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
     );
 
     if (!emailRegex.test(formData.email)) {
@@ -110,7 +110,7 @@ const UpsertUser = () => {
         key !== "confirmed" &&
         key !== "avatar" &&
         key !== "password" &&
-        key !== "banner"
+        key !== "banner",
     );
     keys.forEach((key) => {
       if (formData[key] === "") {
@@ -148,13 +148,20 @@ const UpsertUser = () => {
       console.log(item);
     }
 
-    await createData("user", data, "user", () => {
-      setFormData(initForm);
-      setPreviewAva("");
-      setAvaName("");
-      setPreviewBanner("");
-      setBannerName("");
-    });
+    await createData(
+      "user",
+      data,
+      "user",
+      () => {
+        setFormData(initForm);
+        setPreviewAva("");
+        setAvaName("");
+        setPreviewBanner("");
+        setBannerName("");
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const update = async () => {
@@ -206,9 +213,17 @@ const UpsertUser = () => {
       }
     }
 
-    await updateData("user", id, data, "user", () => {
-      refetch();
-    });
+    await updateData(
+      "user",
+      id,
+      data,
+      "user",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -249,12 +264,12 @@ const UpsertUser = () => {
       setPreviewAva(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_AVA_API
-        }${userData.data.avatar}`
+        }${userData.data.avatar}`,
       );
       setPreviewBanner(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_AVA_API
-        }${userData.data.banner}`
+        }${userData.data.banner}`,
       );
     }
 
@@ -317,7 +332,7 @@ const UpsertUser = () => {
                     banner: file,
                   }));
                 }}
-              />
+              />,
             );
           }}
         >
@@ -347,7 +362,7 @@ const UpsertUser = () => {
                       image: file,
                     }));
                   }}
-                />
+                />,
               );
             }}
           >

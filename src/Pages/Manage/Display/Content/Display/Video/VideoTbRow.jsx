@@ -7,11 +7,19 @@ import { dltData } from "../../../../../../Api/controller";
 import VideoUpsertModal from "./VideoUpsertModal";
 
 const VideoTbRow = ({ handleChecked, checked, data, od, refetch }) => {
-  const { setIsShowing } = useAuthContext();
+  const { setIsShowing, setNotifyMessage } = useAuthContext();
+
   const handleDelete = async () => {
-    await dltData("/client/video", data?._id, "video",() => {
-      refetch();
-    })
+    await dltData(
+      "/client/video",
+      data?._id,
+      "video",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const showDeleteConfirm = () => {
@@ -20,7 +28,7 @@ const VideoTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         handleDelete={handleDelete}
         type={"Video"}
         data={data?._id}
-      />
+      />,
     );
   };
 

@@ -47,24 +47,6 @@ const Body = ({
           path={location.pathname}
         />
       )}
-      {/* {!noLDMenu && (
-        <div className='hidden xl:block z-[9999]'>
-          <LeftMenu
-            openedMenu={openedMenu}
-            setOpenedMenu={setOpenedMenu}
-            path={location.pathname}
-          />
-        </div>
-      )} */}
-      {/* Small device left menu */}
-      {/* <div className={`${!noLDMenu && " xl:hidden"} z-[9999]`}>
-        <SDLeftMenu
-          openedMenu={openedMenu}
-          setOpenedMenu={setOpenedMenu}
-          noIconMenu={noIconMenu}
-          path={location.pathname}
-        />
-      </div> */}
       <div
         className={`
            

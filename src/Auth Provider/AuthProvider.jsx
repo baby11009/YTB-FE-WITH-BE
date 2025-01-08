@@ -22,8 +22,7 @@ const AuthProvider = ({ children }) => {
 
   const [showHover, setShowHover] = useState(undefined);
 
-  const [notifyMessage, setNotifyMessage] = useState(["Complete", "21312"]);
-  console.log("🚀 ~ notifyMessage:", notifyMessage);
+  const [notifyMessage, setNotifyMessage] = useState([]);
 
   const toasterContainer = useRef();
 
@@ -201,6 +200,7 @@ const AuthProvider = ({ children }) => {
         modalContainerRef,
         fetchingState,
         setFetchingState,
+        setNotifyMessage,
       }}
     >
       <div className='relative'>
@@ -239,25 +239,23 @@ const AuthProvider = ({ children }) => {
             {showHover}
           </div>
         )}
-        <div ref={toasterContainer}>
+        <div ref={toasterContainer} className='z-[7000] relative'>
           {notifyMessage.map((message, index) => (
             <div
-              key={message}
+              key={message.id}
               className='fixed bottom-0 left-0  toaster-animation'
               style={{
                 "--delay": 6 * index + "s",
               }}
               onAnimationEnd={(e) => {
-                console.log(message);
-
-                setNotifyMessage((prev) =>
-                  prev.filter((msg) => msg !== message),
-                );
+                if (index === notifyMessage.length - 1) {
+                  setNotifyMessage([]);
+                }
               }}
             >
               <div className=' m-[12px] p-[12px] bg-white max-w-[288px] overflow-hidden rounded-[8px]'>
                 <span className='text-[14px] leading-[20px] text-[#0f0f0f] line-clamp-1 text-ellipsis whitespace-pre-wrap'>
-                  {message}
+                  {message.msg}
                 </span>
               </div>
             </div>

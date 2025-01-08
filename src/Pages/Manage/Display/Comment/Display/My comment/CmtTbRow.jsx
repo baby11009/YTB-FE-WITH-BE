@@ -6,16 +6,23 @@ import { dltData, updateData } from "../../../../../../Api/controller";
 import { useLayoutEffect, useState } from "react";
 
 const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
-  const { setIsShowing } = useAuthContext();
+  const { setIsShowing, setNotifyMessage } = useAuthContext();
 
   const [editText, setEditText] = useState(false);
 
   const [value, setValue] = useState("");
 
   const handleDelete = async () => {
-    await dltData("/client/comment", data?._id, "comment", () => {
-      refetch();
-    });
+    await dltData(
+      "/client/comment",
+      data?._id,
+      "comment",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
   useLayoutEffect(() => {
     if (data) {
@@ -28,7 +35,7 @@ const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         handleDelete={handleDelete}
         type={"Comment"}
         data={data?._id}
-      />
+      />,
     );
   };
 
@@ -48,7 +55,9 @@ const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
       () => {
         refetch();
         setEditText(false);
-      }
+      },
+      undefined,
+      setNotifyMessage,
     );
   };
 

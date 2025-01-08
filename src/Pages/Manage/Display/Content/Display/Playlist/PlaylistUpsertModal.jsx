@@ -72,7 +72,7 @@ const maxLength = 255;
 const VideoUpsertModal = ({ title, id }) => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing } = useAuthContext();
+  const { setIsShowing, setNotifyMessage } = useAuthContext();
 
   const [playlistPrs, setPlaylistPrs] = useState(initPlaylistParams);
 
@@ -164,9 +164,17 @@ const VideoUpsertModal = ({ title, id }) => {
         return;
       }
 
-      await updateData("/client/playlist", id, finalData, "playlist", () => {
-        refetch();
-      });
+      await updateData(
+        "/client/playlist",
+        id,
+        finalData,
+        "playlist",
+        () => {
+          refetch();
+        },
+        undefined,
+        setNotifyMessage,
+      );
     },
     [error],
   );
@@ -180,6 +188,8 @@ const VideoUpsertModal = ({ title, id }) => {
       () => {
         refetch();
       },
+      undefined,
+      setNotifyMessage,
     );
   }, []);
 

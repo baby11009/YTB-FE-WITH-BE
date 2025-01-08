@@ -10,6 +10,7 @@ import { createData, updateData } from "../../../../Api/controller";
 import { getDataWithAuth } from "../../../../Api/getData";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const initForm = {
   userId: "",
@@ -23,6 +24,8 @@ const initForm = {
 
 const UpsertComment = () => {
   const { id } = useParams();
+
+  const { setNotifyMessage } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -94,7 +97,7 @@ const UpsertComment = () => {
     `/comment`,
     replyPrs,
     cmtOpened && formData.videoId ? true : false,
-    false
+    false,
   );
 
   const handleOnChange = (name, value) => {
@@ -123,7 +126,7 @@ const UpsertComment = () => {
         key !== "email" &&
         key !== "like" &&
         key !== "dislike" &&
-        key !== "replyId"
+        key !== "replyId",
     );
 
     keys.forEach((key) => {
@@ -152,7 +155,7 @@ const UpsertComment = () => {
         key !== "email" &&
         key !== "like" &&
         key !== "dislike" &&
-        key !== "replyId"
+        key !== "replyId",
     );
     keys.forEach((key) => {
       if (formData[key] === "" || !formData[key]) {
@@ -184,9 +187,16 @@ const UpsertComment = () => {
       }
     });
 
-    await createData("comment", finalData, "comment", () => {
-      setFormData(initForm);
-    });
+    await createData(
+      "comment",
+      finalData,
+      "comment",
+      () => {
+        setFormData(initForm);
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const update = async () => {
@@ -215,9 +225,17 @@ const UpsertComment = () => {
       return;
     }
 
-    await updateData("comment", id, finalData, "comment", () => {
-      refetch();
-    });
+    await updateData(
+      "comment",
+      id,
+      finalData,
+      "comment",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const handleSubmit = async (e) => {

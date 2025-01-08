@@ -3,39 +3,43 @@ import {
   CloseIcon,
   PlusIcon,
   PublicIcon,
-  PrivacyIcon,
   PrivateIcon,
 } from "../../Assets/Icons";
 import request from "../../util/axios-base-url";
-import { getDataWithAuth } from "../../Api/getData";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState, useCallback } from "react";
 import CheckBox2 from "../CheckBox/CheckBox2";
 import { IsElementEnd } from "../../util/scrollPosition";
 
-const PlaylistCard = ({ data, videoId }) => {
+const PlaylistCard = ({ data, videoId, setNotifyMessage }) => {
   const [playlistData, setPlaylistData] = useState(data);
 
   const [checked, setChecked] = useState(false);
 
   const handleAddToPlaylist = useCallback(async (data) => {
     try {
-      const rsp = await request
+      await request
         .patch(`/client/playlist/${data?._id}`, {
           videoIdList: [videoId],
         })
         .then((rsp) => {
           setPlaylistData((prev) => ({ ...prev, ...rsp.data?.data }));
+          console.log(rsp.data?.data?.itemList.includes(videoId));
+          const msg = rsp.data?.data?.itemList.includes(videoId)
+            ? `Saved to ${rsp.data?.data?.title}`
+            : `Removed from ${rsp.data?.data?.title}`;
+          setNotifyMessage((prev) => [...prev, { id: prev.length + 1, msg }]);
         });
     } catch (error) {
-      setChecked((prev) => !prev);
       alert("Failed to add to playlist");
       throw error;
     }
   }, []);
 
   useEffect(() => {
-    if (playlistData) setChecked(playlistData?.itemList.includes(videoId));
+    if (playlistData) {
+      setChecked(playlistData?.itemList.includes(videoId));
+    }
   }, [playlistData]);
 
   return (
@@ -64,9 +68,7 @@ const PlaylistCard = ({ data, videoId }) => {
 };
 
 const InsertPlaylist = ({ videoId, setDisplay }) => {
-  const queryClient = useQueryClient();
-
-  const { setIsShowing } = useAuthContext();
+  const { setIsShowing, setNotifyMessage } = useAuthContext();
 
   const [queries, setQueries] = useState({
     sort: { createdAt: -1 },
@@ -86,15 +88,8 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
     }
   }, []);
 
-  // const { data, isLoading, isError, isSuccess } = getDataWithAuth(
-  //   "/client/playlist",
-  //   queries,
-  //   true,
-  //   false
-  // );
-
   const { data, isLoading, isSuccess, isError, refetch } = useQuery({
-    queryKey: [JSON.stringify(queries), "watchlater"],
+    queryKey: ["watchlater", "/client/playlist", ...Object.values(queries)],
     queryFn: async () => {
       try {
         const rsp = await request.get("/client/playlist", {
@@ -107,8 +102,7 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
         console.error(error);
       }
     },
-    suspense: false,
-    cacheTime: 5 * 60 * 1000,
+    cacheTime: 0,
   });
 
   useEffect(() => {
@@ -122,12 +116,6 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
       setQueries((prev) => ({ ...prev, page: prev.page + 1 }));
     }
   }, [isEnd]);
-
-  useEffect(() => {
-    return () => {
-      queryClient.removeQueries(Object.values(queries));
-    };
-  }, []);
 
   return (
     <div className='max-w-[648px] min-w-[210px] max-h-[340px] flex flex-col '>
@@ -164,6 +152,7 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
               key={`${item?._id}-${id}`}
               data={item}
               videoId={videoId}
+              setNotifyMessage={setNotifyMessage}
             />
           ))
         )}

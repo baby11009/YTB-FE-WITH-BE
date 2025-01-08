@@ -1,7 +1,6 @@
 import {
   SortIcon2,
   CloseIcon,
-  CreateIcon,
   TrashBinIcon,
   LongArrowIcon,
 } from "../../../../../../Assets/Icons";
@@ -39,12 +38,12 @@ const Comment = () => {
 
   const { data, isLoading, refetch, isError, error } = getDataWithAuth(
     "/client/comment",
-    params
+    params,
   );
 
   const [dataList, setDataList] = useState([]);
 
-  const { setIsShowing, openedMenu } = useAuthContext();
+  const { setIsShowing, openedMenu, setNotifyMessage } = useAuthContext();
 
   const handleCheckedAll = () => {
     if (checkedList.length === data?.data?.length) {
@@ -131,8 +130,10 @@ const Comment = () => {
       () => {
         setCheckedList([]);
         refetch();
-      }
-    )
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const showDltConfirm = () => {
@@ -145,7 +146,7 @@ const Comment = () => {
         handleDelete={handleDeleteMany}
         type={"Comment"}
         data={checkedList.join(", ")}
-      />
+      />,
     );
   };
 
@@ -257,7 +258,7 @@ const Comment = () => {
                 onClick={() => {
                   handleSortUnique(
                     "createdAt",
-                    params.sort["createdAt"] === -1 ? 1 : -1
+                    params.sort["createdAt"] === -1 ? 1 : -1,
                   );
                 }}
                 className={`flex items-center justify-center gap-[8px] ${

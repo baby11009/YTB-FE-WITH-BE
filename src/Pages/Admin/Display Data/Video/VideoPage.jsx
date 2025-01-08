@@ -8,6 +8,7 @@ import Display from "./Display";
 import { Pagination } from "../../../../Component";
 import Search from "./Search";
 import Filter from "./Filter";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const limit = 8;
 const initPrs = {
@@ -23,6 +24,8 @@ const initPrs = {
 };
 
 const VideoPage = ({ openedMenu }) => {
+  const { setNotifyMessage } = useAuthContext();
+
   const queryClient = useQueryClient();
 
   const [totalPage, setTotalPage] = useState(1);
@@ -61,10 +64,17 @@ const VideoPage = ({ openedMenu }) => {
   };
 
   const handleDeleteMany = async () => {
-    await dltManyData("video/delete-many", checkedList, "video", () => {
-      setCheckedList([]);
-      refetch();
-    });
+    await dltManyData(
+      "video/delete-many",
+      checkedList,
+      "video",
+      () => {
+        setCheckedList([]);
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   useLayoutEffect(() => {

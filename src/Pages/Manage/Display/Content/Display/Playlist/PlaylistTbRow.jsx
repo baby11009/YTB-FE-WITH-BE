@@ -5,15 +5,23 @@ import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
 import PlaylistUpsertModal from "./PlaylistUpsertModal";
+import { useCallback } from "react";
 
 const PlaylistTbRow = ({ handleChecked, checked, data, od, refetch }) => {
+  const { setIsShowing, setNotifyMessage } = useAuthContext();
 
-  const { setIsShowing } = useAuthContext();
-  const handleDelete = async () => {
-    await dltData("/client/playlist", data?._id, "playlist", () => {
-      refetch();
-    });
-  };
+  const handleDelete = useCallback(async () => {
+    await dltData(
+      "/client/playlist",
+      data?._id,
+      "playlist",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
+  });
 
   const showDeleteConfirm = () => {
     setIsShowing(
@@ -21,13 +29,13 @@ const PlaylistTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         handleDelete={handleDelete}
         type={"Playlist"}
         data={data?._id}
-      />
+      />,
     );
   };
 
   const showUpsertModal = () => {
     setIsShowing(
-      <PlaylistUpsertModal title={"Editing playlist"} id={data?._id} />
+      <PlaylistUpsertModal title={"Editing playlist"} id={data?._id} />,
     );
   };
   return (

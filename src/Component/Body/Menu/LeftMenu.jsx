@@ -34,7 +34,7 @@ const LeftMenu = ({ openedMenu, path }) => {
     <nav
       className={`fixed top-[56px] left-0  ${
         openedMenu ? "w-[240px]" : "w-[74px]"
-      }  h-screen z-[9999]`}
+      }  h-screen z-[1000]`}
       ref={(e) => {
         if (e) {
           e.addEventListener("wheel", (e) => {

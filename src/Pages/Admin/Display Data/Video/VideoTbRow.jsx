@@ -4,6 +4,7 @@ import { CheckBox2 } from "../../../../Component";
 import { EditIcon, DeleteIcon, ThinArrowIcon } from "../../../../Assets/Icons";
 import { Link } from "react-router-dom";
 import { timeFormat3 } from "../../../../util/timeforMat";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const VideoTbRow = ({
   data,
@@ -15,7 +16,10 @@ const VideoTbRow = ({
   checkedList = [],
   handleChecked,
 }) => {
+  const { setNotifyMessage } = useAuthContext();
+
   const containerRef = useRef();
+
   const [opened, setOpened] = useState(false);
 
   const typeList = ["video", "short"];
@@ -27,9 +31,17 @@ const VideoTbRow = ({
       return null;
     }
 
-    await updateData("video", id, { type }, "video", () => {
-      refetch();
-    });
+    await updateData(
+      "video",
+      id,
+      { type },
+      "video",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   useEffect(() => {
@@ -142,9 +154,16 @@ const VideoTbRow = ({
             <div
               className='text-[rgba(255,255,255,0.4)] group-hover:text-red-500  transition-all duration-[0.2s]'
               onClick={async () => {
-                await dltData("video", data?._id, "video", () => {
-                  refetch();
-                });
+                await dltData(
+                  "video",
+                  data?._id,
+                  "video",
+                  () => {
+                    refetch();
+                  },
+                  undefined,
+                  setNotifyMessage,
+                );
               }}
             >
               <DeleteIcon />

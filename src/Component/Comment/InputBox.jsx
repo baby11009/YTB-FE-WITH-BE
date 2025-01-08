@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { EmojiIcon } from "../../Assets/Icons";
 import { createData } from "../../Api/controller";
+import { useAuthContext } from "../../Auth Provider/authContext";
 
 const InputBox = ({
   setShowedInput,
@@ -13,14 +14,13 @@ const InputBox = ({
   userId,
   replyId,
   refetchVideo,
-  replyUserId,
 }) => {
   const [focused, setFocused] = useState(false);
 
   const [cmtText, setCmtText] = useState("");
 
   const inputRef = useRef();
-
+  const { setNotifyMessage } = useAuthContext();
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -36,13 +36,20 @@ const InputBox = ({
     if (replyId) {
       data.replyId = replyId;
     }
-    await createData("/client/comment", data, "comment", () => {
-      if (refetchVideo) {
-        refetchVideo();
-      }
-      setCmtText("");
-      setShowedInput(false);
-    });
+    await createData(
+      "/client/comment",
+      data,
+      "comment",
+      () => {
+        if (refetchVideo) {
+          refetchVideo();
+        }
+        setCmtText("");
+        setShowedInput(false);
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   return (

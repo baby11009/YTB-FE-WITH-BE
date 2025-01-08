@@ -32,7 +32,7 @@ const initParams = {
 const Video = () => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, openedMenu } = useAuthContext();
+  const { setIsShowing, openedMenu, setNotifyMessage } = useAuthContext();
 
   const [sort, setSort] = useState(undefined);
 
@@ -127,11 +127,17 @@ const Video = () => {
   ]);
 
   const handleDeleteMany = async () => {
-    console.log(checkedList.join(", "));
-    await dltManyData("/client/video/delete-many", checkedList, "video", () => {
-      setCheckedList([]);
-      refetch();
-    });
+    await dltManyData(
+      "/client/video/delete-many",
+      checkedList,
+      "video",
+      () => {
+        setCheckedList([]);
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const showDltConfirm = () => {

@@ -9,6 +9,7 @@ import {
 import { useState, useEffect, useLayoutEffect } from "react";
 import { CloseIcon } from "../../../../Assets/Icons";
 import { createData, updateData } from "../../../../Api/controller";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const initForm = {
   userId: "",
@@ -33,6 +34,8 @@ const videoPrsInit = {
 
 const UpsertPlaylist = () => {
   const { id } = useParams();
+
+  const { setNotifyMessage } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -149,9 +152,16 @@ const UpsertPlaylist = () => {
       userId: formData.userId,
     };
 
-    await createData("playlist", finalFormData, "playlist", () => {
-      setFormData(initForm);
-    });
+    await createData(
+      "playlist",
+      finalFormData,
+      "playlist",
+      () => {
+        setFormData(initForm);
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const update = async () => {
@@ -195,9 +205,17 @@ const UpsertPlaylist = () => {
       finalFormData.videoIdList = uniqueIdList;
     }
 
-    await updateData("playlist", id, finalFormData, "playlist", () => {
-      refetch();
-    });
+    await updateData(
+      "playlist",
+      id,
+      finalFormData,
+      "playlist",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const handleSubmit = async (e) => {

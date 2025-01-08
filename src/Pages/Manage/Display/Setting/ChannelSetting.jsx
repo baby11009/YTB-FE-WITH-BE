@@ -13,7 +13,7 @@ const initForm = {
 };
 
 const ChannelSetting = () => {
-  const { setIsShowing, user, setRefetch } = useAuthContext();
+  const { setIsShowing, user, setRefetch, setNotifyMessage } = useAuthContext();
 
   const [formData, setFormData] = useState(initForm);
 
@@ -131,9 +131,17 @@ const ChannelSetting = () => {
         }
       }
       console.log(finalData);
-      await updateData("/client/user/me", undefined, data, "user", () => {
-        setRefetch(true);
-      });
+      await updateData(
+        "/client/user/me",
+        undefined,
+        data,
+        "user",
+        () => {
+          setRefetch(true);
+        },
+        undefined,
+        setNotifyMessage,
+      );
     },
     [error],
   );

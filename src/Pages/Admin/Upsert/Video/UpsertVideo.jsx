@@ -11,6 +11,7 @@ import { createData, updateData } from "../../../../Api/controller";
 import { getDataWithAuth } from "../../../../Api/getData";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const init = {
   userId: "",
@@ -45,6 +46,8 @@ const currUserInit = {
 
 const UpsertVideo = () => {
   const { id } = useParams();
+
+  const { setNotifyMessage } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -172,7 +175,7 @@ const UpsertVideo = () => {
 
     const keys = Object.keys(formData).filter(
       (key) =>
-        key !== "type" && key !== "like" && key !== "dislike" && key !== "view"
+        key !== "type" && key !== "like" && key !== "dislike" && key !== "view",
     );
 
     keys.forEach((key) => {
@@ -206,7 +209,7 @@ const UpsertVideo = () => {
         key !== "video" &&
         key !== "view" &&
         key !== "like" &&
-        key !== "dislike"
+        key !== "dislike",
     );
     keys.forEach((key) => {
       if (formData[key] === "" || !formData[key]) {
@@ -235,12 +238,19 @@ const UpsertVideo = () => {
       data.append(key, formData[key]);
     }
 
-    await createData("video/upload", data, "video", () => {
-      setFormData(init);
-      setPreviewVideo(undefined);
-      setPreviewThumb(undefined);
-      setCurrUser(currUserInit);
-    });
+    await createData(
+      "video/upload",
+      data,
+      "video",
+      () => {
+        setFormData(init);
+        setPreviewVideo(undefined);
+        setPreviewThumb(undefined);
+        setCurrUser(currUserInit);
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const update = async () => {
@@ -286,9 +296,17 @@ const UpsertVideo = () => {
       }
     }
 
-    await updateData("video", id, data, "video", () => {
-      refetch();
-    });
+    await updateData(
+      "video",
+      id,
+      data,
+      "video",
+      () => {
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -324,12 +342,12 @@ const UpsertVideo = () => {
       setPreviewThumb(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_THUMB_API
-        }${videoData?.data?.thumb}`
+        }${videoData?.data?.thumb}`,
       );
       setPreviewVideo(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_VIDEO_API
-        }${videoData?.data?.video}`
+        }${videoData?.data?.video}`,
       );
     }
 

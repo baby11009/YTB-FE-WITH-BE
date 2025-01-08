@@ -10,7 +10,6 @@ import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import InputBox from "./InputBox";
 import { timeFormat2 } from "../../util/timeforMat";
-
 import { useAuthContext } from "../../Auth Provider/authContext";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
 import { LikeAndDislikeCmtBtn } from "../../Component";
@@ -26,7 +25,7 @@ const CommentCard = ({
   videoId,
   refetchVideo,
 }) => {
-  const { user, setIsShowing } = useAuthContext();
+  const { user, setIsShowing, setNotifyMessage } = useAuthContext();
 
   const [showedInput, setShowedInput] = useState(false);
 
@@ -54,7 +53,9 @@ const CommentCard = ({
       "comment",
       (rsp) => {
         setIsShowing(undefined);
-      }
+      },
+      undefined,
+      setNotifyMessage,
     );
   };
 
@@ -67,7 +68,7 @@ const CommentCard = ({
           <EditCommentArea
             value={data?.cmtText}
             handleUpdate={handleUpdatedCmt}
-          />
+          />,
         );
       },
     },
@@ -75,9 +76,16 @@ const CommentCard = ({
       id: 2,
       text: "Xóa",
       handleOnClick: async () => {
-        await dltData("/client/comment", data?._id, "comment", (rsp) => {
-          refetchVideo();
-        });
+        await dltData(
+          "/client/comment",
+          data?._id,
+          "comment",
+          (rsp) => {
+            refetchVideo();
+          },
+          undefined,
+          setNotifyMessage,
+        );
       },
     },
   ];

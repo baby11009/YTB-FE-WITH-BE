@@ -30,7 +30,7 @@ const initParams = {
 const Playlist = () => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, openedMenu } = useAuthContext();
+  const { setIsShowing, openedMenu,setNotifyMessage } = useAuthContext();
 
   const [sort, setSort] = useState(undefined);
 
@@ -42,7 +42,7 @@ const Playlist = () => {
 
   const { data, isLoading, refetch } = getDataWithAuth(
     "/client/playlist",
-    params
+    params,
   );
 
   const [dataList, setDataList] = useState([]);
@@ -136,7 +136,9 @@ const Playlist = () => {
       () => {
         setCheckedList([]);
         refetch();
-      }
+      },
+      undefined,
+      setNotifyMessage,
     );
   };
 
@@ -150,7 +152,7 @@ const Playlist = () => {
         handleDelete={handleDeleteMany}
         type={"Playlist"}
         data={checkedList.join(", ")}
-      />
+      />,
     );
   };
 
@@ -271,7 +273,7 @@ const Playlist = () => {
                 onClick={() => {
                   handleSortUnique(
                     "createdAt",
-                    params.sort["createdAt"] === -1 ? 1 : -1
+                    params.sort["createdAt"] === -1 ? 1 : -1,
                   );
                 }}
                 className={`flex items-center justify-center gap-[8px] ${

@@ -8,7 +8,7 @@ import { Pagination } from "../../../../Component";
 import Search from "./Search";
 import Filter from "./Filter";
 import { useQueryClient } from "@tanstack/react-query";
-
+import { useAuthContext } from "../../../../Auth Provider/authContext";
 const limit = 8;
 const initPrs = {
   limit,
@@ -18,6 +18,8 @@ const initPrs = {
 };
 
 const CommentPage = ({ openedMenu }) => {
+  const { setNotifyMessage } = useAuthContext();
+
   const queryClient = useQueryClient();
 
   const [totalPage, setTotalPage] = useState(1);
@@ -52,10 +54,17 @@ const CommentPage = ({ openedMenu }) => {
   };
 
   const handleDeleteMany = async () => {
-    await dltManyData("comment/delete-many", checkedList, "comment", () => {
-      setCheckedList([]);
-      refetch();
-    })
+    await dltManyData(
+      "comment/delete-many",
+      checkedList,
+      "comment",
+      () => {
+        setCheckedList([]);
+        refetch();
+      },
+      undefined,
+      setNotifyMessage,
+    );
   };
 
   useLayoutEffect(() => {
