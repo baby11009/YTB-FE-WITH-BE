@@ -16,7 +16,7 @@ const initForm = {
 };
 
 const UpsertUser = () => {
-  const { setIsShowing, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
   const { id } = useParams();
 
@@ -160,7 +160,7 @@ const UpsertUser = () => {
         setBannerName("");
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 
@@ -222,7 +222,7 @@ const UpsertUser = () => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

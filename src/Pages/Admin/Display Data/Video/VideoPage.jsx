@@ -24,7 +24,7 @@ const initPrs = {
 };
 
 const VideoPage = ({ openedMenu }) => {
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -73,7 +73,7 @@ const VideoPage = ({ openedMenu }) => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

@@ -15,7 +15,7 @@ const initForm = {
 const UpsertTag = () => {
   const { id } = useParams();
 
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -161,7 +161,7 @@ const UpsertTag = () => {
         setPreviewImg("");
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 
@@ -213,7 +213,7 @@ const UpsertTag = () => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

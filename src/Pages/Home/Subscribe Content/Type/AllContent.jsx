@@ -159,8 +159,6 @@ const AllContent = ({ openedMenu }) => {
     }
   }, [isEnd]);
 
-  if (isLoading || !shortData || !videoData) return;
-
   return (
     <div>
       {layout === "grid" && (
@@ -191,26 +189,27 @@ const AllContent = ({ openedMenu }) => {
           </div>
         </div>
       )}
-
-      <div className='mx-[16px]'>
-        {layout === "grid" ? (
-          <GridLayout
-            openedMenu={openedMenu}
-            vidList={videoList}
-            shortList={shortList}
-          />
-        ) : (
-          <ListLayout
-            openedMenu={openedMenu}
-            vidList={videoList}
-            shortList={shortList}
-            layout={layout}
-            setLayout={(layout) => {
-              setSearchParams({ layout });
-            }}
-          />
-        )}
-      </div>
+      {videoList.length > 0 && shortList.length > 0 && (
+        <div className='mx-[16px]'>
+          {layout === "grid" ? (
+            <GridLayout
+              openedMenu={openedMenu}
+              vidList={videoList}
+              shortList={shortList}
+            />
+          ) : (
+            <ListLayout
+              openedMenu={openedMenu}
+              vidList={videoList}
+              shortList={shortList}
+              layout={layout}
+              setLayout={(layout) => {
+                setSearchParams({ layout });
+              }}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };

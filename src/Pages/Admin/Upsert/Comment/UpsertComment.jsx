@@ -25,7 +25,7 @@ const initForm = {
 const UpsertComment = () => {
   const { id } = useParams();
 
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -195,7 +195,7 @@ const UpsertComment = () => {
         setFormData(initForm);
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 
@@ -234,7 +234,7 @@ const UpsertComment = () => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

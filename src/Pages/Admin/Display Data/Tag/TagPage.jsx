@@ -20,7 +20,7 @@ const initPrs = {
 };
 
 const TagPage = ({ openedMenu }) => {
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
   const queryClient = useQueryClient();
 
   const [totalPage, setTotalPage] = useState(1);
@@ -64,7 +64,7 @@ const TagPage = ({ openedMenu }) => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

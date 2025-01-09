@@ -43,7 +43,7 @@ const Comment = () => {
 
   const [dataList, setDataList] = useState([]);
 
-  const { setIsShowing, openedMenu, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, openedMenu, addToaster } = useAuthContext();
 
   const handleCheckedAll = () => {
     if (checkedList.length === data?.data?.length) {
@@ -132,7 +132,7 @@ const Comment = () => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

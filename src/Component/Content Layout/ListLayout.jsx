@@ -20,13 +20,13 @@ const HorizonCard = ({ data, layout, setLayout }) => {
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_AVA_API
-              }${data?.user_info?.avatar}`}
+              }${data?.channel_info?.avatar}`}
               alt='channel image'
             />
           </div>
           <div>
             <span className='text-[20px] leading-[28px] font-bold'>
-              {data?.user_info?.name}
+              {data?.channel_info?.name}
             </span>
           </div>
         </Link>
@@ -84,7 +84,7 @@ const ListLayout = ({ openedMenu, vidList, shortList, layout, setLayout }) => {
       direction,
       scrollContainer,
       350,
-      scrollContainer.current.clientWidth
+      scrollContainer.current.clientWidth,
     );
   };
 

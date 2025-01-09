@@ -118,6 +118,14 @@ const ChannelHome = ({ channelEmail }) => {
 
   useEffect(() => {
     return () => {
+      if (videosData && playlistData) {
+        queryClient.clear();
+      }
+    };
+  }, [channelEmail]);
+
+  useEffect(() => {
+    return () => {
       queryClient.clear();
     };
   }, []);

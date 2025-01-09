@@ -32,7 +32,7 @@ const initParams = {
 const Short = () => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, openedMenu, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, openedMenu, addToaster } = useAuthContext();
 
   const [sort, setSort] = useState(undefined);
 
@@ -135,7 +135,7 @@ const Short = () => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

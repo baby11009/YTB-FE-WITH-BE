@@ -7,7 +7,7 @@ export const createData = async (
   dataType,
   handleSuccess,
   handleFinally,
-  setNotifyMessage,
+  addToaster,
 ) => {
   const cfirm = confirm(`Are you sure you want to create new ${dataType}?`);
 
@@ -36,18 +36,12 @@ export const createData = async (
         }
       });
 
-    setNotifyMessage((prev) => [
-      ...prev,
-      { id: prev.length + 1, msg: `New ${dataType} created successfully` },
-    ]);
+    addToaster(`New ${dataType} created successfully`);
 
     return newData;
   } catch (error) {
     console.log("🚀 ~ error:", error);
-    setNotifyMessage((prev) => [
-      ...prev,
-      { id: prev.length + 1, msg: error.response.data.msg },
-    ]);
+    alert(error.response.data.msg);
   }
 };
 
@@ -57,7 +51,7 @@ export const dltData = async (
   dataType,
   handleSuccess,
   handleFinally,
-  setNotifyMessage,
+  addToaster,
 ) => {
   const cfirm = confirm(`Are you sure you want to delete this ${dataType}?`);
 
@@ -86,16 +80,10 @@ export const dltData = async (
         }
       });
 
-    setNotifyMessage((prev) => [
-      ...prev,
-      { id: prev.length + 1, msg: `Delete ${dataType} successfully` },
-    ]);
+    addToaster(`Delete ${dataType} successfully`);
   } catch (error) {
     console.log("🚀 ~ error:", error);
-    setNotifyMessage((prev) => [
-      ...prev,
-      { id: prev.length + 1, msg: error.response.data.msg },
-    ]);
+    alert(error.response.data.msg);
   }
 };
 
@@ -105,7 +93,7 @@ export const dltManyData = async (
   dataType,
   handleSuccess,
   handleFinally,
-  setNotifyMessage,
+  addToaster,
 ) => {
   if (idList.length === 0) {
     alert(`Must choose at least one ${dataType}`);
@@ -145,7 +133,7 @@ export const dltManyData = async (
         }
       });
 
-    alert(`Delete ${dataType} successfully`);
+    addToaster(`Delete ${dataType} successfully`);
     console.log(dltDatas.data);
   } catch (error) {
     console.log("🚀 ~ error:", error);
@@ -160,7 +148,7 @@ export const updateData = async (
   dataType,
   handleSuccess,
   handleFinally,
-  setNotifyMessage,
+  addToaster,
 ) => {
   const cfirm = confirm(`Are you sure you want to change these ${dataType}?`);
 
@@ -192,27 +180,15 @@ export const updateData = async (
           handleFinally();
         }
       });
-    setNotifyMessage((prev) => [
-      ...prev,
-      {
-        id: prev.length + 1,
-        msg: `${firstLetter.toUpperCase()}${rest.join(
-          "",
-        )} updated successfully`,
-      },
-    ]);
+    addToaster(
+      `${firstLetter.toUpperCase()}${rest.join("")} updated successfully`,
+    );
 
     if (data) {
       return data.data;
     }
   } catch (error) {
     console.log("🚀 ~ error:", error);
-    setNotifyMessage((prev) => [
-      ...prev,
-      {
-        id: prev.length + 1,
-        msg: error.response.data.msgF,
-      },
-    ]);
+    alert(error.response.data.msg);
   }
 };

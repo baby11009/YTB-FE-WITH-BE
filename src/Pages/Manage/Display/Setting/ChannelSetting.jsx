@@ -13,7 +13,7 @@ const initForm = {
 };
 
 const ChannelSetting = () => {
-  const { setIsShowing, user, setRefetch, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, user, setRefetch, addToaster } = useAuthContext();
 
   const [formData, setFormData] = useState(initForm);
 
@@ -140,7 +140,7 @@ const ChannelSetting = () => {
           setRefetch(true);
         },
         undefined,
-        setNotifyMessage,
+        addToaster,
       );
     },
     [error],

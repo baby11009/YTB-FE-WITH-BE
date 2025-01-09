@@ -3,7 +3,6 @@ import {
   Setting2Icon,
   BlockIcon,
   AddWLIcon,
-  AddPLIcon,
   DownloadIcon,
   ShareIcon,
   NoSuggetIcon,
@@ -12,6 +11,7 @@ import {
   LaterIcon,
   PlayListIcon,
   CloseIcon,
+  SaveIcon,
 } from "../../Assets/Icons";
 import { motion, useAnimate } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
@@ -117,13 +117,8 @@ const VideoCard = ({
   noFunc2,
   playlistId,
 }) => {
-  const {
-    setShowHover,
-    handleCursorPositon,
-    setIsShowing,
-    user,
-    setNotifyMessage,
-  } = useAuthContext();
+  const { setShowHover, handleCursorPositon, setIsShowing, user, addToaster } =
+    useAuthContext();
 
   const bgColorRef = useRef(getRandomHexColor());
 
@@ -150,10 +145,7 @@ const VideoCard = ({
             videoIdList: [data?._id],
           })
           .then((rsp) => {
-            setNotifyMessage((prev) => [
-              ...prev,
-              { id: prev.length + 1, msg: rsp.data.msg },
-            ]);
+            addToaster(rsp.data.msg);
           })
           .catch((err) => {
             console.error(err);
@@ -162,8 +154,8 @@ const VideoCard = ({
     },
     {
       id: 3,
-      text: "Add to Playlist",
-      icon: <AddPLIcon />,
+      text: "Save to Playlist",
+      icon: <SaveIcon />,
       handleOnClick: () => {
         setIsShowing(<PlaylistModal videoId={data?._id} />);
       },

@@ -4,11 +4,18 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../Auth Provider/authContext";
-import { DownloadIcon } from "../../../Assets/Icons";
+import {
+  DownloadIcon,
+  AddWLIcon,
+  ShareIcon,
+  SaveIcon,
+  TrashBinIcon,
+} from "../../../Assets/Icons";
 import { IsEnd } from "../../../util/scrollPosition";
+import { PlaylistModal } from "../../../Component";
 
 const WatchLater = () => {
-  const { setFetchingState } = useAuthContext();
+  const { setFetchingState, addToaster, setIsShowing } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -33,7 +40,6 @@ const WatchLater = () => {
     isLoading,
     isSuccess,
     isError,
-    refetch,
   } = useQuery({
     queryKey: [...Object.values(queriese), "watchlater"],
     queryFn: async () => {
@@ -114,7 +120,53 @@ const WatchLater = () => {
     [playlistInfo?._id],
   );
 
-  const funcList = [
+  const funcList1 = [
+    {
+      id: 1,
+      text: "Add to queue",
+      icon: <AddWLIcon />,
+    },
+    {
+      id: 2,
+      text: "Save to playlist",
+      icon: <SaveIcon />,
+      handleOnClick: (_, productData) => {
+        setIsShowing(<PlaylistModal videoId={productData?._id} />);
+      },
+    },
+    {
+      id: 3,
+      text: "Remove from watch later",
+      icon: <TrashBinIcon />,
+      handleOnClick: async (_, productData) => {
+        await request
+          .patch("/client/playlist/watchlater", {
+            videoIdList: [productData?._id],
+          })
+          .then(() => {
+            setVideoList((prev) => {
+              return prev.filter((item) => item._id !== productData?._id);
+            });
+            addToaster("Remove from Watch later");
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      },
+    },
+    {
+      id: 4,
+      text: "Download",
+      icon: <DownloadIcon />,
+    },
+    {
+      id: 5,
+      text: "Share",
+      icon: <ShareIcon />,
+    },
+  ];
+
+  const funcList2 = [
     {
       id: 1,
       text: "Move to top",
@@ -125,7 +177,7 @@ const WatchLater = () => {
       ),
       value: -1,
       handleOnClick: movePosition,
-      condition: (id, size) => {
+      renderCondition: (id, size) => {
         return id === 0;
       },
     },
@@ -135,7 +187,7 @@ const WatchLater = () => {
       icon: <DownloadIcon />,
       value: 1,
       handleOnClick: movePosition,
-      condition: (id, size) => {
+      renderCondition: (id, size) => {
         return id === size - 1;
       },
     },
@@ -168,6 +220,7 @@ const WatchLater = () => {
       window.removeEventListener("scroll", () => {
         IsEnd(setIsEnd);
       });
+      queryClient.clear();
     };
   }, []);
 
@@ -190,7 +243,8 @@ const WatchLater = () => {
       }}
       currSort={queriese.type}
       changePostion={handleChangePosition}
-      funcList={funcList}
+      funcList1={funcList1}
+      funcList2={funcList2}
     />
   );
 };

@@ -16,7 +16,7 @@ const VideoTbRow = ({
   checkedList = [],
   handleChecked,
 }) => {
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const containerRef = useRef();
 
@@ -40,7 +40,7 @@ const VideoTbRow = ({
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 
@@ -162,7 +162,7 @@ const VideoTbRow = ({
                     refetch();
                   },
                   undefined,
-                  setNotifyMessage,
+                  addToaster,
                 );
               }}
             >

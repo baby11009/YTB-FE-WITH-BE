@@ -15,7 +15,7 @@ const CommentTbRow = ({
   checkedList = [],
   handleChecked,
 }) => {
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   return (
     <tr className={`${od + 1 !== length && "border-b-[1px]"} `}>
@@ -88,7 +88,7 @@ const CommentTbRow = ({
                     refetch();
                   },
                   undefined,
-                  setNotifyMessage,
+                  addToaster,
                 );
               }}
             >

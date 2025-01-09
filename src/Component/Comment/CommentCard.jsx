@@ -25,7 +25,7 @@ const CommentCard = ({
   videoId,
   refetchVideo,
 }) => {
-  const { user, setIsShowing, setNotifyMessage } = useAuthContext();
+  const { user, setIsShowing, addToaster } = useAuthContext();
 
   const [showedInput, setShowedInput] = useState(false);
 
@@ -55,7 +55,7 @@ const CommentCard = ({
         setIsShowing(undefined);
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 
@@ -84,7 +84,7 @@ const CommentCard = ({
             refetchVideo();
           },
           undefined,
-          setNotifyMessage,
+          addToaster,
         );
       },
     },

@@ -69,3 +69,5 @@ export { default as Range } from "./Range/Range.jsx";
 export { default as AudioRange } from "./Range/AudioRange.jsx";
 
 export { default as RelativeCard } from "./Card/RelativeCard.jsx";
+
+export { default as PlaylistModal } from "./Modal/PlaylistModal.jsx";

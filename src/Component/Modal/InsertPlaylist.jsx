@@ -11,7 +11,7 @@ import { useEffect, useState, useCallback } from "react";
 import CheckBox2 from "../CheckBox/CheckBox2";
 import { IsElementEnd } from "../../util/scrollPosition";
 
-const PlaylistCard = ({ data, videoId, setNotifyMessage }) => {
+const PlaylistCard = ({ data, videoId, addToaster }) => {
   const [playlistData, setPlaylistData] = useState(data);
 
   const [checked, setChecked] = useState(false);
@@ -24,11 +24,10 @@ const PlaylistCard = ({ data, videoId, setNotifyMessage }) => {
         })
         .then((rsp) => {
           setPlaylistData((prev) => ({ ...prev, ...rsp.data?.data }));
-          console.log(rsp.data?.data?.itemList.includes(videoId));
           const msg = rsp.data?.data?.itemList.includes(videoId)
             ? `Saved to ${rsp.data?.data?.title}`
             : `Removed from ${rsp.data?.data?.title}`;
-          setNotifyMessage((prev) => [...prev, { id: prev.length + 1, msg }]);
+          addToaster(msg);
         });
     } catch (error) {
       alert("Failed to add to playlist");
@@ -68,7 +67,7 @@ const PlaylistCard = ({ data, videoId, setNotifyMessage }) => {
 };
 
 const InsertPlaylist = ({ videoId, setDisplay }) => {
-  const { setIsShowing, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
   const [queries, setQueries] = useState({
     sort: { createdAt: -1 },
@@ -88,7 +87,7 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
     }
   }, []);
 
-  const { data, isLoading, isSuccess, isError, refetch } = useQuery({
+  const { data, isLoading, isSuccess, isError } = useQuery({
     queryKey: ["watchlater", "/client/playlist", ...Object.values(queries)],
     queryFn: async () => {
       try {
@@ -117,6 +116,11 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
     }
   }, [isEnd]);
 
+  useEffect(() => {
+    return () => {
+      setDataList([]);
+    };
+  }, []);
   return (
     <div className='max-w-[648px] min-w-[210px] max-h-[340px] flex flex-col '>
       <div className='flex items-center'>
@@ -152,7 +156,7 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
               key={`${item?._id}-${id}`}
               data={item}
               videoId={videoId}
-              setNotifyMessage={setNotifyMessage}
+              addToaster={addToaster}
             />
           ))
         )}

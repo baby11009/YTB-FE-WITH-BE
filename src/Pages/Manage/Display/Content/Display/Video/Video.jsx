@@ -32,7 +32,7 @@ const initParams = {
 const Video = () => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, openedMenu, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, openedMenu, addToaster } = useAuthContext();
 
   const [sort, setSort] = useState(undefined);
 
@@ -136,7 +136,7 @@ const Video = () => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

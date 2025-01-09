@@ -18,7 +18,7 @@ const initPrs = {
 };
 
 const CommentPage = ({ openedMenu }) => {
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -63,7 +63,7 @@ const CommentPage = ({ openedMenu }) => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

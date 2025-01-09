@@ -72,7 +72,7 @@ const maxLength = 255;
 const VideoUpsertModal = ({ title, id }) => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
   const [playlistPrs, setPlaylistPrs] = useState(initPlaylistParams);
 
@@ -173,7 +173,7 @@ const VideoUpsertModal = ({ title, id }) => {
           refetch();
         },
         undefined,
-        setNotifyMessage,
+        addToaster,
       );
     },
     [error],
@@ -189,7 +189,7 @@ const VideoUpsertModal = ({ title, id }) => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   }, []);
 

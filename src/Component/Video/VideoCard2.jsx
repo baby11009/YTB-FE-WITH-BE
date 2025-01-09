@@ -3,50 +3,16 @@ import { formatNumber } from "../../util/numberFormat";
 import { timeFormat } from "../../util/timeforMat";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
 import { durationCalc } from "../../util/durationCalc";
-import {
-  Setting2Icon,
-  AddWLIcon,
-  WatchedIcon,
-  AddPLIcon,
-  DownloadIcon,
-  ShareIcon,
-} from "../../Assets/Icons";
+import { Setting2Icon } from "../../Assets/Icons";
 import { useRef } from "react";
 import { getRandomHexColor } from "../../util/func";
 import { useAuthContext } from "../../Auth Provider/authContext";
-
-const funcList1 = [
-  {
-    id: 1,
-    text: "Add to queue",
-    icon: <AddWLIcon />,
-  },
-  {
-    id: 2,
-    text: "Save to watch later",
-    icon: <WatchedIcon />,
-  },
-  {
-    id: 3,
-    text: "Save to playlist",
-    icon: <AddPLIcon />,
-  },
-  {
-    id: 4,
-    text: "Download",
-    icon: <DownloadIcon />,
-  },
-  {
-    id: 5,
-    text: "Share",
-    icon: <ShareIcon />,
-  },
-];
 
 const VideoCard2 = ({
   index,
   size,
   data,
+  funcList1,
   funcList2,
   playlistId,
   containerStyle,

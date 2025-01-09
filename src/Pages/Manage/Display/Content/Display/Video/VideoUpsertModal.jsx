@@ -34,7 +34,7 @@ const initTagParams = {
 const VideoUpsertModal = ({ title, id }) => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
   const videoRef = useRef();
 
@@ -268,7 +268,7 @@ const VideoUpsertModal = ({ title, id }) => {
           thumbInputRef.current.value = undefined;
         },
         undefined,
-        setNotifyMessage,
+        addToaster,
       );
     },
     [error],
@@ -336,7 +336,7 @@ const VideoUpsertModal = ({ title, id }) => {
           refetch();
         },
         undefined,
-        setNotifyMessage,
+        addToaster,
       );
     },
     [error],

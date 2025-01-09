@@ -20,7 +20,7 @@ const initPrs = {
 };
 
 const PlaylistPage = ({ openedMenu }) => {
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -65,7 +65,7 @@ const PlaylistPage = ({ openedMenu }) => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

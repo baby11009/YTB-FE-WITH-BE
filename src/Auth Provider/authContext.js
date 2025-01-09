@@ -13,7 +13,7 @@ export const AuthContext = createContext({
   modalContainerRef: undefined,
   fetchingState: undefined,
   setFetchingState: () => {},
-  setNotifyMessage: () => {},
+  addToaster: () => {},
 });
 
 export const useAuthContext = () => useContext(AuthContext);

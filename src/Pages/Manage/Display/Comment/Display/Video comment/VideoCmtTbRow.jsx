@@ -5,7 +5,7 @@ import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
 
 const VideoCmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
-  const { setIsShowing, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
   const handleDelete = async () => {
     await dltData(
@@ -16,7 +16,7 @@ const VideoCmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

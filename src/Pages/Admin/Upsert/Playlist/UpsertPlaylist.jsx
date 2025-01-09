@@ -35,7 +35,7 @@ const videoPrsInit = {
 const UpsertPlaylist = () => {
   const { id } = useParams();
 
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -160,7 +160,7 @@ const UpsertPlaylist = () => {
         setFormData(initForm);
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 
@@ -214,7 +214,7 @@ const UpsertPlaylist = () => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

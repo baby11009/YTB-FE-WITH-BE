@@ -22,7 +22,11 @@ const AuthProvider = ({ children }) => {
 
   const [showHover, setShowHover] = useState(undefined);
 
-  const [notifyMessage, setNotifyMessage] = useState([]);
+  const toasterQueue = useRef([]);
+
+  const [currentToaster, setCurrentToaster] = useState(null);
+
+  const currentToasterRef = useRef();
 
   const toasterContainer = useRef();
 
@@ -37,6 +41,26 @@ const AuthProvider = ({ children }) => {
   const hoverContainerRef = useRef();
 
   const modalContainerRef = useRef();
+
+  const showCurrentToaster = useCallback(() => {
+    if (toasterQueue.current.length > 0) {
+      const toaster = toasterQueue.current.shift();
+      setCurrentToaster(toaster);
+      currentToasterRef.current = toaster;
+      setTimeout(() => {
+        setCurrentToaster();
+        showCurrentToaster(null);
+        currentToasterRef.current = null;
+      }, 5000);
+    }
+  }, []);
+
+  const addToaster = (message) => {
+    toasterQueue.current.push(message);
+    if (!currentToasterRef.current) {
+      showCurrentToaster();
+    }
+  };
 
   const getUserInfo = useCallback(async (token) => {
     await request
@@ -200,7 +224,7 @@ const AuthProvider = ({ children }) => {
         modalContainerRef,
         fetchingState,
         setFetchingState,
-        setNotifyMessage,
+        addToaster,
       }}
     >
       <div className='relative'>
@@ -240,26 +264,18 @@ const AuthProvider = ({ children }) => {
           </div>
         )}
         <div ref={toasterContainer} className='z-[7000] relative'>
-          {notifyMessage.map((message, index) => (
+          {currentToaster && (
             <div
-              key={message.id}
+              key={currentToaster}
               className='fixed bottom-0 left-0  toaster-animation'
-              style={{
-                "--delay": 6 * index + "s",
-              }}
-              onAnimationEnd={(e) => {
-                if (index === notifyMessage.length - 1) {
-                  setNotifyMessage([]);
-                }
-              }}
             >
               <div className=' m-[12px] p-[12px] bg-white max-w-[288px] overflow-hidden rounded-[8px]'>
                 <span className='text-[14px] leading-[20px] text-[#0f0f0f] line-clamp-1 text-ellipsis whitespace-pre-wrap'>
-                  {message.msg}
+                  {currentToaster}
                 </span>
               </div>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </AuthContext.Provider>

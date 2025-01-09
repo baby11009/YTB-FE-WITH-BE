@@ -1,5 +1,5 @@
 import ChannelInfor from "./ChannelInfor/ChannelInfor";
-import { useEffect, useState, useLayoutEffect, useRef } from "react";
+import { useState, useLayoutEffect } from "react";
 import { useParams } from "react-router-dom";
 import ChannelHome from "./ChannelContents/Home/ChannelHome";
 import ChannelVideo from "./ChannelContents/Video/ChannelVideo";
@@ -14,11 +14,11 @@ const ChannelPart = ({ openedMenu }) => {
 
   const [renderComponent, setRenderComponent] = useState();
 
-  const displayList = useRef();
+  const [displayList, setDisplayList] = useState();
 
   useLayoutEffect(() => {
     if (id) {
-      displayList.current = {
+      setDisplayList({
         home: <ChannelHome channelEmail={id} />,
         videos: <ChannelVideo channelEmail={id} />,
         shorts: <ChannelShort channelEmail={id} />,
@@ -26,17 +26,17 @@ const ChannelPart = ({ openedMenu }) => {
         playlists: <ChannelPlaylist channelEmail={id} />,
         community: <ChannelComunity channelEmail={id} />,
         search: <ChannelSearch channelEmail={id} />,
-      };
+      });
     }
   }, [id]);
 
   useLayoutEffect(() => {
-    if (displayList.current && displayList.current[feature]) {
-      setRenderComponent(displayList.current[feature]);
-    } else {
-      setRenderComponent(displayList.current["home"]);
+    if (displayList) {
+      setRenderComponent(
+        !!displayList[feature] ? displayList[feature] : displayList["home"],
+      );
     }
-  }, [feature]);
+  }, [feature, displayList]);
 
   return (
     <div className='flex flex-col items-center justify-center'>

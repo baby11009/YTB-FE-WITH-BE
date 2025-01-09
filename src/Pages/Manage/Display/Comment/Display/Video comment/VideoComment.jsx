@@ -44,7 +44,7 @@ const VideoComment = () => {
 
   const [dataList, setDataList] = useState([]);
 
-  const { setIsShowing, openedMenu, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, openedMenu, addToaster } = useAuthContext();
 
   const handleCheckedAll = () => {
     if (checkedList.length === data?.data?.length) {
@@ -133,7 +133,7 @@ const VideoComment = () => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

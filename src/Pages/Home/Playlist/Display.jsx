@@ -60,7 +60,8 @@ const Display = ({
   currSort,
   changePostion,
   noDrag,
-  funcList,
+  funcList1,
+  funcList2,
   isLoading,
 }) => {
   const { user } = useAuthContext();
@@ -301,7 +302,8 @@ const Display = ({
                   playlistId={playlistId}
                   index={index}
                   data={item}
-                  funcList2={funcList}
+                  funcList1={funcList1}
+                  funcList2={funcList2}
                   size={videoList?.length}
                 />
               </div>

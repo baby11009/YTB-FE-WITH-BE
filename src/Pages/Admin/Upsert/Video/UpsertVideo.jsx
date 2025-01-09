@@ -47,7 +47,7 @@ const currUserInit = {
 const UpsertVideo = () => {
   const { id } = useParams();
 
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -249,7 +249,7 @@ const UpsertVideo = () => {
         setCurrUser(currUserInit);
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 
@@ -305,7 +305,7 @@ const UpsertVideo = () => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

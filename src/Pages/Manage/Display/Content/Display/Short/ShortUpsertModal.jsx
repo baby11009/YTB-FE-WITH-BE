@@ -33,7 +33,7 @@ const initTagParams = {
 const ShortUpsertModal = ({ title, id }) => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
   const thumbInputRef = useRef();
 
@@ -263,7 +263,7 @@ const ShortUpsertModal = ({ title, id }) => {
           thumbInputRef.current.files = undefined;
         },
         undefined,
-        setNotifyMessage,
+        addToaster,
       );
     },
     [error],
@@ -330,7 +330,7 @@ const ShortUpsertModal = ({ title, id }) => {
           refetch();
         },
         undefined,
-        setNotifyMessage,
+        addToaster,
       );
     },
     [error],

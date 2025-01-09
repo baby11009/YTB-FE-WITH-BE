@@ -6,7 +6,7 @@ import { dltData, updateData } from "../../../../../../Api/controller";
 import { useLayoutEffect, useState } from "react";
 
 const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
-  const { setIsShowing, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
   const [editText, setEditText] = useState(false);
 
@@ -21,7 +21,7 @@ const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
   useLayoutEffect(() => {
@@ -57,7 +57,7 @@ const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         setEditText(false);
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

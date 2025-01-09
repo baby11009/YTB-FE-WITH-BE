@@ -16,7 +16,7 @@ const UserTbRow = ({
   handleChecked,
   checkedList = [],
 }) => {
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const containerRef = useRef();
 
@@ -43,7 +43,7 @@ const UserTbRow = ({
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 
@@ -163,7 +163,7 @@ const UserTbRow = ({
                     refetch();
                   },
                   undefined,
-                  setNotifyMessage,
+                  addToaster,
                 );
               }}
             >

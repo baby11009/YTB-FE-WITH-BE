@@ -380,7 +380,7 @@ export const SmButton = ({ data, path, handleOnClick }) => {
       className={`flex flex-col justify-center items-center pt-[16px] py-[14px]
           rounded-[10px] cursor-pointer
               ${
-                path && data.path && path === data?.path
+                path && data.path && data?.path.split("?")[0] === path
                   ? "bg-hover-black hover:bg-black-0.2"
                   : "hover:bg-hover-black"
               }

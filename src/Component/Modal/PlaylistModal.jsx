@@ -2,6 +2,7 @@ import InsertPlaylist from "./InsertPlaylist";
 import CreatePlaylist from "./CreatePlaylist";
 import { useState } from "react";
 import { useAuthContext } from "../../Auth Provider/authContext";
+
 const PlaylistModal = ({ videoId }) => {
   const { modalContainerRef } = useAuthContext();
 

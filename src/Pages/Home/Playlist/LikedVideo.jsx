@@ -1,14 +1,22 @@
 import Display from "./Display";
 import request from "../../../util/axios-base-url";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import { IsEnd } from "../../../util/scrollPosition";
-import { TrashBinIcon } from "../../../Assets/Icons";
+import {
+  TrashBinIcon,
+  AddWLIcon,
+  WatchedIcon,
+  ShareIcon,
+  DownloadIcon,
+  SaveIcon,
+} from "../../../Assets/Icons";
+import { PlaylistModal } from "../../../Component";
 
 const LikedVideo = () => {
-  const { setFetchingState } = useAuthContext();
+  const { setFetchingState, setIsShowing, addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -27,7 +35,7 @@ const LikedVideo = () => {
   const [playlistInfo, setPlaylistInfo] = useState(undefined);
 
   const [isEnd, setIsEnd] = useState(false);
-  
+
   const {
     data: likedVideosData,
     isLoading,
@@ -71,7 +79,50 @@ const LikedVideo = () => {
     }
   };
 
-  const funcList = [
+  const funcList1 = [
+    {
+      id: 1,
+      text: "Add to queue",
+      icon: <AddWLIcon />,
+    },
+    {
+      id: 2,
+      text: "Save to watch later",
+      icon: <WatchedIcon />,
+      handleOnClick: async (_, productData) => {
+        await request
+          .patch("/client/playlist/watchlater", {
+            videoIdList: [productData?._id],
+          })
+          .then((rsp) => {
+            addToaster(rsp.data.msg);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      },
+    },
+    {
+      id: 3,
+      text: "Save to playlist",
+      icon: <SaveIcon />,
+      handleOnClick: (_, productData) => {
+        setIsShowing(<PlaylistModal videoId={productData?._id} />);
+      },
+    },
+    {
+      id: 4,
+      text: "Download",
+      icon: <DownloadIcon />,
+    },
+    {
+      id: 5,
+      text: "Share",
+      icon: <ShareIcon />,
+    },
+  ];
+
+  const funcList2 = [
     {
       id: 1,
       text: "Remove from Liked videos",
@@ -140,6 +191,7 @@ const LikedVideo = () => {
       window.removeEventListener("scroll", () => {
         IsEnd(setIsEnd);
       });
+      queryClient.clear();
     };
   }, []);
 
@@ -163,7 +215,8 @@ const LikedVideo = () => {
       }}
       currSort={queriese.type}
       noDrag={true}
-      funcList={funcList}
+      funcList1={funcList1}
+      funcList2={funcList2}
     />
   );
 };

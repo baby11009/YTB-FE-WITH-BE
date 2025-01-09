@@ -103,7 +103,11 @@ const ChannelInfor = ({ channelEmail, openedMenu, feature }) => {
 
   const handleNavigate = useCallback((newPath) => {
     const currFeature = location.pathname.split("/")[3];
-    navigate(location.pathname.replace(currFeature, newPath));
+    const path = currFeature
+      ? location.pathname.replace(currFeature, newPath)
+      : location.pathname + "/" + newPath;
+
+    navigate(path);
   }, []);
 
   const handlePressEnter = useCallback((e) => {

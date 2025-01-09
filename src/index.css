@@ -551,10 +551,9 @@ th {
 }
 
 .toaster-animation {
-  --delay: 0s;
   opacity: 0;
   transform: translateY(100%);
-  animation: showUpAndDisappear 6s ease-in-out var(--delay) forwards;
+  animation: showUpAndDisappear 5s ease-in-out forwards;
 }
 
 @keyframes showUpAndDisappear {

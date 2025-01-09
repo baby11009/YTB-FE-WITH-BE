@@ -8,7 +8,7 @@ import ShortUpsertModal from "./ShortUpsertModal";
 import { useCallback } from "react";
 
 const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
-  const { setIsShowing, setNotifyMessage } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
   const handleDelete = useCallback(async () => {
     await dltData(
@@ -19,7 +19,7 @@ const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   });
 

@@ -20,7 +20,7 @@ const InputBox = ({
   const [cmtText, setCmtText] = useState("");
 
   const inputRef = useRef();
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -48,7 +48,7 @@ const InputBox = ({
         setShowedInput(false);
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

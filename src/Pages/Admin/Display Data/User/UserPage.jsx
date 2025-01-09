@@ -21,7 +21,7 @@ const initPrs = {
 };
 
 const DisplayUser = ({ openedMenu }) => {
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -70,7 +70,7 @@ const DisplayUser = ({ openedMenu }) => {
         refetch();
       },
       undefined,
-      setNotifyMessage,
+      addToaster,
     );
   };
 

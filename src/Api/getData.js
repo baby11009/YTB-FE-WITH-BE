@@ -12,7 +12,7 @@ export const getData = (
     return null;
   }
 
-  const { setNotifyMessage } = useAuthContext();
+  const { addToaster } = useAuthContext();
 
   const paramsValue = [...Object.values(params)];
   const paramsKey = [...Object.keys(params)];
@@ -46,7 +46,7 @@ export const getData = (
       } catch (error) {
         console.error(error);
 
-        setNotifyMessage((prev) => [
+        addToaster((prev) => [
           ...prev,
           {
             id: prev.length + 1,
@@ -73,7 +73,8 @@ export const getDataWithAuth = (
   if (!path) {
     return null;
   }
-  const { setNotifyMessage } = useAuthContext();
+
+  const { addToaster } = useAuthContext();
 
   const paramsValue = [...Object.values(params)];
 
@@ -108,16 +109,9 @@ export const getDataWithAuth = (
         return res.data;
       } catch (error) {
         console.error(error);
-        setNotifyMessage((prev) => [
-          ...prev,
-          {
-            id: prev.length + 1,
-            msg:
-              error.response?.data?.msg ||
-              error.response?.data ||
-              error.message,
-          },
-        ]);
+        addToaster(
+          error.response?.data?.msg || error.response?.data || error.message,
+        );
       }
     },
     refetchOnWindowFocus: false,
