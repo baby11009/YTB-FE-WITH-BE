@@ -38,7 +38,7 @@ const CustomeButton = ({ data, display, setDisplay }) => {
   );
 };
 
-const MyChannelInfor = ({ data, openedMenu, display, setDisplay, refetch }) => {
+const MyChannelInfor = ({ data, openedMenu, display, setDisplay }) => {
   return (
     <div
       className={`w-[214px] xsm:w-[428px] sm:w-[642px] 2md:w-[856px]
@@ -79,7 +79,7 @@ ${
           {data?.description && (
             <div className='flex items-center py-[10px] text-gray-A'>
               <span className='t-1-ellipsis flex-1 text-nowrap'>
-                Không có việc gì khó chỉ sợ lòng không bền
+                {data?.description}
               </span>
 
               <div className='w-[24px] h-[24px] flex items-center justify-center cursor-pointer'>
@@ -102,13 +102,13 @@ ${
               to={"/manage/setting"}
               className='rounded-[20px] leading-[36px] px-[16px] bg-black-0.1 hover:bg-black-0.2 text-[14px] font-[500]'
             >
-              Tùy chỉnh kênh
+              Channel's settings
             </Link>
             <Link
               to={"/manage/content/video"}
               className='rounded-[20px] leading-[36px] px-[16px] bg-black-0.1 hover:bg-black-0.2 text-[14px] font-[500]'
             >
-              Quản lý video
+              Video manage
             </Link>
           </div>
         </div>

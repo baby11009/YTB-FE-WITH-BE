@@ -6,10 +6,11 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import { getCookie, removeCookie } from "../util/tokenHelpers";
+import { getCookie } from "../util/tokenHelpers";
 import request from "../util/axios-base-url";
 
 const AuthProvider = ({ children }) => {
+  
   const [user, setUser] = useState(undefined);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -224,7 +225,7 @@ const AuthProvider = ({ children }) => {
         modalContainerRef,
         fetchingState,
         setFetchingState,
-        addToaster,
+        addToaster: addToaster,
       }}
     >
       <div className='relative'>

@@ -1,17 +1,33 @@
 import {
-  PlayIcon,
   CloseIcon,
   RandomIcon,
   RepeatIcon,
   Setting2Icon,
   ThinArrowIcon,
+  ActiveLoopIcon,
+  ActiveShuffleIcon,
 } from "../../../../../Assets/Icons";
-import { useState, useLayoutEffect, useRef, useEffect } from "react";
+import {
+  useState,
+  useLayoutEffect,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 import { PlaylistVideoCard } from "../../../../../Component";
 import { getData } from "../../../../../Api/getData";
 import { IsElementEnd } from "../../../../../util/scrollPosition";
+import { useAuthContext } from "../../../../../Auth Provider/authContext";
 
-const Playlist = ({ playlistId, videoId }) => {
+const Playlist = ({
+  playlistId,
+  videoId,
+  setNextVideoPath,
+  playlistStatus,
+  setPlaylistStatus,
+}) => {
+  const { user } = useAuthContext();
+
   const [isEnd, setIsEnd] = useState(false);
 
   const [addNew, setAddNew] = useState(true);
@@ -36,17 +52,18 @@ const Playlist = ({ playlistId, videoId }) => {
 
   const container = useRef();
 
-  const {
-    data: playlistDetails,
-    refetch,
-    isError,
-    isLoading,
-  } = getData(
+  const { data: playlistDetails, isError } = getData(
     `/data/playlist/${playlistId}`,
     playlistQuery,
     !!playlistId,
     false,
   );
+
+  const handleModifyVideoList = useCallback((videoId) => {
+    setVideoList((prev) => prev.filter((item) => item._id !== videoId));
+    videoIdList.current.delete(videoId);
+    setPlaylistInfo((prev) => ({ ...prev, size: prev.size - 1 }));
+  }, []);
 
   useLayoutEffect(() => {
     if (playlistDetails) {
@@ -85,12 +102,17 @@ const Playlist = ({ playlistId, videoId }) => {
   }, [playlistDetails]);
 
   useLayoutEffect(() => {
-    if (videoId && playlistDetails) {
-      currentVideoIndex.current = [...videoIdList.current].indexOf(videoId) + 1;
-
-      nextVideo.current = videoList[currentVideoIndex.current];
+    if (videoId && playlistDetails && videoList.length > 0) {
+      currentVideoIndex.current =
+        [...videoIdList.current].indexOf(videoId) + 1 || 1;
+      if (videoList[currentVideoIndex.current]) {
+        nextVideo.current = videoList[currentVideoIndex.current];
+        setNextVideoPath(
+          `/video?id=${nextVideo.current?._id}&list=${playlistInfo?._id}`,
+        );
+      }
     }
-  }, [videoId, playlistDetails]);
+  }, [videoId, playlistDetails, videoList]);
 
   useLayoutEffect(() => {
     if (playlistId) {
@@ -127,6 +149,8 @@ const Playlist = ({ playlistId, videoId }) => {
   if (isError) {
     return <div>Failed to load playlist data</div>;
   }
+
+  if (!playlistDetails) return;
 
   return (
     <div className='mb-[24px]'>
@@ -173,14 +197,34 @@ const Playlist = ({ playlistId, videoId }) => {
             </div>
             <div className='flex'>
               <div className='flex-1 ml-[-8px]'>
-                <button className='size-[40px] rounded-[50%] p-[8px] active:bg-black-0.2 '>
+                <button
+                  className='size-[40px] rounded-[50%] p-[8px] active:bg-black-0.2 '
+                  onClick={() => {
+                    setPlaylistStatus((prev) => ({
+                      ...prev,
+                      loop: !prev.loop,
+                    }));
+                  }}
+                >
                   <div className='w-[24px] '>
-                    <RepeatIcon />
+                    {playlistStatus.loop ? <ActiveLoopIcon /> : <RepeatIcon />}
                   </div>
                 </button>
-                <button className='size-[40px] rounded-[50%] p-[8px] active:bg-black-0.2 '>
+                <button
+                  className='size-[40px] rounded-[50%] p-[8px] active:bg-black-0.2 '
+                  onClick={() => {
+                    setPlaylistStatus((prev) => ({
+                      ...prev,
+                      shuffle: !prev.shuffle,
+                    }));
+                  }}
+                >
                   <div className='w-[24px] '>
-                    <RandomIcon />
+                    {playlistStatus.shuffle ? (
+                      <ActiveShuffleIcon />
+                    ) : (
+                      <RandomIcon />
+                    )}
                   </div>
                 </button>
               </div>
@@ -204,6 +248,10 @@ const Playlist = ({ playlistId, videoId }) => {
                 data={item}
                 size={videoList.length}
                 playlistInfo={playlistInfo}
+                renderSettings={
+                  user && playlistInfo.channel_info._id === user._id
+                }
+                handleModify={handleModifyVideoList}
               />
             ))}
           </div>

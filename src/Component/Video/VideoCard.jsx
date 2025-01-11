@@ -117,6 +117,7 @@ const VideoCard = ({
   noFunc2,
   playlistId,
 }) => {
+  
   const { setShowHover, handleCursorPositon, setIsShowing, user, addToaster } =
     useAuthContext();
 

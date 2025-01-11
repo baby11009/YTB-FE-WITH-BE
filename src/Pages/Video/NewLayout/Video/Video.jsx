@@ -41,7 +41,7 @@ const defaultSettings = {
   quality: { title: "1080 HD", value: 1080 },
 };
 
-const Video = ({ data, containerStyle }) => {
+const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
   const { setShowHover, handleCursorPositon } = useAuthContext();
 
   const hlsRef = useRef();
@@ -322,6 +322,8 @@ const Video = ({ data, containerStyle }) => {
     // handle video ended event
     if (currentRightMenuId.current === 1) {
       videoRef.current.play();
+    } else {
+      handlePlayNextVideo();
     }
   }, []);
 
@@ -676,7 +678,7 @@ const Video = ({ data, containerStyle }) => {
 
   return (
     <div
-      className={`bg-[#000000] relative rounded-[12px] ${containerStyle}`}
+      className='bg-[#000000] relative rounded-[12px]'
       ref={container}
       onContextMenu={(e) => e.preventDefault()}
     >

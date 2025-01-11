@@ -14,6 +14,7 @@ import {
 import { getData } from "../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
 import PlayList from "./Playlist/Playlist";
+import CustomVideoCard from "./CustomVideoCard";
 
 const initVideoQuery = {
   page: 1,
@@ -31,7 +32,15 @@ const initShortQuery = {
   sort: undefined,
 };
 
-const Other = ({ videoId, playlistId, isEnd, showMore }) => {
+const Other = ({
+  videoId,
+  playlistId,
+  isEnd,
+  showMore,
+  setNextVideoPath,
+  setPlaylistStatus,
+  playlistStatus,
+}) => {
   const [firstRender, setFirstRender] = useState(true);
 
   const currPlaylistId = useRef();
@@ -230,39 +239,46 @@ const Other = ({ videoId, playlistId, isEnd, showMore }) => {
 
   return (
     <div>
-      {playlistId && <PlayList playlistId={playlistId} videoId={videoId} />}
+      {playlistId && (
+        <PlayList
+          playlistId={playlistId}
+          videoId={videoId}
+          setNextVideoPath={setNextVideoPath}
+          playlistStatus={playlistStatus}
+          setPlaylistStatus={setPlaylistStatus}
+        />
+      )}
       <ButtonHorizonSlider
         buttonList={buttonList}
         currentId={currentSortId.current}
       />
       {videoList.length > 0 &&
         (videoList[0].type === "video" ? (
-          <VideoCard2
+          <CustomVideoCard
             data={videoList[0]}
             index={0}
             size={videoList.length}
-            containerStyle={"mt-[8px] h-[94px]"}
           />
         ) : (
           <PlaylistCard2 data={videoList[0]} containerStyle={"h-[94px]"} />
         ))}
-
-      <ShortHorizonSlider
-        cardWidth={(402 - 8) / 3}
-        thumbnailHeight={(402 / 3 / 9) * 16}
-        shortList={shortList}
-      />
+      {shortData && shortList.length > 0 && (
+        <ShortHorizonSlider
+          cardWidth={(402 - 8) / 3}
+          thumbnailHeight={(402 / 3 / 9) * 16}
+          shortList={shortList}
+        />
+      )}
       {videoList.length > 0 && (
         <div>
           {videoList.slice(1).map((item, index) => {
             if (item.type === "video") {
               return (
-                <VideoCard2
+                <CustomVideoCard
                   key={item?._id}
                   data={item}
                   index={index}
                   size={videoList.length}
-                  containerStyle={"mt-[8px] h-[94px]"}
                 />
               );
             }

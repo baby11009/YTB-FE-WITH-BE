@@ -7,7 +7,6 @@ import { getDataWithAuth } from "../../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
 
 const ChannelPlaylist = () => {
-  
   const [params, setParams] = useState({
     page: 1,
     limit: 12,
@@ -19,7 +18,8 @@ const ChannelPlaylist = () => {
   const { data: playlistData, isLoading } = getDataWithAuth(
     "/client/playlist",
     params,
-    true
+    true,
+    false,
   );
 
   const [dataList, setDataList] = useState([]);

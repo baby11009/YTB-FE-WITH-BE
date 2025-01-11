@@ -8,9 +8,6 @@ const ShortHorizonSlider = ({ cardWidth, thumbnailHeight, shortList }) => {
     return;
   }
 
-  if (shortList.length < 1) {
-    return <div>Failed to get shorts </div>;
-  }
   return (
     <div className='mt-[24px] border-t-[1px] border-b-[1px] border-black-0.2 pb-[24px]'>
       <div className='mt-[24px]'>

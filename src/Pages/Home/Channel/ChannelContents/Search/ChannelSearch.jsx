@@ -40,7 +40,7 @@ const ChannelSearch = () => {
 
   const [dataList, setDataList] = useState([]);
 
-  const { data, isLoading } = getData(
+  const { data, isLoading, isSuccess } = getData(
     "/data/all",
     query,
     query ? true : false,
@@ -88,16 +88,13 @@ const ChannelSearch = () => {
 
   useEffect(() => {
     if (isEnd && data && data.data.length > 0) {
-      addNew.current = true;
       setQuery((prev) => ({ ...prev, page: prev.page + 1 }));
     }
   }, [isEnd, data]);
 
-  if (!query || isLoading) return;
-
   return (
     <div>
-      {dataList.length > 0 ? (
+      {dataList.length > 0 &&
         dataList.map((data, index) => (
           <div
             className='py-[24px] border-b-[1px] border-black-0.2 overflow-hidden mr-[-32px] xsm:mr-0'
@@ -113,10 +110,10 @@ const ChannelSearch = () => {
               infoStyle={"flex text-[12px] leading-[18px]"}
             />
           </div>
-        ))
-      ) : (
+        ))}
+      {isSuccess && dataList.length < 1 && (
         <div className='p-[16px] mx-auto text-[14px] leading-[20px] text-white text-center'>
-          This channel has no content that matched {query.search}
+          This channel has no content that matched {query?.search}
         </div>
       )}
 

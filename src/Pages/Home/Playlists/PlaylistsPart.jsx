@@ -25,7 +25,7 @@ const PlaylistsPart = ({ openedMenu }) => {
     "/client/playlist",
     params,
     true,
-    true
+    false,
   );
 
   const [showQtt, setShowQtt] = useState(4);
@@ -126,21 +126,25 @@ const PlaylistsPart = ({ openedMenu }) => {
   return (
     <div>
       <div className='mx-[24px]'>
-        <span className='text-[36px] leading-[50px] font-bold  '>Playlist</span>
+        <span className='text-[36px] leading-[50px] font-bold'>Playlist</span>
       </div>
       <div className='pt-[16px] px-[24px]'>
         <CustomeFuncBox2 funcList={funcList} activeId={activeId} />
       </div>
-      <div className='pt-[24px] mx-[16px] flex '>
-        <div
-          className={` grid`}
-          style={{ gridTemplateColumns: `repeat(${showQtt}, minmax(0, 1fr))` }}
-        >
-          {dataList.map((item, id) => (
-            <PlaylistCard key={id} data={item} showL3={item?.size > 1} />
-          ))}
+      {dataList.length > 0 && (
+        <div className='pt-[24px] mx-[16px] flex '>
+          <div
+            className={` grid`}
+            style={{
+              gridTemplateColumns: `repeat(${showQtt}, minmax(0, 1fr))`,
+            }}
+          >
+            {dataList.map((item, id) => (
+              <PlaylistCard key={id} data={item} showL3={item?.size > 1} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

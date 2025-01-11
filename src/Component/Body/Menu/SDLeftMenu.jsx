@@ -115,7 +115,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                 <nav className='p-[12px]'>
                   <ul>
                     {funcList1.slice(0, 3).map((item) => {
-                      if (item.condition && !user) {
+                      if (item.renderCondition && !item.renderCondition(user)) {
                         return;
                       }
                       return (
@@ -133,7 +133,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                       <ul className='border-t-[1px] border-[rgba(255,255,255,0.2)] mt-[12px] pt-[12px]'>
                         <Button
                           data={{
-                            title: "Bạn",
+                            title: "You",
                             path: "/manage/dashboard",
                             icon: <ThinArrowIcon />,
                           }}
@@ -153,7 +153,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                       </ul>
                       <ul className='border-t-[1px] border-[rgba(255,255,255,0.2)] mt-[12px] pt-[12px]'>
                         <li className='px-[12px] text-[16px] pt-[6px] pb-[4px] leading-[22px]'>
-                          Kênh đăng ký
+                          Subscriptions
                         </li>
                         {user?.subscribed_list
                           ?.slice(
@@ -170,7 +170,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                         {showMored && (
                           <Button
                             data={{
-                              title: "Tất cả kênh đăng ký",
+                              title: "All subscriptions",
                               path: "/sub-channels",
                               icon: <AllIcon />,
                             }}
@@ -192,7 +192,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                               <ThinArrowIcon size='24' />
                             </div>
                             <span className={`flex-1`}>
-                              {showMored ? "Ẩn bớt" : "Thêm"}
+                              {showMored ? "Show less" : "Show more"}
                             </span>
                           </div>
                         </li>
@@ -201,7 +201,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                   )}
                   <ul className='border-t-[1px] border-[rgba(255,255,255,0.2)] mt-[12px] pt-[12px]'>
                     <li className='px-[12px] text-[16px] pt-[6px] pb-[4px] leading-[22px]'>
-                      Khám phá
+                      Explore
                     </li>
                     {funcList3.map((item) => (
                       <Button
@@ -214,7 +214,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
                   </ul>
                   <ul className='border-t-[1px] border-[rgba(255,255,255,0.2)] mt-[12px] pt-[12px]'>
                     <li className='px-[12px] text-[16px] pt-[6px] pb-[4px] leading-[22px]'>
-                      Dịch vụ khác
+                      More from YouTube
                     </li>
                     {funcList4.map((item) => (
                       <Button
@@ -263,7 +263,7 @@ const SDLeftMenu = ({ openedMenu, setOpenedMenu, noIconMenu, path }) => {
         <div className='w-[74px] h-scrren hidden md:block fixed left-0'>
           <nav className='mt-[4px] px-[4px]'>
             {funcList1.map((item) => {
-              if (item.condition && !user) {
+              if (item.renderCondition && !item.renderCondition(user)) {
                 return;
               }
               return (

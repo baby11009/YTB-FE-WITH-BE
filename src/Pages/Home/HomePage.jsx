@@ -48,12 +48,15 @@ const HomePage = () => {
   };
 
   useLayoutEffect(() => {
+    scrollToTop();
+  }, [params]);
+
+  useLayoutEffect(() => {
     if (params.path) {
       const pageRender = componentMap.current[params.path];
 
       if (pageRender) {
         setRenderComponent(pageRender);
-        scrollToTop();
       } else {
         setRenderComponent(undefined);
 

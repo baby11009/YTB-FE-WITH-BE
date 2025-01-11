@@ -11,36 +11,54 @@ import {
   ThinArrowIcon,
 } from "../../../../Assets/Icons";
 import { formatNumber } from "../../../../util/numberFormat";
-import { LikeAndDislikeBtn, CustomeFuncBox } from "../../../../Component";
+import {
+  LikeAndDislikeBtn,
+  CustomeFuncBox,
+  PlaylistModal,
+} from "../../../../Component";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { timeFormat2 } from "../../../../util/timeforMat";
 import { useRef, useState, useLayoutEffect } from "react";
 import { getMousePosition } from "../../../../util/mouse";
 
-const funcList = [
-  {
-    id: 1,
-    text: "Download",
-    icon: <DownloadIcon />,
-  },
-  {
-    id: 2,
-    text: "Clip",
-    icon: <CutIcon />,
-  },
-  {
-    id: 3,
-    text: "Save",
-    icon: <SaveIcon />,
-  },
-  {
-    id: 4,
-    text: "Report",
-    icon: <DiaryIcon />,
-  },
-];
 const Description = ({ data, refetch }) => {
-  const { setShowHover, handleCursorPositon } = useAuthContext();
+  const { setShowHover, handleCursorPositon, user, setIsShowing } =
+    useAuthContext();
+
+  const funcList = [
+    {
+      id: 1,
+      text: "Download",
+      icon: <DownloadIcon />,
+    },
+    {
+      id: 2,
+      text: "Clip",
+      icon: <CutIcon />,
+      renderCondition: () => {
+        return !!user;
+      },
+    },
+    {
+      id: 3,
+      text: "Save",
+      icon: <SaveIcon />,
+      handleOnClick: () => {
+        setIsShowing(<PlaylistModal videoId={data?._id} />);
+      },
+      renderCondition: () => {
+        return !!user;
+      },
+    },
+    {
+      id: 4,
+      text: "Report",
+      icon: <DiaryIcon />,
+      renderCondition: () => {
+        return !!user;
+      },
+    },
+  ];
 
   const [showMore, setShowMore] = useState(false);
 

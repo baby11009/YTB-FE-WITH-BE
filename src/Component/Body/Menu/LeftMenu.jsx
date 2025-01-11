@@ -50,9 +50,10 @@ const LeftMenu = ({ openedMenu, path }) => {
             <div className='p-[12px]'>
               <ul>
                 {funcList1.slice(0, 3).map((item) => {
-                  if (item.condition && !user) {
+                  if (item.renderCondition && !item.renderCondition(user)) {
                     return;
                   }
+
                   return (
                     <Button
                       key={item.id}
@@ -68,7 +69,7 @@ const LeftMenu = ({ openedMenu, path }) => {
                   <ul className='border-t-[1px] border-[rgba(255,255,255,0.2)] mt-[12px] pt-[12px]'>
                     <Button
                       data={{
-                        title: "Bạn",
+                        title: "You",
                         path: "/manage/dashboard",
                         icon: <ThinArrowIcon />,
                       }}
@@ -88,7 +89,7 @@ const LeftMenu = ({ openedMenu, path }) => {
                   </ul>
                   <ul className='border-t-[1px] border-[rgba(255,255,255,0.2)] mt-[12px] pt-[12px]'>
                     <li className='px-[12px] text-[16px] pt-[6px] pb-[4px] leading-[22px]'>
-                      Kênh đăng ký
+                      Subscriptions
                     </li>
                     {user?.subscribed_list
                       ?.slice(0, showMored ? user?.subscribed_list?.length : 7)
@@ -98,7 +99,7 @@ const LeftMenu = ({ openedMenu, path }) => {
                     {showMored && (
                       <Button
                         data={{
-                          title: "Tất cả kênh đăng ký",
+                          title: "All subscriptions",
                           path: "/sub-channels",
                           icon: <AllIcon />,
                         }}
@@ -119,7 +120,7 @@ const LeftMenu = ({ openedMenu, path }) => {
                           <ThinArrowIcon size='24' />
                         </div>
                         <span className={`flex-1`}>
-                          {showMored ? "Ẩn bớt" : "Thêm"}
+                          {showMored ? "Show less" : "Show more"}
                         </span>
                       </div>
                     </li>
@@ -128,7 +129,7 @@ const LeftMenu = ({ openedMenu, path }) => {
               )}
               <ul className='border-t-[1px] border-[rgba(255,255,255,0.2)] mt-[12px] pt-[12px]'>
                 <li className='px-[12px] text-[16px] pt-[6px] pb-[4px] leading-[22px]'>
-                  Khám phá
+                  Explore
                 </li>
                 {funcList3.map((item) => (
                   <Button
@@ -141,7 +142,7 @@ const LeftMenu = ({ openedMenu, path }) => {
               </ul>
               <ul className='border-t-[1px] border-[rgba(255,255,255,0.2)] mt-[12px] pt-[12px]'>
                 <li className='px-[12px] text-[16px] pt-[6px] pb-[4px] leading-[22px]'>
-                  Dịch vụ khác
+                  More from YouTube
                 </li>
                 {funcList4.map((item) => (
                   <Button
@@ -189,7 +190,7 @@ const LeftMenu = ({ openedMenu, path }) => {
       {!openedMenu && (
         <nav className='mt-[4px] px-[4px]'>
           {funcList1.map((item) => {
-            if (item.condition && !user) {
+            if (item.renderCondition && !item.renderCondition(user)) {
               return;
             }
             return (

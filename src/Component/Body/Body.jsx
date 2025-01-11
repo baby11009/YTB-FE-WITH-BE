@@ -11,6 +11,7 @@ const Body = ({
   noLDMenu,
   noIconMenu,
 }) => {
+  
   const [useLargeMenu, setUseLargeMenu] = useState();
 
   const handleResize = useCallback(() => {
@@ -54,17 +55,7 @@ const Body = ({
           ${openedMenu && !noLDMenu && " xl:ml-[240px]"} 
           `}
       >
-        <Suspense
-          fallback={
-            <div className='w-full flex items-center justify-center'>
-              <h2 className='text-[30px] leading-[32px] font-[500]'>
-                Loading.....
-              </h2>
-            </div>
-          }
-        >
-          {RenderContent}
-        </Suspense>
+        {RenderContent}
       </div>
     </main>
   );

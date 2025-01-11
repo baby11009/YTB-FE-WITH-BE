@@ -12,9 +12,9 @@ import { useAuthContext } from "../../Auth Provider/authContext";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
 import { useCallback, useRef } from "react";
 import { getRandomHexColor } from "../../util/func";
-import { useSearchParams } from "react-router-dom";
 import request from "../../util/axios-base-url";
 import { Link } from "react-router-dom";
+import PlaylistModal from "../Modal/PlaylistModal";
 
 const PlaylistVideoCard = ({
   containerStyle,
@@ -24,18 +24,30 @@ const PlaylistVideoCard = ({
   index,
   data,
   size,
+  renderSettings, // For your own playlist
+  handleModify,
 }) => {
-  const { handleCursorPositon, setShowHover } = useAuthContext();
-
-  const [_, setSearchParams] = useSearchParams();
+  const { handleCursorPositon, setShowHover, addToaster, setIsShowing } =
+    useAuthContext();
 
   const bgColor = useRef(getRandomHexColor());
 
-  const handleNavigate = useCallback(() => {
-    setSearchParams({ id: data?._id, list: playlistInfo?._id });
-  }, [playlistInfo?._id]);
+  const handleSaveToPlaylist = useCallback(() => {
+    setIsShowing(<PlaylistModal videoId={data?._id} />);
+  }, []);
 
-  const addToWatchLater = useCallback(async () => {}, []);
+  const handleAddToWatchLater = useCallback(async () => {
+    await request
+      .patch("/client/playlist/watchlater", {
+        videoIdList: [data?._id],
+      })
+      .then((rsp) => {
+        addToaster(rsp.data.msg);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
 
   const removeFromPlaylist = useCallback(async (from, to) => {
     try {
@@ -45,23 +57,29 @@ const PlaylistVideoCard = ({
         })
         .then((rsp) => {
           console.log(rsp.data);
+          handleModify(data?._id);
+          addToaster(`Remove from ${playlistInfo.title}`);
         });
     } catch (error) {
-      alert("Failed to move position");
+      alert(`Failed to remove from ${playlistInfo.title}`);
       throw error;
     }
   }, []);
 
-  const removeLikedVideos = useCallback(async (from, to) => {
+  const removeLikedVideos = useCallback(async () => {
     try {
       await request
         .post("/client/react", {
           videoId: data?._id,
           type: "like",
         })
-        .then((rsp) => console.log(rsp.data));
+        .then((rsp) => {
+          console.log(rsp.data);
+          handleModify(data?._id);
+          addToaster(`Remove from ${playlistInfo.title}`);
+        });
     } catch (error) {
-      alert("Failed to move position");
+      alert(`Failed to remove from ${playlistInfo.title}`);
       throw error;
     }
   }, []);
@@ -71,7 +89,8 @@ const PlaylistVideoCard = ({
       id: 1,
       text: "Save to Watch later",
       icon: <LaterIcon />,
-      condition:
+      handleOnClick: handleAddToWatchLater,
+      renderCondition:
         playlistInfo.type !== "personal" ||
         playlistInfo.title !== "Watch later",
     },
@@ -79,13 +98,14 @@ const PlaylistVideoCard = ({
       id: 2,
       text: "Save to playlist",
       icon: <SaveIcon />,
+      handleOnClick: handleSaveToPlaylist,
     },
     {
       id: 3,
       text: "Remove from playlist",
       icon: <TrashBinIcon />,
       handleOnClick: removeFromPlaylist,
-      condition:
+      renderCondition:
         playlistInfo.type !== "personal" ||
         playlistInfo.title !== "Liked videos",
     },
@@ -107,7 +127,7 @@ const PlaylistVideoCard = ({
       text: "Remove from Liked videos",
       icon: <TrashBinIcon />,
       handleOnClick: removeLikedVideos,
-      condition:
+      renderCondition:
         playlistInfo.type === "personal" &&
         playlistInfo.title === "Liked videos",
     },
@@ -174,31 +194,35 @@ const PlaylistVideoCard = ({
         </div>
       </div>
 
-      <button
-        className='size-[40px] rounded-[50%] flex items-center justify-center
+      {renderSettings && (
+        <button
+          className='size-[40px] rounded-[50%] flex items-center justify-center
          active:bg-black-0.2 group-hover:opacity-[1] opacity-0'
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          handleCursorPositon(e);
-          setShowHover((prev) =>
-            prev ? undefined : (
-              <CustomeFuncBox
-                setOpened={() => {
-                  setShowHover(undefined);
-                }}
-                funcList1={funcList}
-                funcList2={funcList2[0].condition ? funcList2 : undefined}
-                productData={data}
-                productIndex={index}
-                size={size}
-              />
-            ),
-          );
-        }}
-      >
-        <Setting2Icon />
-      </button>
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleCursorPositon(e);
+            setShowHover((prev) =>
+              prev ? undefined : (
+                <CustomeFuncBox
+                  setOpened={() => {
+                    setShowHover(undefined);
+                  }}
+                  funcList1={funcList}
+                  funcList2={
+                    funcList2[0].renderCondition ? funcList2 : undefined
+                  }
+                  productData={data}
+                  productIndex={index}
+                  size={size}
+                />
+              ),
+            );
+          }}
+        >
+          <Setting2Icon />
+        </button>
+      )}
     </Link>
   );
 };

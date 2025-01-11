@@ -121,27 +121,27 @@ export const channelList = [
 ];
 
 export const footerList1 = [
-  "Giới thiệu",
-  "Báo chí",
-  "Bản quyền",
-  "Liên hệ với chúng tôi",
-  "Người sáng tạo",
-  "Quảng cáo",
-  "Nhà phát triển",
+  "About",
+  "Press",
+  "Copyright",
+  "Contact us",
+  "Creators",
+  "Advertise",
+  "Developers",
 ];
 
 export const footerList2 = [
-  "Điều khoản",
-  "Quyền riêng tư",
-  "Chính sách và an toàn",
-  "Cách YouTube hoạt động",
-  "Thử các tính năng mới",
+  "Terms",
+  "Privacy",
+  "Policy & Safety",
+  "How YouTube works",
+  "Test new features",
 ];
 
 export const funcList1 = [
   {
     id: 1,
-    title: "Trang chủ",
+    title: "Home",
     path: "/",
     icon: <HomeIcon />,
     activeIcon: <ActiveHomeIcon />,
@@ -155,76 +155,101 @@ export const funcList1 = [
   },
   {
     id: 3,
-    title: "Kênh đăng ký",
+    title: "Subscriptions",
     path: "/sub-content?layout=grid",
     icon: <SubChannelIcon />,
     activeIcon: <ActiveSubChannelIcon />,
-    condition: true,
+    renderCondition: (user) => {
+      return !!user;
+    },
   },
   {
     id: 4,
-    title: "Bạn",
+    title: "You",
     path: "/my-channel",
     activeIcon: <ActiveMyChannel2Icon />,
     icon: <MyChannel2Icon />,
-    condition: true,
+    renderCondition: (user) => {
+      return !!user;
+    },
   },
 ];
 
 export const funcList2 = [
   {
     id: 1,
-    title: "Kênh của bạn",
+    title: "You",
     path: "/my-channel",
     icon: <MyChannelIcon />,
+    renderCondition: (user) => {
+      return !!user;
+    },
   },
   {
     id: 2,
-    title: "Video đã xem",
-    path: "/watched/me",
+    title: "History",
+    path: "/watched",
     icon: <WatchedIcon />,
     activeIcon: <ActiveWatchedIcon />,
+    renderCondition: (user) => {
+      return !!user;
+    },
   },
   {
     id: 3,
-    title: "Danh sách phát",
+    title: "Playlists",
     path: "/playlists",
     icon: <PlayListIcon />,
     activeIcon: <ActivePlayListIcon />,
+    renderCondition: (user) => {
+      return !!user;
+    },
   },
   {
     id: 4,
-    title: "Video của bạn",
+    title: "Your videos",
     path: "/manage/content/video",
     icon: <MyVideoIcon />,
+    renderCondition: (user) => {
+      return !!user;
+    },
   },
   {
     id: 5,
-    title: "Xem sau",
+    title: "Watch later",
     path: "/playlist/wl",
     icon: <LaterIcon />,
     activeIcon: <ActiveLaterIcon />,
+    renderCondition: (user) => {
+      return !!user;
+    },
   },
   {
     id: 6,
-    title: "Video đã thích",
+    title: "Liked videos",
     path: "/playlist/lv",
     icon: <LikedIcon />,
     activeIcon: <ActiveLikedIcon />,
+    renderCondition: (user) => {
+      return !!user;
+    },
   },
   {
     id: 7,
-    title: "Đoạn video của bạn",
+    title: "Your clips",
     path: "/my-cut",
     icon: <CutIcon />,
     activeIcon: <ActiveCutIcon />,
+    renderCondition: (user) => {
+      return !!user;
+    },
   },
 ];
 
 export const funcList3 = [
   {
     id: 1,
-    title: "Thịnh hành",
+    title: "Tranding",
     path: "/feed/popular",
     tag: "?tag=latest",
     icon: <PopularIcon />,
@@ -232,21 +257,21 @@ export const funcList3 = [
   },
   {
     id: 2,
-    title: "Âm nhạc",
+    title: "Music",
     path: "/ytb-channel/music",
     icon: <MusicIcon />,
     activeIcon: <ActiveMusicIcon />,
   },
   {
     id: 3,
-    title: "Trò chơi",
+    title: "Gaming",
     path: "/gaming",
     icon: <GameIcon />,
     activeIcon: <ActiveGameIcon />,
   },
   {
     id: 4,
-    title: "Tin tức",
+    title: "News",
     path: "/news",
     tag: "?tag=top",
     icon: <NewsIcons />,
@@ -254,7 +279,7 @@ export const funcList3 = [
   },
   {
     id: 5,
-    title: "Thể thao",
+    title: "Sports",
     path: "/ytb-channel/sport",
     icon: <SportIcon />,
     activeIcon: <ActiveSportIcon />,
@@ -291,27 +316,27 @@ export const funcList4 = [
 export const funcList5 = [
   {
     id: 1,
-    title: "Cài đặt",
+    title: "Settings",
     path: "/account-setting/account",
     icon: <SettingIcon />,
     activeIcon: <ActiveSettingIcon />,
   },
   {
     id: 2,
-    title: "Nhật ký báo cáo",
+    title: "Report history",
     path: "/report-history",
     icon: <DiaryIcon />,
     activeIcon: <ActiveDiaryIcon />,
   },
   {
     id: 3,
-    title: "Trợ giúp",
+    title: "Help",
     path: "/support",
     icon: <HelpIcon />,
   },
   {
     id: 4,
-    title: "Gửi ý kiến phản hồi",
+    title: "Send feedback",
     path: "/feedback",
     icon: <FeedBackIcon />,
   },

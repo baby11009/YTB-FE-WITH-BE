@@ -66,7 +66,7 @@ const CustomeFuncBox = ({
           funcList1.map((item) => {
             if (
               typeof item.renderCondition === "function" &&
-              item.renderCondition(productIndex, size)
+              !item.renderCondition(productIndex, size)
             ) {
               return null;
             } else if (

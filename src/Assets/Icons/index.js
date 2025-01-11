@@ -164,3 +164,5 @@ export { default as ShortFullScreenIcon } from "./ShortFullScreen.jsx";
 export { default as ShortFullScreenExitIcon } from "./ShortFullScreenExit.jsx";
 export { default as YoutubeBlankIcon } from "./YoutubeBlankIcon.jsx";
 export { default as YourChannelIcon } from "./YourChannel.jsx";
+export { default as ActiveLoopIcon } from "./ActiveLoop.jsx";
+export { default as ActiveShuffleIcon } from "./ActiveShuffle.jsx";

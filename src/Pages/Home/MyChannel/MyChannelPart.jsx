@@ -18,7 +18,6 @@ const MyChannelPart = ({ openedMenu }) => {
         openedMenu={openedMenu}
         display={display}
         setDisplay={setDisplay}
-        // refetch={refetch}
       />
       <MyChannelDisplay
         openedMenu={openedMenu}
