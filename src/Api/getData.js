@@ -45,17 +45,10 @@ export const getData = (
         return res.data;
       } catch (error) {
         console.error(error);
-
-        addToaster((prev) => [
-          ...prev,
-          {
-            id: prev.length + 1,
-            msg:
-              error.response?.data?.msg ||
-              error.response?.data ||
-              error.message,
-          },
-        ]);
+        addToaster(
+          error.response?.data?.msg || error.response?.data || error.message,
+        );
+        return null;
       }
     },
     refetchOnWindowFocus: false,
@@ -112,6 +105,7 @@ export const getDataWithAuth = (
         addToaster(
           error.response?.data?.msg || error.response?.data || error.message,
         );
+        return null;
       }
     },
     refetchOnWindowFocus: false,

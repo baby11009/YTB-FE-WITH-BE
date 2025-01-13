@@ -34,6 +34,7 @@ const PlayListCard = ({
       state={{
         stream: data?.video_list[0]?.stream,
         video: data?.video_list[0]?.video,
+        thumb: data?.video_list[0]?.thumb,
       }}
       className='cursor-pointer inline-block'
     >
@@ -91,7 +92,7 @@ const PlayListCard = ({
             <div className='w-[24px]'>
               <PlayIcon />
             </div>
-            <span className='ml-[2px] text-[13px] font-[550]'>PHÁT TẤT CẢ</span>
+            <span className='ml-[2px] text-[13px] font-[550]'>Play all</span>
           </div>
         </div>
         <div className='flex mt-[12px]'>
@@ -117,14 +118,14 @@ const PlayListCard = ({
                 )}
                 {path === "playlists" && (
                   <div className="before:content-['•'] before:mx-[4px] t-1-ellipsis">
-                    Danh sách phát
+                    Playlist
                   </div>
                 )}
               </div>
 
-              <div>Cập nhật {timeFormat2(data.updatedAt)}</div>
+              <div>Updated {timeFormat2(data.updatedAt)}</div>
 
-              <div className='hover:text-white'>Xem toàn bộ danh sách</div>
+              <div className='hover:text-white'>Watch all playlist</div>
             </div>
           </div>
 
@@ -132,11 +133,7 @@ const PlayListCard = ({
             className='w-[40px] h-[40px] rounded-[50%] 
             flex items-center justify-center relative mt-[-9px] active:bg-black-0.2
              group-hover:opacity-[1] opacity-0'
-            onMouseDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            onMouseUp={(e) => {
+            onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
 

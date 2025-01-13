@@ -1,10 +1,4 @@
-import {
-  useRef,
-  useLayoutEffect,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
+import { useRef, useLayoutEffect, useState, useCallback } from "react";
 import Hls from "hls.js";
 import {
   FillSettingIcon,
@@ -20,6 +14,7 @@ import {
   CopyDebugInfoIcon,
   TroubleshootIcon,
   ForTheNerdIcon,
+  Youtube2Icon,
 } from "../../../../Assets/Icons";
 import { durationCalc } from "../../../../util/durationCalc";
 import { getObjectChangedKey } from "../../../../util/func";
@@ -41,7 +36,7 @@ const defaultSettings = {
   quality: { title: "1080 HD", value: 1080 },
 };
 
-const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
+const Video = ({ data, handlePlayNextVideo }) => {
   const { setShowHover, handleCursorPositon } = useAuthContext();
 
   const hlsRef = useRef();
@@ -134,9 +129,11 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
     },
   ]);
 
-  const [videoLoaded, setVideoLoaded] = useState(false);
+  const autoPlaySuccesss = useRef(false);
 
   const [videoState, setVideoState] = useState({ paused: true });
+
+  const [error, setError] = useState(false);
 
   const [openedSettings, setOpenSettings] = useState(false);
 
@@ -216,7 +213,12 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
 
   const handleContainerMouseOut = useCallback((e) => {
     // Hide the controls UI when mouse is not out the container and scrubbing event is not fired
-    if (isScrubbing.current || audioScrubbing.current) return;
+    if (
+      isScrubbing.current ||
+      audioScrubbing.current ||
+      !autoPlaySuccesss.current
+    )
+      return;
     clearTimeout(timeOut.current);
     controls.current.style.opacity = 0;
   }, []);
@@ -224,16 +226,18 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
   const handleContainerMouseMove = useCallback(() => {
     // check if mouse is moving
     clearTimeout(timeOut.current);
-    controls.current.style.opacity = 1;
-    document.body.style.cursor = "default";
+    if (autoPlaySuccesss.current) {
+      controls.current.style.opacity = 1;
+      document.body.style.cursor = "default";
 
-    timeOut.current = setTimeout(() => {
-      if (isScrubbing.current || audioScrubbing.current) return;
-      document.body.style.cursor = "none";
-      if (controls.current) {
-        controls.current.style.opacity = 0;
-      }
-    }, 2500);
+      timeOut.current = setTimeout(() => {
+        if (isScrubbing.current || audioScrubbing.current) return;
+        document.body.style.cursor = "none";
+        if (controls.current) {
+          controls.current.style.opacity = 0;
+        }
+      }, 2500);
+    }
   }, []);
 
   const handleContainerMouseDown = useCallback(
@@ -291,7 +295,6 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
     // Set video loaded state and calculate the video duration and current time
     // apply video local storage settings and autoplay
 
-    setVideoLoaded(true);
     setVideoState({
       duration: videoRef.current.duration,
       currentTime: videoRef.current.currentTime,
@@ -303,9 +306,18 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
       handleChangeVideoSettings(key, value.value);
     }
 
-    videoRef.current.play().catch((err) => {
-      setVideoState((prev) => ({ ...prev, paused: true }));
-    });
+    videoRef.current
+      .play()
+      .then(() => {
+        autoPlaySuccesss.current = true;
+      })
+      .catch((err) => {
+        setVideoState((prev) => ({ ...prev, paused: true }));
+      });
+  }, []);
+
+  const handleVideoReloaded = useCallback(() => {
+    videoRef.current.load();
   }, []);
 
   const handlePlayVideo = useCallback(() => {
@@ -316,6 +328,7 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
 
   const handleVideoPlay = useCallback(() => {
     setVideoState((prev) => ({ ...prev, paused: false }));
+    autoPlaySuccesss.current = true;
   }, []);
 
   const handleVideoEnded = useCallback(() => {
@@ -325,6 +338,28 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
     } else {
       handlePlayNextVideo();
     }
+  }, []);
+
+  const handleVideoError = useCallback((e) => {
+    const error = videoRef.current.error;
+    let errMsg;
+    switch (error.code) {
+      case 1:
+        errMsg = "Media playback aborted";
+        break;
+      case 2:
+        errMsg = "Network error";
+        break;
+      case 3:
+        errMsg = "Decoding issue, unsupported codec";
+        break;
+      case 4:
+        errMsg = "Video source not supported";
+        break;
+      default:
+        errMsg = "An unknown error occurred";
+    }
+    setError(errMsg);
   }, []);
 
   const handleVideoPause = useCallback(() => {
@@ -517,6 +552,8 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
+
+      setError(false);
     };
   }, [data]);
 
@@ -547,6 +584,8 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
     videoRef.current.addEventListener("pause", handleVideoPause);
 
     videoRef.current.addEventListener("ended", handleVideoEnded);
+
+    videoRef.current.addEventListener("error", handleVideoError);
 
     window.addEventListener("mouseup", handleRemoveScrubbing);
 
@@ -594,6 +633,8 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
       videoRef.current.removeEventListener("pause", handleVideoPause);
 
       videoRef.current.removeEventListener("ended", handleVideoEnded);
+
+      videoRef.current.removeEventListener("error", handleVideoError);
 
       window.removeEventListener("mouseup", handleRemoveScrubbing);
 
@@ -678,10 +719,34 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
 
   return (
     <div
-      className='bg-[#000000] relative rounded-[12px]'
+      className='bg-[#000000] relative rounded-[12px] overflow-hidden group'
       ref={container}
       onContextMenu={(e) => e.preventDefault()}
     >
+      {!autoPlaySuccesss.current && videoState.paused && (
+        <div className='absolute inset-0 bg-[#000000]'>
+          <img
+            draggable={false}
+            src={`${import.meta.env.VITE_BASE_API_URI}${
+              import.meta.env.VITE_VIEW_THUMB_API
+            }${data?.thumb}`}
+            alt='thumbnail'
+            className='size-full object-contain object-center'
+          />
+          <button className='absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]'>
+            <div className='w-[68px] h-[48px]'>
+              <Youtube2Icon />
+            </div>
+          </button>
+        </div>
+      )}
+      {error && (
+        <div className='absolute inset-0 z-[200] bg-[#292929] flex items-center justify-center'>
+          <span className='text-[20x] leading-[28px] font-[500] text-gray-A'>
+            {error}
+          </span>
+        </div>
+      )}
       <div className={`absolute w-full bottom-0 z-[99] `} ref={controls}>
         <div
           className='w-full timeline-container h-[5px] px-[12px]'
@@ -706,7 +771,11 @@ const Video = ({ data, playlistStatus, handlePlayNextVideo }) => {
               </div>
             </button>
 
-            <button type='button' className='fill-white'>
+            <button
+              type='button'
+              className='fill-white'
+              onClick={handlePlayNextVideo}
+            >
               <div className='size-[36px] 2xsm:size-[48px]'>
                 <NextIcon />
               </div>

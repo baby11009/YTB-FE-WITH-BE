@@ -10,7 +10,7 @@ import {
   EqualIcon,
 } from "../../../Assets/Icons";
 import { Link } from "react-router-dom";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { timeFormat2 } from "../../../util/timeforMat";
 import { formatNumber } from "../../../util/numberFormat";
 import { CustomeFuncBox, VideoCard2 } from "../../../Component";
@@ -128,7 +128,15 @@ const Display = ({
               ></div>
             </div>
             <div className='flex flex-col sm:flex-row sm:items-center lg:flex-col lg:items-start '>
-              <Link className='inline-block w-full flex-1'>
+              <Link
+                className='inline-block w-full flex-1'
+                to={`/video?id=${videoList[0]?._id}&list=${playlistId}`}
+                state={{
+                  stream: videoList[0]?.stream,
+                  video: videoList[0]?.video,
+                  thumb: videoList[0]?.thumb,
+                }}
+              >
                 <div className='relative cursor-pointer mb-[16px] flex items-center justify-center'>
                   {videoList?.length > 0 ? (
                     <div className='relative rounded-[12px] overflow-hidden group'>
@@ -151,7 +159,7 @@ const Display = ({
                           <PlayIcon />
                         </div>
                         <span className='ml-[2px] text-[12px] font-[500]'>
-                          PHÁT TẤT CẢ
+                          Play all
                         </span>
                       </div>
                     </div>
@@ -212,17 +220,23 @@ const Display = ({
               </div>
             </div>
             <div className='my-[16px] flex flex-col xsm:flex-row xsm:items-center gap-[8px]'>
-              <button
+              <Link
                 className='flex-1 flex items-center justify-center px-[16px]
                  bg-[#fff] hover:bg-[#e6e6e6] rounded-[18px]'
+                to={`/video?id=${videoList[0]?._id}&list=${playlistId}`}
+                state={{
+                  stream: videoList[0]?.stream,
+                  video: videoList[0]?.video,
+                  thumb: videoList[0]?.thumb,
+                }}
               >
-                <div className='ml-[-6px] mr-[6px]'>
-                  <PlayIcon color={"#212121"} />
+                <div className='ml-[-6px] mr-[6px] text-black-21'>
+                  <PlayIcon />
                 </div>
                 <span className='text-[#212121] text-[14px] leading-[36px] font-[500]'>
                   Play all
                 </span>
-              </button>
+              </Link>
               <button
                 className='flex-1 flex items-center justify-center px-[16px]
                  bg-black-0.1 hover:bg-black-0.2 rounded-[18px]'

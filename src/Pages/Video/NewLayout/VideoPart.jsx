@@ -14,7 +14,6 @@ import { useLocation } from "react-router-dom";
 // video mode : normal , theater , fullscreen
 
 const VideoPart = () => {
-  
   const { state } = useLocation();
 
   const queryClient = useQueryClient();
@@ -33,20 +32,23 @@ const VideoPart = () => {
 
   const [isEnd, setIsEnd] = useState(false);
 
-  const nextVideoPath = useRef();
+  const nextVideoPath = useRef({ path: "", payload: {} });
 
-  const setNextVideoPath = useCallback((path) => {
-    nextVideoPath.current = path;
+  const setNextVideo = useCallback((path, payload) => {
+    console.log(path);
+    if (path) {
+      nextVideoPath.current.path = path;
+      nextVideoPath.current.payload = payload;
+    } else {
+      nextVideoPath.current = { path: "", payload: {} };
+    }
   });
 
   const handlePlayNextVideo = useCallback(() => {
-    navigate(nextVideoPath.current);
+    if (nextVideoPath.current.path) {
+      navigate(nextVideoPath.current.path, nextVideoPath.current.payload);
+    }
   }, []);
-
-  const [playlistStatus, setPlaylistStatus] = useState({
-    loop: false,
-    shuffle: false,
-  });
 
   // Video details
   const {
@@ -116,7 +118,6 @@ const VideoPart = () => {
           prevVideoSettings={prevVideoSettings}
           volume={volume}
           setVolume={setVolume}
-          playlistStatus={playlistStatus}
           containerStyle={"size-full"}
         />
       </div> */}
@@ -132,7 +133,7 @@ const VideoPart = () => {
         >
           {/* ${videoMode !== "normal" && "hidden"} */}
           <div className={`w-full `}>
-            <Video data={state} playlistStatus={playlistStatus} handlePlayNextVideo={handlePlayNextVideo} />
+            <Video data={state} handlePlayNextVideo={handlePlayNextVideo} />
           </div>
           <Description data={videoInfo} refetch={refetch} />
           <div className=' block lg:hidden  '>
@@ -141,9 +142,7 @@ const VideoPart = () => {
               playlistId={list}
               showMore={true}
               id={"small"}
-              setNextVideoPath={setNextVideoPath}
-              playlistStatus={playlistStatus}
-              setPlaylistStatus={setPlaylistStatus}
+              setNextVideo={setNextVideo}
             />
           </div>
           <CommentSection
@@ -161,9 +160,7 @@ const VideoPart = () => {
             playlistId={list}
             isEnd={isEnd}
             id={"large"}
-            setNextVideoPath={setNextVideoPath}
-            playlistStatus={playlistStatus}
-            setPlaylistStatus={setPlaylistStatus}
+            setNextVideo={setNextVideo}
           />
         </div>
       </div>

@@ -19,23 +19,22 @@ import { getData } from "../../../../../Api/getData";
 import { IsElementEnd } from "../../../../../util/scrollPosition";
 import { useAuthContext } from "../../../../../Auth Provider/authContext";
 
-const Playlist = ({
-  playlistId,
-  videoId,
-  setNextVideoPath,
-  playlistStatus,
-  setPlaylistStatus,
-}) => {
+const Playlist = ({ playlistId, videoId, setNextVideo }) => {
   const { user } = useAuthContext();
 
   const [isEnd, setIsEnd] = useState(false);
+
+  const [playlistStatus, setPlaylistStatus] = useState({
+    loop: false,
+    shuffle: false,
+  });
 
   const [addNew, setAddNew] = useState(true);
 
   const [show, setShow] = useState(true);
 
   const [playlistQuery, setPlaylistQuery] = useState({
-    videoLimit: 12,
+    videoLimit: 100,
     videoPage: 1,
     reset: playlistId,
   });
@@ -47,6 +46,8 @@ const Playlist = ({
   const videoIdList = useRef(new Set());
 
   const currentVideoIndex = useRef(undefined);
+
+  const playdedVideo = useRef(new Set());
 
   const nextVideo = useRef(undefined);
 
@@ -103,16 +104,41 @@ const Playlist = ({
 
   useLayoutEffect(() => {
     if (videoId && playlistDetails && videoList.length > 0) {
-      currentVideoIndex.current =
-        [...videoIdList.current].indexOf(videoId) + 1 || 1;
-      if (videoList[currentVideoIndex.current]) {
-        nextVideo.current = videoList[currentVideoIndex.current];
-        setNextVideoPath(
-          `/video?id=${nextVideo.current?._id}&list=${playlistInfo?._id}`,
+      const idList = [...videoIdList.current];
+
+      currentVideoIndex.current = idList.indexOf(videoId) + 1 || 1;
+
+      let index = currentVideoIndex.current;
+
+      if (playlistStatus.shuffle) {
+        playdedVideo.current.add(currentVideoIndex.current);
+        do {
+          index = Math.ceil(Math.random() * idList.length);
+        } while (
+          playdedVideo.current.has(index) &&
+          [...playdedVideo.current].length === idList.length
         );
+        console.log(index);
+      }
+      
+      if (videoList[index]) {
+        nextVideo.current = videoList[index];
+
+        setNextVideo(
+          `/video?id=${nextVideo.current?._id}&list=${playlistInfo?._id}`,
+          {
+            state: {
+              video: nextVideo.current?.video,
+              stream: nextVideo.current?.stream,
+            },
+          },
+        );
+      } else {
+        nextVideo.current = undefined;
+        setNextVideo(undefined);
       }
     }
-  }, [videoId, playlistDetails, videoList]);
+  }, [videoId, playlistDetails, videoList, playlistStatus]);
 
   useLayoutEffect(() => {
     if (playlistId) {

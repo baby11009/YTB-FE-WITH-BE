@@ -141,7 +141,11 @@ const PlaylistVideoCard = ({
           : "hover:bg-black-0.1"
       } box-content flex items-center cursor-grab group`}
       to={`/video?id=${data?._id}&list=${playlistInfo?._id}`}
-      state={{ stream: data?.stream, video: data.video }}
+      state={{
+        stream: data?.stream,
+        video: data.video,
+        thumb: data?.thumb,
+      }}
     >
       <div className='w-[24px] text-center'>
         {currentId === data?._id ? (

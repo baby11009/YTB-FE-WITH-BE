@@ -37,7 +37,7 @@ const Other = ({
   playlistId,
   isEnd,
   showMore,
-  setNextVideoPath,
+  setNextVideo,
   setPlaylistStatus,
   playlistStatus,
 }) => {
@@ -243,7 +243,7 @@ const Other = ({
         <PlayList
           playlistId={playlistId}
           videoId={videoId}
-          setNextVideoPath={setNextVideoPath}
+          setNextVideo={setNextVideo}
           playlistStatus={playlistStatus}
           setPlaylistStatus={setPlaylistStatus}
         />
