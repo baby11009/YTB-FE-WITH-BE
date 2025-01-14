@@ -9,7 +9,7 @@ import {
 
 const AudioRange = ({ videoRef, audioScrubbing }) => {
   
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(0);
 
   const container = useRef();
 

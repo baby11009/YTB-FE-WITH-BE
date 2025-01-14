@@ -37,10 +37,14 @@ const Other = ({
   playlistId,
   isEnd,
   showMore,
-  setNextVideo,
+  playlistInfo,
+  playlistVideos,
+  handlePlaylistShowMore,
+  handleModifyVideoList,
   setPlaylistStatus,
   playlistStatus,
 }) => {
+
   const [firstRender, setFirstRender] = useState(true);
 
   const currPlaylistId = useRef();
@@ -70,7 +74,7 @@ const Other = ({
 
   const shortIdList = useRef(new Set());
 
-  const { data: shortData, isLoading } = getData(
+  const { data: shortData } = getData(
     `/data/all`,
     shortQuery,
     !!shortQuery,
@@ -155,6 +159,7 @@ const Other = ({
   };
 
   useLayoutEffect(() => {
+    // Don't get new data when the playlist is loaded
     if (!playlistId || firstRender || playlistId !== currPlaylistId.current) {
       setFirstRender(false);
       currPlaylistId.current = playlistId;
@@ -241,9 +246,11 @@ const Other = ({
     <div>
       {playlistId && (
         <PlayList
-          playlistId={playlistId}
           videoId={videoId}
-          setNextVideo={setNextVideo}
+          playlistInfo={playlistInfo}
+          playlistVideos={playlistVideos}
+          handlePlaylistShowMore={handlePlaylistShowMore}
+          handleModifyVideoList={handleModifyVideoList}
           playlistStatus={playlistStatus}
           setPlaylistStatus={setPlaylistStatus}
         />

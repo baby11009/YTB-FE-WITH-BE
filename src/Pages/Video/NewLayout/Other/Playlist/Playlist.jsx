@@ -19,29 +19,20 @@ import { getData } from "../../../../../Api/getData";
 import { IsElementEnd } from "../../../../../util/scrollPosition";
 import { useAuthContext } from "../../../../../Auth Provider/authContext";
 
-const Playlist = ({ playlistId, videoId, setNextVideo }) => {
+const Playlist = ({
+  videoId,
+  playlistInfo,
+  playlistVideos,
+  handlePlaylistShowMore,
+  handleModifyVideoList,
+  playlistStatus,
+  setPlaylistStatus,
+}) => {
   const { user } = useAuthContext();
 
   const [isEnd, setIsEnd] = useState(false);
 
-  const [playlistStatus, setPlaylistStatus] = useState({
-    loop: false,
-    shuffle: false,
-  });
-
-  const [addNew, setAddNew] = useState(true);
-
   const [show, setShow] = useState(true);
-
-  const [playlistQuery, setPlaylistQuery] = useState({
-    videoLimit: 100,
-    videoPage: 1,
-    reset: playlistId,
-  });
-
-  const [playlistInfo, setPlaylistInfo] = useState(undefined);
-
-  const [videoList, setVideoList] = useState([]);
 
   const videoIdList = useRef(new Set());
 
@@ -53,106 +44,19 @@ const Playlist = ({ playlistId, videoId, setNextVideo }) => {
 
   const container = useRef();
 
-  const { data: playlistDetails, isError } = getData(
-    `/data/playlist/${playlistId}`,
-    playlistQuery,
-    !!playlistId,
-    false,
-  );
-
-  const handleModifyVideoList = useCallback((videoId) => {
-    setVideoList((prev) => prev.filter((item) => item._id !== videoId));
-    videoIdList.current.delete(videoId);
-    setPlaylistInfo((prev) => ({ ...prev, size: prev.size - 1 }));
-  }, []);
-
   useLayoutEffect(() => {
-    if (playlistDetails) {
-      setPlaylistInfo((prev) => {
-        if (prev) {
-          return { ...prev, ...playlistDetails.data };
-        }
-
-        return playlistDetails.data;
-      });
-
-      if (addNew) {
-        const finalList = [];
-        videoIdList.current.clear();
-        playlistDetails.data.video_list?.forEach((item) => {
-          if (!videoIdList.current.has(item._id)) {
-            videoIdList.current.add(item._id);
-            finalList.push(item);
-          }
-        });
-        setVideoList([...finalList]);
-        setAddNew(false);
-      } else {
-        const finalList = [];
-
-        playlistDetails.data.video_list?.forEach((item) => {
-          if (!videoIdList.current.has(item._id)) {
-            videoIdList.current.add(item._id);
-            finalList.push(item);
-          }
-        });
-
-        setVideoList((prev) => [...prev, ...finalList]);
-      }
-    }
-  }, [playlistDetails]);
-
-  useLayoutEffect(() => {
-    if (videoId && playlistDetails && videoList.length > 0) {
+    if (videoId && playlistInfo && playlistVideos.length > 0) {
       const idList = [...videoIdList.current];
 
       currentVideoIndex.current = idList.indexOf(videoId) + 1 || 1;
 
       let index = currentVideoIndex.current;
-
-      if (playlistStatus.shuffle) {
-        playdedVideo.current.add(currentVideoIndex.current);
-        do {
-          index = Math.ceil(Math.random() * idList.length);
-        } while (
-          playdedVideo.current.has(index) &&
-          [...playdedVideo.current].length === idList.length
-        );
-        console.log(index);
-      }
-      
-      if (videoList[index]) {
-        nextVideo.current = videoList[index];
-
-        setNextVideo(
-          `/video?id=${nextVideo.current?._id}&list=${playlistInfo?._id}`,
-          {
-            state: {
-              video: nextVideo.current?.video,
-              stream: nextVideo.current?.stream,
-            },
-          },
-        );
-      } else {
-        nextVideo.current = undefined;
-        setNextVideo(undefined);
-      }
     }
-  }, [videoId, playlistDetails, videoList, playlistStatus]);
-
-  useLayoutEffect(() => {
-    if (playlistId) {
-      setAddNew(true);
-    }
-  }, [playlistId]);
+  }, [videoId, playlistInfo, playlistVideos]);
 
   useEffect(() => {
-    if (
-      isEnd &&
-      playlistDetails &&
-      playlistQuery.videoPage < playlistDetails.totalPages
-    ) {
-      setPlaylistQuery((prev) => ({ ...prev, videoPage: prev.videoPage + 1 }));
+    if (isEnd) {
+      handlePlaylistShowMore();
     }
   }, [isEnd]);
 
@@ -172,11 +76,7 @@ const Playlist = ({ playlistId, videoId, setNextVideo }) => {
     };
   }, []);
 
-  if (isError) {
-    return <div>Failed to load playlist data</div>;
-  }
-
-  if (!playlistDetails) return;
+  if (!playlistInfo) return;
 
   return (
     <div className='mb-[24px]'>
@@ -233,7 +133,7 @@ const Playlist = ({ playlistId, videoId, setNextVideo }) => {
                   }}
                 >
                   <div className='w-[24px] '>
-                    {playlistStatus.loop ? <ActiveLoopIcon /> : <RepeatIcon />}
+                    {playlistStatus?.loop ? <ActiveLoopIcon /> : <RepeatIcon />}
                   </div>
                 </button>
                 <button
@@ -246,7 +146,7 @@ const Playlist = ({ playlistId, videoId, setNextVideo }) => {
                   }}
                 >
                   <div className='w-[24px] '>
-                    {playlistStatus.shuffle ? (
+                    {playlistStatus?.shuffle ? (
                       <ActiveShuffleIcon />
                     ) : (
                       <RandomIcon />
@@ -262,7 +162,7 @@ const Playlist = ({ playlistId, videoId, setNextVideo }) => {
             </div>
           </div>
           <div className='flex-1 overflow-y-auto pr-[10px]' ref={container}>
-            {videoList.map((item, index) => (
+            {playlistVideos.map((item, index) => (
               <PlaylistVideoCard
                 key={item?._id}
                 containerStyle={`${
@@ -272,7 +172,7 @@ const Playlist = ({ playlistId, videoId, setNextVideo }) => {
                 currentId={videoId}
                 index={index}
                 data={item}
-                size={videoList.length}
+                size={playlistVideos.length}
                 playlistInfo={playlistInfo}
                 renderSettings={
                   user && playlistInfo.channel_info._id === user._id

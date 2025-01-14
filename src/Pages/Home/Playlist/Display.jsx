@@ -131,11 +131,6 @@ const Display = ({
               <Link
                 className='inline-block w-full flex-1'
                 to={`/video?id=${videoList[0]?._id}&list=${playlistId}`}
-                state={{
-                  stream: videoList[0]?.stream,
-                  video: videoList[0]?.video,
-                  thumb: videoList[0]?.thumb,
-                }}
               >
                 <div className='relative cursor-pointer mb-[16px] flex items-center justify-center'>
                   {videoList?.length > 0 ? (
@@ -224,11 +219,6 @@ const Display = ({
                 className='flex-1 flex items-center justify-center px-[16px]
                  bg-[#fff] hover:bg-[#e6e6e6] rounded-[18px]'
                 to={`/video?id=${videoList[0]?._id}&list=${playlistId}`}
-                state={{
-                  stream: videoList[0]?.stream,
-                  video: videoList[0]?.video,
-                  thumb: videoList[0]?.thumb,
-                }}
               >
                 <div className='ml-[-6px] mr-[6px] text-black-21'>
                   <PlayIcon />

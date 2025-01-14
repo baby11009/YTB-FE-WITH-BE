@@ -48,7 +48,7 @@ export const getData = (
         addToaster(
           error.response?.data?.msg || error.response?.data || error.message,
         );
-        return null;
+        throw error;
       }
     },
     refetchOnWindowFocus: false,
@@ -105,7 +105,7 @@ export const getDataWithAuth = (
         addToaster(
           error.response?.data?.msg || error.response?.data || error.message,
         );
-        return null;
+        throw error;
       }
     },
     refetchOnWindowFocus: false,

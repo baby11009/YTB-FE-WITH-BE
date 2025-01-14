@@ -2,7 +2,13 @@ import Other from "./Other/Other";
 import Video from "./Video/Video";
 import Description from "./Description/Description";
 import CommentSection from "./Comment/CommentSection";
-import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useLayoutEffect,
+} from "react";
 import { IsEnd } from "../../../util/scrollPosition";
 import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
@@ -13,8 +19,24 @@ import { useLocation } from "react-router-dom";
 
 // video mode : normal , theater , fullscreen
 
+const initVideoQuery = {
+  page: 1,
+  limit: 12,
+  type: "video",
+  watchedVideoIdList: [],
+  sort: undefined,
+  prevPlCount: 0,
+};
+
+const initShortQuery = {
+  page: 1,
+  limit: 12,
+  type: "short",
+  sort: undefined,
+};
+
 const VideoPart = () => {
-  const { state } = useLocation();
+  const { pathname } = useLocation();
 
   const queryClient = useQueryClient();
 
@@ -26,29 +48,91 @@ const VideoPart = () => {
 
   const navigate = useNavigate();
 
+  const [playlistQuery, setPlaylistQuery] = useState({
+    videoLimit: 100,
+    videoPage: 1,
+    reset: list,
+  });
+
+  const [addNew, setAddNew] = useState(true);
+
   const [videoInfo, setVideoInfo] = useState(undefined);
 
   const [videoMode, setVideoMode] = useState("normal");
 
   const [isEnd, setIsEnd] = useState(false);
 
-  const nextVideoPath = useRef({ path: "", payload: {} });
-
-  const setNextVideo = useCallback((path, payload) => {
-    console.log(path);
-    if (path) {
-      nextVideoPath.current.path = path;
-      nextVideoPath.current.payload = payload;
-    } else {
-      nextVideoPath.current = { path: "", payload: {} };
-    }
+  const [playlistStatus, setPlaylistStatus] = useState({
+    loop: false,
+    shuffle: false,
   });
 
-  const handlePlayNextVideo = useCallback(() => {
-    if (nextVideoPath.current.path) {
-      navigate(nextVideoPath.current.path, nextVideoPath.current.payload);
-    }
-  }, []);
+  const [playlistInfo, setPlaylistInfo] = useState(undefined);
+
+  const [playlistAddNew, setPlaylistAddNew] = useState(true);
+
+  const [playlistVideos, setPlaylistVideos] = useState([]);
+
+  const playlistTotalPage = useRef();
+
+  const currentPlaylistVideo = useRef();
+
+  const playlistVideoIds = useRef(new Set());
+
+  // To get random video if shuffle is on or get next playlist video if video is ended
+  const playlistVideosArr = useRef(new Set());
+
+  const nextVideoPath = useRef({ path: "", payload: {} });
+
+  // const [videoQuery, setVideoQuery] = useState(undefined);
+
+  // const [videoList, setVideoList] = useState([]);
+
+  // const videoIdList = useRef(new Set());
+
+  // const [shortQuery, setShortQuery] = useState(undefined);
+
+  // const [shortList, setShortList] = useState([]);
+
+  // const shortIdList = useRef(new Set());
+
+  // const currentSortId = useRef("all");
+
+  // const handleSort = useCallback((data) => {
+  //   queryClient.removeQueries({
+  //     queryKey: [...Object.values(videoQuery), "/data/all"],
+  //     exact: true,
+  //   });
+  //   queryClient.removeQueries({
+  //     queryKey: [...Object.values(shortQuery), "/data/all"],
+  //     exact: true,
+  //   });
+  //   setVideoQuery({
+  //     ...initVideoQuery,
+  //     reset: videoId,
+  //     sort: data.value,
+  //   });
+  //   setShortQuery({
+  //     ...initShortQuery,
+  //     reset: videoId,
+  //     sort: data.value,
+  //   });
+  //   setAddNew(true);
+  //   setShortAddNew(true);
+  //   currentSortId.current = data.id;
+  // });
+
+  // const handleShowMore = useCallback(() => {
+  //   setVideoQuery((prev) => ({
+  //     ...prev,
+  //     page: prev.page + 1,
+  //     watchedVideoIdList: [
+  //       ...prev.watchedVideoIdList,
+  //       ...[...videoIdList.current],
+  //     ],
+  //     prevPlCount: videoList.filter((data) => data.video_list).length,
+  //   }));
+  // }, []);
 
   // Video details
   const {
@@ -65,21 +149,158 @@ const VideoPart = () => {
     false,
   );
 
-  useEffect(() => {
-    if (videoDetails) {
-      setVideoInfo((prev) =>
-        prev ? { ...prev, ...videoDetails.data } : { ...videoDetails.data },
-      );
+  // playlist data
+  const { data: playlistDetails, isError: plIsError } = getData(
+    `/data/playlist/${list}`,
+    playlistQuery,
+    !!list,
+    false,
+  );
+
+  // video
+  // const { data: videoData } = getData(
+  //   `/data/all`,
+  //   videoQuery,
+  //   !!videoQuery,
+  //   false,
+  // );
+
+  // // short
+  // const { data: shortData } = getData(
+  //   `/data/all`,
+  //   shortQuery,
+  //   !!shortQuery,
+  //   false,
+  // );
+
+  const setNextVideo = useCallback((path, payload) => {
+    if (path) {
+      nextVideoPath.current.path = path;
+      nextVideoPath.current.payload = payload;
+    } else {
+      nextVideoPath.current = { path: "", payload: {} };
     }
-  }, [videoDetails]);
+  });
+
+  const handlePlayNextVideo = useCallback(() => {
+    let playlist = [...playlistVideosArr.current];
+
+    let nextVideoIndex = playlist.indexOf(id) + 1 || 1;
+
+    if (playlistStatus.shuffle) {
+      if (playlistVideosArr.current.has(id)) {
+        playlistVideosArr.current.delete(id);
+        playlist = [...playlistVideosArr.current];
+      }
+
+      nextVideoIndex = Math.floor(Math.random() * playlist.length);
+    }
+
+    console.log(playlist);
+    console.log("🚀 ~ nextVideoIndex:", nextVideoIndex);
+
+    const nextVideo = playlist[nextVideoIndex];
+
+    if (nextVideo) {
+      const searchParams = new URLSearchParams({
+        id: nextVideo,
+        list: list,
+      }).toString();
+      navigate(pathname + "?" + searchParams);
+    }
+  }, [playlistStatus, id, pathname, list]);
+
+  const handlePlaylistShowMore = useCallback(() => {
+    if (playlistInfo && playlistTotalPage.current > playlistQuery.videoPage) {
+      setPlaylistQuery((prev) => ({ ...prev, videoPage: prev.videoPage + 1 }));
+    }
+  }, [playlistInfo, playlistQuery]);
+
+  const handleModifyVideoList = useCallback((videoId) => {
+    setPlaylistVideos((prev) => prev.filter((item) => item._id !== videoId));
+    playlistVideoIds.current.delete(videoId);
+
+    if (playlistVideosArr.current.has(videoId)) {
+      playlistVideosArr.current.delete(videoId);
+    }
+    setPlaylistInfo((prev) => ({ ...prev, size: prev.size - 1 }));
+  }, []);
+
+  useLayoutEffect(() => {
+    if (videoDetails) {
+      if (addNew) {
+        setVideoInfo(videoDetails.data);
+        setAddNew(false);
+      } else {
+        setVideoInfo((prev) => ({ ...prev, ...videoDetails.data }));
+      }
+    }
+  }, [videoDetails, addNew]);
+
+  useLayoutEffect(() => {
+    if (playlistDetails) {
+      playlistTotalPage.current = playlistDetails.totalPages;
+
+      setPlaylistInfo((prev) => {
+        if (prev) {
+          return { ...prev, ...playlistDetails.data };
+        }
+
+        return playlistDetails.data;
+      });
+
+      if (playlistAddNew) {
+        const finalList = [];
+        playlistVideoIds.current.clear();
+        playlistVideosArr.current.clear();
+        playlistDetails.data.video_list?.forEach((item) => {
+          if (!playlistVideoIds.current.has(item._id)) {
+            playlistVideoIds.current.add(item._id);
+            playlistVideosArr.current.add(item._id);
+
+            finalList.push(item);
+          }
+        });
+        setPlaylistVideos([...finalList]);
+        setPlaylistAddNew(false);
+      } else {
+        const finalList = [];
+
+        playlistDetails.data.video_list?.forEach((item) => {
+          if (!playlistVideoIds.current.has(item._id)) {
+            playlistVideoIds.current.add(item._id);
+            playlistVideosArr.current.add(item._id);
+
+            finalList.push(item);
+          }
+        });
+
+        setPlaylistVideos((prev) => [...prev, ...finalList]);
+      }
+    }
+  }, [playlistDetails]);
 
   useEffect(() => {
+    playlistVideosArr.current = new Set([...playlistVideoIds.current]);
+  }, [playlistStatus.shuffle]);
+
+  useLayoutEffect(() => {
+    if (list && playlistInfo) {
+      queryClient.invalidateQueries({
+        queryKey: Object.values(playlistQuery),
+        exact: true,
+      });
+    }
+  }, [list]);
+
+  useLayoutEffect(() => {
     if (id) {
       if (videoInfo) {
         queryClient.invalidateQueries({
           queryKey: [user?._id, id],
           exact: true,
         });
+        setAddNew(true);
       }
     } else {
       navigate("/");
@@ -98,9 +319,11 @@ const VideoPart = () => {
     };
   }, []);
 
-  if (isError) {
+  if (isError || plIsError) {
     return <div>Failed to loading data</div>;
   }
+
+  if (!videoInfo) return;
 
   return (
     <div className='max-w-[1754px] lg:min-w-min-360 1356:min-w-min-480 mx-auto flex flex-col'>
@@ -132,17 +355,24 @@ const VideoPart = () => {
          1356:min-w-480-16/9 ml-[24px] pr-[24px] '
         >
           {/* ${videoMode !== "normal" && "hidden"} */}
+
           <div className={`w-full `}>
-            <Video data={state} handlePlayNextVideo={handlePlayNextVideo} />
+            <Video data={videoInfo} handlePlayNextVideo={handlePlayNextVideo} />
           </div>
+
           <Description data={videoInfo} refetch={refetch} />
-          <div className=' block lg:hidden  '>
+          <div className='block lg:hidden'>
             <Other
               videoId={id}
               playlistId={list}
               showMore={true}
               id={"small"}
-              setNextVideo={setNextVideo}
+              playlistInfo={playlistInfo}
+              playlistVideos={playlistVideos}
+              handlePlaylistShowMore={handlePlaylistShowMore}
+              handleModifyVideoList={handleModifyVideoList}
+              playlistStatus={playlistStatus}
+              setPlaylistStatus={setPlaylistStatus}
             />
           </div>
           <CommentSection
@@ -160,7 +390,12 @@ const VideoPart = () => {
             playlistId={list}
             isEnd={isEnd}
             id={"large"}
-            setNextVideo={setNextVideo}
+            playlistInfo={playlistInfo}
+            playlistVideos={playlistVideos}
+            handlePlaylistShowMore={handlePlaylistShowMore}
+            handleModifyVideoList={handleModifyVideoList}
+            playlistStatus={playlistStatus}
+            setPlaylistStatus={setPlaylistStatus}
           />
         </div>
       </div>

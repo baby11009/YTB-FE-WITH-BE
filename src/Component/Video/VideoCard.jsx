@@ -202,7 +202,7 @@ const VideoCard = ({
             ? `/video?id=${data?._id}&list=${playlistId}`
             : `/video?id=${data?._id}`
         }
-        state={{ stream: data?.stream, video: data.video, thumb: data?.thumb }}
+       
       >
         <div
           className={`relative overflow-hidden ${
