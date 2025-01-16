@@ -1,4 +1,10 @@
-import { useRef, useLayoutEffect, useState, useCallback } from "react";
+import {
+  useRef,
+  useLayoutEffect,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import Hls from "hls.js";
 import {
   FillSettingIcon,
@@ -36,7 +42,7 @@ const defaultSettings = {
   quality: { title: "1080 HD", value: 1080 },
 };
 
-const Video = ({ data, handlePlayNextVideo }) => {
+const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
   const { setShowHover, handleCursorPositon } = useAuthContext();
 
   const hlsRef = useRef();
@@ -316,10 +322,6 @@ const Video = ({ data, handlePlayNextVideo }) => {
       });
   }, []);
 
-  const handleVideoReloaded = useCallback(() => {
-    videoRef.current.load();
-  }, []);
-
   const handlePlayVideo = useCallback(() => {
     videoRef.current.paused
       ? videoRef.current.play()
@@ -338,7 +340,7 @@ const Video = ({ data, handlePlayNextVideo }) => {
     } else {
       handlePlayNextVideo();
     }
-  }, []);
+  }, [playlitStatus, data]);
 
   const handleVideoError = useCallback((e) => {
     const error = videoRef.current.error;
@@ -555,7 +557,7 @@ const Video = ({ data, handlePlayNextVideo }) => {
 
       setError(false);
     };
-  }, [data]);
+  }, [data._id]);
 
   useLayoutEffect(() => {
     container.current.addEventListener("mouseover", handleContainerMouseOver);
@@ -582,8 +584,6 @@ const Video = ({ data, handlePlayNextVideo }) => {
     videoRef.current.addEventListener("play", handleVideoPlay);
 
     videoRef.current.addEventListener("pause", handleVideoPause);
-
-    videoRef.current.addEventListener("ended", handleVideoEnded);
 
     videoRef.current.addEventListener("error", handleVideoError);
 
@@ -631,8 +631,6 @@ const Video = ({ data, handlePlayNextVideo }) => {
       videoRef.current.removeEventListener("play", handleVideoPlay);
 
       videoRef.current.removeEventListener("pause", handleVideoPause);
-
-      videoRef.current.removeEventListener("ended", handleVideoEnded);
 
       videoRef.current.removeEventListener("error", handleVideoError);
 
@@ -701,7 +699,7 @@ const Video = ({ data, handlePlayNextVideo }) => {
     return () => {
       videoRef.current.removeEventListener("loadedmetadata", handleVideoloaded);
     };
-  }, [data, videoSettings]);
+  }, [data._id, videoSettings]);
 
   useLayoutEffect(() => {
     container.current.addEventListener("mousedown", handleContainerMouseDown);
@@ -716,6 +714,14 @@ const Video = ({ data, handlePlayNextVideo }) => {
       );
     };
   }, [openedSettings]);
+
+  useEffect(() => {
+    videoRef.current.addEventListener("ended", handleVideoEnded);
+
+    return () => {
+      videoRef?.current?.removeEventListener("ended", handleVideoEnded);
+    };
+  }, [playlitStatus]);
 
   return (
     <div

@@ -385,38 +385,46 @@ const ShortPart = () => {
       </div>
 
       <div
-        className='hidden md:flex md:flex-col md:justify-center fixed 
-      right-0 h-[calc(100%-56px)] bg-black 1156:z-[2001]'
+        className='hidden md:block fixed 
+      right-0 h-[calc(100%-56px)] bg-black 1156:z-[2001] w-[96px]'
       >
-        {!isTop && (
-          <div className='pl-[16px] pr-[24px] py-[8px]'>
-            <button
-              className='w-[56px] h-[56px] rounded-[50%] bg-hover-black
-           hover:bg-[rgba(255,255,255,0.2)] rotate-180 flex items-center justify-center'
-              title='Video trước'
-              onClick={handleScrollPrev}
-            >
-              <div>
-                <LongArrowIcon />
-              </div>
-            </button>
-          </div>
-        )}
+        <div className='pl-[16px] pr-[24px] py-[8px]'>
+          <button
+            className={`w-[56px] h-[56px] rounded-[50%] bg-hover-black
+           hover:bg-[rgba(255,255,255,0.2)] rotate-180 flex items-center justify-center 
+            absolute top-[50%]  ${
+              !isTop
+                ? "translate-y-[calc(-100%_-_5px)] visible opacity-[1]"
+                : "translate-y-[-50%] invisible opacity-0"
+            }  transition-[opacity_transform] ] ease-linear duration-[0.3s]`}
+            title='Previous video'
+            onClick={handleScrollPrev}
+          >
+            <div>
+              <LongArrowIcon />
+            </div>
+          </button>
+        </div>
+
         {/* Show scrollNext btn if remainData > 0 or remainData = 0 and not isEnd */}
-        {(remainData.current > 0 || (remainData.current === 0 && !isEnd)) && (
-          <div className='pl-[16px] pr-[24px] py-[8px]'>
-            <button
-              className='w-[56px] h-[56px] rounded-[50%] bg-hover-black
-             hover:bg-[rgba(255,255,255,0.2)] flex items-center justify-center'
-              title='Video tiếp theo'
-              onClick={handleScrollNext}
-            >
-              <div>
-                <LongArrowIcon />
-              </div>
-            </button>
-          </div>
-        )}
+
+        <div className='pl-[16px] pr-[24px] py-[8px]'>
+          <button
+            className={`w-[56px] h-[56px] rounded-[50%] bg-hover-black
+             hover:bg-[rgba(255,255,255,0.2)] flex items-center justify-center
+             absolute top-[50%]  ${
+               remainData.current > 0 || (remainData.current === 0 && !isEnd)
+                 ? "translate-y-[10px] visible opacity-[1]"
+                 : "translate-y-[-50%] invisible opacity-[0]"
+             } transition-[opacity_transform] ease-linear duration-[0.3s]`}
+            title='Next video'
+            onClick={handleScrollNext}
+          >
+            <div>
+              <LongArrowIcon />
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   );

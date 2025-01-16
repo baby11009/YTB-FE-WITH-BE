@@ -7,15 +7,8 @@ import {
   ActiveLoopIcon,
   ActiveShuffleIcon,
 } from "../../../../../Assets/Icons";
-import {
-  useState,
-  useLayoutEffect,
-  useRef,
-  useEffect,
-  useCallback,
-} from "react";
+import { useState, useRef, useEffect } from "react";
 import { PlaylistVideoCard } from "../../../../../Component";
-import { getData } from "../../../../../Api/getData";
 import { IsElementEnd } from "../../../../../util/scrollPosition";
 import { useAuthContext } from "../../../../../Auth Provider/authContext";
 
@@ -23,6 +16,8 @@ const Playlist = ({
   videoId,
   playlistInfo,
   playlistVideos,
+  playlistCurrentVideoIndex,
+  playlistNextVideoInfo,
   handlePlaylistShowMore,
   handleModifyVideoList,
   playlistStatus,
@@ -34,25 +29,7 @@ const Playlist = ({
 
   const [show, setShow] = useState(true);
 
-  const videoIdList = useRef(new Set());
-
-  const currentVideoIndex = useRef(undefined);
-
-  const playdedVideo = useRef(new Set());
-
-  const nextVideo = useRef(undefined);
-
   const container = useRef();
-
-  useLayoutEffect(() => {
-    if (videoId && playlistInfo && playlistVideos.length > 0) {
-      const idList = [...videoIdList.current];
-
-      currentVideoIndex.current = idList.indexOf(videoId) + 1 || 1;
-
-      let index = currentVideoIndex.current;
-    }
-  }, [videoId, playlistInfo, playlistVideos]);
 
   useEffect(() => {
     if (isEnd) {
@@ -105,7 +82,7 @@ const Playlist = ({
                     </div>
                     <div className='px-[4px]'>-</div>
                     <span className='text-gray-A'>
-                      {currentVideoIndex.current} / {playlistInfo?.size}
+                      {playlistCurrentVideoIndex} / {playlistInfo?.size}
                     </span>
                   </div>
                 </div>
@@ -187,12 +164,12 @@ const Playlist = ({
           <div className='flex items-center'>
             <div className='flex-1'>
               <div className='text-[14px] leading-[20px] text-[#E6E5FF] flex'>
-                {nextVideo.current ? (
+                {playlistNextVideoInfo ? (
                   <>
                     <span className='font-[500] mr-[4px]'>Next: </span>
                     <div className='max-h-[20px] line-clamp-1 text-ellipsis overflow-hidden whitespace-nowrap'>
                       <span className=' whitespace-pre-wrap'>
-                        {nextVideo.current?.title}
+                        {playlistNextVideoInfo?.title}
                       </span>
                     </div>
                   </>
@@ -212,7 +189,7 @@ const Playlist = ({
                   </button>
                   <div className='px-[4px]'>-</div>
                   <span>
-                    {currentVideoIndex.current} / {playlistInfo.size}
+                    {playlistCurrentVideoIndex} / {playlistInfo.size}
                   </span>
                 </div>
               </div>

@@ -19,20 +19,12 @@ import { useLocation } from "react-router-dom";
 
 // video mode : normal , theater , fullscreen
 
-const initVideoQuery = {
+const initCombineQuery = {
   page: 1,
   limit: 12,
-  type: "video",
   watchedVideoIdList: [],
   sort: undefined,
   prevPlCount: 0,
-};
-
-const initShortQuery = {
-  page: 1,
-  limit: 12,
-  type: "short",
-  sort: undefined,
 };
 
 const VideoPart = () => {
@@ -47,6 +39,8 @@ const VideoPart = () => {
   const { user } = useAuthContext();
 
   const navigate = useNavigate();
+
+  const [smallMedia, setSmallMedia] = useState();
 
   const [playlistQuery, setPlaylistQuery] = useState({
     videoLimit: 100,
@@ -75,64 +69,26 @@ const VideoPart = () => {
 
   const playlistTotalPage = useRef();
 
-  const currentPlaylistVideo = useRef();
+  const currentVideoId = useRef(id);
+
+  const nextVideoInfo = useRef(undefined);
 
   const playlistVideoIds = useRef(new Set());
 
   // To get random video if shuffle is on or get next playlist video if video is ended
   const playlistVideosArr = useRef(new Set());
 
-  const nextVideoPath = useRef({ path: "", payload: {} });
+  const firstRender = useRef(true);
 
-  // const [videoQuery, setVideoQuery] = useState(undefined);
+  const currentPage = useRef(1);
 
-  // const [videoList, setVideoList] = useState([]);
+  const currentSortId = useRef("all");
 
-  // const videoIdList = useRef(new Set());
+  const [combineQuery, setCombineQuery] = useState(undefined);
 
-  // const [shortQuery, setShortQuery] = useState(undefined);
+  const [comebineDataList, setCombineDataList] = useState([]);
 
-  // const [shortList, setShortList] = useState([]);
-
-  // const shortIdList = useRef(new Set());
-
-  // const currentSortId = useRef("all");
-
-  // const handleSort = useCallback((data) => {
-  //   queryClient.removeQueries({
-  //     queryKey: [...Object.values(videoQuery), "/data/all"],
-  //     exact: true,
-  //   });
-  //   queryClient.removeQueries({
-  //     queryKey: [...Object.values(shortQuery), "/data/all"],
-  //     exact: true,
-  //   });
-  //   setVideoQuery({
-  //     ...initVideoQuery,
-  //     reset: videoId,
-  //     sort: data.value,
-  //   });
-  //   setShortQuery({
-  //     ...initShortQuery,
-  //     reset: videoId,
-  //     sort: data.value,
-  //   });
-  //   setAddNew(true);
-  //   setShortAddNew(true);
-  //   currentSortId.current = data.id;
-  // });
-
-  // const handleShowMore = useCallback(() => {
-  //   setVideoQuery((prev) => ({
-  //     ...prev,
-  //     page: prev.page + 1,
-  //     watchedVideoIdList: [
-  //       ...prev.watchedVideoIdList,
-  //       ...[...videoIdList.current],
-  //     ],
-  //     prevPlCount: videoList.filter((data) => data.video_list).length,
-  //   }));
-  // }, []);
+  const [combineAddNew, setCombineAddNew] = useState();
 
   // Video details
   const {
@@ -157,49 +113,29 @@ const VideoPart = () => {
     false,
   );
 
-  // video
-  // const { data: videoData } = getData(
-  //   `/data/all`,
-  //   videoQuery,
-  //   !!videoQuery,
-  //   false,
-  // );
-
-  // // short
-  // const { data: shortData } = getData(
-  //   `/data/all`,
-  //   shortQuery,
-  //   !!shortQuery,
-  //   false,
-  // );
-
-  const setNextVideo = useCallback((path, payload) => {
-    if (path) {
-      nextVideoPath.current.path = path;
-      nextVideoPath.current.payload = payload;
-    } else {
-      nextVideoPath.current = { path: "", payload: {} };
-    }
-  });
+  // video, short , playlist
+  const { data: combineData } = getData(
+    `/data/all`,
+    combineQuery,
+    !!combineQuery,
+    false,
+  );
 
   const handlePlayNextVideo = useCallback(() => {
     let playlist = [...playlistVideosArr.current];
 
-    let nextVideoIndex = playlist.indexOf(id) + 1 || 1;
+    let nextVideoIndex = playlist.indexOf(currentVideoId.current) + 1 || 1;
 
     if (playlistStatus.shuffle) {
-      if (playlistVideosArr.current.has(id)) {
-        playlistVideosArr.current.delete(id);
+      if (playlistVideosArr.current.has(currentVideoId.current)) {
+        playlistVideosArr.current.delete(currentVideoId.current);
         playlist = [...playlistVideosArr.current];
       }
 
       nextVideoIndex = Math.floor(Math.random() * playlist.length);
     }
 
-    console.log(playlist);
-    console.log("🚀 ~ nextVideoIndex:", nextVideoIndex);
-
-    const nextVideo = playlist[nextVideoIndex];
+    let nextVideo = playlist[nextVideoIndex];
 
     if (nextVideo) {
       const searchParams = new URLSearchParams({
@@ -207,8 +143,26 @@ const VideoPart = () => {
         list: list,
       }).toString();
       navigate(pathname + "?" + searchParams);
+    } else if (!nextVideo && playlistStatus.loop) {
+      // if don't have any next video to play and loop is on then reset the playlist
+      if (playlistStatus.shuffle) {
+        playlistVideosArr.current = new Set([...playlistVideoIds.current]);
+
+        playlist = [...playlistVideosArr.current];
+        nextVideo =
+          playlist[
+            Math.floor(Math.random() * [...playlistVideosArr.current].length)
+          ];
+      } else {
+        nextVideo = playlist[0];
+      }
+      const searchParams = new URLSearchParams({
+        id: nextVideo,
+        list: list,
+      }).toString();
+      navigate(pathname + "?" + searchParams);
     }
-  }, [playlistStatus, id, pathname, list]);
+  }, [playlistStatus, pathname, list]);
 
   const handlePlaylistShowMore = useCallback(() => {
     if (playlistInfo && playlistTotalPage.current > playlistQuery.videoPage) {
@@ -225,6 +179,48 @@ const VideoPart = () => {
     }
     setPlaylistInfo((prev) => ({ ...prev, size: prev.size - 1 }));
   }, []);
+
+  const handleSort = useCallback(
+    (data) => {
+      queryClient.removeQueries({
+        queryKey: [...Object.values(combineQuery), "/data/all"],
+        exact: true,
+      });
+
+      setCombineQuery({
+        ...initCombineQuery,
+        reset: id + list,
+        sort: data.value,
+      });
+      setCombineAddNew(true);
+      currentSortId.current = data.id;
+    },
+    [id, list, combineQuery],
+  );
+
+  const handleShowMore = useCallback(() => {
+    // get current data page
+    const currentData = comebineDataList[currentPage.current - 1];
+    if (!currentData) return;
+
+    // calculate total playlist is available
+    const playlistQtt = currentData?.videoList.filter(
+      (data) => data.video_list,
+    ).length;
+
+    // // calculate all the data id is available
+    const watchedId = [
+      ...currentData?.videoList.map((item) => item._id),
+      ...currentData?.shortList.map((item) => item._id),
+    ];
+
+    setCombineQuery((prev) => ({
+      ...prev,
+      page: prev.page + 1,
+      watchedVideoIdList: [...prev.watchedVideoIdList, ...[...watchedId]],
+      prevPlCount: prev.prevPlCount + playlistQtt,
+    }));
+  }, [comebineDataList]);
 
   useLayoutEffect(() => {
     if (videoDetails) {
@@ -282,7 +278,7 @@ const VideoPart = () => {
 
   useEffect(() => {
     playlistVideosArr.current = new Set([...playlistVideoIds.current]);
-  }, [playlistStatus.shuffle]);
+  }, [playlistStatus]);
 
   useLayoutEffect(() => {
     if (list && playlistInfo) {
@@ -295,6 +291,7 @@ const VideoPart = () => {
 
   useLayoutEffect(() => {
     if (id) {
+      currentVideoId.current = id;
       if (videoInfo) {
         queryClient.invalidateQueries({
           queryKey: [user?._id, id],
@@ -307,17 +304,90 @@ const VideoPart = () => {
     }
   }, [id]);
 
+  useLayoutEffect(() => {
+    // Don't get new data when the playlist is loaded
+    if (!list || firstRender.current) {
+      firstRender.current = false;
+
+      setCombineQuery({
+        ...initCombineQuery,
+        reset: id + list,
+      });
+      setCombineAddNew(true);
+      setCombineDataList([]);
+    }
+  }, [id, list]);
+
+  useLayoutEffect(() => {
+    if (combineQuery) {
+      currentPage.current = combineQuery?.page;
+    }
+  }, [combineQuery]);
+
+  useLayoutEffect(() => {
+    if (
+      combineData &&
+      (combineData.data.length > 0 || combineData.short.length > 0)
+    ) {
+      const data = { videoList: [], shortList: [] };
+
+      if (combineData.data.length > 0) {
+        data.videoList = [...combineData.data];
+      }
+
+      if (combineData.shorts.length > 0) {
+        data.shortList = [...combineData.shorts];
+      }
+
+      if (combineAddNew) {
+        setCombineDataList([data]);
+        setCombineAddNew(false);
+      } else {
+        setCombineDataList((prev) => [...prev, data]);
+      }
+    }
+  }, [combineData]);
+
   useEffect(() => {
     const handleOnScroll = (e) => {
       IsEnd(setIsEnd);
     };
+
     window.addEventListener("scroll", handleOnScroll);
 
+    const handleResize = (e) => {
+      setSmallMedia(window.innerWidth < 1024 ? true : false);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("scroll", handleOnScroll);
+      window.removeEventListener("resize", handleResize);
+
       queryClient.clear();
     };
   }, []);
+
+  useLayoutEffect(() => {
+    if (id && playlistVideos.length > 0) {
+      const idList = playlistVideos.map((item) => item._id);
+      let index = idList.indexOf(currentVideoId.current) + 1 || 1;
+
+      nextVideoInfo.current = playlistVideos[index];
+    }
+  }, [id, playlistVideos]);
+
+  useEffect(() => {
+    if (
+      isEnd &&
+      !smallMedia &&
+      combineData &&
+      (combineData?.data?.length === combineQuery?.limit ||
+        combineData?.shorts?.length === combineQuery?.limit)
+    ) {
+      handleShowMore();
+    }
+  }, [isEnd, smallMedia, combineData]);
 
   if (isError || plIsError) {
     return <div>Failed to loading data</div>;
@@ -350,6 +420,7 @@ const VideoPart = () => {
         }`}
       >
         {/* Left side */}
+        <button></button>
         <div
           className='flex-1 min-w-240-16/9 lg:min-w-360-16/9 lg:max-w-max-16/9
          1356:min-w-480-16/9 ml-[24px] pr-[24px] '
@@ -357,16 +428,23 @@ const VideoPart = () => {
           {/* ${videoMode !== "normal" && "hidden"} */}
 
           <div className={`w-full `}>
-            <Video data={videoInfo} handlePlayNextVideo={handlePlayNextVideo} />
+            <Video
+              data={videoInfo}
+              handlePlayNextVideo={handlePlayNextVideo}
+              playlitStatus={playlistStatus}
+            />
           </div>
 
           <Description data={videoInfo} refetch={refetch} />
-          <div className='block lg:hidden'>
+
+          {smallMedia && (
             <Other
               videoId={id}
               playlistId={list}
-              showMore={true}
-              id={"small"}
+              combineData={comebineDataList}
+              handleSort={handleSort}
+              handleShowMore={combineQuery?.page < 2 && handleShowMore}
+              currentSortId={currentSortId.current}
               playlistInfo={playlistInfo}
               playlistVideos={playlistVideos}
               handlePlaylistShowMore={handlePlaylistShowMore}
@@ -374,7 +452,8 @@ const VideoPart = () => {
               playlistStatus={playlistStatus}
               setPlaylistStatus={setPlaylistStatus}
             />
-          </div>
+          )}
+
           <CommentSection
             videoId={id}
             videoUserId={videoInfo?.channel_info._id}
@@ -384,20 +463,29 @@ const VideoPart = () => {
           />
         </div>
         {/* Right side */}
-        <div className='hidden lg:block  pr-[24px] w-[402px] min-w-[300px] box-content'>
-          <Other
-            videoId={id}
-            playlistId={list}
-            isEnd={isEnd}
-            id={"large"}
-            playlistInfo={playlistInfo}
-            playlistVideos={playlistVideos}
-            handlePlaylistShowMore={handlePlaylistShowMore}
-            handleModifyVideoList={handleModifyVideoList}
-            playlistStatus={playlistStatus}
-            setPlaylistStatus={setPlaylistStatus}
-          />
-        </div>
+        {!smallMedia && (
+          <div className='pr-[24px] w-[402px] min-w-[300px] box-content'>
+            <Other
+              videoId={id}
+              playlistId={list}
+              combineData={comebineDataList}
+              handleSort={handleSort}
+              currentSortId={currentSortId.current}
+              playlistInfo={playlistInfo}
+              playlistVideos={playlistVideos}
+              playlistCurrentVideoIndex={
+                playlistVideos
+                  .map((item) => item._id)
+                  .indexOf(currentVideoId.current) + 1 || 1
+              }
+              playlistNextVideoInfo={nextVideoInfo.current}
+              handlePlaylistShowMore={handlePlaylistShowMore}
+              handleModifyVideoList={handleModifyVideoList}
+              playlistStatus={playlistStatus}
+              setPlaylistStatus={setPlaylistStatus}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
