@@ -5,6 +5,13 @@ import { Link } from "react-router-dom";
 import { timeFormat3 } from "../../../../util/timeforMat";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 
+const type = {
+  liked: "Liked videos",
+  watch_later: "Watch later",
+  history: "History",
+  playlist: "Playlist",
+};
+
 const PlaylistTbRow = ({
   data,
   od,
@@ -43,6 +50,11 @@ const PlaylistTbRow = ({
       <th>
         <span className='font-[400] w-[80px] md:w-full max-w-[150px] text-nowrap overflow-hidden text-ellipsis'>
           {data?.title}
+        </span>
+      </th>
+      <th>
+        <span className='font-[400] w-[80px] md:w-full max-w-[150px] text-nowrap overflow-hidden text-ellipsis'>
+          {type[data?.type]}
         </span>
       </th>
       <th className='hidden 2md:table-cell'>

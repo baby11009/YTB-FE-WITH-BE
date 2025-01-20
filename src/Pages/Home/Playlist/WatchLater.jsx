@@ -140,7 +140,7 @@ const WatchLater = () => {
       icon: <TrashBinIcon />,
       handleOnClick: async (_, productData) => {
         await request
-          .patch("/client/playlist/watchlater", {
+          .patch("/client/playlist/wl", {
             videoIdList: [productData?._id],
           })
           .then(() => {

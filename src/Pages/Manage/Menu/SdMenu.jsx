@@ -62,7 +62,7 @@ const SdMenu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
                   />
                 </Link>
                 <h3 className='pt-[14px] text-[15px] leading-[24px] font-[500]'>
-                  Kênh của bạn
+                  Your Channel
                 </h3>
                 <span className='text-[12px] leading-[16px] text-gray-A'>
                   {data?.email}

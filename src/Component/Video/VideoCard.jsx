@@ -141,7 +141,7 @@ const VideoCard = ({
       renderCondition: !!user,
       handleOnClick: async () => {
         await request
-          .patch("/client/playlist/watchlater", {
+          .patch("/client/playlist/wl", {
             videoIdList: [data?._id],
           })
           .then((rsp) => {
@@ -202,7 +202,6 @@ const VideoCard = ({
             ? `/video?id=${data?._id}&list=${playlistId}`
             : `/video?id=${data?._id}`
         }
-       
       >
         <div
           className={`relative overflow-hidden ${

@@ -252,7 +252,7 @@ const AuthProvider = ({ children }) => {
         )}
         {showHover && (
           <div
-            className={`absolute z-[9999] translate-y-[-100%] ${
+            className={`absolute z-[9998] translate-y-[-100%] ${
               displayModal ? "opacity-[1]" : "opacity-0"
             }`}
             style={{
@@ -264,7 +264,7 @@ const AuthProvider = ({ children }) => {
             {showHover}
           </div>
         )}
-        <div ref={toasterContainer} className='z-[7000] relative'>
+        <div ref={toasterContainer} className='z-[9999] relative'>
           {currentToaster && (
             <div
               key={currentToaster}

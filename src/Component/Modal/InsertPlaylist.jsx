@@ -71,8 +71,9 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
 
   const [queries, setQueries] = useState({
     sort: { createdAt: -1 },
-    limit: 8,
+    limit: 12,
     page: 1,
+    exCludeTypes: ["liked"],
   });
 
   const [dataList, setDataList] = useState([]);
@@ -103,6 +104,7 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
     },
     cacheTime: 0,
   });
+  console.log("🚀 ~ data:", data);
 
   useEffect(() => {
     if (data && data?.qtt > 0) {

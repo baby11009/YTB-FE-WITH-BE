@@ -134,7 +134,6 @@ export const dltManyData = async (
       });
 
     addToaster(`Delete ${dataType} successfully`);
-    console.log(dltDatas.data);
   } catch (error) {
     console.log("🚀 ~ error:", error);
     alert(error.response.data.msg);

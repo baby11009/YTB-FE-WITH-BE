@@ -12,7 +12,7 @@ import {
   useLayoutEffect,
   useCallback,
 } from "react";
-import { getDataWithAuth } from "../../../../../../Api/getData";
+import { getData } from "../../../../../../Api/getData";
 import { updateData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
@@ -37,7 +37,7 @@ const VideoCard = ({ data, handleRemoveVideo }) => {
       </div>
       <div className='w-[130px]'>{timeFormat3(data.createdAt)}</div>
       <div className='w-[100px] flex items-center gap-[12px]'>
-        <a href={`/video/${data?._id}`} target='_blank' title='Xem video'>
+        <a href={`/video?id=${data?._id}`} target='_blank' title='Watch video'>
           <div className='hover:text-blue-500 transition-all duration-[0.25s] ease text-[12px]'>
             <GotoIcon />
           </div>
@@ -47,7 +47,7 @@ const VideoCard = ({ data, handleRemoveVideo }) => {
           onClick={() => {
             handleRemoveVideo(data?._id);
           }}
-          title='Xóa video khỏi playlist'
+          title='Remove from playlist'
         >
           <div className='hover:text-red-500 transition-all duration-[0.25s] ease '>
             <DeleteIcon />
@@ -60,7 +60,7 @@ const VideoCard = ({ data, handleRemoveVideo }) => {
 
 const init = {
   title: "",
-  type: "public",
+  privacy: "public",
 };
 const initPlaylistParams = {
   videoLimit: 4,
@@ -82,15 +82,9 @@ const VideoUpsertModal = ({ title, id }) => {
 
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  const typesRef = useRef(["public", "private"]);
+  const privacyRef = useRef(["public", "private"]);
 
-  const {
-    data: playlistData,
-    refetch,
-    error: queryError,
-    isLoading: playlistLoading,
-    isError: playlistIsError,
-  } = getDataWithAuth(
+  const { data: playlistData, refetch } = getData(
     `/client/playlist/${id}`,
     playlistPrs,
     id !== undefined,
@@ -145,10 +139,7 @@ const VideoUpsertModal = ({ title, id }) => {
         return;
       }
 
-      let finalData = {
-        title: formData.title,
-        type: formData.type,
-      };
+      let finalData = structuredClone(formData);
 
       for (const key in finalData) {
         if (
@@ -209,7 +200,7 @@ const VideoUpsertModal = ({ title, id }) => {
     if (playlistData) {
       setFormData({
         title: playlistData?.data?.title,
-        type: playlistData?.data?.type,
+        privacy: playlistData?.data?.privacy,
       });
 
       setVideoList(playlistData.data?.video_list);
@@ -242,6 +233,7 @@ const VideoUpsertModal = ({ title, id }) => {
     };
   }, []);
 
+  if (!playlistData) return;
   return (
     <div className='size-full max-w-[1500px] h-screen p-[12px] lg:p-[24px]'>
       <div className='bg-black size-full overflow-auto rounded-[5px] shadow-[0_0_8px_#f1f1f1] relative'>
@@ -284,12 +276,11 @@ const VideoUpsertModal = ({ title, id }) => {
                 {/* Type*/}
                 <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[90]'>
                   <DropDown
-                    disabled={playlistData?.data?.type === "personal"}
-                    list={typesRef.current}
-                    title={"Type"}
-                    value={formData.type}
-                    handleOnClick={(type) => {
-                      setFormData((prev) => ({ ...prev, type }));
+                    list={privacyRef.current}
+                    title={"Visibility"}
+                    value={formData.privacy}
+                    handleOnClick={(privacy) => {
+                      setFormData((prev) => ({ ...prev, privacy }));
                     }}
                   />
                 </div>

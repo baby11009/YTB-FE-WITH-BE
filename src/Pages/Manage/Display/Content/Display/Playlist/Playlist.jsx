@@ -4,7 +4,7 @@ import {
   TrashBinIcon,
   LongArrowIcon,
 } from "../../../../../../Assets/Icons";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   CustomeFuncBox,
   CheckBox2,
@@ -13,7 +13,7 @@ import {
 } from "../../../../../../Component";
 import PlaylistTbRow from "./PlaylistTbRow";
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
-import { getDataWithAuth } from "../../../../../../Api/getData";
+import { getData } from "../../../../../../Api/getData";
 import { dltManyData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
 import { scrollToTop } from "../../../../../../util/scrollCustom";
@@ -23,6 +23,7 @@ const initParams = {
   limit: 8,
   page: 1,
   sort: { createdAt: -1, size: -1 },
+  exCludeTypes: ["liked", "watch_later"],
   videoLimit: 4,
   clearCache: "playlist",
 };
@@ -30,7 +31,7 @@ const initParams = {
 const Playlist = () => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, openedMenu,addToaster } = useAuthContext();
+  const { setIsShowing, openedMenu, addToaster } = useAuthContext();
 
   const [sort, setSort] = useState(undefined);
 
@@ -40,24 +41,21 @@ const Playlist = () => {
 
   const [checkedList, setCheckedList] = useState([]);
 
-  const { data, isLoading, refetch } = getDataWithAuth(
-    "/client/playlist",
-    params,
-  );
+  const { data, refetch } = getData("/client/playlist", params);
 
   const [dataList, setDataList] = useState([]);
 
-  const handleCheckedAll = () => {
-    if (checkedList.length === data?.data?.length) {
+  const handleCheckedAll = useCallback(() => {
+    if (checkedList.length === dataList.length) {
       setCheckedList([]);
     } else {
-      const idList = data?.data?.map((item) => item?._id);
+      const idList = dataList.map((item) => item?._id);
 
       setCheckedList(idList);
     }
-  };
+  }, [checkedList, dataList]);
 
-  const handleChecked = (id) => {
+  const handleChecked = useCallback((id) => {
     setCheckedList((prev) => {
       const index = prev.indexOf(id);
       if (index === -1) {
@@ -66,9 +64,9 @@ const Playlist = () => {
         return [...prev.filter((data) => data !== id)];
       }
     });
-  };
+  }, []);
 
-  const handleOnClick = (data) => {
+  const handleSort = useCallback((data) => {
     setSort((prev) => {
       if (prev && prev.slug === data.slug) {
         return undefined;
@@ -77,45 +75,56 @@ const Playlist = () => {
       return data;
     });
 
-    if (data.slug !== "title") {
-      setParams((prev) => {
-        const paramObj = { ...prev };
+    const funcObj = {
+      title: () => {
+        setParams((prev) => {
+          const paramObj = { ...prev };
 
-        paramObj.sort = {
-          [`${data.slug}`]: data.value,
-        };
-        paramObj.page = 1;
-        return paramObj;
-      });
+          paramObj.sort = {
+            [`${data.slug}`]: data.value,
+          };
+          paramObj.page = 1;
+          return paramObj;
+        });
+      },
+    };
+
+    const func = funcObj[data.slug];
+
+    if (func) {
+      funcObj[data.slug]();
     }
-  };
+  }, []);
 
   const timeoutRef = useRef();
 
-  const handleOnSearch = (e) => {
+  const handleOnSearch = useCallback((e) => {
     clearTimeout(timeoutRef.current);
     setTimeout(() => {
       setParams((prev) => ({ ...prev, title: e.target.value, page: 1 }));
     }, 600);
-  };
+  }, []);
 
-  const handleSortUnique = (key, value) => {
-    const uniqueSortKeys = ["size"];
-    const sortObj = { ...params.sort };
+  const handleSortUnique = useCallback(
+    (key, value) => {
+      const uniqueSortKeys = ["size"];
+      const sortObj = { ...params.sort };
 
-    const sortObjKeys = Object.keys(sortObj);
-    if (sortObjKeys.includes(key)) {
-      sortObj[key] = value;
-    } else if (uniqueSortKeys.includes(key)) {
-      sortObjKeys.forEach((key) => {
-        if (uniqueSortKeys.includes(key)) {
-          delete sortObj[key];
-        }
-      });
-      sortObj[key] = value;
-    }
-    setParams((prev) => ({ ...prev, sort: sortObj, page: 1 }));
-  };
+      const sortObjKeys = Object.keys(sortObj);
+      if (sortObjKeys.includes(key)) {
+        sortObj[key] = value;
+      } else if (uniqueSortKeys.includes(key)) {
+        sortObjKeys.forEach((key) => {
+          if (uniqueSortKeys.includes(key)) {
+            delete sortObj[key];
+          }
+        });
+        sortObj[key] = value;
+      }
+      setParams((prev) => ({ ...prev, sort: sortObj, page: 1 }));
+    },
+    [params],
+  );
 
   const funcList = useRef([
     {
@@ -123,7 +132,7 @@ const Playlist = () => {
       text: "Title",
       slug: "title",
       value: 1,
-      handleOnClick: handleOnClick,
+      handleOnClick: handleSort,
     },
   ]);
 
@@ -142,7 +151,7 @@ const Playlist = () => {
     );
   };
 
-  const showDltConfirm = () => {
+  const showDltConfirm = useCallback(() => {
     if (checkedList.length < 1) {
       alert("Please select at least one item");
       return;
@@ -154,7 +163,7 @@ const Playlist = () => {
         data={checkedList.join(", ")}
       />,
     );
-  };
+  }, [checkedList]);
 
   useEffect(() => {
     return () => {
@@ -232,22 +241,22 @@ const Playlist = () => {
           </div>
         </div>
       </div>
+
       <div className='overflow-auto pt-[40px]'>
         {/* table */}
         <div className='min-w-full w-fit'>
           {/* Head */}
-          <div className='text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px] border-y-[2px] '>
-            <div className='w-[70px] flex items-center gap-[12px] absolute left-0 bg-black border-r-[2px]'>
+          <div className='text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px] border-y-[2px] flex '>
+            <div className='w-[70px] px-[8px] flex items-center gap-[12px] absolute left-0 bg-black border-r-[2px]'>
               <CheckBox2
-                checked={checkedList.length === data?.data.length}
+                checked={checkedList?.length === data?.data.length}
                 setChecked={handleCheckedAll}
               />
-              <span>STT</span>
+              <span>OD</span>
             </div>
-            <div className='w-[350px] ml-[80px]'>Title</div>
-            <div className='w-[350px] '>Items</div>
+            <div className='flex-1 ml-[100px]'>Playlist</div>
             <div className='w-[100px] px-[10px]'>Type</div>
-            <div className='w-[100px] px-[10px]'>
+            <div className='w-[150px] px-[10px]'>
               <button
                 onClick={() => {
                   handleSortUnique("size", params.sort["size"] === -1 ? 1 : -1);
@@ -256,7 +265,7 @@ const Playlist = () => {
                   params.sort["size"] ? "text-white-F1 font-bold" : ""
                 }`}
               >
-                <span>Size</span>
+                <span>Video count</span>
                 {params.sort["size"] && (
                   <div
                     className={`${
@@ -268,7 +277,7 @@ const Playlist = () => {
                 )}
               </button>
             </div>
-            <div className='w-[150px] mr-[100px]'>
+            <div className='w-[150px]'>
               <button
                 onClick={() => {
                   handleSortUnique(
@@ -280,7 +289,7 @@ const Playlist = () => {
                   params.sort["createdAt"] ? "text-white-F1 font-bold" : ""
                 }`}
               >
-                <span>Created date </span>
+                <span>Date </span>
                 {params.sort["createdAt"] && (
                   <div
                     className={`${
@@ -292,26 +301,20 @@ const Playlist = () => {
                 )}
               </button>
             </div>
-            <div className='w-[100px] absolute right-0 border-l-[2px] px-[12px] bg-black'>
-              Function
-            </div>
           </div>
           {/* Body */}
-          <div className='flex flex-col'>
-            {isLoading ? (
-              <div>Loading....</div>
-            ) : (
+          <div className=' flex flex-col'>
+            {dataList.length > 0 &&
               dataList.map((item, id) => (
                 <PlaylistTbRow
                   key={id}
                   handleChecked={handleChecked}
-                  checked={checkedList.includes(item?._id)}
+                  checked={checkedList?.includes(item?._id)}
                   data={item}
                   od={id + params?.limit * (params?.page - 1) + 1}
                   refetch={refetch}
                 />
-              ))
-            )}
+              ))}
           </div>
         </div>
       </div>

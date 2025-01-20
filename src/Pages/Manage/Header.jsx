@@ -194,13 +194,13 @@ const Header = ({ setOpenedMenu }) => {
               </div>
             </div>
             <div className='flex-1 overflow-y-auto menu-scrollbar border-b-[1px] border-black-0.1'>
-              {funcList1.current.map((func) => (
-                <CustomButton data={func} />
+              {funcList1.current.map((func, id) => (
+                <CustomButton data={func} key={id} />
               ))}
             </div>
             <div className='border-b-[1px] border-black-0.1'>
-              {funcList2.current.map((func) => (
-                <CustomButton data={func} />
+              {funcList2.current.map((func, id) => (
+                <CustomButton data={func} key={id} />
               ))}
             </div>
           </div>

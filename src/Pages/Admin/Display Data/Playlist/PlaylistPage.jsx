@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { CreateIcon, DeleteAllIcon } from "../../../../Assets/Icons";
-import { getDataWithAuth } from "../../../../Api/getData";
+import { getData } from "../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import { dltManyData } from "../../../../Api/controller";
 import Search from "./Search";
 import Display from "./Display";
@@ -16,7 +16,9 @@ const initPrs = {
   limit,
   page: 1,
   email: "",
-  createdAt: "mới nhất",
+  sort: {
+    createdAt: -1,
+  },
 };
 
 const PlaylistPage = ({ openedMenu }) => {
@@ -30,13 +32,19 @@ const PlaylistPage = ({ openedMenu }) => {
 
   const [searchValue, setSearchValue] = useState("");
 
-  const { data: playlistsData, refetch } = getDataWithAuth("playlist", params);
+  const { data: playlistsData, refetch } = getData(
+    "playlist",
+    params,
+    true,
+    false,
+  );
+  console.log("🚀 ~ playlistsData:", playlistsData);
 
   const [mockArr, setMockArr] = useState([]);
 
   const [checkedList, setCheckedList] = useState([]);
 
-  const handleChecked = (id) => {
+  const handleChecked = useCallback((id) => {
     setCheckedList((prev) => {
       if (prev.includes(id)) {
         return [...prev.filter((data) => data !== id)];
@@ -44,16 +52,16 @@ const PlaylistPage = ({ openedMenu }) => {
 
       return [...prev, id];
     });
-  };
+  }, []);
 
-  const handleCheckedAll = () => {
+  const handleCheckedAll = useCallback(() => {
     if (checkedList.length === playlistsData?.data?.length) {
       setCheckedList([]);
     } else {
       const idList = playlistsData?.data?.map((item) => item?._id);
       setCheckedList(idList);
     }
-  };
+  }, [checkedList]);
 
   const handleDeleteMany = async () => {
     await dltManyData(
@@ -107,6 +115,8 @@ const PlaylistPage = ({ openedMenu }) => {
       queryClient.clear();
     };
   }, []);
+
+  if (!playlistsData) return;
 
   return (
     <>

@@ -28,11 +28,12 @@ const Display = ({
                 <button onClick={handleCheckedAll}>STT</button>
               </div>
             </th>
-            <th>Người tạo</th>
-            <th>Title</th>
-            <th className='hidden 2md:table-cell'>Tổng số thành phần</th>
-            <th className='hidden 2lg:table-cell'>Ngày tạo</th>
-            <th>Chức năng</th>
+            <th>Created user</th>
+            <th>Name</th>
+            <th className='hidden 2md:table-cell'>Type</th>
+            <th className='hidden 2md:table-cell'>Size</th>
+            <th className='hidden 2lg:table-cell'>Created date</th>
+            <th>Function</th>
           </tr>
         </thead>
         <tbody className=''>
