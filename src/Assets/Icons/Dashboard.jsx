@@ -5,15 +5,13 @@ const Dashboard = () => {
       preserveAspectRatio='xMidYMid meet'
       focusable='false'
       className='style-scope tp-yt-iron-icon '
-      width={24}
-      height={24}
       style={{
         pointerEvents: "none",
         display: "inherit",
         width: "100%",
         height: "100%",
       }}
-      fill='rgb(255,255,255)'
+      fill='currentColor'
     >
       <g
         width='24'

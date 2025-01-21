@@ -17,10 +17,10 @@ const ManagePage = () => {
   const params = useParams();
 
   const pageList = {
-    dashboard: <Dashboard />,
-    content: <Content />,
-    comment: <Comment />,
-    setting: <ChannelSetting />,
+    dashboard: <Dashboard openedMenu={openedMenu} />,
+    content: <Content openedMenu={openedMenu} />,
+    comment: <Comment openedMenu={openedMenu} />,
+    setting: <ChannelSetting openedMenu={openedMenu} />,
   };
 
   useLayoutEffect(() => {
@@ -61,7 +61,8 @@ const ManagePage = () => {
         <div
           className={` md:ml-[74px] flex justify-center px-[16px] md:px-0 ${
             openedMenu && "xl:ml-[255px]"
-          }`}
+          } transition-[margin]  ease-cubic-bezier-[0,0,0.2,1]
+           duration-[417ms]`}
         >
           <div
             className={`w-full md:px-[24px] min-h-screen

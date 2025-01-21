@@ -23,6 +23,6 @@ const Display = ({ path, pathParam }) => {
     }
   }, [pathParam]);
 
-  return <div className='mt-[128px]'>{pageRender}</div>;
+  return <div>{pageRender}</div>;
 };
 export default Display;

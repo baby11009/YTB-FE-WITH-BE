@@ -42,7 +42,12 @@ const Video = () => {
 
   const [checkedList, setCheckedList] = useState([]);
 
-  const { data, isLoading, refetch } = getDataWithAuth("/client/video", params);
+  const { data, isLoading, refetch } = getDataWithAuth(
+    "/client/video",
+    params,
+    true,
+    false,
+  );
 
   const [dataList, setDataList] = useState([]);
 
@@ -178,11 +183,7 @@ const Video = () => {
 
   return (
     <div className='min-h-[500px] relative'>
-      <div
-        className={`fixed z-[2000] w-full left-0 pl-[16px] px-[16px] md:px-[16px] ${
-          openedMenu ? "md:pl-[267px]" : "md:pl-[90px]"
-        }`}
-      >
+      <div className='sticky left-0 top-[184px] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
             <button
@@ -243,7 +244,7 @@ const Video = () => {
           </div>
         </div>
       </div>
-      <div className='overflow-auto pt-[40px]'>
+      <div className='overflow-auto'>
         {/* table */}
         <div className='flex-1 min-w-full w-fit'>
           {/* Head */}

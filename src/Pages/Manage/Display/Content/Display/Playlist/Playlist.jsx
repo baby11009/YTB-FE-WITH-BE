@@ -33,7 +33,7 @@ const Playlist = () => {
 
   const { setIsShowing, openedMenu, addToaster } = useAuthContext();
 
-  const [sort, setSort] = useState(undefined);
+  const [search, setSearch] = useState(undefined);
 
   const [opened, setOpened] = useState(false);
 
@@ -66,42 +66,26 @@ const Playlist = () => {
     });
   }, []);
 
-  const handleSort = useCallback((data) => {
-    setSort((prev) => {
+  const handleSearch = useCallback((data) => {
+    setSearch((prev) => {
       if (prev && prev.slug === data.slug) {
         return undefined;
       }
 
       return data;
     });
-
-    const funcObj = {
-      title: () => {
-        setParams((prev) => {
-          const paramObj = { ...prev };
-
-          paramObj.sort = {
-            [`${data.slug}`]: data.value,
-          };
-          paramObj.page = 1;
-          return paramObj;
-        });
-      },
-    };
-
-    const func = funcObj[data.slug];
-
-    if (func) {
-      funcObj[data.slug]();
-    }
   }, []);
 
   const timeoutRef = useRef();
 
-  const handleOnSearch = useCallback((e) => {
+  const handleOnSearch = useCallback((searchType, value) => {
     clearTimeout(timeoutRef.current);
     setTimeout(() => {
-      setParams((prev) => ({ ...prev, title: e.target.value, page: 1 }));
+      setParams((prev) => ({
+        ...prev,
+        [`${searchType}`]: value,
+        page: 1,
+      }));
     }, 600);
   }, []);
 
@@ -128,11 +112,9 @@ const Playlist = () => {
 
   const funcList = useRef([
     {
-      id: 6,
+      id: "title",
       text: "Title",
-      slug: "title",
-      value: 1,
-      handleOnClick: handleSort,
+      handleOnClick: handleSearch,
     },
   ]);
 
@@ -181,11 +163,7 @@ const Playlist = () => {
 
   return (
     <div className='min-h-[500px] relative'>
-      <div
-        className={`fixed z-[2000] w-full left-0 pl-[16px] px-[16px] md:px-[16px] ${
-          openedMenu ? "md:pl-[267px]" : "md:pl-[90px]"
-        }`}
-      >
+      <div className='sticky left-0 top-[184px] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
             <button
@@ -200,21 +178,21 @@ const Playlist = () => {
               <CustomeFuncBox
                 style={"left-[100%] top-[100%] w-[150px]"}
                 setOpened={setOpened}
-                currentId={sort?.id}
+                currentId={search?.id}
                 funcList1={funcList.current}
               />
             )}
           </div>
-          <div className='w-full flex items-center'>
-            {sort?.text && (
+          <div className='flex-1 flex items-center'>
+            {search && (
               <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
                 <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
-                  {sort.text}
+                  {search.text}
                 </span>
                 <div
                   className='px-[6px]'
                   onClick={() => {
-                    setSort(undefined);
+                    setSearch(undefined);
                     setParams((prev) => ({ ...prev, title: "", page: 1 }));
                   }}
                 >
@@ -222,13 +200,15 @@ const Playlist = () => {
                 </div>
               </button>
             )}
-            {sort?.text === "Title" && (
+            {search && (
               <input
                 autoFocus
                 type='text'
-                placeholder='Tìm kiếm...'
+                placeholder='Searching...'
                 className='bg-transparent py-[4px] border-b-[2px] outline-none ml-[16px]'
-                onChange={handleOnSearch}
+                onChange={(e) => {
+                  handleOnSearch(search.id, e.target.value);
+                }}
               />
             )}
           </div>
@@ -242,42 +222,23 @@ const Playlist = () => {
         </div>
       </div>
 
-      <div className='overflow-auto pt-[40px]'>
+      <div className='overflow-auto'>
         {/* table */}
         <div className='min-w-full w-fit'>
           {/* Head */}
-          <div className='text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px] border-y-[2px] flex '>
-            <div className='w-[70px] px-[8px] flex items-center gap-[12px] absolute left-0 bg-black border-r-[2px]'>
+          <div className='text-[12px] font-[500] leading-[48px] text-gray-A items-center border-y-[2px] flex pl-[100px] '>
+            <div className='w-[80px] px-[12px] flex items-center gap-[12px] absolute left-0 bg-black border-r-[2px]'>
               <CheckBox2
-                checked={checkedList?.length === data?.data.length}
+                checked={
+                  dataList.length > 0 && checkedList?.length === dataList.length
+                }
                 setChecked={handleCheckedAll}
               />
               <span>OD</span>
             </div>
-            <div className='flex-1 ml-[100px]'>Playlist</div>
-            <div className='w-[100px] px-[10px]'>Type</div>
-            <div className='w-[150px] px-[10px]'>
-              <button
-                onClick={() => {
-                  handleSortUnique("size", params.sort["size"] === -1 ? 1 : -1);
-                }}
-                className={`flex items-center justify-center gap-[8px] ${
-                  params.sort["size"] ? "text-white-F1 font-bold" : ""
-                }`}
-              >
-                <span>Video count</span>
-                {params.sort["size"] && (
-                  <div
-                    className={`${
-                      params.sort["size"] === -1 ? "rotate-180" : ""
-                    } text-[12px]`}
-                  >
-                    <LongArrowIcon size={14} />
-                  </div>
-                )}
-              </button>
-            </div>
-            <div className='w-[150px]'>
+            <div className='flex-1 min-w-[382px]'>Playlist</div>
+            <div className='w-[100px] px-[12px]'>Type</div>
+            <div className='w-[180px] px-[12px]'>
               <button
                 onClick={() => {
                   handleSortUnique(
@@ -294,6 +255,27 @@ const Playlist = () => {
                   <div
                     className={`${
                       params.sort["createdAt"] === -1 ? "rotate-180" : ""
+                    } text-[12px]`}
+                  >
+                    <LongArrowIcon size={14} />
+                  </div>
+                )}
+              </button>
+            </div>
+            <div className='w-[120px] px-[12px]'>
+              <button
+                onClick={() => {
+                  handleSortUnique("size", params.sort["size"] === -1 ? 1 : -1);
+                }}
+                className={`flex items-center justify-end gap-[8px] w-full ${
+                  params.sort["size"] ? "text-white-F1 font-bold" : ""
+                }`}
+              >
+                <span>Video count</span>
+                {params.sort["size"] && (
+                  <div
+                    className={`${
+                      params.sort["size"] === -1 ? "rotate-180" : ""
                     } text-[12px]`}
                   >
                     <LongArrowIcon size={14} />

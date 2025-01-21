@@ -50,8 +50,8 @@ const PlaylistTbRow = ({ handleChecked, checked, data, od, refetch }) => {
     );
   };
   return (
-    <div className='text-[12px] font-[500] leading-[48px] text-gray-A flex  gap-[12px] group hover:bg-black-0.1 '>
-      <div className='w-[70px] h-[84px] px-[8px] flex items-center gap-[12px] absolute left-0 bg-black group-hover:bg-black-0.1 border-r-[2px] z-[20]'>
+    <div className=' h-[84px] group hover:bg-black-0.1 pl-[100px] flex'>
+      <div className='w-[80px] h-[84px] px-[12px] flex items-center gap-[12px] absolute left-0 bg-black group-hover:bg-black-0.1 border-r-[2px] z-[20]'>
         <CheckBox2
           checked={checked}
           setChecked={() => {
@@ -60,7 +60,8 @@ const PlaylistTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         />
         <span>{od}</span>
       </div>
-      <div className='flex-1 ml-[100px] flex py-[8px]'>
+
+      <div className='flex-1 min-w-[382px] flex my-[8px]'>
         <div className='relative w-[120px] h-[68px] border-[1px] rounded-[5px] overflow-hidden mr-[16px]'>
           <img
             src={`${import.meta.env.VITE_BASE_API_URI}${
@@ -70,7 +71,7 @@ const PlaylistTbRow = ({ handleChecked, checked, data, od, refetch }) => {
           />
           <div
             className='absolute w-[52px] h-full right-0 top-0 bg-[#000000cc] 
-          flex flex-col items-center justify-center'
+  flex flex-col items-center justify-center'
           >
             <span className='text-[12px] leading-[20px] font-[500] text-white'>
               {data?.size}
@@ -107,21 +108,21 @@ const PlaylistTbRow = ({ handleChecked, checked, data, od, refetch }) => {
           </div>
         </div>
       </div>
-
-      <div className='w-[100px] px-[10px]  my-[8px]'>
-        <span className='text-[12px] leading-[20px]  text-white'>
+      <div className='w-[100px] px-[12px] my-[8px]'>
+        <span className='text-[12px] leading-[20px] text-white'>
           {type[data?.type]}
         </span>
       </div>
-      <div className='w-[150px] px-[10px] my-[8px]'>
+
+      <div className='w-[180px] px-[12px] my-[8px]'>
         <span className='text-[12px] leading-[20px]  text-white'>
-          {formatNumber(data?.size)}
+          {timeFormat3(data?.createdAt)}
         </span>
       </div>
 
-      <div className='w-[150px] my-[8px]'>
-        <span className='text-[12px] leading-[20px]  text-white'>
-          {timeFormat3(data?.createdAt)}
+      <div className='w-[120px] px-[12px] my-[8px] text-right'>
+        <span className='text-[12px] leading-[20px]  text-white '>
+          {formatNumber(data?.size)}
         </span>
       </div>
     </div>

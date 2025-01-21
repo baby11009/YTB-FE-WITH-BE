@@ -11,12 +11,8 @@ const Content = ({}) => {
 
   return (
     <div>
-      <div
-        className={`fixed top-0 mt-[56px] z-[2000] w-full left-0 pl-[16px] px-[16px] md:px-[24px] ${
-          openedMenu ? "md:pl-[279px]" : "md:pl-[90px]"
-        }`}
-      >
-        <div className='bg-black'>
+      <div className={`sticky top-[56px] z-[2000] bg-black`}>
+        <div>
           <h1 className='pt-[24px] text-nowrap text-[25px] leading-[32px] font-[600]'>
             Channel's content
           </h1>

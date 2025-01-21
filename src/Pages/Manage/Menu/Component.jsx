@@ -13,13 +13,13 @@ import {
 
 export const BtnList = [
   {
-    title: "Tổng quát",
+    title: "Dashboard",
     icon: <DashboardIcon />,
     active: <ActiveDashboardIcon />,
     path: "/manage/dashboard",
   },
   {
-    title: "Nội dung",
+    title: "Content",
     icon: <MyChannel2Icon />,
     active: <ActiveMyChannel2Icon />,
     path: "/manage/content",
@@ -33,14 +33,14 @@ export const BtnList = [
     param: "video-comment",
   },
   {
-    title: "Tùy chỉnh",
+    title: "Customization",
     icon: <CustomeIcon />,
     active: <ActiveCustomeIcon />,
     path: "/manage/setting",
   },
 ];
 
-export const Button = ({ data, currPath }) => {
+export const Button = ({ data, currPath, openedMenu }) => {
   const navigate = useNavigate();
 
   const handleOnclick = () => {
@@ -56,20 +56,28 @@ export const Button = ({ data, currPath }) => {
   }
 
   return (
-    <button
-      className={`w-full px-[12px] my-[6px] h-[48px] flex items-center   
-        rounded-[10px] hover:bg-black-0.2  
+    <button className='w-full' onClick={handleOnclick}>
+      <div
+        className={`mx-[12px] pl-[4px] pr-[12px] h-[48px] flex items-center   
+        rounded-[10px] hover:bg-black-0.2 overflow-hidden 
         ${
           currPath && data.path && currPath.includes(data.path)
             ? " bg-black-0.1 hover:bg-black-0.2"
             : " hover:bg-black-0.1"
         }`}
-      onClick={handleOnclick}
-    >
-      <div className='mr-[24px]'>
-        {data.path === currPath && data.active ? data.active : data.icon}
+      >
+        <div className='min-w-[24px] size-[24px] ml-[8px] mr-[24px]'>
+          {data.path === currPath && data.active ? data.active : data.icon}
+        </div>
+
+        <p
+          className={` text-[16px] leading-[24px] font-[500] ${
+            openedMenu ? "opacity-[1]" : "opacity-[0]"
+          } transition-[opacity] ease-cubic-bezier-[0,0,0.2,1] duration-[217ms] `}
+        >
+          {data.title}
+        </p>
       </div>
-      <p className='text-[16px] leading-[24px] font-[500]'>{data.title}</p>
     </button>
   );
 };
