@@ -31,8 +31,6 @@ const CustomeButton = ({ data, pathParam, handleOnClick }) => {
       to={`/manage/content/${data.param}`}
       onClick={(e) => {
         if (pathParam === data.param) return;
-        console.log(5);
-
         handleOnClick(e);
       }}
       data-path={data.param}

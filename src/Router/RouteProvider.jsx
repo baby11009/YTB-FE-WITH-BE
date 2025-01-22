@@ -44,7 +44,7 @@ const router = createBrowserRouter([
     element: <SettingPage />,
   },
   {
-    path: "/admin/:data/:func?/:id?",
+    path: "/admin/:data/:page?/:id?/:func?",
     element: (
       <ProtectedRoute requiredRole={"admin"}>
         <AdminHomePage />

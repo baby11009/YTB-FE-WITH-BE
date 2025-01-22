@@ -59,13 +59,13 @@ const ManagePage = () => {
           />
         </div>
         <div
-          className={` md:ml-[74px] flex justify-center px-[16px] md:px-0 ${
+          className={` md:ml-[74px] flex justify-center ${
             openedMenu && "xl:ml-[255px]"
           } transition-[margin]  ease-cubic-bezier-[0,0,0.2,1]
            duration-[417ms]`}
         >
           <div
-            className={`w-full md:px-[24px] min-h-screen
+            className={`w-full  h-screen overflow-hidden
             pt-[56px] relative`}
           >
             <Suspense

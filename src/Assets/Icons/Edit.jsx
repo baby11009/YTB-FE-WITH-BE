@@ -1,23 +1,27 @@
 const Edit = () => {
   return (
     <svg
-      width='24px'
-      height='24px'
       viewBox='0 0 24 24'
+      preserveAspectRatio='xMidYMid meet'
+      focusable='false'
+      className='style-scope tp-yt-iron-icon'
+      style={{
+        pointerEvents: "none",
+        display: "inherit",
+        width: "100%",
+        height: "100%",
+      }}
       fill='currentColor'
-      xmlns='http://www.w3.org/2000/svg'
     >
-      <g id='SVGRepo_bgCarrier' strokeWidth='0'></g>
       <g
-        id='SVGRepo_tracerCarrier'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      ></g>
-      <g id='SVGRepo_iconCarrier'>
+        width='24'
+        height='24'
+        viewBox='0 0 24 24'
+        className='style-scope tp-yt-iron-icon'
+      >
         <path
-          fillRule='evenodd'
-          clipRule='evenodd'
-          d='m3.99 16.854-1.314 3.504a.75.75 0 0 0 .966.965l3.503-1.314a3 3 0 0 0 1.068-.687L18.36 9.175s-.354-1.061-1.414-2.122c-1.06-1.06-2.122-1.414-2.122-1.414L4.677 15.786a3 3 0 0 0-.687 1.068zm12.249-12.63 1.383-1.383c.248-.248.579-.406.925-.348.487.08 1.232.322 1.934 1.025.703.703.945 1.447 1.025 1.934.058.346-.1.677-.348.925L19.774 7.76s-.353-1.06-1.414-2.12c-1.06-1.062-2.121-1.415-2.121-1.415z'
+          d='M14.06 7.6L16.4 9.94L6.34 20H4V17.66L14.06 7.6ZM14.06 6.19L3 17.25V21H6.75L17.81 9.94L14.06 6.19ZM17.61 4.05L19.98 6.42L18.84 7.56L16.47 5.19L17.61 4.05ZM17.61 2.63L15.06 5.18L18.85 8.97001L21.4 6.42L17.61 2.63Z'
+          className='style-scope tp-yt-iron-icon'
         ></path>
       </g>
     </svg>

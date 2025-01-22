@@ -4,7 +4,6 @@ import {
   ActiveDashboardIcon,
   CommentIcon,
   UnActiveCommentIcon,
-  LogOutIcon,
   ActiveMyChannel2Icon,
   MyChannel2Icon,
   CustomeIcon,

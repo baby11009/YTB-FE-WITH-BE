@@ -4,7 +4,13 @@ import {
   TrashBinIcon,
   LongArrowIcon,
 } from "../../../../../../Assets/Icons";
-import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from "react";
 import {
   CustomeFuncBox,
   CheckBox2,
@@ -41,9 +47,13 @@ const Playlist = () => {
 
   const [checkedList, setCheckedList] = useState([]);
 
+  const [horizonScrollVisible, setHorizonScrollVisible] = useState();
+
   const { data, refetch } = getData("/client/playlist", params);
 
   const [dataList, setDataList] = useState([]);
+
+  const container = useRef();
 
   const handleCheckedAll = useCallback(() => {
     if (checkedList.length === dataList.length) {
@@ -147,6 +157,20 @@ const Playlist = () => {
     );
   }, [checkedList]);
 
+  useLayoutEffect(() => {
+    const handleResize = (e) => {
+      const scrollW = container.current.scrollWidth;
+      const clientW = container.current.clientWidth;
+      setHorizonScrollVisible(scrollW > clientW);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   useEffect(() => {
     return () => {
       setIsShowing(undefined);
@@ -162,8 +186,8 @@ const Playlist = () => {
   }, [data]);
 
   return (
-    <div className='min-h-[500px] relative'>
-      <div className='sticky left-0 top-[184px] z-[2000] w-full'>
+    <div className='overflow-auto max-h-full relative' ref={container}>
+      <div className='sticky left-0 top-[0] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
             <button
@@ -222,89 +246,104 @@ const Playlist = () => {
         </div>
       </div>
 
-      <div className='overflow-auto'>
-        {/* table */}
-        <div className='min-w-full w-fit'>
-          {/* Head */}
-          <div className='text-[12px] font-[500] leading-[48px] text-gray-A items-center border-y-[2px] flex pl-[100px] '>
-            <div className='w-[80px] px-[12px] flex items-center gap-[12px] absolute left-0 bg-black border-r-[2px]'>
-              <CheckBox2
-                checked={
-                  dataList.length > 0 && checkedList?.length === dataList.length
-                }
-                setChecked={handleCheckedAll}
-              />
-              <span>OD</span>
-            </div>
-            <div className='flex-1 min-w-[382px]'>Playlist</div>
-            <div className='w-[100px] px-[12px]'>Type</div>
-            <div className='w-[180px] px-[12px]'>
-              <button
-                onClick={() => {
-                  handleSortUnique(
-                    "createdAt",
-                    params.sort["createdAt"] === -1 ? 1 : -1,
-                  );
-                }}
-                className={`flex items-center justify-center gap-[8px] ${
-                  params.sort["createdAt"] ? "text-white-F1 font-bold" : ""
-                }`}
-              >
-                <span>Date </span>
-                {params.sort["createdAt"] && (
-                  <div
-                    className={`${
-                      params.sort["createdAt"] === -1 ? "rotate-180" : ""
-                    } text-[12px]`}
-                  >
-                    <LongArrowIcon size={14} />
-                  </div>
-                )}
-              </button>
-            </div>
-            <div className='w-[120px] px-[12px]'>
-              <button
-                onClick={() => {
-                  handleSortUnique("size", params.sort["size"] === -1 ? 1 : -1);
-                }}
-                className={`flex items-center justify-end gap-[8px] w-full ${
-                  params.sort["size"] ? "text-white-F1 font-bold" : ""
-                }`}
-              >
-                <span>Video count</span>
-                {params.sort["size"] && (
-                  <div
-                    className={`${
-                      params.sort["size"] === -1 ? "rotate-180" : ""
-                    } text-[12px]`}
-                  >
-                    <LongArrowIcon size={14} />
-                  </div>
-                )}
-              </button>
-            </div>
+      {/* table */}
+      <div className='min-w-full w-fit'>
+        {/* Head */}
+        <div
+          className='sticky top-[40px] z-[5] bg-black text-[12px] font-[500] leading-[48px]
+           text-gray-A items-center border-y-[1px] border-gray-A flex '
+        >
+          <div
+            className={`sticky left-[0] pl-[24px] flex-1 min-w-[382px] bg-black z-[10] 
+              border-r-[1px] ${
+                horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
+              }`}
+          >
+            Playlist
           </div>
-          {/* Body */}
-          <div className=' flex flex-col'>
-            {dataList.length > 0 &&
-              dataList.map((item, id) => (
-                <PlaylistTbRow
-                  key={id}
-                  handleChecked={handleChecked}
-                  checked={checkedList?.includes(item?._id)}
-                  data={item}
-                  od={id + params?.limit * (params?.page - 1) + 1}
-                  refetch={refetch}
-                />
-              ))}
+          <div className='w-[100px] px-[12px]'>Type</div>
+          <div className='w-[180px] px-[12px]'>
+            <button
+              onClick={() => {
+                handleSortUnique(
+                  "createdAt",
+                  params.sort["createdAt"] === -1 ? 1 : -1,
+                );
+              }}
+              className={`flex items-center justify-center gap-[8px] ${
+                params.sort["createdAt"] ? "text-white-F1 font-bold" : ""
+              }`}
+            >
+              <span>Date </span>
+              {params.sort["createdAt"] && (
+                <div
+                  className={`${
+                    params.sort["createdAt"] === -1 ? "rotate-180" : ""
+                  } text-[12px]`}
+                >
+                  <LongArrowIcon size={14} />
+                </div>
+              )}
+            </button>
+          </div>
+          <div className='w-[130px] px-[12px]'>
+            <button
+              onClick={() => {
+                handleSortUnique("size", params.sort["size"] === -1 ? 1 : -1);
+              }}
+              className={`flex items-center justify-end gap-[8px] w-full ${
+                params.sort["size"] ? "text-white-F1 font-bold" : ""
+              }`}
+            >
+              <span>Video count</span>
+              {params.sort["size"] && (
+                <div
+                  className={`${
+                    params.sort["size"] === -1 ? "rotate-180" : ""
+                  } text-[12px]`}
+                >
+                  <LongArrowIcon size={14} />
+                </div>
+              )}
+            </button>
+          </div>
+          <div
+            className={`sticky right-0 w-[80px] h-[48px] p-[0_24px_0_12px] flex items-center justify-center 
+          gap-[12px] bg-black  border-l-[1px] ${
+            horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
+          }`}
+          >
+            <CheckBox2
+              checked={
+                dataList.length > 0 && checkedList?.length === dataList.length
+              }
+              setChecked={handleCheckedAll}
+            />
           </div>
         </div>
+        {/* Body */}
+        <div className=' flex flex-col'>
+          {dataList.length > 0 &&
+            dataList.map((item, id) => (
+              <PlaylistTbRow
+                key={id}
+                handleChecked={handleChecked}
+                checked={checkedList?.includes(item?._id)}
+                data={item}
+                od={id + params?.limit * (params?.page - 1) + 1}
+                refetch={refetch}
+                horizonScrollVisible={horizonScrollVisible}
+              />
+            ))}
+        </div>
+        <div className='mb-[86px] px-[24px]'>
+          <Pagination
+            setParams={setParams}
+            currPage={params?.page}
+            totalPage={data?.totalPages}
+          />
+        </div>
       </div>
-      <Pagination
-        setParams={setParams}
-        currPage={params?.page}
-        totalPage={data?.totalPages}
-      />
     </div>
   );
 };

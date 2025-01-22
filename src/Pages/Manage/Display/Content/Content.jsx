@@ -11,7 +11,7 @@ const Content = ({}) => {
 
   return (
     <div>
-      <div className={`sticky top-[56px] z-[2000] bg-black`}>
+      <div className={`z-[2000] bg-black`}>
         <div>
           <h1 className='pt-[24px] text-nowrap text-[25px] leading-[32px] font-[600]'>
             Channel's content

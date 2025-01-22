@@ -5,12 +5,20 @@ import Playlist from "./Playlist/Playlist";
 const Display = ({ path, pathParam }) => {
   const [pageRender, setPageRender] = useState(undefined);
 
+  const container = useRef();
+
   const pageList = {
     video: <Video />,
     shorts: <Short />,
     playlists: <Playlist />,
     comunity: <div>comunity</div>,
   };
+
+  useLayoutEffect(() => {
+    const height =
+      window.innerHeight - container.current.getBoundingClientRect().top;
+    container.current.style.height = `${height}px`;
+  }, []);
 
   useLayoutEffect(() => {
     if (pathParam && path === "content") {
@@ -23,6 +31,10 @@ const Display = ({ path, pathParam }) => {
     }
   }, [pathParam]);
 
-  return <div>{pageRender}</div>;
+  return (
+    <div ref={container}>
+      {pageRender}
+    </div>
+  );
 };
 export default Display;

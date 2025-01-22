@@ -1,10 +1,10 @@
-import { useAuthContext } from "../../../../../../Auth Provider/authContext";
+import { useAuthContext } from "../../../../../../../Auth Provider/authContext";
 import {
   CloseIcon,
   DeleteIcon,
   GotoIcon,
-} from "../../../../../../Assets/Icons";
-import { TextArea, DropDown, Pagination } from "../../../../../../Component";
+} from "../../../../../../../Assets/Icons";
+import { TextArea, DropDown, Pagination } from "../../../../../../../Component";
 import {
   useState,
   useEffect,
@@ -12,10 +12,10 @@ import {
   useLayoutEffect,
   useCallback,
 } from "react";
-import { getData } from "../../../../../../Api/getData";
-import { updateData } from "../../../../../../Api/controller";
+import { getData } from "../../../../../../../Api/getData";
+import { updateData } from "../../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
-import { timeFormat3 } from "../../../../../../util/timeforMat";
+import { timeFormat3 } from "../../../../../../../util/timeforMat";
 
 const VideoCard = ({ data, handleRemoveVideo }) => {
   return (
@@ -69,7 +69,7 @@ const initPlaylistParams = {
 
 const maxLength = 255;
 
-const VideoUpsertModal = ({ title, id }) => {
+const VideoUpsertModal = ({ title, id, nav }) => {
   const queryClient = useQueryClient();
 
   const { setIsShowing, addToaster } = useAuthContext();
@@ -235,7 +235,7 @@ const VideoUpsertModal = ({ title, id }) => {
 
   if (!playlistData) return;
   return (
-    <div className='size-full max-w-[1500px] h-screen p-[12px] lg:p-[24px]'>
+    <div className='max-w-[1500px] h-screen p-[12px] lg:p-[24px]'>
       <div className='bg-black size-full overflow-auto rounded-[5px] shadow-[0_0_8px_#f1f1f1] relative'>
         <div className='relative  px-[16px] pb-[16px] xl:pb-[20px] xl:px-[20px]'>
           <div className='sticky top-[0] h-[68px] xl:h-[72px] flex items-center justify-between bg-black z-[2]'>
@@ -253,7 +253,7 @@ const VideoUpsertModal = ({ title, id }) => {
               </div>
             </button>
           </div>
-          <form noValidate onSubmit={handleSubmit} className=' mb-[20px'>
+          <form noValidate onSubmit={handleSubmit} className=' mb-[20px]'>
             <div className='flex flex-wrap gap-[24px] mt-[48px]'>
               <div className='basis-[100%] md:basis-[40%]'>
                 <div className='basis-[100%]  2md:basis-[49%]'>
@@ -285,48 +285,6 @@ const VideoUpsertModal = ({ title, id }) => {
                   />
                 </div>
               </div>
-              <div className='flex-1 relative overflow-hidden'>
-                <div className='w-full overflow-hidden '>
-                  <div className='font-[500] absolute left-0 top-0'>
-                    Video list
-                  </div>
-                  <div
-                    className='h-[65vh]
-                   max-h-[800px] mt-[32px] border-b-[2px] px-[8px] pb-[8px] rounded-[5px] overflow-auto relative  '
-                  >
-                    {/* Head */}
-                    <div
-                      className='w-fit text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px]
-                      border-b-[2px] border-gray-A sticky left-0 top-0 bg-black'
-                    >
-                      <div className='w-[300px]'>Thumbnail</div>
-                      <div className='w-[250px]'>Title</div>
-                      <div className='w-[130px]'>Created date</div>
-                      <div className='w-[100px]'>Function</div>
-                    </div>
-                    {/* Body */}
-                    <div className='w-fit h-full flex flex-col gap-[8px] mt-[8px]'>
-                      {videoList.map((video, index) => (
-                        <VideoCard
-                          data={video}
-                          key={index}
-                          handleRemoveVideo={handleRemoveVideo}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <Pagination
-                    handleSetPage={(pageNum) => {
-                      setPlaylistPrs((prev) => ({
-                        ...prev,
-                        videoPage: pageNum,
-                      }));
-                    }}
-                    currPage={playlistPrs.videoPage}
-                    totalPage={playlistData?.totalPages}
-                  />
-                </div>
-              </div>
             </div>
 
             <div className='flex items-center justify-center mt-[50px]'>
@@ -351,3 +309,45 @@ const VideoUpsertModal = ({ title, id }) => {
   );
 };
 export default VideoUpsertModal;
+
+{
+  /* <div className='flex-1 relative overflow-hidden'>
+  <div className='w-full overflow-hidden '>
+    <div className='font-[500] absolute left-0 top-0'>Video list</div>
+    <div
+      className='h-[65vh]
+   max-h-[800px] mt-[32px] border-b-[2px] px-[8px] pb-[8px] rounded-[5px] overflow-auto relative  '
+    >
+      <div
+        className='w-fit text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px]
+      border-b-[2px] border-gray-A sticky left-0 top-0 bg-black'
+      >
+        <div className='w-[300px]'>Thumbnail</div>
+        <div className='w-[250px]'>Title</div>
+        <div className='w-[130px]'>Created date</div>
+        <div className='w-[100px]'>Function</div>
+      </div>
+
+      <div className='w-fit h-full flex flex-col gap-[8px] mt-[8px]'>
+        {videoList.map((video, index) => (
+          <VideoCard
+            data={video}
+            key={index}
+            handleRemoveVideo={handleRemoveVideo}
+          />
+        ))}
+      </div>
+    </div>
+    <Pagination
+      handleSetPage={(pageNum) => {
+        setPlaylistPrs((prev) => ({
+          ...prev,
+          videoPage: pageNum,
+        }));
+      }}
+      currPage={playlistPrs.videoPage}
+      totalPage={playlistData?.totalPages}
+    />
+  </div>
+</div>; */
+}
