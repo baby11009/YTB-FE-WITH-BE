@@ -54,12 +54,31 @@ const PlaylistTbRow = ({
   };
 
   const showUpsertModal = useCallback((func) => {
-    setIsShowing(<Upsert id={data?._id} func={func} />);
+    setIsShowing(
+      <Upsert
+        playlistId={data?._id}
+        func={func}
+        handleClose={() => {
+          setIsShowing(undefined);
+        }}
+      />,
+    );
   }, []);
   return (
     <div className=' h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
       <div
-        className={`sticky left-0 pl-[24px] flex-1 min-w-[382px] py-[8px] z-[5] flex bg-black group-hover:bg-[#272727]
+        className={`sticky left-0 p-[12px_12px_8px_24px] flex  justify-center
+       bg-black group-hover:bg-[#272727] `}
+      >
+        <CheckBox2
+          checked={checked}
+          setChecked={() => {
+            handleChecked(data?._id);
+          }}
+        />
+      </div>
+      <div
+        className={`sticky left-[57px] flex-1 min-w-[382px] p-[8px_0_0_12px] z-[5] flex bg-black group-hover:bg-[#272727]
          border-r-[1px] ${
            horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
          }`}
@@ -133,23 +152,10 @@ const PlaylistTbRow = ({
         </span>
       </div>
 
-      <div className='w-[130px] px-[12px] py-[8px] text-right'>
+      <div className='w-[130px] pl-[12px] pr-[24px] py-[8px] text-right'>
         <span className='text-[12px] leading-[20px]  text-white '>
           {formatNumber(data?.size)}
         </span>
-      </div>
-      <div
-        className={`sticky right-0 w-[80px]  pl-[12px] pr-[24px] py-[12px] flex  justify-center
-       bg-black group-hover:bg-[#272727] border-l-[1px] ${
-         horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
-       }`}
-      >
-        <CheckBox2
-          checked={checked}
-          setChecked={() => {
-            handleChecked(data?._id);
-          }}
-        />
       </div>
     </div>
   );

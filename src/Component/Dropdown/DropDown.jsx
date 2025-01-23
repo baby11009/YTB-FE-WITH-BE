@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { ThinArrowIcon } from "../../Assets/Icons";
 
 const DropDown = ({ disabled, title, list = [], handleOnClick, value }) => {
   const [opened, setOpened] = useState(undefined);
+
+  const [displayValue, setDisplayValue] = useState(undefined);
 
   const containerRef = useRef();
 
@@ -24,55 +26,63 @@ const DropDown = ({ disabled, title, list = [], handleOnClick, value }) => {
     };
   }, [opened]);
 
+  useLayoutEffect(() => {
+    setDisplayValue(list.find((item) => item.id === value)?.label);
+  }, [value]);
+
   return (
     <div
-      className='flex items-center w-full z-[150] mb-[16px]'
+      className='z-[150]  border-[1px] rounded-[8px]
+       border-[#6b6767] transition-all ease-in hover:border-[white]'
       ref={containerRef}
     >
-      <div className='border-b-[1px] pb-[8px] relative w-[100%] sm:max-w-[360px]'>
+      <div className='relative pl-[12px]'>
         <button
           disabled={disabled}
-          className='flex items-center justify-between w-full px-[8px]'
+          className='flex items-center justify-between w-full  h-[56px] z-[100]'
           type='button'
           onClick={() => {
             setOpened((prev) => !prev);
           }}
         >
-          <p className='text-[16px]'>{title + " : " + value}</p>
+          <div className='text-left w-[288px]'>
+            <div className='text-[12px] leading-[24px] text-gray-A'>
+              {title}
+            </div>
+            <div className='text-[15px] w-[80px]'>{displayValue}</div>
+          </div>
           <div
             className={`${
               opened ? "rotate-[-90deg]" : "rotate-90"
-            } transition-transform duration-[0.3s] mt-[3px]`}
+            } transition-transform duration-[0.3s] size-[24px] ml-[16px] mr-[12px]`}
           >
             <ThinArrowIcon />
           </div>
         </button>
 
         <div
-          className={`absolute top-[133%] w-full
-        rounded-[5px] bg-black-21 z-[100]
-         ${
-           opened === undefined
-             ? "hidden"
-             : opened
-             ? "animate-slideIn "
-             : "animate-slideOut "
-         }
+          className={`absolute left-0 top-[102%]  w-full
+        rounded-[5px] bg-black-21 transition-all duration-[0.3s] ease-out z-[80]
+        ${
+          opened
+            ? "translate-y-[0] opacity-[1] visible"
+            : "translate-y-[-20%] opacity-0 invisible"
+        }
       `}
         >
-          {list.map((item, id) => (
+          {list.map((item) => (
             <button
-              key={id}
+              key={item.id}
               type='button'
               onClick={() => {
-                handleOnClick(item);
+                handleOnClick(item.id);
                 setOpened("");
               }}
               className={`block w-full text-left px-[8px] py-[4px] hover:bg-black-0.2 ${
-                value === item && "bg-black-0.1"
+                value === item.id && "bg-black-0.1"
               }`}
             >
-              {item.toString()}
+              {item.label}
             </button>
           ))}
         </div>

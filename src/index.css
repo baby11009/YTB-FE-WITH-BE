@@ -17,7 +17,7 @@ body {
 }
 
 :root {
-  --scroll-bar-width: auto;
+  --scroll-bar-width: thin;
   scrollbar-color: #a9a9a9 #0f0f0f; /* Color of the scrollbar thumb and track */
   scrollbar-width: var(--scroll-bar-width);
 }
@@ -28,8 +28,17 @@ button:focus {
 }
 
 .scrollbar-2 {
-  scrollbar-width: medium;
+  scrollbar-width: thin;
   scrollbar-color: #a9a9a9 #ffffff;
+}
+.scrollbar-3 {
+  scrollbar-width: thin;
+  
+  scrollbar-color: #a9a9a9 transparent;
+}
+.scrollbar-3 ::-webkit-scrollbar {
+  width: 5px; /* Width of the scrollbar */
+  height: 5px; /* Height of the scrollbar (for horizontal scrollbars) */
 }
 
 /* Style for Firefox */

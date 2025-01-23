@@ -254,7 +254,18 @@ const Playlist = () => {
            text-gray-A items-center border-y-[1px] border-gray-A flex '
         >
           <div
-            className={`sticky left-[0] pl-[24px] flex-1 min-w-[382px] bg-black z-[10] 
+            className={`sticky left-0 h-[48px] p-[0_12px_0_24px] flex items-center justify-center 
+          gap-[12px] bg-black `}
+          >
+            <CheckBox2
+              checked={
+                dataList.length > 0 && checkedList?.length === dataList.length
+              }
+              setChecked={handleCheckedAll}
+            />
+          </div>
+          <div
+            className={`sticky left-[57px] pl-[12px] flex-1 min-w-[382px] bg-black  
               border-r-[1px] ${
                 horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
               }`}
@@ -306,19 +317,6 @@ const Playlist = () => {
                 </div>
               )}
             </button>
-          </div>
-          <div
-            className={`sticky right-0 w-[80px] h-[48px] p-[0_24px_0_12px] flex items-center justify-center 
-          gap-[12px] bg-black  border-l-[1px] ${
-            horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
-          }`}
-          >
-            <CheckBox2
-              checked={
-                dataList.length > 0 && checkedList?.length === dataList.length
-              }
-              setChecked={handleCheckedAll}
-            />
           </div>
         </div>
         {/* Body */}

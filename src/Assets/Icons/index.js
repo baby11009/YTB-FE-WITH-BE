@@ -167,3 +167,4 @@ export { default as YourChannelIcon } from "./YourChannel.jsx";
 export { default as ActiveLoopIcon } from "./ActiveLoop.jsx";
 export { default as ActiveShuffleIcon } from "./ActiveShuffle.jsx";
 export { default as Youtube2Icon } from "./Youtube2.jsx";
+export { default as ActiveEditIcon } from "./ActiveEdit.jsx";
