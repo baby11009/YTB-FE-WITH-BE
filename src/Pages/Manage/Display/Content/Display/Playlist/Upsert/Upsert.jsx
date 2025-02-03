@@ -62,7 +62,14 @@ const Upsert = ({ playlistId, func, handleClose }) => {
 
   const funcList = {
     detail: <Details playlistData={playlistInfo} refetch={refetch} />,
-    list: <VideoList />,
+    list: (
+      <VideoList
+        videoList={videoList}
+        currPage={queriese?.videoPage}
+        totalPage={data?.totalPages}
+        setQueriese={setQueriese}
+      />
+    ),
   };
 
   useLayoutEffect(() => {

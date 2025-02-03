@@ -168,3 +168,5 @@ export { default as ActiveLoopIcon } from "./ActiveLoop.jsx";
 export { default as ActiveShuffleIcon } from "./ActiveShuffle.jsx";
 export { default as Youtube2Icon } from "./Youtube2.jsx";
 export { default as ActiveEditIcon } from "./ActiveEdit.jsx";
+export { default as Share2Icon } from "./Share2.jsx";
+export { default as RemovePL } from "./RemovePL.jsx";
