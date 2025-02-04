@@ -65,9 +65,9 @@ const PlaylistTbRow = ({
     );
   }, []);
   return (
-    <div className=' h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
+    <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
       <div
-        className={`sticky left-0 p-[12px_12px_8px_24px] flex  justify-center
+        className={`sticky left-0 p-[12px_12px_8px_24px] 
        bg-black group-hover:bg-[#272727] `}
       >
         <CheckBox2
@@ -78,18 +78,20 @@ const PlaylistTbRow = ({
         />
       </div>
       <div
-        className={`sticky left-[57px] flex-1 min-w-[382px] p-[8px_0_0_12px] z-[5] flex bg-black group-hover:bg-[#272727]
+        className={`sticky left-[57px] flex-[3_0_382px] min-w-[382px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
          border-r-[1px] ${
            horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
          }`}
       >
-        <div className='relative w-[120px] h-[68px] border-[1px] rounded-[5px] overflow-hidden mr-[16px]'>
-          <img
-            src={`${import.meta.env.VITE_BASE_API_URI}${
-              import.meta.env.VITE_VIEW_THUMB_API
-            }${data?.video_list[0]?.thumb}`}
-            className='w-full object-contain object-center rounded-[5px] aspect-[16/9]'
-          />
+        <div className='relative min-w-[120px]  aspect-video bg-[rgba(0,0,0,0.5)] rounded-[5px] overflow-hidden mr-[16px]'>
+          {data?.video_list?.length > 0 && (
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.video_list[0]?.thumb}`}
+              className='size-full object-contain object-center'
+            />
+          )}
           <div
             className='absolute w-[52px] h-full right-0 top-0 bg-[#000000cc] 
           flex flex-col items-center justify-center'
@@ -102,11 +104,9 @@ const PlaylistTbRow = ({
             </div>
           </div>
         </div>
-        <div>
-          <div>
-            <span className='text-[13px] leading-[20px] text-white font-[400]  line-clamp-1 text-ellipsis'>
-              {data?.title}
-            </span>
+        <div >
+          <div className='text-[13px] leading-[20px] text-white font-[400]  line-clamp-1 text-ellipsis'>
+            {data?.title}
           </div>
           <div className='flex items-center mt-[8px] invisible group-hover:visible'>
             <button
@@ -140,19 +140,19 @@ const PlaylistTbRow = ({
           </div>
         </div>
       </div>
-      <div className='w-[100px] px-[12px] py-[8px]'>
+      <div className='flex-[1_0_100px] min-w-[100px] px-[12px] py-[8px] '>
         <span className='text-[12px] leading-[20px] text-white'>
           {type[data?.type]}
         </span>
       </div>
 
-      <div className='w-[180px] px-[12px] py-[8px]'>
+      <div className='flex-[1_0_100px] min-w-[100px] px-[12px] py-[8px] '>
         <span className='text-[12px] leading-[20px]  text-white'>
           {timeFormat3(data?.createdAt)}
         </span>
       </div>
 
-      <div className='w-[130px] pl-[12px] pr-[24px] py-[8px] text-right'>
+      <div className='flex-[1_0_130px] min-w-[130px] pl-[12px] pr-[24px] py-[8px] text-right '>
         <span className='text-[12px] leading-[20px]  text-white '>
           {formatNumber(data?.size)}
         </span>

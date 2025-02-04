@@ -254,8 +254,8 @@ const Playlist = () => {
            text-gray-A items-center border-y-[1px] border-gray-A flex '
         >
           <div
-            className={`sticky left-0 h-[48px] p-[0_12px_0_24px] flex items-center justify-center 
-          gap-[12px] bg-black `}
+            className="sticky left-0 h-[48px] p-[0_12px_0_24px] flex items-center justify-center 
+          gap-[12px] bg-black"
           >
             <CheckBox2
               checked={
@@ -265,15 +265,15 @@ const Playlist = () => {
             />
           </div>
           <div
-            className={`sticky left-[57px] pl-[12px] flex-1 min-w-[382px] bg-black  
+            className={`sticky left-[57px] pl-[12px] flex-[2_0_382px] min-w-[382px]  bg-black  
               border-r-[1px] ${
                 horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
               }`}
           >
             Playlist
           </div>
-          <div className='w-[100px] px-[12px]'>Type</div>
-          <div className='w-[180px] px-[12px]'>
+          <div className='flex-[1_0_100px] min-w-[100px] px-[12px]'>Type</div>
+          <div className='flex-[1_0_100px] min-w-[100px] px-[12px]'>
             <button
               onClick={() => {
                 handleSortUnique(
@@ -297,7 +297,7 @@ const Playlist = () => {
               )}
             </button>
           </div>
-          <div className='w-[130px] px-[12px]'>
+          <div className='flex-[1_0_130px] min-w-[130px] px-[12px]'>
             <button
               onClick={() => {
                 handleSortUnique("size", params.sort["size"] === -1 ? 1 : -1);

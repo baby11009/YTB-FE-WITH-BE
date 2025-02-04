@@ -135,7 +135,7 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
           }}
           className='mr-[20px]'
         >
-          <div>
+          <div className="w-[24px]">
             <CloseIcon />
           </div>
         </button>

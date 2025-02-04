@@ -21,7 +21,7 @@ const PlaylistCard2 = ({ data, containerStyle, l3Color, l2Color }) => {
       to={`/video?id=${data?.video_list[0]?._id}&list=${data?._id}`}
       state={{
         stream: data?.video_list[0]?.stream,
-        video: data?.video_list[0].video,
+        video: data?.video_list[0]?.video,
       }}
       className='inline-block mt-[16px] cursor-pointer group w-full '
     >

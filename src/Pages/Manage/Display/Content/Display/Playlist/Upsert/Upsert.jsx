@@ -6,7 +6,7 @@ import {
   useEffect,
 } from "react";
 import Details from "./Details";
-import VideoList from "./VIdeoList";
+import VideoList from "./VideoList.jsx";
 import { Slider } from "../../../../../../../Component";
 import {
   EditIcon,
@@ -64,10 +64,14 @@ const Upsert = ({ playlistId, func, handleClose }) => {
     detail: <Details playlistData={playlistInfo} refetch={refetch} />,
     list: (
       <VideoList
+        playlistId={playlistInfo?._id}
         videoList={videoList}
         currPage={queriese?.videoPage}
         totalPage={data?.totalPages}
-        setQueriese={setQueriese}
+        setPage={(page) => {
+          setQueriese((prev) => ({ ...prev, videoPage: page }));
+        }}
+        refetch={refetch}
       />
     ),
   };

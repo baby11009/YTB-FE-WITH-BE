@@ -182,8 +182,8 @@ const Video = () => {
   }, [params.page]);
 
   return (
-    <div className='min-h-[500px] relative'>
-      <div className='sticky left-0 top-[184px] z-[2000] w-full'>
+    <div className='overflow-auto max-h-full relative scrollbar-3'>
+      <div className='sticky left-0 top-[0] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
             <button
@@ -203,20 +203,20 @@ const Video = () => {
               />
             )}
           </div>
-          <div className='w-full flex items-center'>
+          <div className='flex-1 flex items-center'>
             {sort?.text && (
               <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
                 <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
                   {sort.text}
                 </span>
                 <div
-                  className='px-[6px]'
+                  className='px-[6px] w-[24px]'
                   onClick={() => {
                     setSort(undefined);
                     setParams((prev) => ({ ...prev, title: "", page: 1 }));
                   }}
                 >
-                  <CloseIcon size={18} />
+                  <CloseIcon />
                 </div>
               </button>
             )}
@@ -244,159 +244,158 @@ const Video = () => {
           </div>
         </div>
       </div>
-      <div className='overflow-auto'>
-        {/* table */}
-        <div className='flex-1 min-w-full w-fit'>
-          {/* Head */}
-          <div className='text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px] border-y-[2px] '>
-            <div className='w-[70px] flex items-center gap-[12px] absolute left-0 bg-black border-r-[2px]'>
-              <CheckBox2
-                // checked={dataLength === checkedList.length}
-                checked={
-                  checkedList.length === data?.data.length &&
-                  data?.data.length > 0
+      {/* table */}
+      <div className='min-w-full w-fit'>
+        {/* Head */}
+        <div
+          className='sticky top-[40px] z-[7] bg-black text-[12px] font-[500] leading-[48px]
+           text-gray-A items-center border-y-[1px] border-gray-A flex '
+        >
+          <div className='sticky left-0 h-[48px] p-[0_12px_0_24px] flex items-center justify-center gap-[12px]'>
+            <CheckBox2
+              checked={
+                checkedList.length === data?.data.length &&
+                data?.data.length > 0
+              }
+              setChecked={handleCheckedAll}
+            />
+          </div>
+          <div
+            className='sticky left-[57px] pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
+              border-r-[1px] border-gray-A'
+          >
+            Video
+          </div>
+          <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>
+            <button
+              onClick={() => {
+                handleSortUnique(
+                  "createdAt",
+                  params.sort["createdAt"] === -1 ? 1 : -1,
+                );
+              }}
+              className={`flex items-center  w-full ${
+                params.sort["createdAt"] ? "text-white-F1 font-bold" : ""
+              }`}
+            >
+              <span>Date </span>
+
+              <div
+                className={`${
+                  params.sort["createdAt"] === -1 ? "rotate-180" : ""
                 }
-                setChecked={handleCheckedAll}
-              />
-              <span>STT</span>
-            </div>
-            <div className='w-[300px] ml-[80px]'>Thumbbnail</div>
-            <div className='w-[350px]'>Title</div>
-            <div className='w-[100px]'>
-              <button
-                onClick={() => {
-                  handleSortUnique("view", params.sort["view"] === -1 ? 1 : -1);
-                }}
-                className={`flex items-center justify-center gap-[8px] ${
-                  params.sort["view"] ? "text-white-F1 font-bold" : ""
-                }`}
+                ${
+                  params.sort["createdAt"] ? "visible" : "invisible"
+                } ml-[12px] w-[12px]`}
               >
-                <span>View</span>
-                {params.sort["view"] && (
-                  <div
-                    className={`${
-                      params.sort["view"] === -1 ? "rotate-180" : ""
-                    } text-[12px]`}
-                  >
-                    <LongArrowIcon size={14} />
-                  </div>
-                )}
-              </button>
-            </div>
-            <div className='w-[100px]'>
-              <button
-                onClick={() => {
-                  handleSortUnique("like", params.sort["like"] === -1 ? 1 : -1);
-                }}
-                className={`flex items-center justify-center gap-[8px] ${
-                  params.sort["like"] ? "text-white-F1 font-bold" : ""
-                }`}
-              >
-                <span>Like</span>
-                {params.sort["like"] && (
-                  <div
-                    className={`${
-                      params.sort["like"] === -1 ? "rotate-180" : ""
-                    } text-[12px]`}
-                  >
-                    <LongArrowIcon size={14} />
-                  </div>
-                )}
-              </button>
-            </div>
-            <div className='w-[100px]'>
-              <button
-                onClick={() => {
-                  handleSortUnique(
-                    "dislike",
-                    params.sort["dislike"] === -1 ? 1 : -1,
-                  );
-                }}
-                className={`flex items-center justify-center gap-[8px] ${
-                  params.sort["dislike"] ? "text-white-F1 font-bold" : ""
-                }`}
-              >
-                <span>Dislike</span>
-                {params.sort["dislike"] && (
-                  <div
-                    className={`${
-                      params.sort["dislike"] === -1 ? "rotate-180" : ""
-                    } text-[12px]`}
-                  >
-                    <LongArrowIcon size={14} />
-                  </div>
-                )}
-              </button>
-            </div>
-            <div className='w-[100px]'>
-              <button
-                onClick={() => {
-                  handleSortUnique(
-                    "totalCmt",
-                    params.sort["totalCmt"] === -1 ? 1 : -1,
-                  );
-                }}
-                className={`flex items-center justify-center gap-[8px] ${
-                  params.sort["totalCmt"] ? "text-white-F1 font-bold" : ""
-                }`}
-              >
-                <span>Comments</span>
-                {params.sort["totalCmt"] && (
-                  <div
-                    className={`${
-                      params.sort["totalCmt"] === -1 ? "rotate-180" : ""
-                    } text-[12px]`}
-                  >
-                    <LongArrowIcon size={14} />
-                  </div>
-                )}
-              </button>
-            </div>
-            <div className='w-[150px] mr-[100px]'>
-              <button
-                onClick={() => {
-                  handleSortUnique(
-                    "createdAt",
-                    params.sort["createdAt"] === -1 ? 1 : -1,
-                  );
-                }}
-                className={`flex items-center justify-center gap-[8px] ${
-                  params.sort["createdAt"] ? "text-white-F1 font-bold" : ""
-                }`}
-              >
-                <span>Created date </span>
-                {params.sort["createdAt"] && (
-                  <div
-                    className={`${
-                      params.sort["createdAt"] === -1 ? "rotate-180" : ""
-                    } text-[12px]`}
-                  >
-                    <LongArrowIcon size={14} />
-                  </div>
-                )}
-              </button>
-            </div>
-            <div className='w-[100px] absolute right-0 border-l-[2px] px-[12px] bg-black'>
-              Function
-            </div>
+                <LongArrowIcon />
+              </div>
+            </button>
           </div>
-          {/* Body */}
-          <div className='flex flex-col'>
-            {isLoading ? (
-              <div>Loading....</div>
-            ) : (
-              dataList.map((item, id) => (
-                <VideoTbRow
-                  key={id}
-                  handleChecked={handleChecked}
-                  checked={checkedList.includes(item?._id)}
-                  data={item}
-                  od={id + params?.limit * (params?.page - 1) + 1}
-                  refetch={refetch}
-                />
-              ))
-            )}
+          <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] '>
+            <button
+              onClick={() => {
+                handleSortUnique("view", params.sort["view"] === -1 ? 1 : -1);
+              }}
+              className={`flex items-center justify-end w-full ${
+                params.sort["view"] ? "text-white-F1 font-bold" : ""
+              }`}
+            >
+              <span>View</span>
+              <div
+                className={`${params.sort["view"] === -1 ? "rotate-180" : ""}
+                ${
+                  params.sort["view"] ? "visible" : "invisible"
+                } ml-[12px] w-[12px]`}
+              >
+                <LongArrowIcon />
+              </div>
+            </button>
           </div>
+          <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>
+            <button
+              onClick={() => {
+                handleSortUnique(
+                  "totalCmt",
+                  params.sort["totalCmt"] === -1 ? 1 : -1,
+                );
+              }}
+              className={`flex items-center justify-end  w-full ${
+                params.sort["totalCmt"] ? "text-white-F1 font-bold" : ""
+              }`}
+            >
+              <span>Comments</span>
+
+              <div
+                className={`${
+                  params.sort["totalCmt"] === -1 ? "rotate-180" : ""
+                }
+                  ${
+                    params.sort["totalCmt"] ? "visible" : "invisible"
+                  } ml-[12px] w-[12px]`}
+              >
+                <LongArrowIcon />
+              </div>
+            </button>
+          </div>
+          <div className='flex-[1_0_60px] min-w-[60px] mx-[12px]'>
+            <button
+              onClick={() => {
+                handleSortUnique("like", params.sort["like"] === -1 ? 1 : -1);
+              }}
+              className={`flex items-center justify-end w-full ${
+                params.sort["like"] ? "text-white-F1 font-bold" : ""
+              }`}
+            >
+              <span>Like</span>
+
+              <div
+                className={`${params.sort["like"] === -1 ? "rotate-180" : ""}
+                    ${
+                      params.sort["like"] ? "visible" : "invisible"
+                    } ml-[12px] w-[12px]`}
+              >
+                <LongArrowIcon size={14} />
+              </div>
+            </button>
+          </div>
+          <div className='flex-[1_0_60px] min-w-[60px] mx-[12px]'>
+            <button
+              onClick={() => {
+                handleSortUnique(
+                  "dislike",
+                  params.sort["dislike"] === -1 ? 1 : -1,
+                );
+              }}
+              className={`flex items-center justify-end w-full ${
+                params.sort["dislike"] ? "text-white-F1 font-bold" : ""
+              }`}
+            >
+              <span>Dislike</span>
+
+              <div
+                className={`${params.sort["dislike"] === -1 ? "rotate-180" : ""}
+                  ${
+                    params.sort["dislike"] ? "visible" : "invisible"
+                  } ml-[12px] w-[12px]`}
+              >
+                <LongArrowIcon size={14} />
+              </div>
+            </button>
+          </div>
+        </div>
+        {/* Body */}
+        <div className='flex flex-col z-[2]'>
+          {dataList.map((item, id) => (
+            <VideoTbRow
+              key={id}
+              handleChecked={handleChecked}
+              checked={checkedList.includes(item?._id)}
+              data={item}
+              od={id + params?.limit * (params?.page - 1) + 1}
+              refetch={refetch}
+            />
+          ))}
         </div>
       </div>
       <Pagination
