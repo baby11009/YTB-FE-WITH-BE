@@ -182,7 +182,7 @@ const Video = () => {
   }, [params.page]);
 
   return (
-    <div className='overflow-auto max-h-full relative scrollbar-3'>
+    <div className='overflow-auto h-full relative scrollbar-3'>
       <div className='sticky left-0 top-[0] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
@@ -248,10 +248,10 @@ const Video = () => {
       <div className='min-w-full w-fit'>
         {/* Head */}
         <div
-          className='sticky top-[40px] z-[7] bg-black text-[12px] font-[500] leading-[48px]
-           text-gray-A items-center border-y-[1px] border-gray-A flex '
+          className='sticky top-[40px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
+           text-gray-A items-center border-y-[1px] border-gray-A flex'
         >
-          <div className='sticky left-0 h-[48px] p-[0_12px_0_24px] flex items-center justify-center gap-[12px]'>
+          <div className='sticky left-0 h-[48px] p-[0_12px_0_25px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
             <CheckBox2
               checked={
                 checkedList.length === data?.data.length &&
@@ -262,7 +262,7 @@ const Video = () => {
           </div>
           <div
             className='sticky left-[57px] pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
-              border-r-[1px] border-gray-A'
+              border-r-[1px] border-gray-A z-[10]'
           >
             Video
           </div>

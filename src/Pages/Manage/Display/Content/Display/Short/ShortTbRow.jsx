@@ -1,6 +1,10 @@
 import { CheckBox2, DeleteConfirm } from "../../../../../../Component";
 import { formatNumber } from "../../../../../../util/numberFormat";
-import { TrashBinIcon, EditIcon } from "../../../../../../Assets/Icons";
+import {
+  TrashBinIcon,
+  EditIcon,
+  YoutubeBlankIcon,
+} from "../../../../../../Assets/Icons";
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
@@ -38,72 +42,96 @@ const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
   }, [data?._id]);
 
   return (
-    <div className='text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px] py-[10px] h-[270px]'>
-      <div className='w-[70px] flex items-center gap-[12px] absolute left-0 bg-black h-[270px] border-r-[2px] '>
+    <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
+      <div
+        className={`sticky left-0 p-[12px_12px_8px_25px]
+     bg-black group-hover:bg-[#272727] z-[5]`}
+      >
         <CheckBox2
           checked={checked}
           setChecked={() => {
             handleChecked(data?._id);
           }}
         />
-        <span>{od}</span>
       </div>
-      <div className='w-[150px] ml-[80px] mr-[12px] rounded-[5px] bg-amber-300 flex items-center justify-center'>
-        <img
-          src={`${import.meta.env.VITE_BASE_API_URI}${
-            import.meta.env.VITE_VIEW_THUMB_API
-          }${data?.thumb}`}
-          alt=''
-          className='max-h-[250px] h-auto object-contain object-center rounded-[5px] aspect-[9/16]'
-        />
-      </div>
-      <div className='w-[350px]'>
-        <div className='text-nowrap overflow-hidden text-ellipsis'>
-          {data?.title}
-        </div>
-      </div>
-      <div className='w-[100px] relative group'>
-        <span>{formatNumber(data?.view)}</span>
-        <div className='bg-black-0.2 text-[14px] leading-[20px] font-[500] hidden group-hover:block absolute left-[20%] top-[-35%] px-[12px] py-[2px] rounded-[5px]'>
-          {data?.view}
-        </div>
-      </div>
-      <div className='w-[100px] relative group'>
-        <span>{formatNumber(data?.like)}</span>
-        <div className='bg-black-0.2 text-[14px] leading-[20px] font-[500] hidden group-hover:block absolute left-[20%] top-[-35%] px-[12px] py-[2px] rounded-[5px]'>
-          {data?.like}
-        </div>
-      </div>
-      <div className='w-[100px] relative group'>
-        <span>{formatNumber(data?.dislike)}</span>
-        <div className='bg-black-0.2 text-[14px] leading-[20px] font-[500] hidden group-hover:block absolute left-[20%] top-[-35%] px-[12px] py-[2px] rounded-[5px]'>
-          {data?.dislike}
-        </div>
-      </div>
-      <div className='w-[100px] relative group'>
-        <span>{formatNumber(data?.totalCmt)}</span>
-        <div className='bg-black-0.2 text-[14px] leading-[20px] font-[500] hidden group-hover:block absolute left-[20%] top-[-35%] px-[12px] py-[2px] rounded-[5px]'>
-          {data?.totalCmt}
-        </div>
-      </div>
-      <div className='w-[150px] mr-[100px]'>{timeFormat3(data?.createdAt)}</div>
-      <div className='w-[100px] absolute right-0 bg-black flex items-center border-l-[2px] px-[12px] h-[270px]'>
-        <button
-          className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-          onClick={showUpsertModal}
-        >
-          <div className='text-blue-500'>
-            <EditIcon />
+
+      <div
+        className='sticky left-[57px] flex-[2_0_400px] min-w-[400px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
+        border-r-[1px] border-gray-A'
+      >
+        <div className='w-full flex relative'>
+          <div className='min-w-[120px] aspect-video  rounded-[5px] overflow-hidden z-[2]'>
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.thumb}`}
+              alt='thumbnail'
+              className='size-full object-contain object-center'
+            />
           </div>
-        </button>
-        <button
-          className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-          onClick={showDeleteConfirm}
-        >
-          <div className='text-red-500'>
-            <TrashBinIcon />
+          <div className='absolute left-0 w-[120px] aspect-video z-[1] rounded-[5px] overflow-hidden'>
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.thumb}`}
+              alt='thumbnail'
+              className='size-full object-cover object-center z-[1]'
+            />
+            <div className='absolute left-0 top-0 size-full bg-[rgba(0,0,0,.4)] z-[5] backdrop-blur '></div>
           </div>
-        </button>
+          <div className='flex-1 ml-[16px] pr-[12px] overflow-hidden'>
+            <div className='h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'>
+              {data.title}
+            </div>
+            <div className='h-[16px] line-clamp-1 text-ellipsis break-all text-[12px] leading-[16px] text-gray-A group-hover:hidden'>
+              {data?.description}
+            </div>
+            <div className='hidden group-hover:flex'>
+              <button
+                className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
+                onClick={() => {
+                  showUpsertModal("detail");
+                }}
+              >
+                <div className='text-white size-[24px]'>
+                  <EditIcon />
+                </div>
+              </button>
+              <a
+                className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
+                href={`http://localhost:5173/video?id=${data._id}`}
+                target='_blank'
+              >
+                <div className='text-white size-[24px]'>
+                  <YoutubeBlankIcon />
+                </div>
+              </a>
+              <button
+                className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
+                onClick={showDeleteConfirm}
+              >
+                <div className='text-white size-[24px]'>
+                  <TrashBinIcon />
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]'>
+        {timeFormat3(data?.createdAt)}
+      </div>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-right '>
+        {formatNumber(data?.view)}
+      </div>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-right'>
+        {formatNumber(data?.totalCmt)}
+      </div>
+      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px] text-right'>
+        {formatNumber(data?.like)}
+      </div>
+      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px] text-right'>
+        {formatNumber(data?.dislike)}
       </div>
     </div>
   );

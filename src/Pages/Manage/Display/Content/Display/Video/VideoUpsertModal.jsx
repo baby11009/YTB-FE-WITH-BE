@@ -1,5 +1,9 @@
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
-import { CloseIcon, UploadImageIcon } from "../../../../../../Assets/Icons";
+import {
+  CloseIcon,
+  UploadImageIcon,
+  YoutubeBlankIcon,
+} from "../../../../../../Assets/Icons";
 import {
   TextArea,
   InfiniteDropDownWithCheck,
@@ -86,6 +90,11 @@ const VideoUpsertModal = ({ title, id }) => {
   }, []);
 
   const handleUploadThumb = useCallback((e) => {
+    setError({
+      inputName: [],
+      message: [],
+    });
+
     const file = e.files[0];
 
     if (!file) {
@@ -152,6 +161,11 @@ const VideoUpsertModal = ({ title, id }) => {
   }, []);
 
   const handleUploadVideo = useCallback((e) => {
+    setError({
+      inputName: [],
+      message: [],
+    });
+
     const file = e.files[0];
 
     if (!file) {
@@ -453,35 +467,39 @@ const VideoUpsertModal = ({ title, id }) => {
   }, []);
 
   return (
-    <div className='size-full max-w-[1500px] p-[12px] lg:p-[24px] h-screen '>
-      <div className='bg-black size-full overflow-auto rounded-[12px] shadow-[0_0_8px_#f1f1f1] '>
-        <div className='relative  px-[16px] pb-[16px] xl:pb-[20px] xl:px-[20px]'>
-          <div className='sticky top-[0] h-[68px] xl:h-[72px] flex items-center justify-between bg-black z-[2]'>
-            <h1 className='text-nowrap text-[25px] leading-[32px] font-[600]'>
+    <div className='w-[min(1700px,100vw)] sm:p-[12px] lg:p-[24px] h-screen'>
+      <div className='rounded-[12px] bg-black size-full shadow-[0_0_8px_#f1f1f1] pr-[4px] overflow-hidden'>
+        <div className=' size-full overflow-auto scrollbar-3 relative'>
+          <div className='sticky top-0 px-[16px] h-[68px] xl:h-[72px] flex items-center justify-between bg-black z-[2]'>
+            <h2 className='text-nowrap text-[25px] leading-[32px] font-[600]'>
               {title}
-            </h1>
+            </h2>
             <button
               className='size-[32px] rounded-[50%] flex items-center justify-center hover:bg-black-0.1 active:bg-black-0.2'
               onClick={() => {
                 setIsShowing(undefined);
               }}
             >
-              <div>
-                <CloseIcon size={16} />
+              <div className='w-[16px]'>
+                <CloseIcon />
               </div>
             </button>
           </div>
-          <form noValidate onSubmit={handleSubmit} className='mb-[20px]'>
-            <div className='flex items-center justify-center flex-wrap gap-[36px] 2md:gap-[24px]'>
+          <form
+            noValidate
+            onSubmit={handleSubmit}
+            className='my-[20px] p-[0_8px_8px] sm:p-[0_16px_16px]'
+          >
+            <div className='flex items-center justify-center flex-wrap'>
               {/* thumbnail */}
               <div
-                className='basis-[100%] 2md:basis-[40%] 
-                max-w-full h-[40vh] 2md:h-[45vh] max-h-[405px] '
+                className='basis-[100%] 2md:basis-[50%] 
+                max-w-full aspect-video max-h-[405px] p-[0_0_16px] pl 2md:p-[0px_16px_0px_0px]'
               >
                 <label
                   htmlFor='thumbnail'
                   className='inline-block size-full relative cursor-pointer 
-                    border-[2px] border-dashed rounded-[10px] p-[16px]'
+                    rounded-[10px] overflow-hidden shadow-[0_0_4px_2px_rgba(255,255,255,0.2)] sm:shadow-[0_0_8px_4px_rgba(255,255,255,0.2)]'
                   onDragOver={(e) => {
                     e.preventDefault();
                   }}
@@ -491,23 +509,23 @@ const VideoUpsertModal = ({ title, id }) => {
                     handleUploadThumb(thumbInputRef.current);
                   }}
                 >
-                  <div className='flex items-center justify-center size-full aspect-video'>
+                  <div className='flex items-center justify-center size-full '>
                     {previewThumb ? (
                       <div
-                        className='size-full bg-contain bg-center bg-no-repeat'
+                        className='size-full bg-contain bg-center bg-no-repeat rounded-[10px]'
                         style={{
                           backgroundImage: `url("${previewThumb}")`,
                         }}
                       ></div>
                     ) : (
                       <div className='w-full flex flex-col items-center justify-center font-[500] text-center'>
-                        <div>
+                        <div className='w-[54px] sm:w-[64px]'>
                           <UploadImageIcon />
                         </div>
-                        <h2 className='mt-[12px]'>
+                        <h2 className='mt-[12px] text-[12px] xsm:text-[16px]'>
                           Click to upload video's thumbnai or drag and drop
                         </h2>
-                        <p className='text-gray-A text-[12px] leading-[18px]'>
+                        <p className='text-gray-A text-[10px] xsm:text-[12px] leading-[18px]'>
                           Just support : JPG, PNG,.. (Maximum 2MB)
                         </p>
                       </div>
@@ -534,17 +552,14 @@ const VideoUpsertModal = ({ title, id }) => {
               </div>
 
               {/* Video */}
-
               <div
-                className='basis-[100%]  2md:flex-1
-                h-[50vh] 2md:h-[45vh] max-h-[405px] '
+                className='basis-[100%] 2md:basis-[50%] 
+                max-w-full aspect-video max-h-[405px] p-[16px_0] pl 2md:p-[0px_0px_0px_16px] '
               >
                 <label
                   htmlFor='video'
-                  className={`inline-block size-full relative 
-                border-[2px] border-dashed rounded-[10px] p-[16px]
-                ${!id ? "cursor-pointer " : " cursor-default"}
-                `}
+                  className='inline-block size-full relative cursor-pointer 
+                    rounded-[10px] overflow-hidden shadow-[0_0_4px_2px_rgba(255,255,255,0.2)] sm:shadow-[0_0_8px_4px_rgba(255,255,255,0.2)]'
                   onDragOver={(e) => {
                     e.preventDefault();
                   }}
@@ -557,7 +572,7 @@ const VideoUpsertModal = ({ title, id }) => {
                     handleUploadVideo(videoInputRef.current);
                   }}
                 >
-                  <div className='flex items-center justify-center h-full aspect-video'>
+                  <div className='flex items-center justify-center size-full '>
                     {previewVideo ? (
                       <video
                         ref={videoRef}
@@ -566,13 +581,13 @@ const VideoUpsertModal = ({ title, id }) => {
                       ></video>
                     ) : (
                       <div className='w-full flex flex-col items-center justify-center font-[500] text-center'>
-                        <div>
-                          <UploadImageIcon />
+                        <div className='w-[56px] sm:w-[64px]'>
+                          <YoutubeBlankIcon />
                         </div>
-                        <h2 className='mt-[12px]'>
+                        <h2 className='mt-[12px] text-[12px] xsm:text-[16px]'>
                           Click to upload video or drag and drop
                         </h2>
-                        <p className='text-gray-A text-[12px] leading-[18px]'>
+                        <p className='text-gray-A text-[10px] xsm:text-[12px] leading-[18px]'>
                           Just support : MP4, WEBM,...
                         </p>
                       </div>
@@ -590,6 +605,7 @@ const VideoUpsertModal = ({ title, id }) => {
                     className='hidden'
                   />
                 </label>
+
                 <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
                   <span>
                     {error.inputName?.includes("video")
@@ -600,14 +616,15 @@ const VideoUpsertModal = ({ title, id }) => {
               </div>
             </div>
 
-            <div className='flex flex-wrap gap-[16px] mt-[48px]'>
-              <div className='basis-[100%]  2md:basis-[49%]'>
+            <div className='flex flex-wrap mt-[16px]'>
+              <div className='basis-[100%]  2md:basis-[50%]  p-[0_0_8px] pl 2md:p-[0px_8px_0px_0px] '>
                 <TextArea
                   title={"Title"}
                   name={"title"}
                   value={formData.title}
                   defaultValue={videoData?.data.title}
                   handleOnChange={handleOnChange}
+                  maxLength={155}
                   errMsg={
                     error.inputName?.includes("title")
                       ? error.message[error.inputName?.indexOf("title")]
@@ -616,7 +633,7 @@ const VideoUpsertModal = ({ title, id }) => {
                   placeholder={"Enter video title"}
                 />
               </div>
-              <div className='basis-[100%]  2md:basis-[49%]'>
+              <div className='basis-[100%]  2md:basis-[50%]  p-[8px_0_0] pl 2md:p-[0px_0px_0px_8px] '>
                 <TextArea
                   title={"Description"}
                   name={"description"}
@@ -631,7 +648,7 @@ const VideoUpsertModal = ({ title, id }) => {
                   placeholder={"Enter video description"}
                 />
               </div>
-              <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] '>
+              <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] mt-[32px] '>
                 <InfiniteDropDownWithCheck
                   title={"Tag"}
                   valueList={formData.tag}
@@ -673,7 +690,7 @@ const VideoUpsertModal = ({ title, id }) => {
               </div>
             </div>
 
-            <div className='basis-[100%]  flex items-center justify-center mt-[50px]'>
+            <div className='basis-[100%]  flex items-center justify-center mt-[180px]'>
               <button type='submit' className='w-full max-w-[160px] btn1'>
                 {submitLoading ? (
                   <div

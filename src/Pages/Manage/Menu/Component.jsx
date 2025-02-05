@@ -66,7 +66,9 @@ export const Button = ({ data, currPath, openedMenu }) => {
         }`}
       >
         <div className='min-w-[24px] size-[24px] ml-[8px] mr-[24px]'>
-          {data.path === currPath && data.active ? data.active : data.icon}
+          {currPath && data.path && currPath.includes(data.path)
+            ? data.active
+            : data.icon}
         </div>
 
         <p

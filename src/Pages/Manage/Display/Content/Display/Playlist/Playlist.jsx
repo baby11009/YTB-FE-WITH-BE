@@ -186,7 +186,7 @@ const Playlist = () => {
   }, [data]);
 
   return (
-    <div className='overflow-auto max-h-full relative' ref={container}>
+    <div className='overflow-auto h-full relative scrollbar-3' ref={container}>
       <div className='sticky left-0 top-[0] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
@@ -250,12 +250,12 @@ const Playlist = () => {
       <div className='min-w-full w-fit'>
         {/* Head */}
         <div
-          className='sticky top-[40px] z-[5] bg-black text-[12px] font-[500] leading-[48px]
+          className='sticky top-[40px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
            text-gray-A items-center border-y-[1px] border-gray-A flex '
         >
           <div
-            className="sticky left-0 h-[48px] p-[0_12px_0_24px] flex items-center justify-center 
-          gap-[12px] bg-black"
+            className='sticky left-0 h-[48px] p-[0_12px_0_24px] flex items-center justify-center 
+          gap-[12px] bg-black'
           >
             <CheckBox2
               checked={
@@ -266,7 +266,7 @@ const Playlist = () => {
           </div>
           <div
             className={`sticky left-[57px] pl-[12px] flex-[2_0_382px] min-w-[382px]  bg-black  
-              border-r-[1px] ${
+              border-r-[1px] z-[10] ${
                 horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
               }`}
           >
@@ -320,7 +320,7 @@ const Playlist = () => {
           </div>
         </div>
         {/* Body */}
-        <div className=' flex flex-col'>
+        <div className=' flex flex-col z-[2]'>
           {dataList.length > 0 &&
             dataList.map((item, id) => (
               <PlaylistTbRow
@@ -334,6 +334,7 @@ const Playlist = () => {
               />
             ))}
         </div>
+
         <div className='mb-[86px] px-[24px]'>
           <Pagination
             setParams={setParams}

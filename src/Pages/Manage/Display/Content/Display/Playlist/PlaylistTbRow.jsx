@@ -64,6 +64,7 @@ const PlaylistTbRow = ({
       />,
     );
   }, []);
+
   return (
     <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
       <div
@@ -78,23 +79,25 @@ const PlaylistTbRow = ({
         />
       </div>
       <div
-        className={`sticky left-[57px] flex-[3_0_382px] min-w-[382px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
-         border-r-[1px] ${
+        className={`sticky left-[57px] flex-[2_0_382px] min-w-[382px] p-[8px_0_8px_12px] flex bg-black group-hover:bg-[#272727]
+         border-r-[1px]  z-[5] ${
            horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
          }`}
       >
-        <div className='relative min-w-[120px]  aspect-video bg-[rgba(0,0,0,0.5)] rounded-[5px] overflow-hidden mr-[16px]'>
-          {data?.video_list?.length > 0 && (
-            <img
-              src={`${import.meta.env.VITE_BASE_API_URI}${
-                import.meta.env.VITE_VIEW_THUMB_API
-              }${data?.video_list[0]?.thumb}`}
-              className='size-full object-contain object-center'
-            />
-          )}
+        <div className='relative min-w-[120px] h-[68px] mr-[16px] z-[5]'>
+          <div className='size-full rounded-[5px] overflow-hidden'>
+            {data?.video_list?.length > 0 && (
+              <img
+                src={`${import.meta.env.VITE_BASE_API_URI}${
+                  import.meta.env.VITE_VIEW_THUMB_API
+                }${data?.video_list[0]?.thumb}`}
+                className='size-full object-contain object-center'
+              />
+            )}
+          </div>
           <div
-            className='absolute w-[52px] h-full right-0 top-0 bg-[#000000cc] 
-          flex flex-col items-center justify-center'
+            className='absolute w-[52px] h-full right-[-1px] bottom-0 bg-[#000000cc] 
+          flex flex-col items-center justify-center rounded-r-[5px]'
           >
             <span className='text-[12px] leading-[20px] font-[500] text-white'>
               {data?.size}
@@ -104,7 +107,20 @@ const PlaylistTbRow = ({
             </div>
           </div>
         </div>
-        <div >
+        <div className='absolute w-[120px]  h-[68px] rounded-[5px] overflow-hidden z-[1]'>
+          {data?.video_list?.length > 0 ? (
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.video_list[0]?.thumb}`}
+              className='size-full object-cover object-center'
+            />
+          ) : (
+            <div className='size-full  bg-[#ffffff85]'></div>
+          )}
+          <div className='absolute left-0 top-0 size-full bg-[rgba(0,0,0,.4)] z-[5] backdrop-blur '></div>
+        </div>
+        <div>
           <div className='text-[13px] leading-[20px] text-white font-[400]  line-clamp-1 text-ellipsis'>
             {data?.title}
           </div>
@@ -140,6 +156,7 @@ const PlaylistTbRow = ({
           </div>
         </div>
       </div>
+
       <div className='flex-[1_0_100px] min-w-[100px] px-[12px] py-[8px] '>
         <span className='text-[12px] leading-[20px] text-white'>
           {type[data?.type]}

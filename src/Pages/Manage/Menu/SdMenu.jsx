@@ -77,8 +77,8 @@ const SdMenu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
           </div>
         )}
       </AnimatePresence>
-      <div className='w-[74px] h-screen-h-minus-56  hidden md:block fixed left-0 bottom-0'>
-        <div className='mt-[4px] px-[4px] h-full flex flex-col'>
+      <div className='w-[72px] h-screen-h-minus-56  hidden md:block fixed left-0 bottom-0 bg-black'>
+        <div className='px-[4px] h-full flex flex-col'>
           <div className='h-[60px] flex items-center justify-center'>
             <Link to='/'>
               <img
@@ -90,7 +90,7 @@ const SdMenu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
               />
             </Link>
           </div>
-          <div className='flex-1 overflow-auto w-full flex flex-col gap-[6px]'>
+          <div className='flex-1 overflow-auto w-full flex flex-col'>
             {BtnList.map((btn, id) => (
               <SmallButton data={btn} currPath={currPath} key={id} />
             ))}

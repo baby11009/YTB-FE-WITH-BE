@@ -14,11 +14,11 @@ const Display = ({ path, pathParam }) => {
     comunity: <div>comunity</div>,
   };
 
-  useLayoutEffect(() => {
-    const height =
-      window.innerHeight - container.current.getBoundingClientRect().top;
-    container.current.style.height = `${height}px`;
-  }, []);
+  // useLayoutEffect(() => {
+  //   const height =
+  //     window.innerHeight - container.current.getBoundingClientRect().top;
+  //   container.current.style.height = `${height}px`;
+  // }, []);
 
   useLayoutEffect(() => {
     if (pathParam && path === "content") {
@@ -32,7 +32,7 @@ const Display = ({ path, pathParam }) => {
   }, [pathParam]);
 
   return (
-    <div ref={container}>
+    <div ref={container} className='px-[8px] md:px-0 h-[calc(100vh-182px)]'>
       {pageRender}
     </div>
   );

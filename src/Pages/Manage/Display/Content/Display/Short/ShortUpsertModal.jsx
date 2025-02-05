@@ -1,5 +1,9 @@
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
-import { CloseIcon, UploadImageIcon } from "../../../../../../Assets/Icons";
+import {
+  CloseIcon,
+  UploadImageIcon,
+  YoutubeBlankIcon,
+} from "../../../../../../Assets/Icons";
 import {
   InfiniteDropDownWithCheck,
   TextArea,
@@ -85,6 +89,10 @@ const ShortUpsertModal = ({ title, id }) => {
   }, []);
 
   const handleUploadThumb = useCallback((e) => {
+    setError({
+      inputName: [],
+      message: [],
+    });
     const file = e.files[0];
 
     if (!file) {
@@ -97,17 +105,18 @@ const ShortUpsertModal = ({ title, id }) => {
     if (!file.type.startsWith("image/")) {
       setError((prev) => ({
         inputName: [...prev?.inputName, "image"],
-        message: [...prev?.message, "Chỉ nhận file hình ảnh"],
+        message: [...prev?.message, "Only image files can be uploaded"],
       }));
       e.value = "";
       return;
     }
-    const maxSize = 2 * 1024 * 1024; //2MB
+    const maxMb = 10;
+    const maxSize = maxMb * 1024 * 1024; //10MB
 
     if (file.size > maxSize) {
       setError((prev) => ({
         inputName: [...prev?.inputName, "avatar"],
-        message: [...prev?.message, "Kích thước file lớn hơn 2MB"],
+        message: [...prev?.message, `Files size must less than ${maxMb}MB`],
       }));
       e.value = "";
       return;
@@ -152,6 +161,11 @@ const ShortUpsertModal = ({ title, id }) => {
   }, []);
 
   const handleUploadVideo = useCallback((e) => {
+    setError({
+      inputName: [],
+      message: [],
+    });
+
     const file = e.files[0];
 
     if (!file) {
@@ -190,9 +204,9 @@ const ShortUpsertModal = ({ title, id }) => {
 
       keys.forEach((key) => {
         if (formData[key] === "" || !formData[key]) {
-          let errMsg = "Không được để trống";
+          let errMsg = "Cannot be empty";
           if (key === "image" || key === "video") {
-            errMsg = "Chưa upload file";
+            errMsg = "File not uploaded";
           }
           setError((prev) => ({
             inputName: [...prev?.inputName, key],
@@ -224,7 +238,7 @@ const ShortUpsertModal = ({ title, id }) => {
       );
       keys.forEach((key) => {
         if (formData[key] === "" || !formData[key]) {
-          let errMsg = "Không được để trống";
+          let errMsg = "Cannot be empty";
           setError((prev) => ({
             inputName: [...prev?.inputName, key],
             message: [...prev?.message, errMsg],
@@ -442,38 +456,38 @@ const ShortUpsertModal = ({ title, id }) => {
   }, []);
 
   return (
-    <div className='size-full  max-w-[1500px] h-screen p-[12px] lg:p-[24px]'>
-      <div className='bg-black size-full overflow-auto rounded-[5px] shadow-[0_0_8px_#f1f1f1]'>
-        <div className='relative  px-[16px] pb-[16px] xl:pb-[20px] xl:px-[20px]'>
-          <div className='sticky top-[0] h-[68px] xl:h-[72px] flex items-center justify-between bg-black z-[2]'>
-            <h1 className='text-nowrap text-[25px] leading-[32px] font-[600]'>
+    <div className='w-[min(1700px,100vw)] sm:p-[12px] lg:p-[24px] h-screen'>
+      <div className='rounded-[12px] bg-black size-full shadow-[0_0_8px_#f1f1f1] pr-[4px] overflow-hidden'>
+        <div className=' size-full overflow-auto scrollbar-3 relative'>
+          <div className='sticky top-0 px-[16px] h-[68px] xl:h-[72px] flex items-center justify-between bg-black z-[2]'>
+            <h2 className='text-nowrap text-[25px] leading-[32px] font-[600]'>
               {title}
-            </h1>
+            </h2>
             <button
               className='size-[32px] rounded-[50%] flex items-center justify-center hover:bg-black-0.1 active:bg-black-0.2'
               onClick={() => {
                 setIsShowing(undefined);
               }}
             >
-              <div>
-                <CloseIcon size={16} />
+              <div className='w-[16px]'>
+                <CloseIcon />
               </div>
             </button>
           </div>
-          <form noValidate onSubmit={handleSubmit} className='mb-[20px]'>
-            <div className='flex gap-[24px] flex-col ite md:flex-row '>
-              <div
-                className='basis-[70%] md:basis-[55%]  2lg:basis-[60%] flex items-center justify-center
-               flex-wrap gap-[36px] 2md:gap-[24px]'
-              >
+          <form
+            noValidate
+            onSubmit={handleSubmit}
+            className='my-[20px] p-[0_8px_8px] sm:p-[0_16px_16px]'
+          >
+            <div className='flex flex-col md:flex-row'>
+              <div className='flex items-center flex-wrap'>
                 {/* thumbnail */}
-                <div className='h-[80vh] max-h-[720px] aspect-[9/16]'>
+                <div className='h-[80vh] max-h-[720px] aspect-[9/16] p-[0_0_16px] pl 2md:p-[0px_16px_0px_0px]'>
                   <label
                     htmlFor='thumbnail'
                     className={`inline-block size-full relative cursor-pointer
-                    ${
-                      !formData.image && !id && "border-dashed p-[12px]"
-                    } border-[2px] rounded-[10px] overflow-hidden`}
+                      shadow-[0_0_4px_2px_rgba(255,255,255,0.2)] sm:shadow-[0_0_8px_4px_rgba(255,255,255,0.2)] 
+                      rounded-[10px] overflow-hidden`}
                     onDragOver={(e) => {
                       e.preventDefault();
                     }}
@@ -493,14 +507,14 @@ const ShortUpsertModal = ({ title, id }) => {
                         ></div>
                       ) : (
                         <div className='w-full flex flex-col items-center justify-center font-[500] text-center'>
-                          <div>
+                          <div className='w-[54px] sm:w-[64px]'>
                             <UploadImageIcon />
                           </div>
-                          <h2 className='mt-[12px]'>
-                            Nhấn vào để tải thumbnail của video hoặc kéo thả
+                          <h2 className='mt-[12px] text-[12px] xsm:text-[16px]'>
+                            Drag and drop or click to upload short thumbnail
                           </h2>
-                          <p className='text-gray-A text-[12px] leading-[18px]'>
-                            Chỉ hỗ trợ : JPG, PNG,.. (Tối đa 2MB)
+                          <p className='text-gray-A text-[10px] xsm:text-[12px] leading-[18px]'>
+                            Suported : JPG, PNG,.. (Max 10MB)
                           </p>
                         </div>
                       )}
@@ -527,12 +541,12 @@ const ShortUpsertModal = ({ title, id }) => {
 
                 {/* Video */}
 
-                <div className='h-[80vh] max-h-[720px] aspect-[9/16]'>
+                <div className='h-[80vh] max-h-[720px] aspect-[9/16] p-[16px_0] pl 2md:p-[0px_0px_0px_16px] '>
                   <label
                     htmlFor='video'
                     className={`inline-block size-full relative 
-                    border-[2px] rounded-[10px] p-[12px]
-                     ${!formData.image && !id && "border-dashed p-[12px]"}
+                    rounded-[10px]
+                    shadow-[0_0_4px_2px_rgba(255,255,255,0.2)] sm:shadow-[0_0_8px_4px_rgba(255,255,255,0.2)]
                       ${!id ? "cursor-pointer " : " cursor-default"}
                 `}
                     onDragOver={(e) => {
@@ -556,14 +570,14 @@ const ShortUpsertModal = ({ title, id }) => {
                         ></video>
                       ) : (
                         <div className='w-full flex flex-col items-center justify-center font-[500] text-center'>
-                          <div>
-                            <UploadImageIcon />
+                          <div className='w-[54px] sm:w-[64px]'>
+                            <YoutubeBlankIcon />
                           </div>
-                          <h2 className='mt-[12px]'>
-                            Nhấn vào để tải video hoặc kéo thả
+                          <h2 className='mt-[12px] text-[12px] xsm:text-[16px]'>
+                            Drag and drop to upload short
                           </h2>
-                          <p className='text-gray-A text-[12px] leading-[18px]'>
-                            Chỉ hỗ trợ : MP4, WEBM,...
+                          <p className='text-gray-A text-[10px] xsm:text-[12px] leading-[18px]'>
+                            Suported : MP4, WEBM,...
                           </p>
                         </div>
                       )}

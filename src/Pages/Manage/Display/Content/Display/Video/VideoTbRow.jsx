@@ -42,8 +42,8 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
   return (
     <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
       <div
-        className={`sticky left-0 p-[12px_12px_8px_24px]
-       bg-black group-hover:bg-[#272727] `}
+        className={`sticky left-0 p-[12px_12px_8px_25px]
+       bg-black group-hover:bg-[#272727] z-[5]`}
       >
         <CheckBox2
           checked={checked}
@@ -57,8 +57,8 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
         className='sticky left-[57px] flex-[2_0_400px] min-w-[400px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
           border-r-[1px] border-gray-A'
       >
-        <div className='w-full flex'>
-          <div className='min-w-[120px] aspect-video bg-[rgba(0,0,0,0.5)] rounded-[5px]'>
+        <div className='w-full flex relative'>
+          <div className='min-w-[120px] aspect-video  rounded-[5px] overflow-hidden z-[2]'>
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_THUMB_API
@@ -66,6 +66,20 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
               alt='thumbnail'
               className='size-full object-contain object-center'
             />
+          </div>
+          <div
+            className='absolute left-0 w-[120px] aspect-video z-[1] rounded-[5px] overflow-hidden'
+          >
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.thumb}`}
+              alt='thumbnail'
+              className='size-full object-cover object-center z-[1]'
+            />
+            <div  className="absolute left-0 top-0 size-full bg-[rgba(0,0,0,.4)] z-[5] backdrop-blur ">
+
+            </div>
           </div>
           <div className='flex-1 ml-[16px] pr-[12px] overflow-hidden'>
             <div className='h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'>
