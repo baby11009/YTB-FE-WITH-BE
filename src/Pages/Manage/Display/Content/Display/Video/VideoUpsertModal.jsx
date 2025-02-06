@@ -494,12 +494,14 @@ const VideoUpsertModal = ({ title, id }) => {
               {/* thumbnail */}
               <div
                 className='basis-[100%] 2md:basis-[50%] 
-                max-w-full aspect-video max-h-[405px] p-[0_0_16px] pl 2md:p-[0px_16px_0px_0px]'
+               p-0 pl 2md:p-[0px_8px_0px_0px]'
               >
                 <label
                   htmlFor='thumbnail'
-                  className='inline-block size-full relative cursor-pointer 
-                    rounded-[10px] overflow-hidden shadow-[0_0_4px_2px_rgba(255,255,255,0.2)] sm:shadow-[0_0_8px_4px_rgba(255,255,255,0.2)]'
+                  className={`inline-block  aspect-video max-h-[405px]  size-full relative cursor-pointer 
+                    rounded-[10px] overflow-hidden  border-[1px] transition-[border] ease-in ${
+                      previewThumb ? "" : "border-[#6b6767] hover:border-white"
+                    }`}
                   onDragOver={(e) => {
                     e.preventDefault();
                   }}
@@ -542,7 +544,8 @@ const VideoUpsertModal = ({ title, id }) => {
                   />
                 </label>
 
-                <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
+                <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] px-[8px] 
+                line-clamp-1 text-ellipsis break-all'>
                   <span>
                     {error.inputName?.includes("image")
                       ? error.message[error.inputName?.indexOf("image")]
@@ -554,12 +557,14 @@ const VideoUpsertModal = ({ title, id }) => {
               {/* Video */}
               <div
                 className='basis-[100%] 2md:basis-[50%] 
-                max-w-full aspect-video max-h-[405px] p-[16px_0] pl 2md:p-[0px_0px_0px_16px] '
+                p-[8px_0_0] 2md:p-[0px_0px_0px_8px] '
               >
                 <label
                   htmlFor='video'
-                  className='inline-block size-full relative cursor-pointer 
-                    rounded-[10px] overflow-hidden shadow-[0_0_4px_2px_rgba(255,255,255,0.2)] sm:shadow-[0_0_8px_4px_rgba(255,255,255,0.2)]'
+                  className={`inline-block w-full aspect-video max-h-[405px]  relative cursor-pointer 
+                    rounded-[10px] overflow-hidden border-[1px] transition-[border] ease-in ${
+                      previewVideo ? "" : "border-[#6b6767] hover:border-white"
+                    }`}
                   onDragOver={(e) => {
                     e.preventDefault();
                   }}
@@ -606,7 +611,7 @@ const VideoUpsertModal = ({ title, id }) => {
                   />
                 </label>
 
-                <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
+                <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] px-[8px] line-clamp-1 text-ellipsis break-all'>
                   <span>
                     {error.inputName?.includes("video")
                       ? error.message[error.inputName?.indexOf("video")]
@@ -616,8 +621,8 @@ const VideoUpsertModal = ({ title, id }) => {
               </div>
             </div>
 
-            <div className='flex flex-wrap mt-[16px]'>
-              <div className='basis-[100%]  2md:basis-[50%]  p-[0_0_8px] pl 2md:p-[0px_8px_0px_0px] '>
+            <div className='flex flex-wrap mt-[8px]'>
+              <div className='basis-[100%]  2md:basis-[50%]  p-[0_0_8px] pl 2md:p-[0px_8px_0px_0px]'>
                 <TextArea
                   title={"Title"}
                   name={"title"}

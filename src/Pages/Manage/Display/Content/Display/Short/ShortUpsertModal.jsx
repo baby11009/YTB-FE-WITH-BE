@@ -52,6 +52,7 @@ const ShortUpsertModal = ({ title, id }) => {
   const [tagParams, setTagParams] = useState(initTagParams);
 
   const [formData, setFormData] = useState(init);
+  console.log(formData);
 
   const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -474,20 +475,24 @@ const ShortUpsertModal = ({ title, id }) => {
               </div>
             </button>
           </div>
+
           <form
             noValidate
             onSubmit={handleSubmit}
             className='my-[20px] p-[0_8px_8px] sm:p-[0_16px_16px]'
           >
-            <div className='flex flex-col md:flex-row'>
+            <div className='flex lg:gap-[16px] flex-wrap'>
               <div className='flex items-center flex-wrap'>
                 {/* thumbnail */}
-                <div className='h-[80vh] max-h-[720px] aspect-[9/16] p-[0_0_16px] pl 2md:p-[0px_16px_0px_0px]'>
+                <div className='h-[85vh] sm:h-[80vh] xl:h-[85vh] max-h-[720px] aspect-[9/16] mb-[32px] sm:mr-[16px]  '>
                   <label
                     htmlFor='thumbnail'
                     className={`inline-block size-full relative cursor-pointer
-                      shadow-[0_0_4px_2px_rgba(255,255,255,0.2)] sm:shadow-[0_0_8px_4px_rgba(255,255,255,0.2)] 
-                      rounded-[10px] overflow-hidden`}
+                       rounded-[10px] overflow-hidden border-[1px] transition-[border] ease-in ${
+                         previewThumb
+                           ? ""
+                           : "border-[#6b6767] hover:border-white"
+                       }`}
                     onDragOver={(e) => {
                       e.preventDefault();
                     }}
@@ -530,7 +535,10 @@ const ShortUpsertModal = ({ title, id }) => {
                     />
                   </label>
 
-                  <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
+                  <div
+                    className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] 
+                  px-[8px] line-clamp-1 text-ellipsis break-all'
+                  >
                     <span>
                       {error.inputName?.includes("image")
                         ? error.message[error.inputName?.indexOf("image")]
@@ -541,12 +549,14 @@ const ShortUpsertModal = ({ title, id }) => {
 
                 {/* Video */}
 
-                <div className='h-[80vh] max-h-[720px] aspect-[9/16] p-[16px_0] pl 2md:p-[0px_0px_0px_16px] '>
+                <div className='h-[85vh] sm:h-[80vh] xl:h-[85vh] max-h-[720px] aspect-[9/16] mb-[32px]'>
                   <label
                     htmlFor='video'
-                    className={`inline-block size-full relative 
-                    rounded-[10px]
-                    shadow-[0_0_4px_2px_rgba(255,255,255,0.2)] sm:shadow-[0_0_8px_4px_rgba(255,255,255,0.2)]
+                    className={`inline-block size-full  relative 
+                    rounded-[10px] overflow-hidden
+                    border-[1px] transition-[border] ease-in ${
+                      previewVideo ? "" : "border-[#6b6767] hover:border-white"
+                    }
                       ${!id ? "cursor-pointer " : " cursor-default"}
                 `}
                     onDragOver={(e) => {
@@ -594,7 +604,7 @@ const ShortUpsertModal = ({ title, id }) => {
                       className='hidden'
                     />
                   </label>
-                  <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
+                  <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] px-[8px] line-clamp-1 text-ellipsis break-all'>
                     <span>
                       {error.inputName?.includes("video")
                         ? error.message[error.inputName?.indexOf("video")]
@@ -604,8 +614,8 @@ const ShortUpsertModal = ({ title, id }) => {
                 </div>
               </div>
 
-              <div className='flex-1 flex flex-wrap gap-[16px] h-fit'>
-                <div className='basis-[100%]'>
+              <div className='flex-1 min-w-[300px] flex flex-wrap h-fit gap-[16px]'>
+                <div className='basis-[100%] md:basis-[48.5%] lg:basis-[100%] 2xl:basis-[48.5%]'>
                   <TextArea
                     title={"Title"}
                     name={"title"}
@@ -621,10 +631,11 @@ const ShortUpsertModal = ({ title, id }) => {
                   />
                 </div>
 
-                <div className='basis-[100%]'>
+                <div className='basis-[100%] md:basis-[48.5%] lg:basis-[100%] 2xl:basis-[48.5%]'>
                   <TextArea
                     title={"Description"}
                     name={"description"}
+                    cannotEmpty={false}
                     value={formData.description}
                     defaultValue={shortData?.data.description}
                     handleOnChange={handleOnChange}

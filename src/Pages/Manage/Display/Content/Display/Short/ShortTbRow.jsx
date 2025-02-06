@@ -83,9 +83,11 @@ const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
             <div className='h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'>
               {data.title}
             </div>
-            <div className='h-[16px] line-clamp-1 text-ellipsis break-all text-[12px] leading-[16px] text-gray-A group-hover:hidden'>
-              {data?.description}
-            </div>
+            <div
+              className='w-full h-[16px] overflow-hidden line-clamp-1 text-ellipsis break-all text-[12px] 
+            leading-[16px] text-gray-A group-hover:hidden'
+              dangerouslySetInnerHTML={{ __html: data?.description }}
+            ></div>
             <div className='hidden group-hover:flex'>
               <button
                 className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'

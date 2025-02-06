@@ -174,9 +174,10 @@ const Description = ({ data, refetch }) => {
             <span>{data?.view} views </span>
             <span>{time.current}</span>
           </div>
-          <div className=' break-words flex-1 overflow-hidden'>
-            {data?.description}
-          </div>
+          <div
+            className='break-words flex-1 overflow-hidden'
+            dangerouslySetInnerHTML={{ __html: data?.description }}
+          ></div>
           {descriptionRef?.current?.children[1]?.scrollHeight > 60 && (
             <div>
               <button
