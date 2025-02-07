@@ -152,7 +152,7 @@ const Details = ({ playlistData, refetch }) => {
       >
         <div className='overflow-auto pb-[8px] scrollbar-3'>
           <div className=' mt-[48px] w-[1000px] flex'>
-            <div className='w-[700px]'>
+            <div className='w-[700px] overflow-hidden'>
               <TextArea
                 maxLength={150}
                 title={"Title"}

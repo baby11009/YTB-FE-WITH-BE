@@ -121,9 +121,10 @@ const PlaylistTbRow = ({
           <div className='absolute left-0 top-0 size-full bg-[rgba(0,0,0,.4)] z-[5] backdrop-blur '></div>
         </div>
         <div>
-          <div className='text-[13px] leading-[20px] text-white font-[400]  line-clamp-1 text-ellipsis'>
-            {data?.title}
-          </div>
+          <div
+            className='text-[13px] leading-[20px] text-white font-[400]  line-clamp-1 text-ellipsis'
+            dangerouslySetInnerHTML={{ __html: data?.title }}
+          ></div>
           <div className='flex items-center mt-[8px] invisible group-hover:visible'>
             <button
               className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'

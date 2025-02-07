@@ -59,11 +59,13 @@ const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle, noDesc }) => {
       {!noDesc && (
         <div className='pt-[12px] flex justify-between'>
           <div>
-            <div className=' text-[16px] leading-[22px]'>
-              <h3 className='t-ellipsis '>{data.title}</h3>
-            </div>
+            <div
+              className=' text-[16px] leading-[22px] max-h-[44px] 
+            line-clamp-2 text-ellipsis whitespace-normal'
+              dangerouslySetInnerHTML={{ __html: data?.title }}
+            ></div>
             <div className='text-[14px] leading-[20px] text-gray-A'>
-              {formatNumber(data.view)} lượt xem
+              {formatNumber(data.view)} views
             </div>
           </div>
           <motion.div

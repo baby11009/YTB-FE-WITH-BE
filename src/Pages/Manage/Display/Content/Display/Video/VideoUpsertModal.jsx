@@ -544,8 +544,10 @@ const VideoUpsertModal = ({ title, id }) => {
                   />
                 </label>
 
-                <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] px-[8px] 
-                line-clamp-1 text-ellipsis break-all'>
+                <div
+                  className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] px-[8px] 
+                line-clamp-1 text-ellipsis break-all'
+                >
                   <span>
                     {error.inputName?.includes("image")
                       ? error.message[error.inputName?.indexOf("image")]
@@ -622,10 +624,11 @@ const VideoUpsertModal = ({ title, id }) => {
             </div>
 
             <div className='flex flex-wrap mt-[8px]'>
-              <div className='basis-[100%]  2md:basis-[50%]  p-[0_0_8px] pl 2md:p-[0px_8px_0px_0px]'>
+              <div className=' basis-[100%]  2md:basis-[50%]  p-[0_0_8px] pl 2md:p-[0px_8px_0px_0px] overflow-hidden'>
                 <TextArea
                   title={"Title"}
                   name={"title"}
+                  preventCharactersList={new Set(["Enter"])}
                   value={formData.title}
                   defaultValue={videoData?.data.title}
                   handleOnChange={handleOnChange}
@@ -638,7 +641,7 @@ const VideoUpsertModal = ({ title, id }) => {
                   placeholder={"Enter video title"}
                 />
               </div>
-              <div className='basis-[100%]  2md:basis-[50%]  p-[8px_0_0] pl 2md:p-[0px_0px_0px_8px] '>
+              <div className='basis-[100%]  2md:basis-[50%]  p-[8px_0_0] pl 2md:p-[0px_0px_0px_8px]  overflow-hidden'>
                 <TextArea
                   title={"Description"}
                   name={"description"}

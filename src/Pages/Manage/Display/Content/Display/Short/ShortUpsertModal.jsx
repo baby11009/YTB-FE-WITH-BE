@@ -615,7 +615,7 @@ const ShortUpsertModal = ({ title, id }) => {
               </div>
 
               <div className='flex-1 min-w-[300px] flex flex-wrap h-fit gap-[16px]'>
-                <div className='basis-[100%] md:basis-[48.5%] lg:basis-[100%] 2xl:basis-[48.5%]'>
+                <div className='basis-[100%] md:basis-[48.5%] lg:basis-[100%] 2xl:basis-[48.5%] overflow-hidden'>
                   <TextArea
                     title={"Title"}
                     name={"title"}
@@ -631,7 +631,7 @@ const ShortUpsertModal = ({ title, id }) => {
                   />
                 </div>
 
-                <div className='basis-[100%] md:basis-[48.5%] lg:basis-[100%] 2xl:basis-[48.5%]'>
+                <div className='basis-[100%] md:basis-[48.5%] lg:basis-[100%] 2xl:basis-[48.5%] overflow-hidden'>
                   <TextArea
                     title={"Description"}
                     name={"description"}

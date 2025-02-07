@@ -67,9 +67,7 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
               className='size-full object-contain object-center'
             />
           </div>
-          <div
-            className='absolute left-0 w-[120px] aspect-video z-[1] rounded-[5px] overflow-hidden'
-          >
+          <div className='absolute left-0 w-[120px] aspect-video z-[1] rounded-[5px] overflow-hidden'>
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_THUMB_API
@@ -77,17 +75,22 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
               alt='thumbnail'
               className='size-full object-cover object-center z-[1]'
             />
-            <div  className="absolute left-0 top-0 size-full bg-[rgba(0,0,0,.4)] z-[5] backdrop-blur ">
-
-            </div>
+            <div className='absolute left-0 top-0 size-full bg-[rgba(0,0,0,.4)] z-[5] backdrop-blur '></div>
           </div>
           <div className='flex-1 ml-[16px] pr-[12px] overflow-hidden'>
-            <div className='h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'>
-              {data.title}
+            <div className=' overflow-hidden'>
+              <div
+                className=' h-[24px] line-clamp-1 text-ellipsis break-words text-[13px] leading-[24px]'
+                dangerouslySetInnerHTML={{
+                  __html: data?.title,
+                }}
+              ></div>
             </div>
-            <div className='h-[16px] line-clamp-1 text-ellipsis break-all text-[12px] leading-[16px] text-gray-A group-hover:hidden'>
-              {data?.description}
-            </div>
+            <div
+              className='h-[16px] line-clamp-1 text-ellipsis break-all
+             text-[12px] leading-[16px] text-gray-A group-hover:hidden'
+              dangerouslySetInnerHTML={{ __html: data?.description }}
+            ></div>
             <div className='hidden group-hover:flex'>
               <button
                 className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'

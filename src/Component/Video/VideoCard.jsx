@@ -218,7 +218,7 @@ const VideoCard = ({
                 import.meta.env.VITE_VIEW_THUMB_API
               }${data?.thumb}`}
               alt=''
-              className='object-contain w-full h-full'
+              className='size-full object-contain'
             />
           </div>
 
@@ -250,9 +250,9 @@ const VideoCard = ({
         </div>
       </Link>
 
-      <div className={` flex-1 flex  ${ctContainerStyle}`}>
+      <div className={`flex relative  ${ctContainerStyle}`}>
         <div
-          className={`w-[36px] h-[36px] rounded-[50%] overflow-hidden cursor-pointer mr-[12px] ${imgStyle}`}
+          className={`shrink-0 w-[36px] h-[36px] rounded-[50%] overflow-hidden cursor-pointer mr-[12px] ${imgStyle}`}
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -267,98 +267,97 @@ const VideoCard = ({
           />
         </div>
 
-        <div className='flex-1 flex relative'>
-          <div className={`pr-[24px] flex-1`}>
-            <div className='flex'>
-              <h4
-                className={`t-ellipsis mb-[4px] flex-1 ${
-                  titleStyle ||
-                  "text-[16px] leading-[22px] max-h-[44px] font-[500]"
-                }`}
-              >
-                {data.title}
-              </h4>
-              {showCloseBtn && (
-                <div
-                  className='size-[40px] rounded-[50%] flex items-center justify-center
+        <div className='flex-1 pr-[24px] overflow-hidden'>
+          <div className='flex overflow-hidden'>
+            <div
+              className={`t-ellipsis  mb-[4px] flex-1  ${
+                titleStyle ||
+                "line-clamp-2 text-[16px] leading-[22px] max-h-[44px] font-[500] whitespace-normal"
+              }`}
+              dangerouslySetInnerHTML={{
+                __html: data?.title,
+              }}
+            ></div>
+            {showCloseBtn && (
+              <div
+                className='size-[40px] rounded-[50%] flex items-center justify-center
                  active:bg-black-0.2 cursor-pointer mt-[-6px] mr-[10px]'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    handleRemove(5);
-                  }}
-                >
-                  <CloseIcon />
-                </div>
-              )}
-
-              <button
-                className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center 
-                  absolute right-0  translate-y-[-15%] z-[500] active:bg-black-0.2 group-hover:opacity-[1] opacity-0'
                 onClick={(e) => {
-                  e.preventDefault();
                   e.stopPropagation();
-
-                  setShowHover((prev) => {
-                    if (prev) return undefined;
-                    handleCursorPositon(e);
-                    return (
-                      <CustomeFuncBox
-                        style={`w-[270px]`}
-                        setOpened={() => {
-                          setShowHover(undefined);
-                        }}
-                        funcList1={funcList1}
-                        funcList2={!noFunc2 && funcList2}
-                      />
-                    );
-                  });
+                  e.preventDefault();
+                  handleRemove(5);
                 }}
               >
-                <Setting2Icon />
-              </button>
-            </div>
-            <div
-              className={` text-gray-A ${
-                infoStyle ||
-                "text-[12px] leading-[18px] sm:text-[14px] sm:leading-[20px]"
-              }`}
-            >
-              <div className='flex items-center gap-[4px] mr-[8px]'>
-                <div
-                  title={data?.channel_info?.name}
-                  className='hover:text-white-F1'
-                >
-                  {data?.channel_info?.name}
-                </div>
-
-                <div>
-                  <Verification size={"14"} />
-                </div>
-              </div>
-
-              <div className='flex flex-wrap items-center'>
-                <span>{formatNumber(data?.view)} lượt xem</span>
-                <span
-                  className={`${
-                    layout === "horizon" && "hidden"
-                  } before:content-['•'] before:mx-[4px]`}
-                >
-                  {timeFormat2(data?.createdAt)}
-                </span>
-              </div>
-            </div>
-
-            {data.desc && (
-              <div
-                className={`t-ellipsis text-[12px] leading-[18px]
-                 text-gray-A pt-[8px] mb-[8px] ${descStyle}`}
-              >
-                {data.desc}
+                <CloseIcon />
               </div>
             )}
           </div>
+          <div
+            className={` text-gray-A ${
+              infoStyle ||
+              "text-[12px] leading-[18px] sm:text-[14px] sm:leading-[20px]"
+            }`}
+          >
+            <div className='flex items-center gap-[4px] mr-[8px]'>
+              <div
+                title={data?.channel_info?.name}
+                className='hover:text-white-F1'
+              >
+                {data?.channel_info?.name}
+              </div>
+
+              <div>
+                <Verification size={"14"} />
+              </div>
+            </div>
+
+            <div className='flex flex-wrap items-center'>
+              <span>{formatNumber(data?.view)} lượt xem</span>
+              <span
+                className={`${
+                  layout === "horizon" && "hidden"
+                } before:content-['•'] before:mx-[4px]`}
+              >
+                {timeFormat2(data?.createdAt)}
+              </span>
+            </div>
+          </div>
+
+          {data?.description && (
+            <div
+              className={`t-ellipsis text-[12px] leading-[18px]
+                 text-gray-A pt-[8px] mb-[8px] ${descStyle}`}
+              dangerouslySetInnerHTML={{
+                __html: data?.description,
+              }}
+            ></div>
+          )}
         </div>
+        <button
+          className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center 
+                  absolute top-0 right-[-16px] translate-y-[-15%] z-[500] active:bg-black-0.2 group-hover:opacity-[1] opacity-0'
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            setShowHover((prev) => {
+              if (prev) return undefined;
+              handleCursorPositon(e);
+              return (
+                <CustomeFuncBox
+                  style={`w-[270px]`}
+                  setOpened={() => {
+                    setShowHover(undefined);
+                  }}
+                  funcList1={funcList1}
+                  funcList2={!noFunc2 && funcList2}
+                />
+              );
+            });
+          }}
+        >
+          <Setting2Icon />
+        </button>
       </div>
     </div>
   );

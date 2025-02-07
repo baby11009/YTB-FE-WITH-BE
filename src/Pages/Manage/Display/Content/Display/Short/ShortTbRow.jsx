@@ -80,9 +80,10 @@ const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
             <div className='absolute left-0 top-0 size-full bg-[rgba(0,0,0,.4)] z-[5] backdrop-blur '></div>
           </div>
           <div className='flex-1 ml-[16px] pr-[12px] overflow-hidden'>
-            <div className='h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'>
-              {data.title}
-            </div>
+            <div
+              className='h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'
+              dangerouslySetInnerHTML={{ __html: data?.title }}
+            ></div>
             <div
               className='w-full h-[16px] overflow-hidden line-clamp-1 text-ellipsis break-all text-[12px] 
             leading-[16px] text-gray-A group-hover:hidden'
