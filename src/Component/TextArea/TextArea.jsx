@@ -15,6 +15,8 @@ const TextArea = ({
   value = "",
   defaultValue,
   handleOnChange,
+  handleSetRealTimeErr,
+  handleRemoveRealTimeErr,
   errMsg,
   placeholder,
   maxLength = 255,
@@ -111,6 +113,19 @@ const TextArea = ({
     }
   }, [value]);
 
+  useEffect(() => {
+    if (totalCharacters) {
+      if (totalCharacters > maxLength) {
+        handleSetRealTimeErr(
+          name,
+          `${title} cannot exceed ${maxLength} characters`,
+        );
+      } else {
+        handleRemoveRealTimeErr(name);
+      }
+    }
+  }, [totalCharacters]);
+
   return (
     // Remember to add the parrents element  overflow hidden
     // to make sure the content will collapse when it overflows or else the width of this textarea will be exceeded
@@ -132,6 +147,7 @@ const TextArea = ({
       <div
         contentEditable={true}
         ref={textAreaRef}
+        key={name}
         aria-label={placeholder}
         onInput={handleOnInput}
         onFocus={() => setIsFocused(true)}

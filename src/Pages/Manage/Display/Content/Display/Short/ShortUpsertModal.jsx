@@ -52,7 +52,6 @@ const ShortUpsertModal = ({ title, id }) => {
   const [tagParams, setTagParams] = useState(initTagParams);
 
   const [formData, setFormData] = useState(init);
-  console.log(formData);
 
   const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -62,7 +61,9 @@ const ShortUpsertModal = ({ title, id }) => {
 
   const [openedTags, setOpenedTags] = useState(false);
 
-  const [error, setError] = useState({
+  const [realTimeErrs, setRealTimeErrs] = useState({});
+
+  const [submitErrs, setSubmitErrs] = useState({
     inputName: [],
     message: [],
   });
@@ -90,23 +91,18 @@ const ShortUpsertModal = ({ title, id }) => {
   }, []);
 
   const handleUploadThumb = useCallback((e) => {
-    setError({
-      inputName: [],
-      message: [],
-    });
+    setSubmitErrs({});
+
     const file = e.files[0];
 
     if (!file) {
-      setError((prev) => ({
-        inputName: [...prev?.inputName, "image"],
-        message: [...prev?.message, "Không thể tải file"],
-      }));
+      setSubmitErrs((prev) => ({ ...prev, image: "Không thể tải file" }));
       return;
     }
     if (!file.type.startsWith("image/")) {
-      setError((prev) => ({
-        inputName: [...prev?.inputName, "image"],
-        message: [...prev?.message, "Only image files can be uploaded"],
+      setSubmitErrs((prev) => ({
+        ...prev,
+        image: "Only image files can be uploaded",
       }));
       e.value = "";
       return;
@@ -115,9 +111,9 @@ const ShortUpsertModal = ({ title, id }) => {
     const maxSize = maxMb * 1024 * 1024; //10MB
 
     if (file.size > maxSize) {
-      setError((prev) => ({
-        inputName: [...prev?.inputName, "avatar"],
-        message: [...prev?.message, `Files size must less than ${maxMb}MB`],
+      setSubmitErrs((prev) => ({
+        ...prev,
+        image: `Files size must less than ${maxMb}MB`,
       }));
       e.value = "";
       return;
@@ -130,23 +126,15 @@ const ShortUpsertModal = ({ title, id }) => {
       imageElement.src = imageUrl;
 
       imageElement.addEventListener("load", (e) => {
-        if (error)
-          setError({
-            inputName: [],
-            message: [],
-          });
         const { naturalWidth, naturalHeight } = e.currentTarget;
 
         if (
           naturalWidth < 404 ||
           Number((naturalWidth / naturalHeight).toFixed(4)) !== 9 / 16
         ) {
-          setError((prev) => ({
-            inputName: [...prev?.inputName, "image"],
-            message: [
-              ...prev?.message,
-              `Image must be at least 404 width and having 9:16 aspect ratio`,
-            ],
+          setSubmitErrs((prev) => ({
+            ...prev,
+            image: `Image must be at least 404 width and having 9:16 aspect ratio`,
           }));
           return;
         }
@@ -162,25 +150,16 @@ const ShortUpsertModal = ({ title, id }) => {
   }, []);
 
   const handleUploadVideo = useCallback((e) => {
-    setError({
-      inputName: [],
-      message: [],
-    });
+    setSubmitErrs({});
 
     const file = e.files[0];
 
     if (!file) {
-      setError((prev) => ({
-        inputName: [...prev?.inputName, "video"],
-        message: [...prev?.message, "Không thể tải file"],
-      }));
+      setSubmitErrs((prev) => ({ ...prev, video: "Failed to upload video" }));
       return;
     }
     if (!file.type.startsWith("video/")) {
-      setError((prev) => ({
-        inputName: [...prev?.inputName, "video"],
-        message: [...prev?.message, "Chỉ nhận file video"],
-      }));
+      setSubmitErrs((prev) => ({ ...prev, video: "Just accepted video file" }));
       e.value = "";
       return;
     }
@@ -192,10 +171,27 @@ const ShortUpsertModal = ({ title, id }) => {
     setPreviewVideo(URL.createObjectURL(file));
   }, []);
 
+  const handleSetRealTimeErr = useCallback((errName, errMessage) => {
+    setRealTimeErrs((prev) => ({ ...prev, [errName]: errMessage }));
+  }, []);
+
+  const handleRemoveRealTimeErr = useCallback(
+    (errName) => {
+      if (!Object.keys(realTimeErrs).includes(errName)) return;
+
+      setRealTimeErrs((prev) => {
+        const errs = structuredClone(prev);
+        delete errs[errName];
+        return errs;
+      });
+    },
+    [realTimeErrs],
+  );
+
   const handleValidate = useCallback(
     (formData) => {
-      if (error.inputName.length > 0) {
-        setError({ inputName: [], message: [] });
+      if (Object.keys(submitErrs).length > 0) {
+        setSubmitErrs({});
       }
       let hasErrors = false;
 
@@ -209,10 +205,7 @@ const ShortUpsertModal = ({ title, id }) => {
           if (key === "image" || key === "video") {
             errMsg = "File not uploaded";
           }
-          setError((prev) => ({
-            inputName: [...prev?.inputName, key],
-            message: [...prev?.message, errMsg],
-          }));
+          setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
           hasErrors = true;
         }
       });
@@ -221,13 +214,13 @@ const ShortUpsertModal = ({ title, id }) => {
         return true;
       }
     },
-    [error],
+    [submitErrs],
   );
 
   const handleValidateUpdate = useCallback(
     (formData) => {
-      if (error.inputName.length > 0) {
-        setError({ inputName: [], message: [] });
+      if (Object.keys(submitErrs).length > 0) {
+        setSubmitErrs({});
       }
       let hasErrors = false;
       const keys = Object.keys(formData).filter(
@@ -240,10 +233,7 @@ const ShortUpsertModal = ({ title, id }) => {
       keys.forEach((key) => {
         if (formData[key] === "" || !formData[key]) {
           let errMsg = "Cannot be empty";
-          setError((prev) => ({
-            inputName: [...prev?.inputName, key],
-            message: [...prev?.message, errMsg],
-          }));
+          setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
           hasErrors = true;
         }
       });
@@ -251,7 +241,7 @@ const ShortUpsertModal = ({ title, id }) => {
         return true;
       }
     },
-    [error],
+    [submitErrs],
   );
 
   const create = useCallback(
@@ -281,7 +271,7 @@ const ShortUpsertModal = ({ title, id }) => {
         addToaster,
       );
     },
-    [error],
+    [submitErrs],
   );
 
   const update = useCallback(
@@ -322,14 +312,14 @@ const ShortUpsertModal = ({ title, id }) => {
       }
 
       if (Object.keys(finalData).length === 0) {
-        alert("Không có gì thay đổi");
+        alert("Nothing changed");
         return;
       }
 
       let data = new FormData();
       for (const key in finalData) {
         if (key === "tag") {
-          // Chuyển mảng thành json để dữ nguyên giá trị trong FormData
+          // Convert to JSON to keep data type not changed to tring
           data.append(key, JSON.stringify(finalData[key]));
         } else {
           data.append(key, finalData[key]);
@@ -348,7 +338,7 @@ const ShortUpsertModal = ({ title, id }) => {
         addToaster,
       );
     },
-    [error],
+    [submitErrs],
   );
 
   const handleSubmit = useCallback(
@@ -433,19 +423,16 @@ const ShortUpsertModal = ({ title, id }) => {
 
   useEffect(() => {
     let timeOut;
-    if (error.inputName.length > 0) {
+    if (Object.keys(submitErrs).length > 0) {
       timeOut = setTimeout(() => {
-        setError({
-          inputName: [],
-          message: [],
-        });
+        setSubmitErrs({});
       }, 2500);
     }
 
     return () => {
       clearTimeout(timeOut);
     };
-  }, [error]);
+  }, [submitErrs]);
 
   useEffect(() => {
     return () => {
@@ -540,9 +527,7 @@ const ShortUpsertModal = ({ title, id }) => {
                   px-[8px] line-clamp-1 text-ellipsis break-all'
                   >
                     <span>
-                      {error.inputName?.includes("image")
-                        ? error.message[error.inputName?.indexOf("image")]
-                        : ""}
+                      {submitErrs["image"] ? submitErrs["image"] : ""}
                     </span>
                   </div>
                 </div>
@@ -606,9 +591,7 @@ const ShortUpsertModal = ({ title, id }) => {
                   </label>
                   <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] px-[8px] line-clamp-1 text-ellipsis break-all'>
                     <span>
-                      {error.inputName?.includes("video")
-                        ? error.message[error.inputName?.indexOf("video")]
-                        : ""}
+                      {submitErrs["video"] ? submitErrs["video"] : ""}
                     </span>
                   </div>
                 </div>
@@ -622,11 +605,9 @@ const ShortUpsertModal = ({ title, id }) => {
                     value={formData.title}
                     defaultValue={shortData?.data.title}
                     handleOnChange={handleOnChange}
-                    errMsg={
-                      error.inputName?.includes("title")
-                        ? error.message[error.inputName?.indexOf("title")]
-                        : ""
-                    }
+                    handleSetRealTimeErr={handleSetRealTimeErr}
+                    handleRemoveRealTimeErr={handleRemoveRealTimeErr}
+                    errMsg={submitErrs["title"] ? submitErrs["title"] : ""}
                     placeholder={"Enter short title"}
                   />
                 </div>
@@ -639,10 +620,10 @@ const ShortUpsertModal = ({ title, id }) => {
                     value={formData.description}
                     defaultValue={shortData?.data.description}
                     handleOnChange={handleOnChange}
+                    handleSetRealTimeErr={handleSetRealTimeErr}
+                    handleRemoveRealTimeErr={handleRemoveRealTimeErr}
                     errMsg={
-                      error.inputName?.includes("description")
-                        ? error.message[error.inputName?.indexOf("description")]
-                        : ""
+                      submitErrs["description"] ? submitErrs["description"] : ""
                     }
                     placeholder={"Enter short description"}
                   />
@@ -682,8 +663,8 @@ const ShortUpsertModal = ({ title, id }) => {
                   />
                   <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
                     <span>
-                      {error.inputName.includes("videoIdList")
-                        ? error.message[error.inputName.indexOf("videoIdList")]
+                      {submitErrs["videoIdList"]
+                        ? submitErrs["videoIdList"]
                         : ""}
                     </span>
                   </div>
@@ -694,7 +675,8 @@ const ShortUpsertModal = ({ title, id }) => {
             <div className='basis-[100%] order-7 flex justify-center mt-[50px]'>
               <button
                 type='submit'
-                className='w-full max-w-[160px] btn1 relative'
+                className={`w-full max-w-[160px] btn1 relative `}
+                disabled={Object.keys(realTimeErrs).length > 0 ? true : false}
               >
                 {submitLoading ? (
                   <div

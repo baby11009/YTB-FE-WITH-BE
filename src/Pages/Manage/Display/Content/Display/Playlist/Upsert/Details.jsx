@@ -21,10 +21,9 @@ const Details = ({ playlistData, refetch }) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const [error, setError] = useState({
-    inputName: [],
-    message: [],
-  });
+  const [realTimeErrs, setRealTimeErrs] = useState({});
+
+  const [submitErrs, setSubmitErrs] = useState({});
 
   const privacyRef = useRef([
     { id: "public", label: "Public" },
@@ -35,10 +34,27 @@ const Details = ({ playlistData, refetch }) => {
     setFormData((prev) => ({ ...prev, [`${name}`]: value }));
   }, []);
 
+  const handleSetRealTimeErr = useCallback((errName, errMessage) => {
+    setRealTimeErrs((prev) => ({ ...prev, [errName]: errMessage }));
+  }, []);
+
+  const handleRemoveRealTimeErr = useCallback(
+    (errName) => {
+      if (!Object.keys(realTimeErrs).includes(errName)) return;
+
+      setRealTimeErrs((prev) => {
+        const errs = structuredClone(prev);
+        delete errs[errName];
+        return errs;
+      });
+    },
+    [realTimeErrs],
+  );
+
   const handleValidateUpdate = useCallback(
     (formData) => {
-      if (error.inputName.length > 0) {
-        setError({ inputName: [], message: [] });
+      if (Object.keys(submitErrs).length > 0) {
+        setSubmitErrs({});
       }
 
       let hasErrors = false;
@@ -48,10 +64,7 @@ const Details = ({ playlistData, refetch }) => {
       keys.forEach((key) => {
         if (formData[key] === "" || !formData[key]) {
           let errMsg = "Cannot be empty";
-          setError((prev) => ({
-            inputName: [...prev?.inputName, key],
-            message: [...prev?.message, errMsg],
-          }));
+          setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
           hasErrors = true;
         }
       });
@@ -60,7 +73,7 @@ const Details = ({ playlistData, refetch }) => {
         return true;
       }
     },
-    [error],
+    [submitErrs],
   );
 
   const update = useCallback(
@@ -99,7 +112,7 @@ const Details = ({ playlistData, refetch }) => {
         addToaster,
       );
     },
-    [error],
+    [submitErrs],
   );
 
   const handleSubmit = useCallback(
@@ -111,7 +124,7 @@ const Details = ({ playlistData, refetch }) => {
 
       setIsLoading(false);
     },
-    [error, formData, playlistData],
+    [submitErrs, formData, playlistData],
   );
 
   useLayoutEffect(() => {
@@ -129,19 +142,16 @@ const Details = ({ playlistData, refetch }) => {
 
   useEffect(() => {
     let timeOut;
-    if (error.inputName.length > 0) {
+    if (Object.keys(submitErrs).length > 0) {
       timeOut = setTimeout(() => {
-        setError({
-          inputName: [],
-          message: [],
-        });
+        setSubmitErrs({});
       }, 2500);
     }
 
     return () => {
       clearTimeout(timeOut);
     };
-  }, [error]);
+  }, [submitErrs]);
 
   return (
     <div className='overflow-hidden'>
@@ -160,11 +170,9 @@ const Details = ({ playlistData, refetch }) => {
                 value={formData.title}
                 defaultValue={playlistData?.title}
                 handleOnChange={handleOnChange}
-                errMsg={
-                  error?.inputName?.includes("title")
-                    ? error.message[error.inputName?.indexOf("title")]
-                    : ""
-                }
+                handleSetRealTimeErr={handleSetRealTimeErr}
+                handleRemoveRealTimeErr={handleRemoveRealTimeErr}
+                errMsg={submitErrs["title"] ? submitErrs["title"] : ""}
                 placeholder={"Enter playlist title..."}
               />
             </div>
@@ -183,7 +191,11 @@ const Details = ({ playlistData, refetch }) => {
         </div>
 
         <div className='flex items-center justify-center pt-[40px] pb-[60px]'>
-          <button type='submit' className='w-full max-w-[160px] btn1 relative'>
+          <button
+            type='submit'
+            className='w-full max-w-[160px] btn1 relative'
+            disabled={Object.keys(realTimeErrs).length > 0 ? true : false}
+          >
             {isLoading ? (
               <div
                 className='size-[30px] rounded-[50%] border-[3px] border-l-transparent 

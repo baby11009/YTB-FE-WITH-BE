@@ -62,10 +62,9 @@ const VideoUpsertModal = ({ title, id }) => {
 
   const [previewVideo, setPreviewVideo] = useState("");
 
-  const [error, setError] = useState({
-    inputName: [],
-    message: [],
-  });
+  const [realTimeErrs, setRealTimeErrs] = useState({});
+
+  const [submitErrs, setSubmitErrs] = useState({});
 
   const {
     data: videoData,
@@ -90,34 +89,25 @@ const VideoUpsertModal = ({ title, id }) => {
   }, []);
 
   const handleUploadThumb = useCallback((e) => {
-    setError({
-      inputName: [],
-      message: [],
-    });
+    setSubmitErrs({});
 
     const file = e.files[0];
 
     if (!file) {
-      setError((prev) => ({
-        inputName: [...prev?.inputName, "image"],
-        message: [...prev?.message, "Failed to upload file"],
-      }));
+      setSubmitErrs((prev) => ({ ...prev, image: "Failed to upload file" }));
       return;
     }
     if (!file.type.startsWith("image/")) {
-      setError((prev) => ({
-        inputName: [...prev?.inputName, "image"],
-        message: [...prev?.message, "Just accepted image file"],
-      }));
+      setSubmitErrs((prev) => ({ ...prev, image: "Just accepted image file" }));
       e.value = "";
       return;
     }
     const maxSize = 2 * 1024 * 1024; //2MB
 
     if (file.size > maxSize) {
-      setError((prev) => ({
-        inputName: [...prev?.inputName, "avatar"],
-        message: [...prev?.message, "File size exceeds maximum"],
+      setSubmitErrs((prev) => ({
+        ...prev,
+        image: "File size exceeds maximum",
       }));
       e.value = "";
       return;
@@ -130,22 +120,16 @@ const VideoUpsertModal = ({ title, id }) => {
       imageElement.src = imageUrl;
 
       imageElement.addEventListener("load", (e) => {
-        if (error)
-          setError({
-            inputName: [],
-            message: [],
-          });
+        if (Object.keys(submitErrs).lenght > 1) setSubmitErrs({});
         const { naturalWidth, naturalHeight } = e.currentTarget;
         if (
           naturalWidth < 720 ||
           Number((naturalWidth / naturalHeight).toFixed(2)) !== 1.78
         ) {
-          setError((prev) => ({
-            inputName: [...prev?.inputName, "image"],
-            message: [
-              ...prev?.message,
-              `Image must be at least 720 width and having 16:9 aspect ratio`,
-            ],
+          setSubmitErrs((prev) => ({
+            ...prev,
+            thumb:
+              "Image must be at least 720 width and having 16:9 aspect ratio",
           }));
           return;
         }
@@ -161,24 +145,21 @@ const VideoUpsertModal = ({ title, id }) => {
   }, []);
 
   const handleUploadVideo = useCallback((e) => {
-    setError({
-      inputName: [],
-      message: [],
-    });
+    setSubmitErrs({});
 
     const file = e.files[0];
 
     if (!file) {
-      setError((prev) => ({
-        inputName: [...prev?.inputName, "video"],
-        message: [...prev?.message, "Failed to upload video"],
+      setSubmitErrs((prev) => ({
+        ...prev,
+        video: "Failed to upload video",
       }));
       return;
     }
     if (!file.type.startsWith("video/")) {
-      setError((prev) => ({
-        inputName: [...prev?.inputName, "video"],
-        message: [...prev?.message, "Just accepted video file"],
+      setSubmitErrs((prev) => ({
+        ...prev,
+        video: "Just accepted video file",
       }));
       e.value = "";
       return;
@@ -191,10 +172,27 @@ const VideoUpsertModal = ({ title, id }) => {
     setPreviewVideo(URL.createObjectURL(file));
   }, []);
 
+  const handleSetRealTimeErr = useCallback((errName, errMessage) => {
+    setRealTimeErrs((prev) => ({ ...prev, [errName]: errMessage }));
+  }, []);
+
+  const handleRemoveRealTimeErr = useCallback(
+    (errName) => {
+      if (!Object.keys(realTimeErrs).includes(errName)) return;
+
+      setRealTimeErrs((prev) => {
+        const errs = structuredClone(prev);
+        delete errs[errName];
+        return errs;
+      });
+    },
+    [realTimeErrs],
+  );
+
   const handleValidate = useCallback(
     (formData) => {
-      if (error.inputName.length > 0) {
-        setError({ inputName: [], message: [] });
+      if (Object.keys(submitErrs).length > 0) {
+        setSubmitErrs({});
       }
       let hasErrors = false;
 
@@ -208,10 +206,7 @@ const VideoUpsertModal = ({ title, id }) => {
           if (key === "image" || key === "video") {
             errMsg = "File not uploaded";
           }
-          setError((prev) => ({
-            inputName: [...prev?.inputName, key],
-            message: [...prev?.message, errMsg],
-          }));
+          setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
           hasErrors = true;
         }
       });
@@ -220,13 +215,13 @@ const VideoUpsertModal = ({ title, id }) => {
         return true;
       }
     },
-    [error],
+    [submitErrs],
   );
 
   const handleValidateUpdate = useCallback(
     (formData) => {
-      if (error.inputName.length > 0) {
-        setError({ inputName: [], message: [] });
+      if (Object.keys(submitErrs).length > 0) {
+        setSubmitErrs({});
       }
       let hasErrors = false;
 
@@ -241,21 +236,16 @@ const VideoUpsertModal = ({ title, id }) => {
       for (const key of keys) {
         if (formData[key] === "" || !formData[key]) {
           let errMsg = "Cannot be empty";
-          setError((prev) => ({
-            inputName: [...prev?.inputName, key],
-            message: [...prev?.message, errMsg],
-          }));
+          setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
           hasErrors = true;
         }
       }
 
       if (hasErrors) {
-        console.log(5);
-
         return true;
       }
     },
-    [error],
+    [submitErrs],
   );
 
   const create = useCallback(
@@ -285,7 +275,7 @@ const VideoUpsertModal = ({ title, id }) => {
         addToaster,
       );
     },
-    [error],
+    [submitErrs],
   );
 
   const update = useCallback(
@@ -353,7 +343,7 @@ const VideoUpsertModal = ({ title, id }) => {
         addToaster,
       );
     },
-    [error],
+    [submitErrs],
   );
 
   const handleSubmit = useCallback(
@@ -370,7 +360,7 @@ const VideoUpsertModal = ({ title, id }) => {
 
       setSubmitLoading(false);
     },
-    [formData, error, videoData],
+    [formData, submitErrs, videoData],
   );
 
   useLayoutEffect(() => {
@@ -443,19 +433,16 @@ const VideoUpsertModal = ({ title, id }) => {
 
   useEffect(() => {
     let timeOut;
-    if (error.inputName.length > 0) {
+    if (Object.keys(submitErrs).length > 0) {
       timeOut = setTimeout(() => {
-        setError({
-          inputName: [],
-          message: [],
-        });
+        setSubmitErrs({});
       }, 2500);
     }
 
     return () => {
       clearTimeout(timeOut);
     };
-  }, [error]);
+  }, [submitErrs]);
 
   useEffect(() => {
     return () => {
@@ -548,11 +535,7 @@ const VideoUpsertModal = ({ title, id }) => {
                   className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] px-[8px] 
                 line-clamp-1 text-ellipsis break-all'
                 >
-                  <span>
-                    {error.inputName?.includes("image")
-                      ? error.message[error.inputName?.indexOf("image")]
-                      : ""}
-                  </span>
+                  <span>{submitErrs["image"] ? submitErrs["image"] : ""}</span>
                 </div>
               </div>
 
@@ -614,11 +597,7 @@ const VideoUpsertModal = ({ title, id }) => {
                 </label>
 
                 <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] px-[8px] line-clamp-1 text-ellipsis break-all'>
-                  <span>
-                    {error.inputName?.includes("video")
-                      ? error.message[error.inputName?.indexOf("video")]
-                      : ""}
-                  </span>
+                  <span>{submitErrs["video"] ? submitErrs["video"] : ""}</span>
                 </div>
               </div>
             </div>
@@ -633,11 +612,9 @@ const VideoUpsertModal = ({ title, id }) => {
                   defaultValue={videoData?.data.title}
                   handleOnChange={handleOnChange}
                   maxLength={155}
-                  errMsg={
-                    error.inputName?.includes("title")
-                      ? error.message[error.inputName?.indexOf("title")]
-                      : ""
-                  }
+                  handleSetRealTimeErr={handleSetRealTimeErr}
+                  handleRemoveRealTimeErr={handleRemoveRealTimeErr}
+                  errMsg={submitErrs["title"] ? submitErrs["title"] : ""}
                   placeholder={"Enter video title"}
                 />
               </div>
@@ -648,11 +625,9 @@ const VideoUpsertModal = ({ title, id }) => {
                   value={formData.description}
                   defaultValue={videoData?.data.description}
                   handleOnChange={handleOnChange}
-                  errMsg={
-                    error.inputName?.includes("description")
-                      ? error.message[error.inputName?.indexOf("description")]
-                      : ""
-                  }
+                  handleSetRealTimeErr={handleSetRealTimeErr}
+                  handleRemoveRealTimeErr={handleRemoveRealTimeErr}
+                  errMsg={submitErrs["description"] ? description : ""}
                   placeholder={"Enter video description"}
                 />
               </div>
@@ -690,16 +665,18 @@ const VideoUpsertModal = ({ title, id }) => {
                 />
                 <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
                   <span>
-                    {error.inputName.includes("videoIdList")
-                      ? error.message[error.inputName.indexOf("videoIdList")]
-                      : ""}
+                    {submitErrs["videoIdList"] ? submitErrs["videoIdList"] : ""}
                   </span>
                 </div>
               </div>
             </div>
 
             <div className='basis-[100%]  flex items-center justify-center mt-[180px]'>
-              <button type='submit' className='w-full max-w-[160px] btn1'>
+              <button
+                type='submit'
+                className='w-full max-w-[160px] btn1'
+                disabled={Object.keys(realTimeErrs).length > 0 ? true : false}
+              >
                 {submitLoading ? (
                   <div
                     className='size-[30px] rounded-[50%] border-[3px] border-l-transparent 
