@@ -4,7 +4,7 @@ import {
   TrashBinIcon,
   LongArrowIcon,
 } from "../../../../../../Assets/Icons";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   CustomeFuncBox,
   CheckBox2,
@@ -28,34 +28,36 @@ const initParams = {
 const Comment = () => {
   const queryClient = useQueryClient();
 
-  const [sort, setSort] = useState(undefined);
+  const [searching, setSearching] = useState(undefined);
 
   const [opened, setOpened] = useState(false);
 
-  const [params, setParams] = useState(initParams);
+  const [queriese, setQueriese] = useState(initParams);
 
   const [checkedList, setCheckedList] = useState([]);
 
-  const { data, isLoading, refetch, isError, error } = getDataWithAuth(
+  const { data, refetch, isError, error } = getDataWithAuth(
     "/client/comment",
-    params,
+    queriese,
+    true,
+    false,
   );
 
   const [dataList, setDataList] = useState([]);
 
-  const { setIsShowing, openedMenu, addToaster } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
-  const handleCheckedAll = () => {
-    if (checkedList.length === data?.data?.length) {
+  const handleCheckedAll = useCallback(() => {
+    if (checkedList.length === dataList?.length) {
       setCheckedList([]);
     } else {
       const idList = data?.data?.map((item) => item?._id);
 
       setCheckedList(idList);
     }
-  };
+  }, [checkedList, dataList]);
 
-  const handleChecked = (id) => {
+  const handleChecked = useCallback((id) => {
     setCheckedList((prev) => {
       const index = prev.indexOf(id);
       if (index === -1) {
@@ -64,65 +66,53 @@ const Comment = () => {
         return [...prev.filter((data) => data !== id)];
       }
     });
-  };
+  }, []);
 
-  const handleOnClick = (data) => {
-    setSort((prev) => {
-      if (prev && prev.slug === data.slug) {
+  const handleOnClick = useCallback((data) => {
+    setSearching((prev) => {
+      if (prev && prev.id === data.id) {
         return undefined;
       }
 
       return data;
     });
-
-    if (data?.slug !== "text") {
-      setParams((prev) => {
-        const paramObj = { ...prev };
-
-        paramObj.sort = {
-          ...paramObj.sort,
-          [`${data.slug}`]: data.value,
-        };
-        paramObj.page = 1;
-        return paramObj;
-      });
-    }
-  };
+  }, []);
 
   const timeoutRef = useRef();
 
-  const handleOnSearch = (e) => {
+  const handleOnSearch = useCallback((e) => {
     clearTimeout(timeoutRef.current);
     setTimeout(() => {
-      setParams((prev) => ({ ...prev, text: e.target.value, page: 1 }));
+      setQueriese((prev) => ({ ...prev, text: e.target.value, page: 1 }));
     }, 600);
-  };
+  }, []);
 
-  const handleSortUnique = (key, value) => {
-    const sortTimeKeys = ["createdAt"];
-    const sortObj = { ...params.sort };
+  const handleSort = useCallback(
+    (key, value) => {
+      const addOnSortKeys = new Set(["createdAt"]);
 
-    const sortObjKeys = Object.keys(sortObj);
-    if (sortObjKeys.includes(key)) {
-      sortObj[key] = value;
-    } else if (sortTimeKeys.includes(key)) {
-      sortObj[key] = value;
-    }
-    setParams((prev) => ({ ...prev, sort: sortObj, page: 1 }));
-  };
+      const sortObj = structuredClone(queriese.sort);
 
+      const sortObjKeys = new Set(Object.keys(sortObj));
+      if (sortObjKeys.has(key)) {
+        sortObj[key] = value;
+      } else if (addOnSortKeys.has(key)) {
+        sortObj[key] = value;
+      }
+      setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
+    },
+    [queriese],
+  );
   const funcList = useRef([
     {
-      id: 1,
+      id: "title",
       text: "Text",
-      slug: "text",
-      value: 1,
+      type: "input:text",
       handleOnClick: handleOnClick,
     },
   ]);
 
-  const handleDeleteMany = async () => {
-    console.log(checkedList.join(", "));
+  const handleDeleteMany = useCallback(async () => {
     await dltManyData(
       "/client/comment/delete-many",
       checkedList,
@@ -134,13 +124,14 @@ const Comment = () => {
       undefined,
       addToaster,
     );
-  };
+  }, [checkedList]);
 
-  const showDltConfirm = () => {
+  const showDltConfirm = useCallback(() => {
     if (checkedList.length < 1) {
       alert("Please select at least one item");
       return;
     }
+
     setIsShowing(
       <DeleteConfirm
         handleDelete={handleDeleteMany}
@@ -148,7 +139,7 @@ const Comment = () => {
         data={checkedList.join(", ")}
       />,
     );
-  };
+  }, [checkedList]);
 
   useEffect(() => {
     return () => {
@@ -165,22 +156,17 @@ const Comment = () => {
 
   useEffect(() => {
     setCheckedList([]);
-  }, [params.page]);
+  }, [queriese.page]);
 
   if (isError) {
     console.log(error);
-
     return;
   }
 
   return (
-    <div className='min-h-[500px] relative'>
-      <div
-        className={`fixed z-[2000] w-full left-0 pl-[16px] px-[16px] md:px-[16px] ${
-          openedMenu ? "md:pl-[267px]" : "md:pl-[90px]"
-        }`}
-      >
-        <div className='flex gap-[24px] bg-black '>
+    <div className='overflow-auto h-full relative scrollbar-3'>
+      <div className='sticky left-0 top-[0] z-[2000] w-full'>
+        <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
             <button
               className=' p-[8px]'
@@ -194,39 +180,43 @@ const Comment = () => {
               <CustomeFuncBox
                 style={"left-[100%] top-[100%] w-[150px]"}
                 setOpened={setOpened}
-                currentId={sort?.id}
+                currentId={searching?.id}
                 funcList1={funcList.current}
               />
             )}
           </div>
-          <div className='w-full flex items-center'>
-            {sort?.text && (
+          <div className='flex-1 flex items-center'>
+            {searching && (
               <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
                 <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
-                  {sort.text}
+                  {searching.text}
                 </span>
                 <div
-                  className='px-[6px]'
+                  className='px-[6px] w-[24px]'
                   onClick={() => {
-                    setSort(undefined);
-                    setParams((prev) => ({ ...prev, text: "", page: 1 }));
+                    setSearching(undefined);
+                    setQueriese((prev) => ({
+                      ...prev,
+                      [searching.id]: "",
+                      page: 1,
+                    }));
                   }}
                 >
-                  <CloseIcon size={18} />
+                  <CloseIcon />
                 </div>
               </button>
             )}
-            {sort?.text === "Text" && (
+            {searching?.type === "input:text" && (
               <input
                 autoFocus
                 type='text'
-                placeholder='Tìm kiếm...'
+                placeholder='Searching...'
                 className='bg-transparent py-[4px] border-b-[2px] outline-none ml-[16px]'
                 onChange={handleOnSearch}
               />
             )}
           </div>
-          <div className=' self-end flex items-center justify-center gap-[8px]'>
+          <div>
             <button onClick={showDltConfirm}>
               <div className='p-[8px] hover:text-red-600'>
                 <TrashBinIcon />
@@ -235,74 +225,80 @@ const Comment = () => {
           </div>
         </div>
       </div>
-      <div className='overflow-auto pt-[40px]'>
-        {/* table */}
-        <div className='flex-1 min-w-full w-fit'>
-          {/* Head */}
-          <div className='text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px] border-y-[2px] '>
-            <div className='w-[70px] flex items-center gap-[12px] absolute left-0 bg-black border-r-[2px]'>
-              <CheckBox2
-                checked={
-                  checkedList.length === data?.data?.length &&
-                  data?.data?.length > 0
+      {/* table */}
+      <div className='min-w-full w-fit'>
+        {/* Head */}
+        <div
+          className='sticky top-[46px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
+           text-gray-A items-center border-y-[1px] border-gray-A flex'
+        >
+          <div className='sticky left-0 h-[48px] p-[0_12px_0_25px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
+            <CheckBox2
+              checked={
+                checkedList.length === data?.data.length &&
+                data?.data.length > 0
+              }
+              setChecked={handleCheckedAll}
+            />
+          </div>
+          <div
+            className='sticky left-[57px] pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
+              border-r-[1px] border-gray-A z-[10]'
+          >
+            Comment
+          </div>
+          <div className='flex-[2_0_400px] min-w-[400px] mx-[12px]'>Video</div>
+          <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>
+            <button
+              onClick={() => {
+                handleSort(
+                  "createdAt",
+                  queriese.sort["createdAt"] === -1 ? 1 : -1,
+                );
+              }}
+              className={`flex items-center  w-full ${
+                queriese.sort["createdAt"] ? "text-white-F1 font-bold" : ""
+              }`}
+            >
+              <span>Date </span>
+
+              <div
+                className={`${
+                  queriese.sort["createdAt"] === -1 ? "rotate-180" : ""
                 }
-                setChecked={handleCheckedAll}
-              />
-              <span>STT</span>
-            </div>
-            <div className='w-[300px] ml-[80px]'>Content</div>
-            <div className='w-[300px]'>Video thumbnail</div>
-            <div className='w-[200px]'>Video title</div>
-            <div className='w-[150px] mr-[100px]'>
-              <button
-                onClick={() => {
-                  handleSortUnique(
-                    "createdAt",
-                    params.sort["createdAt"] === -1 ? 1 : -1,
-                  );
-                }}
-                className={`flex items-center justify-center gap-[8px] ${
-                  params.sort["createdAt"] ? "text-white-F1 font-bold" : ""
-                }`}
+                ${
+                  queriese.sort["createdAt"] ? "visible" : "invisible"
+                } ml-[12px] w-[12px]`}
               >
-                <span>Created date </span>
-                {params.sort["createdAt"] && (
-                  <div
-                    className={`${
-                      params.sort["createdAt"] === -1 ? "rotate-180" : ""
-                    } text-[12px]`}
-                  >
-                    <LongArrowIcon size={14} />
-                  </div>
-                )}
-              </button>
-            </div>
-            <div className='w-[100px] absolute right-0 border-l-[2px] px-[12px] bg-black'>
-              Function
-            </div>
+                <LongArrowIcon />
+              </div>
+            </button>
           </div>
-          {/* Body */}
-          <div className='flex flex-col'>
-            {isLoading ? (
-              <div>Loading....</div>
-            ) : (
-              dataList.map((item, id) => (
-                <CmtTbRow
-                  key={id}
-                  handleChecked={handleChecked}
-                  checked={checkedList.includes(item?._id)}
-                  data={item}
-                  od={id + params?.limit * (params?.page - 1) + 1}
-                  refetch={refetch}
-                />
-              ))
-            )}
+          <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] text-right'>
+            Like
           </div>
+          <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] text-right'>
+            Dislike
+          </div>
+        </div>
+        {/* Body */}
+        <div className='flex flex-col z-[2]'>
+          {dataList.length > 0 &&
+            dataList.map((item, id) => (
+              <CmtTbRow
+                key={id}
+                handleChecked={handleChecked}
+                checked={checkedList.includes(item?._id)}
+                data={item}
+                od={id + queriese?.limit * (queriese?.page - 1) + 1}
+                refetch={refetch}
+              />
+            ))}
         </div>
       </div>
       <Pagination
-        setParams={setParams}
-        currPage={params?.page}
+        setParams={setQueriese}
+        currPage={queriese?.page}
         totalPage={data?.totalPages}
       />
     </div>

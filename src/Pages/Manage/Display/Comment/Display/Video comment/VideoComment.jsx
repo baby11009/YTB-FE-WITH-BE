@@ -40,6 +40,8 @@ const VideoComment = () => {
   const { data, refetch, isLoading } = getDataWithAuth(
     "/client/comment/video-comments",
     params,
+    true,
+    false,
   );
 
   const [dataList, setDataList] = useState([]);
@@ -280,9 +282,7 @@ const VideoComment = () => {
           </div>
           {/* Body */}
           <div className='flex flex-col'>
-            {isLoading ? (
-              <div>Loading....</div>
-            ) : (
+            {dataList.length > 0 &&
               dataList.map((item, id) => (
                 <VideoCmtTbRow
                   key={id}
@@ -292,8 +292,7 @@ const VideoComment = () => {
                   od={id + params?.limit * (params?.page - 1) + 1}
                   refetch={refetch}
                 />
-              ))
-            )}
+              ))}
           </div>
         </div>
       </div>

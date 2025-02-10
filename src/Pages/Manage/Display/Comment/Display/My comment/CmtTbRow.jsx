@@ -1,9 +1,14 @@
 import { CheckBox2, DeleteConfirm } from "../../../../../../Component";
-import { TrashBinIcon, EditIcon } from "../../../../../../Assets/Icons";
+import {
+  TrashBinIcon,
+  EditIcon,
+  Share2Icon,
+  YoutubeBlankIcon,
+} from "../../../../../../Assets/Icons";
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData, updateData } from "../../../../../../Api/controller";
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState, useCallback } from "react";
 
 const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
   const { setIsShowing, addToaster } = useAuthContext();
@@ -12,7 +17,7 @@ const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
 
   const [value, setValue] = useState("");
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     await dltData(
       "/client/comment",
       data?._id,
@@ -23,13 +28,9 @@ const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
       undefined,
       addToaster,
     );
-  };
-  useLayoutEffect(() => {
-    if (data) {
-      setValue(data.cmtText);
-    }
   }, [data]);
-  const showDeleteConfirm = () => {
+
+  const showDeleteConfirm = useCallback(() => {
     setIsShowing(
       <DeleteConfirm
         handleDelete={handleDelete}
@@ -37,120 +38,146 @@ const CmtTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         data={data?._id}
       />,
     );
-  };
+  }, [data]);
 
-  const handleUpdateCmtText = async () => {
-    if (value === "") {
-      setValue(data?.cmtText);
-      alert("Comment text cannot be empty");
-      return;
+  useLayoutEffect(() => {
+    if (data) {
+      setValue(data.cmtText);
     }
-    await updateData(
-      "/client/comment",
-      data?._id,
-      {
-        cmtText: value,
-      },
-      "comment",
-      () => {
-        refetch();
-        setEditText(false);
-      },
-      undefined,
-      addToaster,
-    );
-  };
+  }, [data]);
+
+  const handleCopyVideoLink = useCallback((videoId, type) => {
+    let url;
+    switch (type) {
+      case "video":
+        url = `http://localhost:5173/video?id=${videoId}`;
+        break;
+      case "short":
+        url = `http://localhost:5173/short/${videoId}`;
+        break;
+    }
+    console.log(url);
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        addToaster("Link copied to clipboard.");
+      })
+      .catch(() => {
+        addToaster("Failed to copy link");
+      });
+  }, []);
 
   return (
-    <div className='text-[12px] font-[500] leading-[48px] text-gray-A flex items-center gap-[12px] py-[12px] h-[200px]'>
-      <div className='w-[70px] flex items-center gap-[12px] absolute left-0 bg-black h-[200px] border-r-[2px] '>
+    <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
+      <div
+        className='sticky left-0 p-[12px_12px_8px_25px]
+       bg-black group-hover:bg-[#272727] z-[5]'
+      >
         <CheckBox2
           checked={checked}
           setChecked={() => {
             handleChecked(data?._id);
           }}
         />
-        <span>{od}</span>
       </div>
-      <div className='w-[300px] ml-[80px]'>
-        {editText ? (
-          <div className='h-[200px] flex flex-col gap-[8px] py-[16px]'>
-            <textarea
-              className='flex-1 bg-transparent outline-none border-[2px] border-gray-A focus:border-white-F1
-             rounded-[5px] w-full text-[16px] leading-[18px] p-[4px]'
-              value={value}
-              onChange={(e) => {
-                setValue(e.target.value);
+      <div
+        className='sticky left-[57px] flex-[2_0_400px] min-w-[400px] p-[8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
+          border-r-[1px] border-gray-A'
+      >
+        <div className='w-full overflow-hidden relative flex flex-col'>
+          <div className='overflow-hidden flex-1'>
+            <div
+              className=' max-h-[68px] overflow-hidden text-ellipsis break-all text-[13px] leading-[24px]'
+              dangerouslySetInnerHTML={{
+                __html: data?.cmtText,
               }}
-            ></textarea>
-            <div className='flex items-center justify-end gap-[12px]'>
+            ></div>
+          </div>
+
+          <div className='hidden group-hover:flex'>
+            <button
+              className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
+              onClick={showDeleteConfirm}
+            >
+              <div className='text-white size-[24px]'>
+                <TrashBinIcon />
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className='flex-[2_0_400px] min-w-[400px] mx-[12px] my-[8px]'>
+        <div className='w-full flex relative'>
+          <div className='w-[120px] aspect-video rounded-[5px] overflow-hidden z-[2]'>
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.video_info?.thumb}`}
+              alt='thumbnail'
+              className='size-full object-contain object-center'
+            />
+          </div>
+          <div className='absolute left-0 w-[120px] aspect-video z-[1] rounded-[5px] overflow-hidden'>
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.video_info?.thumb}`}
+              alt='thumbnail'
+              className='size-full object-cover object-center z-[1]'
+            />
+            <div className='absolute left-0 top-0 size-full bg-[rgba(0,0,0,.4)] z-[5] backdrop-blur '></div>
+          </div>
+          <div className='flex-1 ml-[16px] pr-[12px] overflow-hidden'>
+            <div className=' overflow-hidden'>
+              <div
+                className=' h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'
+                dangerouslySetInnerHTML={{
+                  __html: data?.video_info?.title,
+                }}
+              ></div>
+            </div>
+            <div
+              className='h-[16px] line-clamp-1 text-ellipsis break-all
+             text-[12px] leading-[16px] text-gray-A group-hover:hidden'
+              dangerouslySetInnerHTML={{
+                __html: data?.video_info?.description,
+              }}
+            ></div>
+            <div className='hidden group-hover:flex'>
               <button
-                className='text-[12px] font-[500] leading-[18px] text-white-F1 bg-blue-500 hover:bg-blue-600 rounded-[5px] py-[4px] px-[12px] focus:outline-none'
+                className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
                 onClick={() => {
-                  handleUpdateCmtText();
+                  handleCopyVideoLink(
+                    data?.video_info?._id,
+                    data?.video_info?.type,
+                  );
                 }}
               >
-                Save
+                <div className='text-white size-[24px]'>
+                  <Share2Icon />
+                </div>
               </button>
-              <button
-                className='text-[12px] font-[500] leading-[18px] text-white-F1
-                 bg-gray-500 hover:bg-gray-600 rounded-[5px] py-[4px] px-[12px] focus:outline-none'
-                onClick={() => {
-                  setEditText(false);
-                }}
+              <a
+                className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
+                href={`http://localhost:5173/video?id=${data?.video_info?._id}`}
+                target='_blank'
               >
-                Cancel
-              </button>
+                <div className='text-white size-[24px]'>
+                  <YoutubeBlankIcon />
+                </div>
+              </a>
             </div>
           </div>
-        ) : (
-          <p className='leading-[18px] line-clamp-[9] '>{data?.cmtText}</p>
-        )}
-      </div>
-      <div className='w-[300px] rounded-[5px] bg-amber-300'>
-        <img
-          src={`${import.meta.env.VITE_BASE_API_URI}${
-            import.meta.env.VITE_VIEW_THUMB_API
-          }${data?.video_info?.thumb}`}
-          alt=''
-          className='w-full max-h-[200px] h-auto object-contain object-center rounded-[5px] aspect-[16/9]'
-        />
-      </div>
-      <div className='w-[200px] h-[200px] relative group flex items-center '>
-        <div
-          className='absolute top-[16px] left-0 group-hover:block hidden bg-black text-white-F1 rounded-[5px]
-          py-[4px] px-[8px] shadow-[0_0_8px_rgba(255,255,255,0.6)] text-[16px] leading-[18px] z-[1]'
-          style={{
-            userSelect: "none",
-          }}
-        >
-          <p className='line-clamp-[9]'>{data?.video_info?.title}</p>
-        </div>
-        <div className='text-nowrap overflow-hidden text-ellipsis relative '>
-          {data?.video_info?.title}
         </div>
       </div>
-      <div className='w-[150px] mr-[100px]'>{timeFormat3(data?.createdAt)}</div>
-
-      <div className='w-[100px] absolute right-0 bg-black h-[200px] flex items-center border-l-[2px] px-[12px]'>
-        <button
-          className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-          onClick={() => {
-            setEditText((prev) => !prev);
-          }}
-        >
-          <div className='text-blue-500'>
-            <EditIcon />
-          </div>
-        </button>
-        <button
-          className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-          onClick={showDeleteConfirm}
-        >
-          <div className='text-red-500'>
-            <TrashBinIcon />
-          </div>
-        </button>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-[13px] leading-[24px]'>
+        <span>{timeFormat3(data?.createdAt)}</span>
+      </div>
+      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px] text-[13px] leading-[24px] text-right'>
+        <span>{data?.like}</span>
+      </div>
+      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px] text-[13px] leading-[24px] text-right'>
+        <span>{data?.dislike}</span>
       </div>
     </div>
   );

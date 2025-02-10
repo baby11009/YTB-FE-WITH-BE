@@ -22,7 +22,6 @@ import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { getData } from "../../../../../../Api/getData";
 import { dltManyData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
-import { scrollToTop } from "../../../../../../util/scrollCustom";
 
 const initParams = {
   title: "",
@@ -37,19 +36,19 @@ const initParams = {
 const Playlist = () => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, openedMenu, addToaster } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
-  const [search, setSearch] = useState(undefined);
+  const [searching, setSearching] = useState(undefined);
 
   const [opened, setOpened] = useState(false);
 
-  const [params, setParams] = useState(initParams);
-
+  const [queriese, setQueriese] = useState(initParams);
+ 
   const [checkedList, setCheckedList] = useState([]);
 
   const [horizonScrollVisible, setHorizonScrollVisible] = useState();
 
-  const { data, refetch } = getData("/client/playlist", params);
+  const { data, refetch } = getData("/client/playlist", queriese);
 
   const [dataList, setDataList] = useState([]);
 
@@ -76,9 +75,9 @@ const Playlist = () => {
     });
   }, []);
 
-  const handleSearch = useCallback((data) => {
-    setSearch((prev) => {
-      if (prev && prev.slug === data.slug) {
+  const handleOnClick = useCallback((data) => {
+    setSearching((prev) => {
+      if (prev && prev.id === data.id) {
         return undefined;
       }
 
@@ -91,7 +90,7 @@ const Playlist = () => {
   const handleOnSearch = useCallback((searchType, value) => {
     clearTimeout(timeoutRef.current);
     setTimeout(() => {
-      setParams((prev) => ({
+      setQueriese((prev) => ({
         ...prev,
         [`${searchType}`]: value,
         page: 1,
@@ -102,7 +101,7 @@ const Playlist = () => {
   const handleSortUnique = useCallback(
     (key, value) => {
       const uniqueSortKeys = ["size"];
-      const sortObj = { ...params.sort };
+      const sortObj = { ...queriese.sort };
 
       const sortObjKeys = Object.keys(sortObj);
       if (sortObjKeys.includes(key)) {
@@ -115,21 +114,21 @@ const Playlist = () => {
         });
         sortObj[key] = value;
       }
-      setParams((prev) => ({ ...prev, sort: sortObj, page: 1 }));
+      setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
     },
-    [params],
+    [queriese],
   );
 
   const funcList = useRef([
     {
       id: "title",
-      text: "Title",
-      handleOnClick: handleSearch,
+      text: "Text",
+      type: "input:text",
+      handleOnClick: handleOnClick,
     },
   ]);
 
-  const handleDeleteMany = async () => {
-    console.log(checkedList.join(", "));
+  const handleDeleteMany = useCallback(async () => {
     await dltManyData(
       "/client/playlist/delete-many",
       checkedList,
@@ -141,7 +140,7 @@ const Playlist = () => {
       undefined,
       addToaster,
     );
-  };
+  }, [checkedList]);
 
   const showDltConfirm = useCallback(() => {
     if (checkedList.length < 1) {
@@ -181,7 +180,6 @@ const Playlist = () => {
   useEffect(() => {
     if (data) {
       setDataList([...data?.data]);
-      scrollToTop();
     }
   }, [data]);
 
@@ -202,36 +200,40 @@ const Playlist = () => {
               <CustomeFuncBox
                 style={"left-[100%] top-[100%] w-[150px]"}
                 setOpened={setOpened}
-                currentId={search?.id}
+                currentId={searching?.id}
                 funcList1={funcList.current}
               />
             )}
           </div>
           <div className='flex-1 flex items-center'>
-            {search && (
+            {searching && (
               <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
                 <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
-                  {search.text}
+                  {searching.text}
                 </span>
                 <div
-                  className='px-[6px]'
+                  className='px-[6px] w-[24px]'
                   onClick={() => {
-                    setSearch(undefined);
-                    setParams((prev) => ({ ...prev, title: "", page: 1 }));
+                    setSearching(undefined);
+                    setQueriese((prev) => ({
+                      ...prev,
+                      [searching.id]: "",
+                      page: 1,
+                    }));
                   }}
                 >
-                  <CloseIcon size={18} />
+                  <CloseIcon />
                 </div>
               </button>
             )}
-            {search && (
+            {searching?.type === "input:text" && (
               <input
                 autoFocus
                 type='text'
                 placeholder='Searching...'
                 className='bg-transparent py-[4px] border-b-[2px] outline-none ml-[16px]'
                 onChange={(e) => {
-                  handleOnSearch(search.id, e.target.value);
+                  handleOnSearch(searching.id, e.target.value);
                 }}
               />
             )}
@@ -278,18 +280,18 @@ const Playlist = () => {
               onClick={() => {
                 handleSortUnique(
                   "createdAt",
-                  params.sort["createdAt"] === -1 ? 1 : -1,
+                  queriese.sort["createdAt"] === -1 ? 1 : -1,
                 );
               }}
               className={`flex items-center justify-center gap-[8px] ${
-                params.sort["createdAt"] ? "text-white-F1 font-bold" : ""
+                queriese.sort["createdAt"] ? "text-white-F1 font-bold" : ""
               }`}
             >
               <span>Date </span>
-              {params.sort["createdAt"] && (
+              {queriese.sort["createdAt"] && (
                 <div
                   className={`${
-                    params.sort["createdAt"] === -1 ? "rotate-180" : ""
+                    queriese.sort["createdAt"] === -1 ? "rotate-180" : ""
                   } text-[12px]`}
                 >
                   <LongArrowIcon size={14} />
@@ -300,17 +302,17 @@ const Playlist = () => {
           <div className='flex-[1_0_130px] min-w-[130px] px-[12px]'>
             <button
               onClick={() => {
-                handleSortUnique("size", params.sort["size"] === -1 ? 1 : -1);
+                handleSortUnique("size", queriese.sort["size"] === -1 ? 1 : -1);
               }}
               className={`flex items-center justify-end gap-[8px] w-full ${
-                params.sort["size"] ? "text-white-F1 font-bold" : ""
+                queriese.sort["size"] ? "text-white-F1 font-bold" : ""
               }`}
             >
               <span>Video count</span>
-              {params.sort["size"] && (
+              {queriese.sort["size"] && (
                 <div
                   className={`${
-                    params.sort["size"] === -1 ? "rotate-180" : ""
+                    queriese.sort["size"] === -1 ? "rotate-180" : ""
                   } text-[12px]`}
                 >
                   <LongArrowIcon size={14} />
@@ -328,7 +330,6 @@ const Playlist = () => {
                 handleChecked={handleChecked}
                 checked={checkedList?.includes(item?._id)}
                 data={item}
-                od={id + params?.limit * (params?.page - 1) + 1}
                 refetch={refetch}
                 horizonScrollVisible={horizonScrollVisible}
               />
@@ -337,8 +338,8 @@ const Playlist = () => {
 
         <div className='mb-[86px] px-[24px]'>
           <Pagination
-            setParams={setParams}
-            currPage={params?.page}
+            setQueriese={setQueriese}
+            currPage={queriese?.page}
             totalPage={data?.totalPages}
           />
         </div>

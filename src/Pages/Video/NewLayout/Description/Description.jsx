@@ -199,7 +199,7 @@ const Description = ({ data, refetch }) => {
           )}
         </div>
       </div>
-      {data?.tag_info.length > 0 && (
+      {data?.tag_info?.length > 0 && (
         <div className='mt-[8px] flex flex-wrap sm:flex-nowrap'>
           {data?.tag_info.slice(0, 2).map((tag) => (
             <button

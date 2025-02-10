@@ -1,11 +1,9 @@
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 import Video from "./Video/Video";
 import Short from "./Short/Short";
 import Playlist from "./Playlist/Playlist";
 const Display = ({ path, pathParam }) => {
   const [pageRender, setPageRender] = useState(undefined);
-
-  const container = useRef();
 
   const pageList = {
     video: <Video />,
@@ -13,12 +11,6 @@ const Display = ({ path, pathParam }) => {
     playlists: <Playlist />,
     comunity: <div>comunity</div>,
   };
-
-  // useLayoutEffect(() => {
-  //   const height =
-  //     window.innerHeight - container.current.getBoundingClientRect().top;
-  //   container.current.style.height = `${height}px`;
-  // }, []);
 
   useLayoutEffect(() => {
     if (pathParam && path === "content") {
@@ -32,9 +24,7 @@ const Display = ({ path, pathParam }) => {
   }, [pathParam]);
 
   return (
-    <div ref={container} className='px-[8px] md:px-0 h-[calc(100vh-182px)]'>
-      {pageRender}
-    </div>
+    <div className='px-[8px] md:px-0 h-[calc(100vh-182px)]'>{pageRender}</div>
   );
 };
 export default Display;

@@ -4,7 +4,7 @@ import Menu from "./Menu/Menu";
 import SdMenu from "./Menu/SdMenu";
 import { useLocation, useParams } from "react-router-dom";
 import { scrollToTop } from "../../util/scrollCustom";
-import { useState, useEffect, useLayoutEffect, Suspense } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { useAuthContext } from "../../Auth Provider/authContext";
 import { Dashboard, Content, Comment, ChannelSetting } from "./Display";
 const ManagePage = () => {
@@ -68,17 +68,7 @@ const ManagePage = () => {
             className={`w-full  h-screen overflow-hidden
             pt-[56px] relative`}
           >
-            <Suspense
-              fallback={
-                <div className='w-full h-screen flex items-center justify-center'>
-                  <h2 className='text-[30px] leading-[32px] font-[500]'>
-                    Loading.....
-                  </h2>
-                </div>
-              }
-            >
-              {pageRender}
-            </Suspense>
+            {pageRender}
           </div>
         </div>
       </>

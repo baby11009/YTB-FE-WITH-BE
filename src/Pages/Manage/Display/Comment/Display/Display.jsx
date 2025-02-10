@@ -6,7 +6,7 @@ const Display = ({ path, pathParam }) => {
   const [pageRender, setPageRender] = useState(undefined);
 
   const pageList = {
-    "video-comment": <VideoComment/>,
+    "video-comment": <VideoComment />,
     "my-comment": <Comment />,
   };
 
@@ -21,6 +21,8 @@ const Display = ({ path, pathParam }) => {
     }
   }, [pathParam]);
 
-  return <div className='mt-[128px]'>{pageRender}</div>;
+  return (
+    <div className='px-[8px] md:px-0 h-[calc(100vh-182px)]'>{pageRender}</div>
+  );
 };
 export default Display;

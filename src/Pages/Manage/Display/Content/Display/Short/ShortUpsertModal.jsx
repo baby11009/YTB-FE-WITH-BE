@@ -354,7 +354,7 @@ const ShortUpsertModal = ({ title, id }) => {
 
       setSubmitLoading(false);
     },
-    [error, formData, shortData],
+    [submitErrs, formData, shortData],
   );
 
   useLayoutEffect(() => {

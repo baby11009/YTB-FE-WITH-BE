@@ -9,11 +9,13 @@ import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
 import VideoUpsertModal from "./VideoUpsertModal";
+import { useCallback } from "react";
 
 const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
+  
   const { setIsShowing, addToaster } = useAuthContext();
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     await dltData(
       "/client/video",
       data?._id,
@@ -24,9 +26,9 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
       undefined,
       addToaster,
     );
-  };
+  }, [data]);
 
-  const showDeleteConfirm = () => {
+  const showDeleteConfirm = useCallback(() => {
     setIsShowing(
       <DeleteConfirm
         handleDelete={handleDelete}
@@ -34,16 +36,17 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
         data={data?._id}
       />,
     );
-  };
+  }, [data]);
 
-  const showUpsertModal = () => {
+  const showUpsertModal = useCallback(() => {
     setIsShowing(<VideoUpsertModal title={"Editing video"} id={data?._id} />);
-  };
+  }, [data]);
+
   return (
     <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
       <div
-        className={`sticky left-0 p-[12px_12px_8px_25px]
-       bg-black group-hover:bg-[#272727] z-[5]`}
+        className='sticky left-0 p-[12px_12px_8px_25px]
+       bg-black group-hover:bg-[#272727] z-[5]'
       >
         <CheckBox2
           checked={checked}
@@ -80,7 +83,7 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
           <div className='flex-1 ml-[16px] pr-[12px] overflow-hidden'>
             <div className=' overflow-hidden'>
               <div
-                className=' h-[24px] line-clamp-1 text-ellipsis break-words text-[13px] leading-[24px]'
+                className=' h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'
                 dangerouslySetInnerHTML={{
                   __html: data?.title,
                 }}
@@ -123,19 +126,19 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
           </div>
         </div>
       </div>
-      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]'>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-[13px] leading-[24px]'>
         {timeFormat3(data?.createdAt)}
       </div>
-      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-right '>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right '>
         {formatNumber(data?.view)}
       </div>
-      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-right'>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right'>
         {formatNumber(data?.totalCmt)}
       </div>
-      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px] text-right'>
+      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right'>
         {formatNumber(data?.like)}
       </div>
-      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px] text-right'>
+      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right'>
         {formatNumber(data?.dislike)}
       </div>
     </div>

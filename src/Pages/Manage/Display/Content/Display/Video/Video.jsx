@@ -5,7 +5,7 @@ import {
   TrashBinIcon,
   LongArrowIcon,
 } from "../../../../../../Assets/Icons";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   CustomeFuncBox,
   CheckBox2,
@@ -18,7 +18,6 @@ import VideoUpsertModal from "./VideoUpsertModal";
 import { getDataWithAuth } from "../../../../../../Api/getData";
 import { dltManyData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
-import { scrollToTop } from "../../../../../../util/scrollCustom";
 
 const initParams = {
   title: "",
@@ -32,36 +31,36 @@ const initParams = {
 const Video = () => {
   const queryClient = useQueryClient();
 
-  const { setIsShowing, openedMenu, addToaster } = useAuthContext();
+  const { setIsShowing, addToaster } = useAuthContext();
 
-  const [sort, setSort] = useState(undefined);
+  const [searching, setSearching] = useState(undefined);
 
   const [opened, setOpened] = useState(false);
 
-  const [params, setParams] = useState(initParams);
+  const [queriese, setQueriese] = useState(initParams);
 
   const [checkedList, setCheckedList] = useState([]);
 
-  const { data, isLoading, refetch } = getDataWithAuth(
+  const { data, refetch } = getDataWithAuth(
     "/client/video",
-    params,
+    queriese,
     true,
     false,
   );
 
   const [dataList, setDataList] = useState([]);
 
-  const handleCheckedAll = () => {
-    if (checkedList.length === data?.data?.length) {
+  const handleCheckedAll = useCallback(() => {
+    if (checkedList.length === dataList.length) {
       setCheckedList([]);
     } else {
-      const idList = data?.data?.map((item) => item?._id);
+      const idList = dataList.map((item) => item?._id);
 
       setCheckedList(idList);
     }
-  };
+  }, [checkedList, dataList]);
 
-  const handleChecked = (id) => {
+  const handleChecked = useCallback((id) => {
     setCheckedList((prev) => {
       const index = prev.indexOf(id);
       if (index === -1) {
@@ -70,68 +69,61 @@ const Video = () => {
         return [...prev.filter((data) => data !== id)];
       }
     });
-  };
+  }, []);
 
-  const handleOnClick = (data) => {
-    setSort((prev) => {
-      if (prev && prev.slug === data.slug) {
+  const handleOnClick = useCallback((data) => {
+    setSearching((prev) => {
+      if (prev && prev.id === data.id) {
         return undefined;
       }
 
       return data;
     });
-
-    if (data.slug !== "title") {
-      setParams((prev) => {
-        const paramObj = { ...prev };
-
-        paramObj.sort = {
-          [`${data.slug}`]: data.value,
-        };
-        paramObj.page = 1;
-        return paramObj;
-      });
-    }
-  };
+  }, []);
 
   const timeoutRef = useRef();
 
-  const handleOnSearch = (e) => {
+  const handleOnSearch = useCallback((e) => {
     clearTimeout(timeoutRef.current);
     setTimeout(() => {
-      setParams((prev) => ({ ...prev, title: e.target.value, page: 1 }));
+      setQueriese((prev) => ({ ...prev, title: e.target.value, page: 1 }));
     }, 600);
-  };
+  }, []);
 
-  const handleSortUnique = (key, value) => {
-    const uniqueSortKeys = ["view", "like", "dislike", "totalCmt"];
-    const sortObj = { ...params.sort };
+  const handleSort = useCallback(
+    (key, value) => {
+      // Can only have 1 add on sort key at the same time
+      const addOnSortKeys = new Set(["view", "like", "dislike", "totalCmt"]);
+      const sortObj = { ...queriese.sort };
 
-    const sortObjKeys = Object.keys(sortObj);
-    if (sortObjKeys.includes(key)) {
-      sortObj[key] = value;
-    } else if (uniqueSortKeys.includes(key)) {
-      sortObjKeys.forEach((key) => {
-        if (uniqueSortKeys.includes(key)) {
-          delete sortObj[key];
-        }
-      });
-      sortObj[key] = value;
-    }
-    setParams((prev) => ({ ...prev, sort: sortObj, page: 1 }));
-  };
+      const sortObjKeys = Object.keys(sortObj);
+      if (sortObjKeys.includes(key)) {
+        sortObj[key] = value;
+      } else if (addOnSortKeys.has(key)) {
+        // remove previous addon sort key
+        sortObjKeys.forEach((key) => {
+          if (addOnSortKeys.has(key)) {
+            delete sortObj[key];
+          }
+        });
+        sortObj[key] = value;
+      }
+      setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
+    },
+    [queriese],
+  );
 
   const funcList = useRef([
     {
-      id: 1,
-      text: "Title",
-      slug: "title",
+      id: "title",
+      text: "Text",
+      type: "input:text",
       value: 1,
       handleOnClick: handleOnClick,
     },
   ]);
 
-  const handleDeleteMany = async () => {
+  const handleDeleteMany = useCallback(async () => {
     await dltManyData(
       "/client/video/delete-many",
       checkedList,
@@ -143,9 +135,9 @@ const Video = () => {
       undefined,
       addToaster,
     );
-  };
+  }, [checkedList]);
 
-  const showDltConfirm = () => {
+  const showDltConfirm = useCallback(() => {
     if (checkedList.length < 1) {
       alert("Please select at least one item");
       return;
@@ -157,11 +149,11 @@ const Video = () => {
         data={checkedList.join(", ")}
       />,
     );
-  };
+  }, [checkedList]);
 
-  const showUpsertModal = () => {
+  const showUpsertModal = useCallback(() => {
     setIsShowing(<VideoUpsertModal title={"Uploading video"} />);
-  };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -173,13 +165,12 @@ const Video = () => {
   useEffect(() => {
     if (data) {
       setDataList([...data?.data]);
-      scrollToTop();
     }
   }, [data]);
 
   useEffect(() => {
     setCheckedList([]);
-  }, [params.page]);
+  }, [queriese.page]);
 
   return (
     <div className='overflow-auto h-full relative scrollbar-3'>
@@ -187,7 +178,7 @@ const Video = () => {
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
             <button
-              className=' p-[8px]'
+              className='p-[8px]'
               onClick={() => {
                 setOpened((prev) => !prev);
               }}
@@ -198,33 +189,37 @@ const Video = () => {
               <CustomeFuncBox
                 style={"left-[100%] top-[100%] w-[150px]"}
                 setOpened={setOpened}
-                currentId={sort?.id}
+                currentId={searching?.id}
                 funcList1={funcList.current}
               />
             )}
           </div>
           <div className='flex-1 flex items-center'>
-            {sort?.text && (
+            {searching?.text && (
               <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
                 <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
-                  {sort.text}
+                  {searching.text}
                 </span>
                 <div
                   className='px-[6px] w-[24px]'
                   onClick={() => {
-                    setSort(undefined);
-                    setParams((prev) => ({ ...prev, title: "", page: 1 }));
+                    setSearching(undefined);
+                    setQueriese((prev) => ({
+                      ...prev,
+                      [searching.id]: "",
+                      page: 1,
+                    }));
                   }}
                 >
                   <CloseIcon />
                 </div>
               </button>
             )}
-            {sort?.text === "Title" && (
+            {searching?.type === "input:text" && (
               <input
                 autoFocus
                 type='text'
-                placeholder='Tìm kiếm...'
+                placeholder='Searching...'
                 className='bg-transparent py-[4px] border-b-[2px] outline-none ml-[16px]'
                 onChange={handleOnSearch}
               />
@@ -269,23 +264,23 @@ const Video = () => {
           <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>
             <button
               onClick={() => {
-                handleSortUnique(
+                handleSort(
                   "createdAt",
-                  params.sort["createdAt"] === -1 ? 1 : -1,
+                  queriese.sort["createdAt"] === -1 ? 1 : -1,
                 );
               }}
               className={`flex items-center  w-full ${
-                params.sort["createdAt"] ? "text-white-F1 font-bold" : ""
+                queriese.sort["createdAt"] ? "text-white-F1 font-bold" : ""
               }`}
             >
               <span>Date </span>
 
               <div
                 className={`${
-                  params.sort["createdAt"] === -1 ? "rotate-180" : ""
+                  queriese.sort["createdAt"] === -1 ? "rotate-180" : ""
                 }
                 ${
-                  params.sort["createdAt"] ? "visible" : "invisible"
+                  queriese.sort["createdAt"] ? "visible" : "invisible"
                 } ml-[12px] w-[12px]`}
               >
                 <LongArrowIcon />
@@ -295,17 +290,17 @@ const Video = () => {
           <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] '>
             <button
               onClick={() => {
-                handleSortUnique("view", params.sort["view"] === -1 ? 1 : -1);
+                handleSort("view", queriese.sort["view"] === -1 ? 1 : -1);
               }}
               className={`flex items-center justify-end w-full ${
-                params.sort["view"] ? "text-white-F1 font-bold" : ""
+                queriese.sort["view"] ? "text-white-F1 font-bold" : ""
               }`}
             >
               <span>View</span>
               <div
-                className={`${params.sort["view"] === -1 ? "rotate-180" : ""}
+                className={`${queriese.sort["view"] === -1 ? "rotate-180" : ""}
                 ${
-                  params.sort["view"] ? "visible" : "invisible"
+                  queriese.sort["view"] ? "visible" : "invisible"
                 } ml-[12px] w-[12px]`}
               >
                 <LongArrowIcon />
@@ -315,23 +310,23 @@ const Video = () => {
           <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>
             <button
               onClick={() => {
-                handleSortUnique(
+                handleSort(
                   "totalCmt",
-                  params.sort["totalCmt"] === -1 ? 1 : -1,
+                  queriese.sort["totalCmt"] === -1 ? 1 : -1,
                 );
               }}
               className={`flex items-center justify-end  w-full ${
-                params.sort["totalCmt"] ? "text-white-F1 font-bold" : ""
+                queriese.sort["totalCmt"] ? "text-white-F1 font-bold" : ""
               }`}
             >
               <span>Comments</span>
 
               <div
                 className={`${
-                  params.sort["totalCmt"] === -1 ? "rotate-180" : ""
+                  queriese.sort["totalCmt"] === -1 ? "rotate-180" : ""
                 }
                   ${
-                    params.sort["totalCmt"] ? "visible" : "invisible"
+                    queriese.sort["totalCmt"] ? "visible" : "invisible"
                   } ml-[12px] w-[12px]`}
               >
                 <LongArrowIcon />
@@ -341,18 +336,18 @@ const Video = () => {
           <div className='flex-[1_0_60px] min-w-[60px] mx-[12px]'>
             <button
               onClick={() => {
-                handleSortUnique("like", params.sort["like"] === -1 ? 1 : -1);
+                handleSort("like", queriese.sort["like"] === -1 ? 1 : -1);
               }}
               className={`flex items-center justify-end w-full ${
-                params.sort["like"] ? "text-white-F1 font-bold" : ""
+                queriese.sort["like"] ? "text-white-F1 font-bold" : ""
               }`}
             >
               <span>Like</span>
 
               <div
-                className={`${params.sort["like"] === -1 ? "rotate-180" : ""}
+                className={`${queriese.sort["like"] === -1 ? "rotate-180" : ""}
                     ${
-                      params.sort["like"] ? "visible" : "invisible"
+                      queriese.sort["like"] ? "visible" : "invisible"
                     } ml-[12px] w-[12px]`}
               >
                 <LongArrowIcon size={14} />
@@ -362,21 +357,20 @@ const Video = () => {
           <div className='flex-[1_0_60px] min-w-[60px] mx-[12px]'>
             <button
               onClick={() => {
-                handleSortUnique(
-                  "dislike",
-                  params.sort["dislike"] === -1 ? 1 : -1,
-                );
+                handleSort("dislike", queriese.sort["dislike"] === -1 ? 1 : -1);
               }}
               className={`flex items-center justify-end w-full ${
-                params.sort["dislike"] ? "text-white-F1 font-bold" : ""
+                queriese.sort["dislike"] ? "text-white-F1 font-bold" : ""
               }`}
             >
               <span>Dislike</span>
 
               <div
-                className={`${params.sort["dislike"] === -1 ? "rotate-180" : ""}
+                className={`${
+                  queriese.sort["dislike"] === -1 ? "rotate-180" : ""
+                }
                   ${
-                    params.sort["dislike"] ? "visible" : "invisible"
+                    queriese.sort["dislike"] ? "visible" : "invisible"
                   } ml-[12px] w-[12px]`}
               >
                 <LongArrowIcon size={14} />
@@ -392,15 +386,14 @@ const Video = () => {
               handleChecked={handleChecked}
               checked={checkedList.includes(item?._id)}
               data={item}
-              od={id + params?.limit * (params?.page - 1) + 1}
               refetch={refetch}
             />
           ))}
         </div>
       </div>
       <Pagination
-        setParams={setParams}
-        currPage={params?.page}
+        setParams={setQueriese}
+        currPage={queriese?.page}
         totalPage={data?.totalPages}
       />
     </div>

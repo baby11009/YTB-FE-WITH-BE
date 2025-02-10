@@ -456,7 +456,7 @@ const VideoPart = () => {
 
           <CommentSection
             videoId={id}
-            videoUserId={videoInfo?.channel_info._id}
+            videoUserId={videoInfo?.channel_info?._id}
             totalCmt={videoInfo?.totalCmt}
             refetch={refetch}
             isEnd={isEnd}
