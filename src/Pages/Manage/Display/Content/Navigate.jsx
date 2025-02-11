@@ -50,7 +50,12 @@ const Navigate = ({ pathParam }) => {
 
   const containerRef = useRef();
 
+  const indicator = useRef();
+
   const handleOnClick = useCallback((e) => {
+    if (!indicator.current.classList.contains("transition-[left]")) {
+      indicator.current.classList.add("transition-[left]");
+    }
     const childRect = e.target.getBoundingClientRect();
     const parentRect = containerRef.current.getBoundingClientRect();
     setUnderlineInfo({
@@ -88,7 +93,8 @@ const Navigate = ({ pathParam }) => {
           />
         ))}
         <div
-          className='h-[2px] bg-white absolute bottom-0 transition-all '
+          className='h-[2px] bg-white absolute bottom-0'
+          ref={indicator}
           style={{
             width: underlineInfo.width + "px",
             left: underlineInfo.left + "px",

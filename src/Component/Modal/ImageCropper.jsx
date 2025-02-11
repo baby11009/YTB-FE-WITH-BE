@@ -64,7 +64,7 @@ const ImageCropper = ({
       },
       aspectRatio,
       width,
-      height
+      height,
     );
     const centeredCrop = centerCrop(crop, width, height);
     setCrop(centeredCrop);
@@ -74,7 +74,7 @@ const ImageCropper = ({
     setCanvasPreview(
       imgRef.current, // HTMLImageElement
       previewCanvasRef.current, // HTMLCanvasElement
-      convertToPixelCrop(crop, imgRef.current.width, imgRef.current.height)
+      convertToPixelCrop(crop, imgRef.current.width, imgRef.current.height),
     );
     const dataUrl = previewCanvasRef.current.toDataURL();
     previewCanvasRef.current.toBlob((blob) => {
@@ -95,7 +95,9 @@ const ImageCropper = ({
           className='size-[40px] rounded-[50%] hover:bg-black-0.1 flex items-center justify-center '
           onClick={() => setIsShowing(undefined)}
         >
-          <CloseIcon />
+          <div className='w-[24px]'>
+            <CloseIcon />
+          </div>
         </button>
       </div>
 
@@ -111,8 +113,6 @@ const ImageCropper = ({
             minHeight={
               minHeight * (imgRef?.current?.offsetHeight / imgSize.height)
             }
-            // minWidth={minWidth}
-            // minHeight={minHeight}
           >
             <img
               ref={imgRef}
@@ -156,7 +156,9 @@ const ImageCropper = ({
             }}
           >
             <div className='flex flex-col items-center gap-[16px]'>
-              <PlusIcon size={60} />
+              <div className='w-[60px]'>
+                <PlusIcon />
+              </div>
               <span className='text-center'>
                 Drag and drop an image here or click to select an image.
               </span>
@@ -184,8 +186,6 @@ const ImageCropper = ({
             width: minWidth * (imgRef?.current?.offsetWidth / imgSize.width),
             height:
               minHeight * (imgRef?.current?.offsetHeight / imgSize.height),
-            // width: minWidth,
-            // height: minHeight,
           }}
         />
       )}

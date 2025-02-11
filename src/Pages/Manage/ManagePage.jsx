@@ -1,7 +1,6 @@
 import MainLayOut from "../../Layout/MainLayOut";
 import Header from "./Header";
 import Menu from "./Menu/Menu";
-import SdMenu from "./Menu/SdMenu";
 import { useLocation, useParams } from "react-router-dom";
 import { scrollToTop } from "../../util/scrollCustom";
 import { useState, useEffect, useLayoutEffect } from "react";
@@ -42,16 +41,11 @@ const ManagePage = () => {
   return (
     <MainLayOut>
       <>
-        <Header setOpenedMenu={setOpenedMenu} />
-        <div className='hidden xl:block relative z-[9500]'>
-          <Menu
-            openedMenu={openedMenu}
-            currPath={location.pathname}
-            data={user}
-          />
+        <div className='relative z-[9501]'>
+          <Header setOpenedMenu={setOpenedMenu} />
         </div>
-        <div className='block xl:hidden relative z-[9500]'>
-          <SdMenu
+        <div className=' relative z-[9500] '>
+          <Menu
             openedMenu={openedMenu}
             setOpenedMenu={setOpenedMenu}
             currPath={location.pathname}

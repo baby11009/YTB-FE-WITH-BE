@@ -21,7 +21,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const initParams = {
   title: "",
-  limit: 8,
+  limit: 10,
   page: 1,
   sort: { createdAt: -1, view: -1 },
   type: "video",
@@ -39,7 +39,13 @@ const Video = () => {
 
   const [queriese, setQueriese] = useState(initParams);
 
+  const [dataList, setDataList] = useState([]);
+
   const [checkedList, setCheckedList] = useState([]);
+
+  const containerRef = useRef();
+
+  const timeoutRef = useRef();
 
   const { data, refetch } = getDataWithAuth(
     "/client/video",
@@ -47,8 +53,6 @@ const Video = () => {
     true,
     false,
   );
-
-  const [dataList, setDataList] = useState([]);
 
   const handleCheckedAll = useCallback(() => {
     if (checkedList.length === dataList.length) {
@@ -81,7 +85,15 @@ const Video = () => {
     });
   }, []);
 
-  const timeoutRef = useRef();
+  const sortBtnList = useRef([
+    {
+      id: "title",
+      text: "Text",
+      type: "input:text",
+      value: 1,
+      handleOnClick: handleOnClick,
+    },
+  ]);
 
   const handleOnSearch = useCallback((e) => {
     clearTimeout(timeoutRef.current);
@@ -112,16 +124,6 @@ const Video = () => {
     },
     [queriese],
   );
-
-  const funcList = useRef([
-    {
-      id: "title",
-      text: "Text",
-      type: "input:text",
-      value: 1,
-      handleOnClick: handleOnClick,
-    },
-  ]);
 
   const handleDeleteMany = useCallback(async () => {
     await dltManyData(
@@ -165,6 +167,7 @@ const Video = () => {
   useEffect(() => {
     if (data) {
       setDataList([...data?.data]);
+      containerRef.current.scrollTop = 0;
     }
   }, [data]);
 
@@ -173,7 +176,10 @@ const Video = () => {
   }, [queriese.page]);
 
   return (
-    <div className='overflow-auto h-full relative scrollbar-3'>
+    <div
+      className='overflow-auto h-full relative scrollbar-3'
+      ref={containerRef}
+    >
       <div className='sticky left-0 top-[0] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
@@ -190,7 +196,7 @@ const Video = () => {
                 style={"left-[100%] top-[100%] w-[150px]"}
                 setOpened={setOpened}
                 currentId={searching?.id}
-                funcList1={funcList.current}
+                funcList1={sortBtnList.current}
               />
             )}
           </div>
@@ -380,9 +386,9 @@ const Video = () => {
         </div>
         {/* Body */}
         <div className='flex flex-col z-[2]'>
-          {dataList.map((item, id) => (
+          {dataList.map((item) => (
             <VideoTbRow
-              key={id}
+              key={item?._id}
               handleChecked={handleChecked}
               checked={checkedList.includes(item?._id)}
               data={item}

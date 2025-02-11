@@ -128,7 +128,7 @@ const Header = ({ setOpenedMenu }) => {
   }, []);
 
   return (
-    <header className=' fixed top-0 w-full bg-black  py-[10px] px-[8px] md:px-[16px] z-[3000]'>
+    <header className=' fixed top-0 w-full bg-black py-[10px] px-[8px] md:px-[16px]'>
       <div className='flex items-center justify-between size-full'>
         <div className='flex  gap-[16px]'>
           <button

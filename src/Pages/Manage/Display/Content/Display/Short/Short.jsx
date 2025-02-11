@@ -21,7 +21,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const initParams = {
   title: "",
-  limit: 8,
+  limit: 10,
   page: 1,
   sort: { createdAt: -1, view: -1 },
   type: "short",
@@ -39,7 +39,11 @@ const Short = () => {
 
   const [queriese, setQueriese] = useState(initParams);
 
+  const [dataList, setDataList] = useState([]);
+
   const [checkedList, setCheckedList] = useState([]);
+
+  const containerRef = useRef();
 
   const { data, refetch } = getDataWithAuth(
     "/client/video",
@@ -47,8 +51,6 @@ const Short = () => {
     true,
     false,
   );
-
-  const [dataList, setDataList] = useState([]);
 
   const handleCheckedAll = useCallback(() => {
     if (checkedList.length === dataList.length) {
@@ -168,11 +170,15 @@ const Short = () => {
   useEffect(() => {
     if (data) {
       setDataList([...data?.data]);
+      containerRef.current.scrollTop = 0;
     }
   }, [data]);
 
   return (
-    <div className='overflow-auto max-h-full min-h-[500px] relative scrollbar-3'>
+    <div
+      className='overflow-auto max-h-full min-h-[500px] relative scrollbar-3'
+      ref={containerRef}
+    >
       <div className='sticky left-0 top-[0] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
@@ -380,13 +386,12 @@ const Short = () => {
         </div>
         {/* Body */}
         <div className='flex flex-col z-[2]'>
-          {dataList.map((item, id) => (
+          {dataList.map((item) => (
             <ShortTbRow
-              key={id}
+              key={item?._id}
               handleChecked={handleChecked}
               checked={checkedList.includes(item?._id)}
               data={item}
-              od={id + queriese?.limit * (queriese?.page - 1) + 1}
               refetch={refetch}
             />
           ))}

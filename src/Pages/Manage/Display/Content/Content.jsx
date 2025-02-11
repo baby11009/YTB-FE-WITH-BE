@@ -1,13 +1,9 @@
-import { useState } from "react";
 import Navigate from "./Navigate";
 import Display from "./Display/Display";
 import { useParams } from "react-router-dom";
-import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const Content = ({}) => {
   const params = useParams();
-
-  const { openedMenu } = useAuthContext();
 
   return (
     <div>

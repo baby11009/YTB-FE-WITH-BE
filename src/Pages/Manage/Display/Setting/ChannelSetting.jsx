@@ -27,7 +27,9 @@ const ChannelSetting = () => {
 
   const [bannerName, setBannerName] = useState("");
 
-  const [error, setError] = useState({
+  const [realTimeErrs, setRealTimeErrs] = useState({});
+
+  const [submitErrs, setSubmitErrs] = useState({
     inputName: [],
     message: [],
   });
@@ -39,10 +41,27 @@ const ChannelSetting = () => {
     }));
   }, []);
 
+  const handleSetRealTimeErr = useCallback((errName, errMessage) => {
+    setRealTimeErrs((prev) => ({ ...prev, [errName]: errMessage }));
+  }, []);
+
+  const handleRemoveRealTimeErr = useCallback(
+    (errName) => {
+      if (!Object.keys(realTimeErrs).includes(errName)) return;
+
+      setRealTimeErrs((prev) => {
+        const errs = structuredClone(prev);
+        delete errs[errName];
+        return errs;
+      });
+    },
+    [realTimeErrs],
+  );
+
   const handleValidateUpdate = useCallback(
     (formData) => {
-      if (error.inputName.length > 0) {
-        setError({ inputName: [], message: [] });
+      if (Object.keys(submitErrs).length > 0) {
+        setSubmitErrs({ inputName: [], message: [] });
       }
       let hasErrors = false;
       const keys = Object.keys(formData).filter(
@@ -55,10 +74,7 @@ const ChannelSetting = () => {
       );
       keys.forEach((key) => {
         if (formData[key] === "") {
-          setError((prev) => ({
-            inputName: [...prev.inputName, key],
-            message: [...prev.message, "Không được để trống"],
-          }));
+          setSubmitErrs((prev) => ({ ...prev, [key]: "Cannot be empty" }));
           hasErrors = true;
         }
       });
@@ -67,9 +83,9 @@ const ChannelSetting = () => {
         (formData.password || formData.confirm) &&
         formData.password !== formData.confirm
       ) {
-        setError((prev) => ({
-          inputName: [...prev.inputName, "confirm"],
-          message: [...prev.message, "Mật khẩu xác nhận không đúng"],
+        setSubmitErrs((prev) => ({
+          ...prev,
+          confirm: "Password confirmation is not matching",
         }));
         hasErrors = true;
       }
@@ -77,7 +93,7 @@ const ChannelSetting = () => {
         return true;
       }
     },
-    [error],
+    [submitErrs],
   );
 
   const update = useCallback(
@@ -115,7 +131,7 @@ const ChannelSetting = () => {
       }
 
       if (Object.keys(finalData).length === 0) {
-        alert("Không có gì thay đổi");
+        alert("Nothing changed");
         return;
       }
 
@@ -143,7 +159,7 @@ const ChannelSetting = () => {
         addToaster,
       );
     },
-    [error],
+    [submitErrs],
   );
 
   const handleSubmit = useCallback(
@@ -156,14 +172,14 @@ const ChannelSetting = () => {
 
       setSubmitLoading(false);
     },
-    [error, formData, user],
+    [submitErrs, formData, user],
   );
 
   useEffect(() => {
     let timeOut;
-    if (error.inputName.length > 0) {
+    if (Object.keys(submitErrs).length > 0) {
       timeOut = setTimeout(() => {
-        setError({
+        setSubmitErrs({
           inputName: [],
           message: [],
         });
@@ -173,7 +189,7 @@ const ChannelSetting = () => {
     return () => {
       clearTimeout(timeOut);
     };
-  }, [error]);
+  }, [submitErrs]);
 
   useLayoutEffect(() => {
     if (user) {
@@ -204,10 +220,10 @@ const ChannelSetting = () => {
   return (
     <div>
       <div className='bg-black'>
-        <h1 className='pt-[24px] text-nowrap text-[25px] leading-[32px] font-[600]'>
+        <h2 className='pt-[24px] text-nowrap text-[25px] leading-[32px] font-[600]'>
           Channel's setting
-        </h1>
-        <div className='pt-[24px]'>
+        </h2>
+        <div className='pt-[24px] max-h-[calc(100vh-110px)] overflow-auto scrollbar-3'>
           <form
             noValidate
             onSubmit={handleSubmit}
@@ -302,11 +318,7 @@ const ChannelSetting = () => {
                     value={formData.name}
                     defaultValue={user?.name}
                     handleOnChange={handleOnChange}
-                    error={
-                      error.inputName.includes("name")
-                        ? `${error.message[error.inputName.indexOf("name")]}`
-                        : ""
-                    }
+                    error={submitErrs["name"] ? submitErrs["name"] : ""}
                   />
                 </div>
 
@@ -318,11 +330,7 @@ const ChannelSetting = () => {
                     value={formData.email}
                     defaultValue={user?.email}
                     handleOnChange={handleOnChange}
-                    error={
-                      error.inputName.includes("email")
-                        ? `${error.message[error.inputName.indexOf("email")]}`
-                        : ""
-                    }
+                    error={submitErrs["email"] ? submitErrs["email"] : ""}
                     readOnly={true}
                   />
                 </div>
@@ -335,13 +343,7 @@ const ChannelSetting = () => {
                     label={"Password"}
                     value={formData.password}
                     handleOnChange={handleOnChange}
-                    error={
-                      error.inputName.includes("password")
-                        ? `${
-                            error.message[error.inputName.indexOf("password")]
-                          }`
-                        : ""
-                    }
+                    error={submitErrs["password"] ? submitErrs["password"] : ""}
                   />
                 </div>
                 <div className='basis-[100%] mr-[16px] mt-[16px] '>
@@ -351,11 +353,7 @@ const ChannelSetting = () => {
                     label={"Confirm Password"}
                     value={formData.confirm}
                     handleOnChange={handleOnChange}
-                    error={
-                      error.inputName.includes("confirm")
-                        ? `${error.message[error.inputName.indexOf("confirm")]}`
-                        : ""
-                    }
+                    error={submitErrs["confirm"] ? submitErrs["confirm"] : ""}
                   />
                 </div>
               </div>
@@ -368,10 +366,10 @@ const ChannelSetting = () => {
                 value={formData.description}
                 defaultValue={user?.description}
                 handleOnChange={handleOnChange}
+                handleRemoveRealTimeErr={handleRemoveRealTimeErr}
+                handleSetRealTimeErr={handleSetRealTimeErr}
                 errMsg={
-                  error.inputName?.includes("description")
-                    ? error.message[error.inputName?.indexOf("description")]
-                    : ""
+                  submitErrs["description"] ? submitErrs["description"] : ""
                 }
                 placeholder={"Enter video description"}
               />
@@ -381,6 +379,7 @@ const ChannelSetting = () => {
               <button
                 type='submit'
                 className='w-full max-w-[160px] btn1 relative'
+                disabled={Object.keys(realTimeErrs).length > 0 ? true : false}
               >
                 {submitLoading ? (
                   <div

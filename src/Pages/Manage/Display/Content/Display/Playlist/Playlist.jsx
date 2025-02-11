@@ -43,7 +43,7 @@ const Playlist = () => {
   const [opened, setOpened] = useState(false);
 
   const [queriese, setQueriese] = useState(initParams);
- 
+
   const [checkedList, setCheckedList] = useState([]);
 
   const [horizonScrollVisible, setHorizonScrollVisible] = useState();
@@ -52,7 +52,7 @@ const Playlist = () => {
 
   const [dataList, setDataList] = useState([]);
 
-  const container = useRef();
+  const containerRef = useRef();
 
   const handleCheckedAll = useCallback(() => {
     if (checkedList.length === dataList.length) {
@@ -158,8 +158,8 @@ const Playlist = () => {
 
   useLayoutEffect(() => {
     const handleResize = (e) => {
-      const scrollW = container.current.scrollWidth;
-      const clientW = container.current.clientWidth;
+      const scrollW = containerRef.current.scrollWidth;
+      const clientW = containerRef.current.clientWidth;
       setHorizonScrollVisible(scrollW > clientW);
     };
     handleResize();
@@ -180,11 +180,15 @@ const Playlist = () => {
   useEffect(() => {
     if (data) {
       setDataList([...data?.data]);
+      containerRef.current.scrollTop = 0;
     }
   }, [data]);
 
   return (
-    <div className='overflow-auto h-full relative scrollbar-3' ref={container}>
+    <div
+      className='overflow-auto h-full relative scrollbar-3'
+      ref={containerRef}
+    >
       <div className='sticky left-0 top-[0] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>

@@ -1,4 +1,10 @@
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import { ShowPasswordIcon, HidePasswordIcon } from "../../Assets/Icons";
 
 const Input = ({
@@ -12,6 +18,8 @@ const Input = ({
   error,
   readOnly = false,
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
+
   const [actived, setActived] = useState(value !== "" ? true : undefined);
 
   const [hiddenPass, setHiddenPass] = useState(false);
@@ -19,6 +27,8 @@ const Input = ({
   const containerRef = useRef();
 
   const inputRef = useRef();
+
+  const lableRef = useRef();
 
   const handleTogglePw = () => {
     inputRef.current.type = hiddenPass ? "password" : "text";
@@ -30,7 +40,6 @@ const Input = ({
     const handleOnBlur = (e) => {
       if (!value && defaultValue) {
         handleOnChange(e.target.name, defaultValue);
-        console.log(1)
       }
     };
     inputRef.current.addEventListener("blur", handleOnBlur);
@@ -48,7 +57,6 @@ const Input = ({
         value === "" &&
         !defaultValue
       ) {
-
         setActived(false);
       }
     };
@@ -64,14 +72,25 @@ const Input = ({
     };
   }, [actived, value]);
 
-  const handleChangeValue = (e) => {
+  useEffect(() => {
+    if (
+      type === "password" &&
+      !actived &&
+      inputRef.current.type !== "password"
+    ) {
+      inputRef.current.type = "password";
+      setHiddenPass(false);
+    }
+  }, [actived]);
+
+  const handleChangeValue = useCallback((e) => {
     let name = e.target.name;
     let value = e.target.value;
     if (e.target.type === "number") {
       value = Number(value);
     }
     handleOnChange(name, value);
-  };
+  }, []);
 
   return (
     <div
@@ -86,7 +105,10 @@ const Input = ({
           className='bg-transparent outline-none flex-1 pb-[8px] w-full'
           value={value}
           onChange={handleChangeValue}
-          onFocus={() => setActived(true)}
+          onFocus={() => {
+            setActived(true);
+            setIsFocused(true);
+          }}
           aria-autocomplete='none'
           ref={inputRef}
           readOnly={readOnly}
@@ -99,9 +121,11 @@ const Input = ({
               handleTogglePw();
             }}
             type='button'
-            className='size-[24px] flex items-center justify-center '
+            className={`size-[24px] flex items-center justify-center ${
+              actived && value ? "visible" : "invisible"
+            }`}
           >
-            <div className={`${actived && value ? "block" : "hidden"}`}>
+            <div>
               {hiddenPass ? <HidePasswordIcon /> : <ShowPasswordIcon />}
             </div>
           </button>
@@ -109,15 +133,15 @@ const Input = ({
 
         <label
           htmlFor={id}
-          className={`cursor-pointer absolute 
+          key={label}
+          ref={lableRef}
+          className={`cursor-pointer absolute
+            ${isFocused ? "transition-all duration-[0.25s] ease-in" : ""}
             ${
-              actived === undefined
-                ? "scale-95"
-                : actived
-                ? " animate-labelMoveUp"
-                : " animate-labelMoveDown"
-            }
-            `}
+              actived
+                ? "scale-100 left-0  top-[-24px]"
+                : "scale-95 left-[8px] top-0"
+            }`}
         >
           {label}
         </label>
