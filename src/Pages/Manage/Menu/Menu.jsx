@@ -2,8 +2,6 @@ import { Button, BtnList } from "./Component";
 import { Link } from "react-router-dom";
 
 const Menu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
-  console.log(openedMenu);
-
   return (
     <>
       <div className='fixed left-0 bottom-0 bg-black z-[10]'>

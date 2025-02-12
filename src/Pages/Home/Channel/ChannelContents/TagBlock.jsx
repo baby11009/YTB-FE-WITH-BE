@@ -5,19 +5,19 @@ const TagBlock = ({ tagList, activeIndex, handleOnClick }) => {
   const defaultRef = useRef([
     {
       id: 1,
-      title: "Mới nhất",
+      title: "Newest",
       sort: { createdAt: -1 },
       handleOnClick: handleOnClick,
     },
     {
       id: 2,
-      title: "Phổ biến",
+      title: "Popular",
       sort: { view: -1 },
       handleOnClick: handleOnClick,
     },
     {
       id: 3,
-      title: "Cũ nhất",
+      title: "Oldest",
       sort: { createdAt: 1 },
       handleOnClick: handleOnClick,
     },

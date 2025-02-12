@@ -1,4 +1,3 @@
-import { iloda_v1 } from "../../../../../Assets/Images";
 import { VideoCard } from "../../../../../Component";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { IsEnd } from "../../../../../util/scrollPosition";
@@ -6,25 +5,13 @@ import { getData } from "../../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "react-router-dom";
 
-const firstVid = {
-  id: 1,
-  thumb: iloda_v1,
-  type: "video",
-  title:
-    "Tôi biến VÙNG ĐẤT HOANG thành VƯƠNG QUỐC TRUNG CỔ THỊNH VƯỢNG mỗi tội ... (Manor Lords #1)",
-  channel: "iLoda",
-  verify: true,
-  view: 133000,
-  time: "04/15/2024, 12:25:32 AM",
-  desc: "➥ Đăng ký kênh để xem thêm Video mỗi ngày: https://bom.to/2ylFGlf ➥ Lịch Live: 2 ca Stream mỗi ngày:- Ca 1: 12h - 15h30- Ca 2: 22h - 3h30 Các buổi Stream sẽ bắt...",
-};
-
 const init = {
   limit: 12,
   page: 1,
   sort: { view: -1, createdAt: -1 },
   clearCache: "search",
 };
+
 const ChannelSearch = () => {
   const { id } = useParams();
 

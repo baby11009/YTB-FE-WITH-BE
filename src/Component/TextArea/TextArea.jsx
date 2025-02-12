@@ -34,13 +34,14 @@ const TextArea = ({
   const handleOnInput = useCallback(
     (e) => {
       handleOnChange(name, textAreaRef.current.innerHTML);
-      let text = textAreaRef.current.innerText;
+
+      let textContent = textAreaRef.current.innerText;
 
       // if the innetText is \n\n then it means line breaks, count total of the line breaks
-      const totalLineBreak = text.match(/\n{2}/g)?.length || 0;
+      const totalLineBreak = textContent.match(/\n{2}/g)?.length || 0;
 
       // Replace \n linebreaks with ↵ to count the number of characters
-      let enterAdjustedText = text.replace(/\n/g, "↵");
+      let enterAdjustedText = textContent.replace(/\n/g, "↵");
       // minus with the total line breaks to make sure the line breaks just count as 1 character
       const total = enterAdjustedText.length - totalLineBreak;
       setTotalCharacters(total);
@@ -60,6 +61,43 @@ const TextArea = ({
     ) {
       e.preventDefault();
     }
+  }, []);
+
+  const hanldeOnPaste = useCallback((e) => {
+    e.preventDefault();
+
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    let clipboardText = e.clipboardData.getData("text/plain");
+
+    // Nếu clipboardText chứa URL, thay thế bằng thẻ <a>
+    if (urlRegex.test(clipboardText)) {
+      clipboardText = clipboardText.replace(
+        urlRegex,
+        (url) =>
+          `<a href="${url}" target="_blank" class="text-blue-3E">${url}</a>`,
+      );
+    }
+
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+
+    // Chuyển clipboardText thành HTML (sau khi thay thế bằng <a>)
+    const div = document.createElement("div");
+    div.innerHTML = clipboardText; // Phân tích HTML và tạo các nodes
+
+    const fragment = document.createDocumentFragment();
+
+    // Dán tất cả các node con của div vào range
+    while (div.firstChild) {
+      fragment.appendChild(div.firstChild);
+    }
+
+    range.insertNode(fragment);
+
+    const editableElement = e.target;
+    const inputEvent = new Event("input", { bubbles: true });
+    editableElement.dispatchEvent(inputEvent);
   }, []);
 
   useEffect(() => {
@@ -130,7 +168,7 @@ const TextArea = ({
     // Remember to add the parrents element  overflow hidden
     // to make sure the content will collapse when it overflows or else the width of this textarea will be exceeded
     <div
-      className={`w-full overflow-hidden border-[1px] rounded-[8px] ${
+      className={`w-full overflow-hidden border-[1px] rounded-[8px]  ${
         isErr
           ? "border-red-400"
           : isFocused
@@ -152,6 +190,7 @@ const TextArea = ({
         onInput={handleOnInput}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
+        onPaste={hanldeOnPaste}
         onKeyDown={handleOnKeyDown}
         className='text-[15px]
        leading-[24px] min-h-[120px] overflow-hidden outline-none'

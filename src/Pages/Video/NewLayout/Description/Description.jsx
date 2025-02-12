@@ -84,87 +84,92 @@ const Description = ({ data, refetch }) => {
 
   return (
     <div className='mt-[12px] mb-[24px]'>
-      <div>
-        <h1 className='text-[20px] leading-[28px] font-bold text-ellipsis overflow-hidden line-clamp-2 break-words '>
-          {data?.title}
-        </h1>
-        <div className='flex items-center flex-wrap'>
-          <div className='flex-1 mt-[12px] mr-[12px] flex items-center'>
-            {data && (
-              <Link>
-                <img
-                  src={`${import.meta.env.VITE_BASE_API_URI}${
-                    import.meta.env.VITE_VIEW_AVA_API
-                  }${data?.channel_info?.avatar}`}
-                  alt=''
-                  className='min-w-[40px] h-[40px] rounded-[50%] mr-[12px]'
-                />
-              </Link>
-            )}
-            <div className='flex flex-col mr-[24px]'>
-              <div
-                className='flex items-center gap-[4px]'
-                title={data?.channel_info?.name}
-              >
-                <Link className='text-[16px] leading-[22px] font-[500] t-1-ellipsis'>
-                  {data?.channel_info?.name}
-                </Link>
-                <Verification size={"14"} />
-              </div>
-              <span className='text-[12px] !leading-[18px] text-gray-A t-1-ellipsis'>
-                {formatNumber(data?.channel_info?.subscriber || 0)} subscribers
-              </span>
-            </div>
-            <SubscribeBtn
-              sub={data?.subscription_info !== null ? true : false}
-              notify={data?.subscription_info?.notify}
-              id={data?.subscription_info?._id}
-              channelId={data?.channel_info?._id}
-              refetch={refetch}
-            />
-          </div>
-          <div className='flex-1  mt-[12px] flex 2xsm:justify-end'>
-            <LikeAndDislikeBtn
-              totalLike={data?.like}
-              videoId={data?._id}
-              reactState={data?.react_info?.type}
-              refetch={refetch}
-            />
+      <div
+        className='text-[20px] leading-[28px] font-bold text-ellipsis overflow-hidden line-clamp-2 break-words'
+        dangerouslySetInnerHTML={{
+          __html: data?.title,
+        }}
+      ></div>
+      <div className='flex items-center flex-wrap'>
+        <div className='flex-1 mt-[12px] mr-[12px] flex items-center'>
+          {data && (
+            <Link to={`/channel/${data?.channel_info?.email}`}>
+              <img
+                src={`${import.meta.env.VITE_BASE_API_URI}${
+                  import.meta.env.VITE_VIEW_AVA_API
+                }${data?.channel_info?.avatar}`}
+                alt=''
+                className='min-w-[40px] h-[40px] rounded-[50%] mr-[12px]'
+              />
+            </Link>
+          )}
+          <div className='flex flex-col mr-[24px]'>
             <div
-              className='h-[36px] flex items-center justify-center rounded-[18px]
-              bg-hover-black hover:bg-[rgba(255,255,255,0.2)] cursor-pointer px-[16px] ml-[8px]'
-              title='Share'
+              className='flex items-center gap-[4px]'
+              title={data?.channel_info?.name}
             >
-              <div className='ml-[-6px] mr-[6px]'>
-                <ShareIcon />
-              </div>
-              <span className='text-[14px] text-nowrap'>Share</span>
+              <Link
+                className='text-[16px] leading-[22px] font-[500] t-1-ellipsis'
+                to={`/channel/${data?.channel_info?.email}`}
+              >
+                {data?.channel_info?.name}
+              </Link>
+              <Verification size={"14"} />
             </div>
-            <button
-              className='w-[36px] h-[36px] flex items-center justify-center rounded-[50%]
-                bg-hover-black hover:bg-[rgba(255,255,255,0.2)] ml-[8px] rotate-[90deg]'
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setShowHover((prev) => {
-                  if (prev) return undefined;
-                  handleCursorPositon(e);
-                  return (
-                    <CustomeFuncBox
-                      setOpened={() => {
-                        setShowHover(undefined);
-                      }}
-                      funcList1={funcList}
-                    />
-                  );
-                });
-              }}
-            >
-              <Setting2Icon />
-            </button>
+            <span className='text-[12px] !leading-[18px] text-gray-A t-1-ellipsis'>
+              {formatNumber(data?.channel_info?.subscriber || 0)} subscribers
+            </span>
           </div>
+          <SubscribeBtn
+            sub={data?.subscription_info !== null ? true : false}
+            notify={data?.subscription_info?.notify}
+            id={data?.subscription_info?._id}
+            channelId={data?.channel_info?._id}
+            refetch={refetch}
+          />
+        </div>
+        <div className='flex-1  mt-[12px] flex 2xsm:justify-end'>
+          <LikeAndDislikeBtn
+            totalLike={data?.like}
+            videoId={data?._id}
+            reactState={data?.react_info?.type}
+            refetch={refetch}
+          />
+          <div
+            className='h-[36px] flex items-center justify-center rounded-[18px]
+              bg-hover-black hover:bg-[rgba(255,255,255,0.2)] cursor-pointer px-[16px] ml-[8px]'
+            title='Share'
+          >
+            <div className='ml-[-6px] mr-[6px]'>
+              <ShareIcon />
+            </div>
+            <span className='text-[14px] text-nowrap'>Share</span>
+          </div>
+          <button
+            className='w-[36px] h-[36px] flex items-center justify-center rounded-[50%]
+                bg-hover-black hover:bg-[rgba(255,255,255,0.2)] ml-[8px] rotate-[90deg]'
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setShowHover((prev) => {
+                if (prev) return undefined;
+                handleCursorPositon(e);
+                return (
+                  <CustomeFuncBox
+                    setOpened={() => {
+                      setShowHover(undefined);
+                    }}
+                    funcList1={funcList}
+                  />
+                );
+              });
+            }}
+          >
+            <Setting2Icon />
+          </button>
         </div>
       </div>
+
       <div className='mt-[12px] mr-[12px] bg-black-0.1 rounded-[12px]'>
         <div
           className='p-[12px] text-[14px] leading-[20px] font-[500] h-[104px] flex flex-col'
