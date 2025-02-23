@@ -31,26 +31,20 @@ const PlaylistList = ({ playlistList, isLoading }) => {
       setShowQtt(2);
     } else setShowQtt(1);
   };
-
   useLayoutEffect(() => {
-    // Function to update state with current window width
     handleResize();
 
-    window.addEventListener("resize", () => {
-      handleResize();
-    });
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", () => {
-        handleResize();
-      });
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
   return (
     <div
-      className='w-full grid'
-      style={{ gridTemplateColumns: `repeat(${showQtt}, minmax(0, 1fr)` }}
+      className='grid grid-cols-1 xsm:grid-cols-2 sm:grid-cols-3 2md:grid-cols-4 1336:grid-cols-6 '
+      // style={{ gridTemplateColumns: `repeat(${showQtt}, minmax(0, 1fr)` }}
       ref={containerRef}
     >
       {playlistList.map((item, id) => (

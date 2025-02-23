@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { DeleteAllIcon, CreateIcon } from "../../../../Assets/Icons";
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import { getDataWithAuth } from "../../../../Api/getData";
 import { dltManyData } from "../../../../Api/controller";
 import Display from "./Display";
@@ -34,7 +34,7 @@ const CommentPage = ({ openedMenu }) => {
 
   const [checkedList, setCheckedList] = useState([]);
 
-  const handleChecked = (id) => {
+  const handleChecked = useCallback((id) => {
     setCheckedList((prev) => {
       if (prev.includes(id)) {
         return [...prev.filter((data) => data !== id)];
@@ -42,17 +42,16 @@ const CommentPage = ({ openedMenu }) => {
 
       return [...prev, id];
     });
-  };
+  }, []);
 
-  const handleCheckedAll = () => {
+  const handleCheckedAll = useCallback(() => {
     if (checkedList.length === cmtsData?.data?.length) {
       setCheckedList([]);
     } else {
       const idList = cmtsData?.data?.map((item) => item?._id);
       setCheckedList(idList);
     }
-  };
-
+  }, [checkedList,]);
   const handleDeleteMany = async () => {
     await dltManyData(
       "comment/delete-many",

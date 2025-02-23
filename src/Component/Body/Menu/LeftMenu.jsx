@@ -32,7 +32,7 @@ const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
 
   return (
     <nav
-      className={`fixed top-[56px] left-0   h-screen z-[1000]`}
+      className={`fixed top-[56px] left-0  h-screen z-[1000]`}
       ref={(e) => {
         if (e) {
           e.addEventListener("wheel", (e) => {

@@ -209,23 +209,28 @@ const VideoCard = ({
           } `}
           style={thumbStyleInline}
         >
-          <div
-            className={`w-full  ${thumbStyle ? "h-full" : "h-[185.31px]"}`}
-            style={{ backgroundColor: bgColorRef.current }}
-          >
+          <div className={`aspect-video relative`}>
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_THUMB_API
               }${data?.thumb}`}
-              alt=''
-              className='size-full object-contain'
+              alt='thumbnail'
+              className='size-full object-contain z-[2] relative'
             />
+            <div
+              className='absolute inset-0 z-[1] bg-no-repeat bg-cover bg-center  blur-[8px] '
+              style={{
+                backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
+                  import.meta.env.VITE_VIEW_THUMB_API
+                }${data?.thumb}')`,
+              }}
+            ></div>
           </div>
 
           {/* duration */}
           <div
             className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
-          mr-[8px] mb-[8px] text-[12px] leading-[18px] rounded-[4px]'
+          mr-[8px] mb-[8px] text-[12px] leading-[18px] rounded-[4px] z-[3]'
           >
             {durationCalc(data?.duration || duration)}
           </div>

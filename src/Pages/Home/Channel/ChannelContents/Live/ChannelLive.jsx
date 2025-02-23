@@ -1,4 +1,3 @@
-import TagBlock from "../TagBlock";
 import { useState, useEffect } from "react";
 import { IsEnd, IsTop } from "../../../../../util/scrollPosition";
 import LiveList from "./LiveList";
@@ -25,8 +24,7 @@ const ChannelLive = () => {
 
   return (
     <div>
-      <TagBlock activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
-      <LiveList isEnd={isEnd} isTop={isTop}/>
+      <LiveList isEnd={isEnd} isTop={isTop} />
     </div>
   );
 };

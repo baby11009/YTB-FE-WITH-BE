@@ -26,8 +26,6 @@ const PlayListCard = ({
 
   const { setShowHover, handleCursorPositon } = useAuthContext();
 
-  const bgColorRef = useRef(getRandomHexColor());
-
   return (
     <Link
       to={`/video?id=${data?.video_list[0]?._id}&list=${data?._id}`}
@@ -40,22 +38,26 @@ const PlayListCard = ({
     >
       <div className={`flex-1 mx-[8px] mb-[40px] ${containerStyle} group`}>
         <div className={`relative ${imgStyle || "w-full"} aspect-video`}>
-          <div
-            className='w-full h-full bg-black-0.1 relative rounded-[12px] z-[3]'
-            style={{
-              backgroundColor: bgColorRef.current,
-            }}
-          >
-            {data?.size > 0 && (
+          {data?.size > 0 && (
+            <div className='aspect-video bg-black relative rounded-[12px] z-[3]'>
               <img
                 src={`${import.meta.env.VITE_BASE_API_URI}${
                   import.meta.env.VITE_VIEW_THUMB_API
                 }${data?.video_list[0]?.thumb}`}
                 alt='thumb'
-                className='object-contain w-full h-full rounded-[12px] '
+                className='object-contain size-full rounded-[12px] relative z-[2]'
               />
-            )}
-          </div>
+              <div
+                className='absolute inset-0 z-[1] bg-no-repeat bg-cover bg-center rounded-[12px]'
+                style={{
+                  backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
+                    import.meta.env.VITE_VIEW_THUMB_API
+                  }${data?.video_list[0]?.thumb}')`,
+                  filter: "blur(4px)",
+                }}
+              ></div>
+            </div>
+          )}
           {showL3 && (
             <div
               className='absolute top-[-8px]  left-[50%] 
@@ -86,7 +88,7 @@ const PlayListCard = ({
           </div>
 
           <div
-            className='absolute inset-0 bg-[rgba(0,0,0,0.8)] group-hover:opacity-[1] opacity-0
+            className='absolute top-0 w-full aspect-video bg-[rgba(0,0,0,0.8)] group-hover:opacity-[1] opacity-0
             z-[5] rounded-[12px] border-t-[1px] border-black flex items-center justify-center'
           >
             <div className='w-[24px]'>

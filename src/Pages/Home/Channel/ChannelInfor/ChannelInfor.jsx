@@ -6,7 +6,6 @@ import {
 import { formatNumber } from "../../../../util/numberFormat";
 import { SubscribeBtn, Slider } from "../../../../Component";
 import { getData } from "../../../../Api/getData";
-import { motion } from "framer-motion";
 import {
   useState,
   useEffect,
@@ -62,18 +61,18 @@ const funcList = [
   },
 ];
 
-const CustomeButton = ({ data, feature, handleNavigate }) => {
+const CustomeButton = ({ data, feature, handleOnClick }) => {
   return (
     <div
-      className={`border-b-[3px] cursor-pointer h-[48px]
+      className={`cursor-pointer h-[48px]
             ${
-              data.handleCheckCurr(feature)
-                ? " border-white-F1"
-                : "border-[transparent] hover:border-gray-71"
+              !data.handleCheckCurr(feature) &&
+              "border-b-[3px] border-[transparent] hover:border-gray-71"
             }
             `}
-      onClick={() => {
-        handleNavigate(data.id);
+      data-path={data.id}
+      onClick={(e) => {
+        handleOnClick(e, data.id);
       }}
     >
       {data.title}
@@ -94,23 +93,31 @@ const ChannelInfor = ({ channelEmail, openedMenu, feature }) => {
 
   const [channelData, setChannelData] = useState(undefined);
 
+  const [underlineInfo, setUnderlineInfo] = useState({ width: 0, left: 0 });
+
+  const navigateContainerRef = useRef();
+
+  const indicator = useRef();
+
   const { data, refetch } = getData(
     `/data/channels/${channelEmail}`,
     { userId: user?._id, id: channelEmail },
     channelEmail ? true : false,
     false,
   );
-
-  const handleNavigate = useCallback((newPath) => {
+  const handleOnClick = useCallback((e, newPath) => {
     const currFeature = location.pathname.split("/")[3];
     const path = currFeature
       ? location.pathname.replace(currFeature, newPath)
       : location.pathname + "/" + newPath;
 
     navigate(path);
+    if (!indicator.current.classList.contains("transition-[left]")) {
+      indicator.current.classList.add("transition-[left]");
+    }
   }, []);
 
-  const handlePressEnter = useCallback((e) => {
+  const handlePressEnter = (e) => {
     if (e.key === "Enter" && inputRef.current.value !== "") {
       const currFeature = location.pathname.split("/")[3];
       const query = new URLSearchParams({
@@ -118,11 +125,17 @@ const ChannelInfor = ({ channelEmail, openedMenu, feature }) => {
       }).toString();
       navigate(location.pathname.replace(currFeature, "search") + "?" + query);
     }
-  }, []);
+  };
 
   useLayoutEffect(() => {
     if (data) {
-      setChannelData(data.data[0]);
+      setChannelData((prev) => {
+        if (prev) {
+          return { ...prev, ...data.data[0] };
+        }
+
+        return data.data[0];
+      });
     }
   }, [data]);
 
@@ -132,15 +145,29 @@ const ChannelInfor = ({ channelEmail, openedMenu, feature }) => {
     }
   }, [focused]);
 
-  if (!channelData) return;
+  useEffect(() => {
+    if (navigateContainerRef.current) {
+      const childrens = navigateContainerRef.current.children;
+      for (let i = 0; i < childrens.length - 1; i++) {
+        if (childrens[i]?.dataset?.path === feature) {
+          const childRect = childrens[i].getBoundingClientRect();
+          const parentRect =
+            navigateContainerRef.current.getBoundingClientRect();
+          setUnderlineInfo({
+            width: childrens[i].offsetWidth,
+            left: childRect.left - parentRect.left,
+          });
+          break;
+        }
+      }
+    }
+  }, [feature]);
 
   return (
     <div
-      className={`w-[214px] xsm:w-[428px] sm:w-[642px] 2md:w-[856px]
+      className={`
     ${
-      openedMenu
-        ? "1336:w-[1070px] 2xl:w-[1284px]"
-        : " 2lg:w-[1070px] 1-5xl:w-[1284px]"
+      channelData ? "" : " invisible"
     } border-b-[1px] border-[rgba(255,255,255,0.2)]`}
     >
       {/*  Channel Banner */}
@@ -195,20 +222,10 @@ const ChannelInfor = ({ channelEmail, openedMenu, feature }) => {
             </div>
           )}
 
-          <a
-            href='https://www.youtube.com/channel/UCHApD6LBIxIusJy7VVgocfA'
-            target='_blank'
-            className='text-blue-3E py-[4px] t-1-ellipsis'
-          >
-            youtube.com/channel/UCHApD6LBIxIusJy7VVgocfA
-          </a>
-
           {/* Func Btn */}
           <div className='pt-[10px] pb-[6px] flex flex-col items-start sm:flex-row sm:items-center gap-[8px]'>
             <SubscribeBtn
-              sub={
-                channelData?.subscription_info?.notify !== null ? true : false
-              }
+              sub={channelData?.subscription_info?.notify ? true : false}
               notify={channelData?.subscription_info?.notify}
               id={channelData?.subscription_info?._id}
               channelId={channelData?._id}
@@ -225,61 +242,60 @@ const ChannelInfor = ({ channelEmail, openedMenu, feature }) => {
         </div>
       </div>
       <Slider dragScroll={true} buttonType={2}>
-        <div className='flex !mx-0 w-full text-[16px] leading-[48px] font-[500] gap-[24px]'>
+        <div
+          className='flex !mx-0 w-full text-[16px] leading-[48px] font-[500] gap-[24px]'
+          ref={navigateContainerRef}
+        >
           {funcList.map((item) => (
             <CustomeButton
               key={item.id}
               data={item}
               feature={feature}
-              handleNavigate={handleNavigate}
+              handleOnClick={handleOnClick}
             />
           ))}
-          <div className='h-[48px] flex items-center !w-fit'>
-            <motion.button
-              className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center'
-              whileTap={{
-                backgroundColor: "rgba(255,255,255,0.2)",
-              }}
-              transition={{
-                duration: 0.3,
-              }}
+          <div
+            className='h-[2px] bg-white absolute bottom-0'
+            ref={indicator}
+            style={{
+              width: underlineInfo.width + "px",
+              left: underlineInfo.left + "px",
+            }}
+          ></div>
+          <div className='h-[48px] flex items-center'>
+            <button
+              className='w-[40px] h-[40px] rounded-[50%] flex items-center justify-center active:bg-black-0.2'
               onClick={(e) => {
-                setFocused((prev) => !prev);
                 e.stopPropagation();
                 e.preventDefault();
+                setFocused((prev) => true);
               }}
             >
               <SearchIcon color={"#aaaaaa"} />
-            </motion.button>
+            </button>
 
-            {focused && (
-              <div className='flex flex-col items-center'>
-                <input
-                  type='text'
-                  ref={inputRef}
-                  placeholder='Tìm kiếm'
-                  className='outline-none bg-[transparent] text-[14px] 
+            <div
+              className={` ${
+                focused ? "flex" : "hidden"
+              } flex-col items-center`}
+            >
+              <input
+                type='text'
+                ref={inputRef}
+                placeholder='Searching'
+                className='outline-none bg-[transparent] text-[14px] 
                     leading-[20px] font-normal py-[4px]'
-                  onBlur={() => setFocused(false)}
-                  onKeyDown={handlePressEnter}
-                />
-                <div className='relative w-full'>
-                  <div className='h-[2px] bg-[#aaaaaa] origin-center'></div>
-                  {focused && (
-                    <motion.div
-                      className='h-[2px] bg-[#ffffff] origin-center absolute top-0 left-[50%] w-[0] '
-                      animate={{
-                        width: "100%",
-                        left: 0,
-                      }}
-                      transition={{
-                        delay: 0.05,
-                      }}
-                    ></motion.div>
-                  )}
-                </div>
+                onBlur={() => setFocused(false)}
+                onKeyDown={handlePressEnter}
+              />
+              <div className='relative w-full'>
+                <div className='h-[2px] bg-[#aaaaaa] origin-center'></div>
+
+                <div
+                  className={`h-[2px] bg-[#ffffff] origin-center absolute top-0 left-[50%] w-[0] animate-centerSliderIn `}
+                ></div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </Slider>

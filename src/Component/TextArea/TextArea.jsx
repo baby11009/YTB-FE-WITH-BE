@@ -35,15 +35,6 @@ const TextArea = ({
     (e) => {
       handleOnChange(name, textAreaRef.current.innerHTML);
 
-      let textContent = textAreaRef.current.innerText;
-
-      // if the innetText is \n\n then it means line breaks, count total of the line breaks
-      const totalLineBreak = textContent.match(/\n{2}/g)?.length || 0;
-
-      // Replace \n linebreaks with ↵ to count the number of characters
-      let enterAdjustedText = textContent.replace(/\n/g, "↵");
-      // minus with the total line breaks to make sure the line breaks just count as 1 character
-      const total = enterAdjustedText.length - totalLineBreak;
       setTotalCharacters(total);
       if (total > maxLength) {
         setIsErr(true);
@@ -66,7 +57,7 @@ const TextArea = ({
   const hanldeOnPaste = useCallback((e) => {
     e.preventDefault();
 
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const urlRegex = /(g;https?:\/\/[^\s]+)/;
     let clipboardText = e.clipboardData.getData("text/plain");
 
     // Nếu clipboardText chứa URL, thay thế bằng thẻ <a>

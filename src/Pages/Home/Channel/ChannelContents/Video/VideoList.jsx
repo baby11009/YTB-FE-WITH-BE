@@ -1,42 +1,14 @@
-import { useState, useLayoutEffect, useRef, useEffect } from "react";
 import { VideoCard } from "../../../../../Component";
+import { useAuthContext } from "../../../../../Auth Provider/authContext";
 
 const VideoList = ({ vidList, isLoading }) => {
-  const containerRef = useRef();
-
-  const [showQtt, setShowQtt] = useState(4);
-
-  const handleResize = () => {
-    if (containerRef.current.offsetWidth >= 1070 && containerRef.current) {
-      setShowQtt(4);
-    } else if (
-      containerRef.current.offsetWidth === 856 &&
-      containerRef.current
-    ) {
-      setShowQtt(3);
-    } else if (
-      containerRef.current.offsetWidth === 642 &&
-      containerRef.current
-    ) {
-      setShowQtt(2);
-    } else setShowQtt(1);
-  };
-
-  useLayoutEffect(() => {
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  const { openedMenu } = useAuthContext();
 
   return (
     <div
-      className='w-full grid'
-      style={{ gridTemplateColumns: `repeat(${showQtt},minmax(0,1fr))` }}
-      ref={containerRef}
+      className={`grid grid-cols-1 sm:grid-cols-2 2md:grid-cols-3 ${
+        openedMenu ? "1336:grid-cols-4" : "2lg:grid-cols-4"
+      } `}
     >
       {vidList.map((item, id) => (
         <VideoCard

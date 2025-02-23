@@ -103,6 +103,16 @@ export default {
 
           "100%": { left: "8px", top: "0px", transform: "scale(0.95)" },
         },
+        centerSlideIn: {
+          "0%": {
+            left: "50%",
+            width: "0%",
+          },
+          "100%": {
+            left: "0%",
+            width: "100%",
+          },
+        },
         btnPing: {
           "0%": {
             opacity: 1,
@@ -120,6 +130,7 @@ export default {
         labelMoveUp: "labelMoveUp 0.25s ease-out forwards",
         labelMoveDown: "labelMoveDown 0.25s ease-out forwards",
         buttonPing: "btnPing 0.4s ease-out forwards",
+        centerSliderIn: "centerSlideIn 0.25s ease-out forwards",
       },
     },
   },

@@ -29,7 +29,7 @@ const ChannelVideo = ({ channelEmail }) => {
 
   const [isEnd, setIsEnd] = useState(false);
 
-  const handleSort = useCallback((data) => {
+  const handleSort = (data) => {
     queryClient.removeQueries({
       queryKey: [...Object.values(query), "/data/videos"],
       exact: true,
@@ -43,9 +43,9 @@ const ChannelVideo = ({ channelEmail }) => {
     setAddNew(true);
 
     currentSortId.current = data.id;
-  });
+  };
 
-  const buttonList = [
+  const buttonList = useRef([
     {
       id: "latest",
       title: "Latest",
@@ -64,8 +64,7 @@ const ChannelVideo = ({ channelEmail }) => {
       value: { createdAt: 1 },
       handleOnClick: handleSort,
     },
-  ];
-
+  ]);
   useEffect(() => {
     window.addEventListener("scroll", () => {
       IsEnd(setIsEnd);
@@ -98,10 +97,9 @@ const ChannelVideo = ({ channelEmail }) => {
 
   return (
     <div className='w-full'>
-      {/* <TagBlock activeIndex={activeIndex} handleOnClick={handleOnClick} /> */}
       <div className='mt-[16px] mb-[-8px]'>
         <ButtonHorizonSlider
-          buttonList={buttonList}
+          buttonList={buttonList.current}
           currentId={currentSortId.current}
         />
       </div>
