@@ -9,13 +9,12 @@ import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
 import VideoUpsertModal from "./VideoUpsertModal";
-import { useCallback } from "react";
+
 
 const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
-  
   const { setIsShowing, addToaster } = useAuthContext();
 
-  const handleDelete = useCallback(async () => {
+  const handleDelete = async () => {
     await dltData(
       "/client/video",
       data?._id,
@@ -26,9 +25,9 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
       undefined,
       addToaster,
     );
-  }, [data]);
+  }
 
-  const showDeleteConfirm = useCallback(() => {
+  const showDeleteConfirm = () => {
     setIsShowing(
       <DeleteConfirm
         handleDelete={handleDelete}
@@ -36,11 +35,11 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
         data={data?._id}
       />,
     );
-  }, [data]);
+  };
 
-  const showUpsertModal = useCallback(() => {
+  const showUpsertModal = () => {
     setIsShowing(<VideoUpsertModal title={"Editing video"} id={data?._id} />);
-  }, [data]);
+  };
 
   return (
     <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>

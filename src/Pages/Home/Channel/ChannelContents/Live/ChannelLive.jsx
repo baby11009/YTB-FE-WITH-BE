@@ -1,30 +1,24 @@
 import { useState, useEffect } from "react";
-import { IsEnd, IsTop } from "../../../../../util/scrollPosition";
+import { IsEnd } from "../../../../../util/scrollPosition";
 import LiveList from "./LiveList";
 
 const ChannelLive = () => {
-  const [activeIndex, setActiveIndex] = useState(1);
   const [isEnd, setIsEnd] = useState(false);
 
-  const [isTop, setIsTop] = useState(true);
-
   useEffect(() => {
-    window.addEventListener("scroll", () => {
+    const handleScroll = () => {
       IsEnd(setIsEnd);
-      IsTop(setIsTop);
-    });
+    };
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", () => {
-        IsEnd(setIsEnd);
-        IsTop(setIsTop);
-      });
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   return (
     <div>
-      <LiveList isEnd={isEnd} isTop={isTop} />
+      <LiveList isEnd={isEnd}/>
     </div>
   );
 };

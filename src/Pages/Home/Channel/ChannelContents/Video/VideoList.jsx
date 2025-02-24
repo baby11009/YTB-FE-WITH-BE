@@ -6,9 +6,8 @@ const VideoList = ({ vidList, isLoading }) => {
 
   return (
     <div
-      className={`grid grid-cols-1 sm:grid-cols-2 2md:grid-cols-3 ${
-        openedMenu ? "1336:grid-cols-4" : "2lg:grid-cols-4"
-      } `}
+      className={`grid grid-cols-1 sm:grid-cols-2 2md:grid-cols-3 2lg:grid-cols-4
+      ${openedMenu && "1312:grid-cols-3 1360:grid-cols-4"} `}
     >
       {vidList.map((item, id) => (
         <VideoCard

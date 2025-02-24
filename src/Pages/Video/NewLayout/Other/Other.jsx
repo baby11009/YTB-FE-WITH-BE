@@ -5,6 +5,7 @@ import {
 } from "../../../../Component";
 import PlayList from "./Playlist/Playlist";
 import CustomVideoCard from "./CustomVideoCard";
+import { memo } from "react";
 
 const Other = ({
   videoId,
@@ -146,4 +147,4 @@ const Other = ({
     </div>
   );
 };
-export default Other;
+export default memo(Other);

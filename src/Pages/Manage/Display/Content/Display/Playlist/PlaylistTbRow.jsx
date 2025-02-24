@@ -9,7 +9,7 @@ import {
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
-import { useCallback } from "react";
+
 import Upsert from "./Upsert/Upsert";
 
 const type = {
@@ -29,7 +29,7 @@ const PlaylistTbRow = ({
 }) => {
   const { setIsShowing, addToaster } = useAuthContext();
 
-  const handleDelete = useCallback(async () => {
+  const handleDelete = async () => {
     await dltData(
       "/client/playlist",
       data?._id,
@@ -40,7 +40,7 @@ const PlaylistTbRow = ({
       undefined,
       addToaster,
     );
-  });
+  };
 
   const showDeleteConfirm = () => {
     setIsShowing(
@@ -52,7 +52,7 @@ const PlaylistTbRow = ({
     );
   };
 
-  const showUpsertModal = useCallback((func) => {
+  const showUpsertModal = (func) => {
     setIsShowing(
       <Upsert
         playlistId={data?._id}
@@ -62,7 +62,7 @@ const PlaylistTbRow = ({
         }}
       />,
     );
-  }, []);
+  };
 
   return (
     <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>

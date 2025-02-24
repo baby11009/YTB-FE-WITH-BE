@@ -75,7 +75,7 @@ const Playlist = () => {
     });
   }, []);
 
-  const handleOnClick = useCallback((data) => {
+  const handleOnClick = (data) => {
     setSearching((prev) => {
       if (prev && prev.id === data.id) {
         return undefined;
@@ -83,11 +83,11 @@ const Playlist = () => {
 
       return data;
     });
-  }, []);
+  };
 
   const timeoutRef = useRef();
 
-  const handleOnSearch = useCallback((searchType, value) => {
+  const handleOnSearch = (searchType, value) => {
     clearTimeout(timeoutRef.current);
     setTimeout(() => {
       setQueriese((prev) => ({
@@ -96,28 +96,25 @@ const Playlist = () => {
         page: 1,
       }));
     }, 600);
-  }, []);
+  };
 
-  const handleSortUnique = useCallback(
-    (key, value) => {
-      const uniqueSortKeys = ["size"];
-      const sortObj = { ...queriese.sort };
+  const handleSortUnique = (key, value) => {
+    const uniqueSortKeys = ["size"];
+    const sortObj = { ...queriese.sort };
 
-      const sortObjKeys = Object.keys(sortObj);
-      if (sortObjKeys.includes(key)) {
-        sortObj[key] = value;
-      } else if (uniqueSortKeys.includes(key)) {
-        sortObjKeys.forEach((key) => {
-          if (uniqueSortKeys.includes(key)) {
-            delete sortObj[key];
-          }
-        });
-        sortObj[key] = value;
-      }
-      setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
-    },
-    [queriese],
-  );
+    const sortObjKeys = Object.keys(sortObj);
+    if (sortObjKeys.includes(key)) {
+      sortObj[key] = value;
+    } else if (uniqueSortKeys.includes(key)) {
+      sortObjKeys.forEach((key) => {
+        if (uniqueSortKeys.includes(key)) {
+          delete sortObj[key];
+        }
+      });
+      sortObj[key] = value;
+    }
+    setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
+  };
 
   const funcList = useRef([
     {
@@ -128,7 +125,7 @@ const Playlist = () => {
     },
   ]);
 
-  const handleDeleteMany = useCallback(async () => {
+  const handleDeleteMany = async () => {
     await dltManyData(
       "/client/playlist/delete-many",
       checkedList,
@@ -140,9 +137,9 @@ const Playlist = () => {
       undefined,
       addToaster,
     );
-  }, [checkedList]);
-
-  const showDltConfirm = useCallback(() => {
+  };
+  
+  const showDltConfirm = () => {
     if (checkedList.length < 1) {
       alert("Please select at least one item");
       return;
@@ -154,7 +151,7 @@ const Playlist = () => {
         data={checkedList.join(", ")}
       />,
     );
-  }, [checkedList]);
+  };
 
   useLayoutEffect(() => {
     const handleResize = (e) => {

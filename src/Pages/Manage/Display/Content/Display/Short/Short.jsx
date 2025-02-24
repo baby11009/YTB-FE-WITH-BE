@@ -73,7 +73,7 @@ const Short = () => {
     });
   }, []);
 
-  const handleOnClick = useCallback((data) => {
+  const handleOnClick = (data) => {
     setSearching((prev) => {
       if (prev && prev.id === data.id) {
         return undefined;
@@ -81,17 +81,17 @@ const Short = () => {
 
       return data;
     });
-  }, []);
+  }
   const timeoutRef = useRef();
 
-  const handleOnSearch = useCallback((e) => {
+  const handleOnSearch = (e) => {
     clearTimeout(timeoutRef.current);
     setTimeout(() => {
       setQueriese((prev) => ({ ...prev, title: e.target.value, page: 1 }));
     }, 600);
-  }, []);
+  }
 
-  const handleSort = useCallback(
+  const handleSort =
     (key, value) => {
       // Can only have 1 add on sort key at the same time
       const addOnSortKeys = new Set(["view", "like", "dislike", "totalCmt"]);
@@ -110,9 +110,7 @@ const Short = () => {
         sortObj[key] = value;
       }
       setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
-    },
-    [queriese],
-  );
+    }
 
   const funcList = useRef([
     {
@@ -124,7 +122,7 @@ const Short = () => {
     },
   ]);
 
-  const handleDeleteMany = useCallback(async () => {
+  const handleDeleteMany = async () => {
     await dltManyData(
       "/client/video/delete-many",
       checkedList,
@@ -136,9 +134,9 @@ const Short = () => {
       undefined,
       addToaster,
     );
-  }, [checkedList]);
+  }
 
-  const showDltConfirm = useCallback(() => {
+  const showDltConfirm = () => {
     if (checkedList.length < 1) {
       alert("Please select at least one item");
       return;
@@ -150,11 +148,11 @@ const Short = () => {
         data={checkedList.join(", ")}
       />,
     );
-  }, [checkedList]);
+  }
 
-  const showUpsertModal = useCallback(() => {
+  const showUpsertModal = () => {
     setIsShowing(<ShortUpsertModal title={"Uploading short"} />);
-  }, []);
+  }
 
   useEffect(() => {
     return () => {

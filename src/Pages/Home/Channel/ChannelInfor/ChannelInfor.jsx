@@ -80,7 +80,7 @@ const CustomeButton = ({ data, feature, handleOnClick }) => {
   );
 };
 
-const ChannelInfor = ({ channelEmail, openedMenu, feature }) => {
+const ChannelInfor = ({ channelEmail, feature }) => {
   const { user } = useAuthContext();
 
   const location = useLocation();
@@ -142,6 +142,8 @@ const ChannelInfor = ({ channelEmail, openedMenu, feature }) => {
   useEffect(() => {
     if (focused && inputRef.current) {
       inputRef.current.focus();
+    } else {
+      inputRef.current.value = "";
     }
   }, [focused]);
 
@@ -285,7 +287,12 @@ const ChannelInfor = ({ channelEmail, openedMenu, feature }) => {
                 placeholder='Searching'
                 className='outline-none bg-[transparent] text-[14px] 
                     leading-[20px] font-normal py-[4px]'
-                onBlur={() => setFocused(false)}
+                onBlur={() => {
+                  console.log(feature);
+                  if (inputRef.current.value === "") {
+                    setFocused(false);
+                  }
+                }}
                 onKeyDown={handlePressEnter}
               />
               <div className='relative w-full'>

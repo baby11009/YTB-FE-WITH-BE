@@ -5,7 +5,6 @@ import {
   Share2Icon,
   RemovePL,
 } from "../../../../../../../Assets/Icons";
-import { useCallback } from "react";
 import { useAuthContext } from "../../../../../../../Auth Provider/authContext";
 import { updateData } from "../../../../../../../Api/controller";
 const VideoList = ({
@@ -16,10 +15,9 @@ const VideoList = ({
   setPage,
   refetch,
 }) => {
-
   const { addToaster } = useAuthContext();
 
-  const handleCopyVideoLink = useCallback((videoId, type) => {
+  const handleCopyVideoLink = (videoId, type) => {
     let url;
     switch (type) {
       case "video":
@@ -37,24 +35,21 @@ const VideoList = ({
       .catch(() => {
         addToaster("Failed to copy link");
       });
-  }, []);
+  };
 
-  const handleRemoveVideo = useCallback(
-    async (videoId) => {
-      await updateData(
-        "/client/playlist",
-        playlistId,
-        { videoIdList: [videoId] },
-        "playlist",
-        () => {
-          refetch();
-        },
-        undefined,
-        addToaster,
-      );
-    },
-    [playlistId],
-  );
+  const handleRemoveVideo = async (videoId) => {
+    await updateData(
+      "/client/playlist",
+      playlistId,
+      { videoIdList: [videoId] },
+      "playlist",
+      () => {
+        refetch();
+      },
+      undefined,
+      addToaster,
+    );
+  };
 
   return (
     <div className='mt-[24px]'>
@@ -140,7 +135,6 @@ const VideoList = ({
                       </div>
                     </div>
                   </div>
-                  
                 </div>
                 <div className='flex-[0_0_100px] min-w-[100px] mx-[12px] my-[8px] text-[12px] leading-[20px]'>
                   <span>{timeFormat3(video?.createdAt)}</span>

@@ -2,7 +2,6 @@ import {
   useState,
   useLayoutEffect,
   useRef,
-  useCallback,
   useEffect,
 } from "react";
 import Details from "./Details";

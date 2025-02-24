@@ -58,123 +58,114 @@ const ChannelSetting = () => {
     [realTimeErrs],
   );
 
-  const handleValidateUpdate = useCallback(
-    (formData) => {
-      if (Object.keys(submitErrs).length > 0) {
-        setSubmitErrs({ inputName: [], message: [] });
-      }
-      let hasErrors = false;
-      const keys = Object.keys(formData).filter(
-        (key) =>
-          key !== "avatar" &&
-          key !== "banner" &&
-          key !== "password" &&
-          key !== "confirm" &&
-          key !== "description",
-      );
-      keys.forEach((key) => {
-        if (formData[key] === "") {
-          setSubmitErrs((prev) => ({ ...prev, [key]: "Cannot be empty" }));
-          hasErrors = true;
-        }
-      });
-
-      if (
-        (formData.password || formData.confirm) &&
-        formData.password !== formData.confirm
-      ) {
-        setSubmitErrs((prev) => ({
-          ...prev,
-          confirm: "Password confirmation is not matching",
-        }));
+  const handleValidateUpdate = (formData) => {
+    if (Object.keys(submitErrs).length > 0) {
+      setSubmitErrs({ inputName: [], message: [] });
+    }
+    let hasErrors = false;
+    const keys = Object.keys(formData).filter(
+      (key) =>
+        key !== "avatar" &&
+        key !== "banner" &&
+        key !== "password" &&
+        key !== "confirm" &&
+        key !== "description",
+    );
+    keys.forEach((key) => {
+      if (formData[key] === "") {
+        setSubmitErrs((prev) => ({ ...prev, [key]: "Cannot be empty" }));
         hasErrors = true;
       }
-      if (hasErrors) {
-        return true;
-      }
-    },
-    [submitErrs],
-  );
+    });
 
-  const update = useCallback(
-    async (formData, user) => {
-      const error = handleValidateUpdate(formData);
+    if (
+      (formData.password || formData.confirm) &&
+      formData.password !== formData.confirm
+    ) {
+      setSubmitErrs((prev) => ({
+        ...prev,
+        confirm: "Password confirmation is not matching",
+      }));
+      hasErrors = true;
+    }
+    if (hasErrors) {
+      return true;
+    }
+  };
 
-      if (error) {
-        return;
-      }
+  const update = async (formData, user) => {
+    const error = handleValidateUpdate(formData);
 
-      let finalData = {
-        name: formData.name,
-        password: formData.password,
-        description: formData.description,
-      };
+    if (error) {
+      return;
+    }
 
-      for (const key in finalData) {
-        if (user.hasOwnProperty(key)) {
-          if (user[key] === finalData[key]) {
-            delete finalData[key];
-          }
+    let finalData = {
+      name: formData.name,
+      password: formData.password,
+      description: formData.description,
+    };
+
+    for (const key in finalData) {
+      if (user.hasOwnProperty(key)) {
+        if (user[key] === finalData[key]) {
+          delete finalData[key];
         }
       }
+    }
 
-      if (finalData.password === "") {
-        delete finalData.password;
+    if (finalData.password === "") {
+      delete finalData.password;
+    }
+
+    if (formData.image) {
+      finalData.image = formData.image;
+    }
+
+    if (formData.banner) {
+      finalData.banner = formData.banner;
+    }
+
+    if (Object.keys(finalData).length === 0) {
+      alert("Nothing changed");
+      return;
+    }
+
+    let data = new FormData();
+
+    for (const key in finalData) {
+      if (key === "image") {
+        data.append(key, finalData[key], avaName);
+      } else if (key === "banner") {
+        data.append(key, finalData[key], bannerName);
+      } else {
+        data.append(key, finalData[key]);
       }
+    }
+    console.log(finalData);
+    await updateData(
+      "/client/user/me",
+      undefined,
+      data,
+      "user",
+      () => {
+        setRefetch(true);
+      },
+      undefined,
+      addToaster,
+    );
+  };
 
-      if (formData.image) {
-        finalData.image = formData.image;
-      }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-      if (formData.banner) {
-        finalData.banner = formData.banner;
-      }
+    setSubmitLoading(true);
 
-      if (Object.keys(finalData).length === 0) {
-        alert("Nothing changed");
-        return;
-      }
+    await update(formData, user);
 
-      let data = new FormData();
-
-      for (const key in finalData) {
-        if (key === "image") {
-          data.append(key, finalData[key], avaName);
-        } else if (key === "banner") {
-          data.append(key, finalData[key], bannerName);
-        } else {
-          data.append(key, finalData[key]);
-        }
-      }
-      console.log(finalData);
-      await updateData(
-        "/client/user/me",
-        undefined,
-        data,
-        "user",
-        () => {
-          setRefetch(true);
-        },
-        undefined,
-        addToaster,
-      );
-    },
-    [submitErrs],
-  );
-
-  const handleSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-
-      setSubmitLoading(true);
-
-      await update(formData, user);
-
-      setSubmitLoading(false);
-    },
-    [submitErrs, formData, user],
-  );
-
+    setSubmitLoading(false);
+  };
+  
   useEffect(() => {
     let timeOut;
     if (Object.keys(submitErrs).length > 0) {

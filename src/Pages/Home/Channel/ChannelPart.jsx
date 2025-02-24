@@ -42,7 +42,11 @@ const ChannelPart = ({ openedMenu }) => {
     <div className='flex flex-col items-center justify-center'>
       <div
         className={`w-[214px] xsm:w-[428px] sm:w-[642px] 2md:w-[856px] 2lg:w-[1070px] 
-      ${openedMenu ? "2xl:w-[1284px]" : "1336:w-[1284px]"}`}
+      ${
+        openedMenu
+          ? "1312:w-[856px] 1360:w-[1070px] 1573:w-[1284px]"
+          : "1400:w-[1284px]"
+      }`}
       >
         <ChannelInfor
           channelEmail={id}

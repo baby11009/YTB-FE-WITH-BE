@@ -29,7 +29,7 @@ const ChannelShort = ({ channelEmail }) => {
 
   const currentSortId = useRef("latest");
 
-  const handleSort = useCallback((data) => {
+  const handleSort = (data) => {
     queryClient.removeQueries({
       queryKey: [...Object.values(query), "/data/videos"],
       exact: true,
@@ -43,7 +43,7 @@ const ChannelShort = ({ channelEmail }) => {
     setAddNew(true);
 
     currentSortId.current = data.id;
-  });
+  };
 
   const buttonList = [
     {
@@ -67,15 +67,14 @@ const ChannelShort = ({ channelEmail }) => {
   ];
 
   useEffect(() => {
-    window.addEventListener("scroll", () => {
+    const handleScroll = () => {
       IsEnd(setIsEnd);
-    });
+    };
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
       queryClient.clear();
-      window.removeEventListener("scroll", () => {
-        IsEnd(setIsEnd);
-      });
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -95,20 +94,18 @@ const ChannelShort = ({ channelEmail }) => {
       }
     }
   }, [videosData]);
+
   return (
     <div className='w-full pb-[40px]'>
       <div className='mt-[16px] mb-[-8px]'>
-        {" "}
         <ButtonHorizonSlider
           buttonList={buttonList}
           currentId={currentSortId.current}
         />
       </div>
       <div className='pt-[24px]'>
-        {dataList.length > 0 ? (
+        {dataList.length > 0 && (
           <ShortList shortList={dataList} isLoading={isLoading} />
-        ) : (
-          "Không có dữ liệu"
         )}
       </div>
     </div>

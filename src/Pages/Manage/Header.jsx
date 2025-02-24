@@ -12,7 +12,7 @@ import {
 import { Link } from "react-router-dom";
 import { useAuthContext } from "../../Auth Provider/authContext";
 import { removeCookie } from "../../util/tokenHelpers";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef,} from "react";
 import { useNavigate } from "react-router-dom";
 
 const CustomButton = ({ data }) => {

@@ -62,7 +62,7 @@ const Video = () => {
 
       setCheckedList(idList);
     }
-  }, [checkedList, dataList]);
+  },[])
 
   const handleChecked = useCallback((id) => {
     setCheckedList((prev) => {
@@ -73,9 +73,9 @@ const Video = () => {
         return [...prev.filter((data) => data !== id)];
       }
     });
-  }, []);
+  },[])
 
-  const handleOnClick = useCallback((data) => {
+  const handleOnClick = (data) => {
     setSearching((prev) => {
       if (prev && prev.id === data.id) {
         return undefined;
@@ -83,7 +83,7 @@ const Video = () => {
 
       return data;
     });
-  }, []);
+  };
 
   const sortBtnList = useRef([
     {
@@ -95,37 +95,34 @@ const Video = () => {
     },
   ]);
 
-  const handleOnSearch = useCallback((e) => {
+  const handleOnSearch = (e) => {
     clearTimeout(timeoutRef.current);
     setTimeout(() => {
       setQueriese((prev) => ({ ...prev, title: e.target.value, page: 1 }));
     }, 600);
-  }, []);
+  };
 
-  const handleSort = useCallback(
-    (key, value) => {
-      // Can only have 1 add on sort key at the same time
-      const addOnSortKeys = new Set(["view", "like", "dislike", "totalCmt"]);
-      const sortObj = { ...queriese.sort };
+  const handleSort = (key, value) => {
+    // Can only have 1 add on sort key at the same time
+    const addOnSortKeys = new Set(["view", "like", "dislike", "totalCmt"]);
+    const sortObj = { ...queriese.sort };
 
-      const sortObjKeys = Object.keys(sortObj);
-      if (sortObjKeys.includes(key)) {
-        sortObj[key] = value;
-      } else if (addOnSortKeys.has(key)) {
-        // remove previous addon sort key
-        sortObjKeys.forEach((key) => {
-          if (addOnSortKeys.has(key)) {
-            delete sortObj[key];
-          }
-        });
-        sortObj[key] = value;
-      }
-      setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
-    },
-    [queriese],
-  );
+    const sortObjKeys = Object.keys(sortObj);
+    if (sortObjKeys.includes(key)) {
+      sortObj[key] = value;
+    } else if (addOnSortKeys.has(key)) {
+      // remove previous addon sort key
+      sortObjKeys.forEach((key) => {
+        if (addOnSortKeys.has(key)) {
+          delete sortObj[key];
+        }
+      });
+      sortObj[key] = value;
+    }
+    setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
+  };
 
-  const handleDeleteMany = useCallback(async () => {
+  const handleDeleteMany = async () => {
     await dltManyData(
       "/client/video/delete-many",
       checkedList,
@@ -137,9 +134,8 @@ const Video = () => {
       undefined,
       addToaster,
     );
-  }, [checkedList]);
-
-  const showDltConfirm = useCallback(() => {
+  };
+  const showDltConfirm = () => {
     if (checkedList.length < 1) {
       alert("Please select at least one item");
       return;
@@ -151,11 +147,11 @@ const Video = () => {
         data={checkedList.join(", ")}
       />,
     );
-  }, [checkedList]);
+  };
 
-  const showUpsertModal = useCallback(() => {
+  const showUpsertModal = () => {
     setIsShowing(<VideoUpsertModal title={"Uploading video"} />);
-  }, []);
+  };
 
   useEffect(() => {
     return () => {

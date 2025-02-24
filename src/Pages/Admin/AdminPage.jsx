@@ -2,7 +2,6 @@ import MainLayOut from "../../Layout/MainLayOut";
 import { useState, useEffect, useLayoutEffect, Suspense } from "react";
 import Header from "./Header";
 import Menu from "./Menu/Menu";
-import SdMenu from "./Menu/SdMenu";
 import {
   DisplayUser,
   DisplayVideo,
@@ -17,10 +16,15 @@ import {
   UpsertPlaylist,
   UpsertTag,
 } from "./Upsert";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { scrollToTop } from "../../util/scrollCustom";
+import { useAuthContext } from "../../Auth Provider/authContext";
 
 const AdminPage = () => {
+  const { user } = useAuthContext();
+
+  const navigate = useNavigate();
+
   const [openedMenu, setOpenedMenu] = useState(true);
 
   const [pageRender, setPageRender] = useState(undefined);
@@ -52,8 +56,7 @@ const AdminPage = () => {
     if (pageList[page]) {
       setPageRender(pageList[page]);
     } else {
-      setPageRender(undefined);
-      throw new Error("Route does not exits");
+      navigate("/");
     }
   }, [params, openedMenu]);
 
@@ -66,32 +69,28 @@ const AdminPage = () => {
       <>
         <Header setOpenedMenu={setOpenedMenu} />
 
-        <div className='hidden xl:block z-[500]'>
+        <div className='relative z-[9500]'>
           <Menu
             openedMenu={openedMenu}
             setOpenedMenu={setOpenedMenu}
             currPath={location.pathname}
+            userData={user}
           />
         </div>
-        <div className='block xl:hidden z-[500]'>
-          <SdMenu
-            openedMenu={openedMenu}
-            setOpenedMenu={setOpenedMenu}
-            currPath={location.pathname}
-          />
-        </div>
+
         <div
-          className={` md:ml-[74px] flex justify-center px-[16px] md:px-0 ${
-            openedMenu && "xl:ml-[240px]"
-          }`}
+          className={` md:ml-[74px] flex justify-center  ${
+            openedMenu && "2lg:ml-[255px]"
+          } transition-[margin]  ease-cubic-bezier-[0,0,0.2,1]
+           duration-[417ms]`}
         >
           <div
-            className={`w-full md:px-[24px]
-            pt-[56px] relative`}
+            className='w-full h-[calc(100vh-56px)] md:px-[16px]
+            mt-[56px] relative '
           >
             <Suspense
               fallback={
-                <div className='w-full h-screen flex items-center justify-center'>
+                <div className=' h-screen flex items-center justify-center'>
                   <h2 className='text-[30px] leading-[32px] font-[500]'>
                     Loading.....
                   </h2>

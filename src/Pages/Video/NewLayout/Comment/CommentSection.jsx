@@ -1,6 +1,6 @@
 import { formatNumber } from "../../../../util/numberFormat";
-import { CloseIcon, SortIcon } from "../../../../Assets/Icons";
-import { useState, useCallback, useRef, useEffect } from "react";
+import { SortIcon } from "../../../../Assets/Icons";
+import { useState, useRef, useEffect } from "react";
 import { getMousePosition } from "../../../../util/mouse";
 import { CustomeFuncBox, CommentInput, Comment } from "../../../../Component";
 import { getData } from "../../../../Api/getData";
@@ -19,7 +19,6 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
   const {
     data: cmtData,
     refetch: refetchCmt,
-    isSuccess,
     isLoading,
   } = getData(
     `/data/comment/video-cmt/${videoId}`,

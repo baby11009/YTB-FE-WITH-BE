@@ -1,34 +1,12 @@
 import { ShortCard } from "../../../../../Component";
 import { useState, useLayoutEffect, useEffect, useRef } from "react";
-
-const ShortsRow = ({ showQtt, dataList }) => {
-  const [vrArr, setVrArr] = useState([]);
-
-  useLayoutEffect(() => {
-    setVrArr(Array.from({ length: showQtt - dataList?.length }, (_, i) => i));
-  }, [showQtt, dataList]);
-  return (
-    <div className='flex mx-[-8px]'>
-      {dataList.map((item, index) => (
-        <ShortCard
-          key={index}
-          data={item}
-          containerStyle={"!mx-[2px] !mb-[20px]"}
-        />
-      ))}
-      {vrArr.map((item) => (
-        <div className='flex-1' key={item}></div>
-      ))}
-    </div>
-  );
-};
-
+import { useAuthContext } from "../../../../../Auth Provider/authContext";
 const ShortList = ({ shortList, isLoading }) => {
+  const { openedMenu } = useAuthContext();
+
   const containerRef = useRef();
 
   const [showQtt, setShowQtt] = useState(6);
-
-  const [rows, setRows] = useState(3);
 
   const handleResize = () => {
     if (containerRef.current.offsetWidth > 1070 && containerRef.current) {
@@ -56,24 +34,14 @@ const ShortList = ({ shortList, isLoading }) => {
     } else setShowQtt(1);
   };
 
-  useLayoutEffect(() => {
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    setRows(Math.ceil(shortList?.length / showQtt));
-  }, [showQtt, shortList]);
-
   return (
     <div
-      className='w-full grid'
-      style={{ gridTemplateColumns: `repeat(${showQtt},minmax(0,1fr))` }}
+      className={`grid grid-cols-1 xsm:grid-cols-2 sm:grid-cols-3 2md:grid-cols-4 2lg:grid-cols-5 
+      ${
+        openedMenu
+          ? "1312:grid-cols-4 1360:grid-cols-5  1573:grid-cols-6"
+          : "1400:grid-cols-6"
+      }`}
       ref={containerRef}
     >
       {shortList.map((item, id) => (

@@ -54,7 +54,7 @@ const ManagePage = () => {
         </div>
         <div
           className={` md:ml-[74px] flex justify-center ${
-            openedMenu && "xl:ml-[255px]"
+            openedMenu && "2lg:ml-[255px]"
           } transition-[margin]  ease-cubic-bezier-[0,0,0.2,1]
            duration-[417ms]`}
         >

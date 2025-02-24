@@ -9,12 +9,12 @@ import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
 import ShortUpsertModal from "./ShortUpsertModal";
-import { useCallback } from "react";
+
 
 const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
   const { setIsShowing, addToaster } = useAuthContext();
 
-  const handleDelete = useCallback(async () => {
+  const handleDelete = async () => {
     await dltData(
       "/client/video",
       data?._id,
@@ -25,9 +25,8 @@ const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
       undefined,
       addToaster,
     );
-  });
-
-  const showDeleteConfirm = useCallback(() => {
+  }
+  const showDeleteConfirm = () => {
     setIsShowing(
       <DeleteConfirm
         handleDelete={handleDelete}
@@ -35,11 +34,11 @@ const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
         data={data?._id}
       />,
     );
-  }, [data?._id]);
+  }
 
-  const showUpsertModal = useCallback(() => {
+  const showUpsertModal =() => {
     setIsShowing(<ShortUpsertModal title={"Editing short"} id={data?._id} />);
-  }, [data?._id]);
+  }
 
   return (
     <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>

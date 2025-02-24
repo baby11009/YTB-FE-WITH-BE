@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import {  useLayoutEffect } from "react";
 import { ThinArrowIcon, CheckIcon } from "../../../../../Assets/Icons";
 
 const Quality = ({

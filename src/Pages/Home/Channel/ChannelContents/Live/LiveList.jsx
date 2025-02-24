@@ -5,7 +5,8 @@ import {
   sangtraan_live1,
 } from "../../../../../Assets/Images";
 import { VideoCard } from "../../../../../Component";
-import { useState, useLayoutEffect, useEffect, useRef } from "react";
+import { useState } from "react";
+import { useAuthContext } from "../../../../../Auth Provider/authContext";
 
 const mockList = [
   {
@@ -55,91 +56,64 @@ const mockList = [
   },
 ];
 
-const LiveRow = ({ showQtt }) => {
-  return (
-    <div className='flex mx-[-8px]'>
-      {mockList.slice(0, showQtt).map((item) => {
-        return (
-          <VideoCard
-            data={item}
-            key={item.id}
-            showBtn={true}
-            style={`inline-block flex-1 mx-[8px] mb-[40px]`}
-            thumbStyleInline={{
-              borderRadius: "12px",
-            }}
-            titleStyle={"text-[14px] leading-[20px] font-[500] max-h-[40px]"}
-            noFuncBox={true}
-          />
-        );
-      })}
-    </div>
-  );
-};
-
-const LiveList = ({ isEnd, isTop }) => {
-  const containerRef = useRef();
-
-  const [showQtt, setShowQtt] = useState(6);
+const LiveList = ({ isEnd }) => {
+  const { openedMenu } = useAuthContext();
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const [rows, setRows] = useState(3);
-
-  const handleResize = () => {
-    if (containerRef.current.offsetWidth >= 1070 && containerRef.current) {
-      setShowQtt(4);
-    } else if (
-      containerRef.current.offsetWidth === 856 &&
-      containerRef.current
-    ) {
-      setShowQtt(3);
-    } else if (
-      containerRef.current.offsetWidth === 642 &&
-      containerRef.current
-    ) {
-      setShowQtt(2);
-    } else setShowQtt(1);
-  };
-
-  useLayoutEffect(() => {
-    // Function to update state with current window width
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    let timeOut;
-
-    if (isEnd) {
-      setIsLoading(true);
-      timeOut = setTimeout(() => {
-        setRows((prev) => prev + 2);
-        setIsLoading(false);
-      }, 3000);
-    }
-
-    return () => {
-      clearTimeout(timeOut);
-    };
-  }, [isEnd]);
-
-  useEffect(() => {
-    if (isTop) {
-      setRows(3);
-    }
-  }, [isTop]);
-
   return (
-    <div className='w-full' ref={containerRef}>
-      {[...Array(rows)].map((_, index) => (
-        <LiveRow showQtt={showQtt} key={index} />
-      ))}
+    <div>
+      <div
+        className={`grid grid-cols-1 sm:grid-cols-2 2md:grid-cols-3 2lg:grid-cols-4
+      ${openedMenu && "1312:grid-cols-3 1360:id-cols-4"}`}
+      >
+        {mockList.map((item) => {
+          return (
+            <VideoCard
+              data={item}
+              key={item.id}
+              showBtn={true}
+              style={`inline-block flex-1 mx-[8px] mb-[40px]`}
+              thumbStyleInline={{
+                borderRadius: "12px",
+              }}
+              titleStyle={"text-[14px] leading-[20px] font-[500] max-h-[40px]"}
+              noFuncBox={true}
+            />
+          );
+        })}
+        {mockList.map((item) => {
+          return (
+            <VideoCard
+              data={item}
+              key={item.id}
+              showBtn={true}
+              style={`inline-block flex-1 mx-[8px] mb-[40px]`}
+              thumbStyleInline={{
+                borderRadius: "12px",
+              }}
+              titleStyle={"text-[14px] leading-[20px] font-[500] max-h-[40px]"}
+              noFuncBox={true}
+            />
+          );
+        })}
+        {mockList.map((item) => {
+          return (
+            <VideoCard
+              data={item}
+              key={item.id}
+              showBtn={true}
+              style={`inline-block flex-1 mx-[8px] mb-[40px]`}
+              thumbStyleInline={{
+                borderRadius: "12px",
+              }}
+              titleStyle={"text-[14px] leading-[20px] font-[500] max-h-[40px]"}
+              noFuncBox={true}
+            />
+          );
+        })}
+      </div>
+
       {isLoading && (
         <div className='mt-[20px] mb-[40px] flex items-center justify-center'>
           <div

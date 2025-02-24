@@ -50,7 +50,7 @@ const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
          } 
          ${
            path !== "/video"
-             ? "transition-[transform] 1336:transition-none"
+             ? "transition-[transform] 1312:transition-none"
              : "transition-[transform]"
          }`}
       >
@@ -218,7 +218,7 @@ const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
           openedMenu
             ? "visible bg-[rgba(0,0,0,0.5)] "
             : "invisible bg-[transparent] transition-all delay-[250ms]"
-        }    ${path !== "/video" ? "1336:invisible" : ""}`}
+        }    ${path !== "/video" ? "1312:invisible" : ""}`}
         onClick={() => {
           setOpenedMenu(false);
         }}

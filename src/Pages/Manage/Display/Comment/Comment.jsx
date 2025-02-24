@@ -3,7 +3,6 @@ import { getData } from "../../../../Api/getData";
 import {
   useState,
   useEffect,
-  useLayoutEffect,
   useRef,
   useCallback,
 } from "react";
@@ -75,7 +74,7 @@ const Comment = () => {
     });
   }, []);
 
-  const handleOnClick = useCallback((data) => {
+  const handleOnClick = (data) => {
     setSearching((prev) => {
       if (prev && prev.id === data.id) {
         return undefined;
@@ -83,18 +82,18 @@ const Comment = () => {
 
       return data;
     });
-  }, []);
+  }
 
   const timeoutRef = useRef();
 
-  const handleOnSearch = useCallback((e) => {
+  const handleOnSearch = (e) => {
     clearTimeout(timeoutRef.current);
     setTimeout(() => {
       setQueriese((prev) => ({ ...prev, text: e.target.value, page: 1 }));
     }, 600);
-  }, []);
+  }
 
-  const handleSort = useCallback(
+  const handleSort = 
     (key, value) => {
       const addOnSortKeys = new Set(["createdAt"]);
 
@@ -107,9 +106,8 @@ const Comment = () => {
         sortObj[key] = value;
       }
       setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
-    },
-    [queriese],
-  );
+    }
+
   const funcList = useRef([
     {
       id: "text",
@@ -119,7 +117,7 @@ const Comment = () => {
     },
   ]);
 
-  const handleDeleteMany = useCallback(async () => {
+  const handleDeleteMany = async () => {
     await dltManyData(
       "/client/comment/delete-many",
       checkedList,
@@ -131,9 +129,9 @@ const Comment = () => {
       undefined,
       addToaster,
     );
-  }, [checkedList]);
+  }
 
-  const showDltConfirm = useCallback(() => {
+  const showDltConfirm = () => {
     if (checkedList.length < 1) {
       alert("Please select at least one item");
       return;
@@ -146,7 +144,7 @@ const Comment = () => {
         data={checkedList.join(", ")}
       />,
     );
-  }, [checkedList]);
+  }
 
   useEffect(() => {
     return () => {

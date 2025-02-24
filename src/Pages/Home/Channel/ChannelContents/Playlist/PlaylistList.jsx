@@ -1,51 +1,17 @@
-import { useState, useLayoutEffect, useEffect, useRef } from "react";
 import { PlaylistCard } from "../../../../../Component";
+import { useAuthContext } from "../../../../../Auth Provider/authContext";
 
 const PlaylistList = ({ playlistList, isLoading }) => {
-  const containerRef = useRef();
-
-  const [showQtt, setShowQtt] = useState(6);
-
-  const handleResize = () => {
-    if (containerRef.current.offsetWidth > 1070 && containerRef.current) {
-      setShowQtt(6);
-    } else if (
-      containerRef.current.offsetWidth === 1070 &&
-      containerRef.current
-    ) {
-      setShowQtt(5);
-    } else if (
-      containerRef.current.offsetWidth === 856 &&
-      containerRef.current
-    ) {
-      setShowQtt(4);
-    } else if (
-      containerRef.current.offsetWidth === 642 &&
-      containerRef.current
-    ) {
-      setShowQtt(3);
-    } else if (
-      containerRef.current.offsetWidth === 428 &&
-      containerRef.current
-    ) {
-      setShowQtt(2);
-    } else setShowQtt(1);
-  };
-  useLayoutEffect(() => {
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  const { openedMenu } = useAuthContext();
 
   return (
     <div
-      className='grid grid-cols-1 xsm:grid-cols-2 sm:grid-cols-3 2md:grid-cols-4 1336:grid-cols-6 '
-      // style={{ gridTemplateColumns: `repeat(${showQtt}, minmax(0, 1fr)` }}
-      ref={containerRef}
+      className={`grid  grid-cols-1 xsm:grid-cols-2 sm:grid-cols-3 2md:grid-cols-4 2lg:grid-cols-5
+      ${
+        openedMenu
+          ? "1312:grid-cols-4 1360:grid-cols-5 1573:grid-cols-6"
+          : "1400:grid-cols-6"
+      }`}
     >
       {playlistList.map((item, id) => (
         <PlaylistCard

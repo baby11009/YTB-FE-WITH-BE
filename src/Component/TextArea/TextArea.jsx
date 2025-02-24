@@ -4,6 +4,7 @@ import {
   useState,
   useLayoutEffect,
   useCallback,
+  memo,
 } from "react";
 
 const TextArea = ({
@@ -209,4 +210,4 @@ const TextArea = ({
     </div>
   );
 };
-export default TextArea;
+export default memo(TextArea);

@@ -12,7 +12,7 @@ import { useCallback } from "react";
 const CmtTbRow = ({ handleChecked, checked, data, refetch }) => {
   const { setIsShowing, addToaster } = useAuthContext();
 
-  const handleDelete = useCallback(async () => {
+  const handleDelete = async () => {
     await dltData(
       "/client/comment",
       data?._id,
@@ -23,9 +23,9 @@ const CmtTbRow = ({ handleChecked, checked, data, refetch }) => {
       undefined,
       addToaster,
     );
-  }, [data]);
+  };
 
-  const showDeleteConfirm = useCallback(() => {
+  const showDeleteConfirm = () => {
     setIsShowing(
       <DeleteConfirm
         handleDelete={handleDelete}
@@ -33,9 +33,9 @@ const CmtTbRow = ({ handleChecked, checked, data, refetch }) => {
         data={data?._id}
       />,
     );
-  }, [data]);
+  };
 
-  const handleCopyVideoLink = useCallback((videoId, type) => {
+  const handleCopyVideoLink = (videoId, type) => {
     let url;
     switch (type) {
       case "video":
@@ -45,7 +45,7 @@ const CmtTbRow = ({ handleChecked, checked, data, refetch }) => {
         url = `http://localhost:5173/short/${videoId}`;
         break;
     }
-    console.log(url);
+
     navigator.clipboard
       .writeText(url)
       .then(() => {
@@ -54,7 +54,7 @@ const CmtTbRow = ({ handleChecked, checked, data, refetch }) => {
       .catch(() => {
         addToaster("Failed to copy link");
       });
-  }, []);
+  };
 
   return (
     <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>

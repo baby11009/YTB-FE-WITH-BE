@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 
 const CheckBox2 = ({ checked, setChecked }) => {
   const [active, setActive] = useState(false);
@@ -53,4 +53,4 @@ const CheckBox2 = ({ checked, setChecked }) => {
     </div>
   );
 };
-export default CheckBox2;
+export default memo(CheckBox2);

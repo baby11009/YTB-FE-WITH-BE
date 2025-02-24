@@ -19,6 +19,7 @@ import { getDataWithAuth } from "../../../../../../Api/getData";
 import { createData, updateData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
 import Hls from "hls.js";
+
 const init = {
   title: "",
   image: undefined,
@@ -68,13 +69,12 @@ const ShortUpsertModal = ({ title, id }) => {
     message: [],
   });
 
-  const {
-    data: shortData,
-    refetch,
-    error: queryError,
-    isLoading: videoLoading,
-    isError: videoisError,
-  } = getDataWithAuth(`/client/video/${id}`, {}, id !== undefined, false);
+  const { data: shortData, refetch } = getDataWithAuth(
+    `/client/video/${id}`,
+    {},
+    id !== undefined,
+    false,
+  );
 
   const {
     data: tagList,
@@ -90,7 +90,7 @@ const ShortUpsertModal = ({ title, id }) => {
     }));
   }, []);
 
-  const handleUploadThumb = useCallback((e) => {
+  const handleUploadThumb = (e) => {
     setSubmitErrs({});
 
     const file = e.files[0];
@@ -147,9 +147,9 @@ const ShortUpsertModal = ({ title, id }) => {
       });
     });
     reader.readAsDataURL(file);
-  }, []);
+  };
 
-  const handleUploadVideo = useCallback((e) => {
+  const handleUploadVideo = (e) => {
     setSubmitErrs({});
 
     const file = e.files[0];
@@ -169,7 +169,7 @@ const ShortUpsertModal = ({ title, id }) => {
       video: file,
     }));
     setPreviewVideo(URL.createObjectURL(file));
-  }, []);
+  };
 
   const handleSetRealTimeErr = useCallback((errName, errMessage) => {
     setRealTimeErrs((prev) => ({ ...prev, [errName]: errMessage }));
@@ -188,160 +188,148 @@ const ShortUpsertModal = ({ title, id }) => {
     [realTimeErrs],
   );
 
-  const handleValidate = useCallback(
-    (formData) => {
-      if (Object.keys(submitErrs).length > 0) {
-        setSubmitErrs({});
-      }
-      let hasErrors = false;
+  const handleValidate = (formData) => {
+    if (Object.keys(submitErrs).length > 0) {
+      setSubmitErrs({});
+    }
+    let hasErrors = false;
 
-      const keys = Object.keys(formData).filter(
-        (key) => key !== "type" && key !== "description",
+    const keys = Object.keys(formData).filter(
+      (key) => key !== "type" && key !== "description",
+    );
+
+    keys.forEach((key) => {
+      if (formData[key] === "" || !formData[key]) {
+        let errMsg = "Cannot be empty";
+        if (key === "image" || key === "video") {
+          errMsg = "File not uploaded";
+        }
+        setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
+        hasErrors = true;
+      }
+    });
+
+    if (hasErrors) {
+      return true;
+    }
+  };
+
+  const handleValidateUpdate = (formData) => {
+    if (Object.keys(submitErrs).length > 0) {
+      setSubmitErrs({});
+    }
+    let hasErrors = false;
+    const keys = Object.keys(formData).filter(
+      (key) =>
+        key !== "type" &&
+        key !== "image" &&
+        key !== "video" &&
+        key !== "description",
+    );
+    keys.forEach((key) => {
+      if (formData[key] === "" || !formData[key]) {
+        let errMsg = "Cannot be empty";
+        setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
+        hasErrors = true;
+      }
+    });
+    if (hasErrors) {
+      return true;
+    }
+  };
+
+  const create = async (formData) => {
+    const error = handleValidate(formData);
+
+    if (error) {
+      return;
+    }
+
+    let data = new FormData();
+    for (const key in formData) {
+      data.append(key, formData[key]);
+    }
+
+    await createData(
+      "/client/video/upload",
+      data,
+      "short",
+      () => {
+        setFormData(init);
+        setPreviewVideo(undefined);
+        setPreviewThumb(undefined);
+        thumbInputRef.current.files = undefined;
+      },
+      undefined,
+      addToaster,
+    );
+  };
+
+  const update = async (formData, shortData) => {
+    const error = handleValidateUpdate(formData);
+
+    if (error) {
+      return;
+    }
+
+    let finalData = {
+      title: formData.title,
+      type: formData.type,
+      description: formData.description,
+    };
+
+    for (const key in finalData) {
+      if (
+        shortData?.data?.hasOwnProperty(key) &&
+        shortData?.data[key] === finalData[key]
+      ) {
+        delete finalData[key];
+      }
+    }
+
+    if (formData.tag.length === defaultTagRef.current.length) {
+      let test = formData.tag.filter((id) =>
+        defaultTagRef.current.includes(id),
       );
-
-      keys.forEach((key) => {
-        if (formData[key] === "" || !formData[key]) {
-          let errMsg = "Cannot be empty";
-          if (key === "image" || key === "video") {
-            errMsg = "File not uploaded";
-          }
-          setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
-          hasErrors = true;
-        }
-      });
-
-      if (hasErrors) {
-        return true;
-      }
-    },
-    [submitErrs],
-  );
-
-  const handleValidateUpdate = useCallback(
-    (formData) => {
-      if (Object.keys(submitErrs).length > 0) {
-        setSubmitErrs({});
-      }
-      let hasErrors = false;
-      const keys = Object.keys(formData).filter(
-        (key) =>
-          key !== "type" &&
-          key !== "image" &&
-          key !== "video" &&
-          key !== "description",
-      );
-      keys.forEach((key) => {
-        if (formData[key] === "" || !formData[key]) {
-          let errMsg = "Cannot be empty";
-          setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
-          hasErrors = true;
-        }
-      });
-      if (hasErrors) {
-        return true;
-      }
-    },
-    [submitErrs],
-  );
-
-  const create = useCallback(
-    async (formData) => {
-      const error = handleValidate(formData);
-
-      if (error) {
-        return;
-      }
-
-      let data = new FormData();
-      for (const key in formData) {
-        data.append(key, formData[key]);
-      }
-
-      await createData(
-        "/client/video/upload",
-        data,
-        "short",
-        () => {
-          setFormData(init);
-          setPreviewVideo(undefined);
-          setPreviewThumb(undefined);
-          thumbInputRef.current.files = undefined;
-        },
-        undefined,
-        addToaster,
-      );
-    },
-    [submitErrs],
-  );
-
-  const update = useCallback(
-    async (formData, shortData) => {
-      const error = handleValidateUpdate(formData);
-
-      if (error) {
-        return;
-      }
-
-      let finalData = {
-        title: formData.title,
-        type: formData.type,
-        description: formData.description,
-      };
-
-      for (const key in finalData) {
-        if (
-          shortData?.data?.hasOwnProperty(key) &&
-          shortData?.data[key] === finalData[key]
-        ) {
-          delete finalData[key];
-        }
-      }
-
-      if (formData.tag.length === defaultTagRef.current.length) {
-        let test = formData.tag.filter((id) =>
-          defaultTagRef.current.includes(id),
-        );
-        if (test.length !== defaultTagRef.current.length) {
-          finalData.tag = formData.tag;
-        }
-      } else {
+      if (test.length !== defaultTagRef.current.length) {
         finalData.tag = formData.tag;
       }
-      if (formData.image) {
-        finalData.image = formData.image;
+    } else {
+      finalData.tag = formData.tag;
+    }
+    if (formData.image) {
+      finalData.image = formData.image;
+    }
+
+    if (Object.keys(finalData).length === 0) {
+      alert("Nothing changed");
+      return;
+    }
+
+    let data = new FormData();
+    for (const key in finalData) {
+      if (key === "tag") {
+        // Convert to JSON to keep data type not changed to tring
+        data.append(key, JSON.stringify(finalData[key]));
+      } else {
+        data.append(key, finalData[key]);
       }
+    }
 
-      if (Object.keys(finalData).length === 0) {
-        alert("Nothing changed");
-        return;
-      }
+    await updateData(
+      "/client/video",
+      id,
+      data,
+      "short",
+      () => {
+        refetch();
+      },
+      undefined,
+      addToaster,
+    );
+  };
 
-      let data = new FormData();
-      for (const key in finalData) {
-        if (key === "tag") {
-          // Convert to JSON to keep data type not changed to tring
-          data.append(key, JSON.stringify(finalData[key]));
-        } else {
-          data.append(key, finalData[key]);
-        }
-      }
-
-      await updateData(
-        "/client/video",
-        id,
-        data,
-        "short",
-        () => {
-          refetch();
-        },
-        undefined,
-        addToaster,
-      );
-    },
-    [submitErrs],
-  );
-
-  const handleSubmit = useCallback(
+  const handleSubmit =
     async (e) => {
       e.preventDefault();
       setSubmitLoading(true);
@@ -353,10 +341,7 @@ const ShortUpsertModal = ({ title, id }) => {
       }
 
       setSubmitLoading(false);
-    },
-    [submitErrs, formData, shortData],
-  );
-
+    }
   useLayoutEffect(() => {
     if (shortData) {
       const dataForm = {

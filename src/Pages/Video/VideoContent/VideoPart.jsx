@@ -20,7 +20,6 @@ const initVideoParams = {
 };
 
 const VideoPart = ({ openedMenu }) => {
-  const queryClient = useQueryClient();
 
   let [searchParams] = useSearchParams();
   const id = searchParams.get("id");

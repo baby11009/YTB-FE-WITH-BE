@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Menu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
   return (
-    <>
+    <div>
       <div className='fixed left-0 bottom-0 bg-black z-[10]'>
         <div
           className={` ${
@@ -60,7 +60,7 @@ const Menu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
         } 2lg:invisible`}
         onClick={() => setOpenedMenu(false)}
       ></div>
-    </>
+    </div>
   );
 };
 export default Menu;

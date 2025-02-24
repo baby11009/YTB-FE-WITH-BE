@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  memo,
 } from "react";
 import Hls from "hls.js";
 import {
@@ -854,4 +855,4 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
     </div>
   );
 };
-export default Video;
+export default memo(Video);

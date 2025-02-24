@@ -51,81 +51,72 @@ const Details = ({ playlistData, refetch }) => {
     [realTimeErrs],
   );
 
-  const handleValidateUpdate = useCallback(
-    (formData) => {
-      if (Object.keys(submitErrs).length > 0) {
-        setSubmitErrs({});
+  const handleValidateUpdate = (formData) => {
+    if (Object.keys(submitErrs).length > 0) {
+      setSubmitErrs({});
+    }
+
+    let hasErrors = false;
+
+    const keys = Object.keys(formData);
+
+    keys.forEach((key) => {
+      if (formData[key] === "" || !formData[key]) {
+        let errMsg = "Cannot be empty";
+        setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
+        hasErrors = true;
       }
+    });
 
-      let hasErrors = false;
+    if (hasErrors) {
+      return true;
+    }
+  };
 
-      const keys = Object.keys(formData);
+  const update = async (formData, playlistData) => {
+    const error = handleValidateUpdate(formData);
 
-      keys.forEach((key) => {
-        if (formData[key] === "" || !formData[key]) {
-          let errMsg = "Cannot be empty";
-          setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
-          hasErrors = true;
-        }
-      });
+    if (error) {
+      return;
+    }
 
-      if (hasErrors) {
-        return true;
+    let finalData = structuredClone(formData);
+
+    for (const key in finalData) {
+      if (
+        playlistData?.hasOwnProperty(key) &&
+        playlistData[key] === finalData[key]
+      ) {
+        delete finalData[key];
       }
-    },
-    [submitErrs],
-  );
+    }
 
-  const update = useCallback(
-    async (formData, playlistData) => {
-      const error = handleValidateUpdate(formData);
+    if (Object.keys(finalData).length === 0) {
+      alert("Không có gì thay đổi");
+      return;
+    }
 
-      if (error) {
-        return;
-      }
+    await updateData(
+      "/client/playlist",
+      playlistData?._id,
+      finalData,
+      "playlist",
+      () => {
+        refetch();
+      },
+      undefined,
+      addToaster,
+    );
+  };
 
-      let finalData = structuredClone(formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-      for (const key in finalData) {
-        if (
-          playlistData?.hasOwnProperty(key) &&
-          playlistData[key] === finalData[key]
-        ) {
-          delete finalData[key];
-        }
-      }
+    await update(formData, playlistData);
 
-      if (Object.keys(finalData).length === 0) {
-        alert("Không có gì thay đổi");
-        return;
-      }
-
-      await updateData(
-        "/client/playlist",
-        playlistData?._id,
-        finalData,
-        "playlist",
-        () => {
-          refetch();
-        },
-        undefined,
-        addToaster,
-      );
-    },
-    [submitErrs],
-  );
-
-  const handleSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-      setIsLoading(true);
-
-      await update(formData, playlistData);
-
-      setIsLoading(false);
-    },
-    [submitErrs, formData, playlistData],
-  );
+    setIsLoading(false);
+  };
 
   useLayoutEffect(() => {
     if (playlistData) {

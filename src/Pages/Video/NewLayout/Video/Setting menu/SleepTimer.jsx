@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import {  useRef, useLayoutEffect } from "react";
 import { ThinArrowIcon, CheckIcon } from "../../../../../Assets/Icons";
 
 const SleepTimer = ({
