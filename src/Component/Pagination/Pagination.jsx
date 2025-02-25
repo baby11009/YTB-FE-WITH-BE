@@ -1,7 +1,7 @@
 import { ThinArrowIcon } from "../../Assets/Icons";
 import { useState, useLayoutEffect, useCallback } from "react";
 
-const Pagination = ({ setParams, currPage, totalPage, handleSetPage }) => {
+const Pagination = ({ setQueriese, currPage, totalPage, handleSetPage }) => {
   const [pageArr, setPageArr] = useState([]);
 
   const handleNavPage = useCallback(
@@ -10,8 +10,8 @@ const Pagination = ({ setParams, currPage, totalPage, handleSetPage }) => {
         return;
       }
 
-      if (setParams) {
-        setParams((prev) => ({ ...prev, page: pageNum }));
+      if (setQueriese) {
+        setQueriese((prev) => ({ ...prev, page: pageNum }));
       } else {
         handleSetPage(pageNum);
       }

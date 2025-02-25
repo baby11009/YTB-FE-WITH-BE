@@ -71,3 +71,5 @@ export { default as AudioRange } from "./Range/AudioRange.jsx";
 export { default as RelativeCard } from "./Card/RelativeCard.jsx";
 
 export { default as PlaylistModal } from "./Modal/PlaylistModal.jsx";
+
+export { default as SearchTextInput } from "./Sort/SearchTextInput.jsx";

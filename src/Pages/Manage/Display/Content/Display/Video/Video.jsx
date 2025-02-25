@@ -85,7 +85,7 @@ const Video = () => {
     });
   };
 
-  const sortBtnList = useRef([
+  const searchBtnList = useRef([
     {
       id: "title",
       text: "Text",
@@ -192,7 +192,7 @@ const Video = () => {
                 style={"left-[100%] top-[100%] w-[150px]"}
                 setOpened={setOpened}
                 currentId={searching?.id}
-                funcList1={sortBtnList.current}
+                funcList1={searchBtnList.current}
               />
             )}
           </div>

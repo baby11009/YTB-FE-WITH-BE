@@ -9,6 +9,7 @@ import { smoothScroll } from "../../util/scrollCustom";
 import { ThinArrowIcon } from "../../Assets/Icons";
 
 const Slider = ({
+  containerStyle,
   children,
   dragScroll,
   scrollDistance,
@@ -91,7 +92,7 @@ const Slider = ({
   }, []);
 
   return (
-    <div className='relative '>
+    <div className={`relative w-full  ${containerStyle ? containerStyle : ""}`}>
       {scrollPosition &&
         scrollPosition !== "start" &&
         (buttonType === 1 ? (
@@ -135,7 +136,7 @@ const Slider = ({
         ))}
       <div
         className='overflow-y-hidden hidden-scorllbar 
-        overflow-x-auto whitespace-nowrap touch-pan-y e'
+        overflow-x-auto whitespace-nowrap touch-pan-y'
         ref={sliderRef}
         onMouseDown={(e) => {
           isDown.current = true;

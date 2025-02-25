@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   DeleteAllIcon,
@@ -10,7 +10,12 @@ import {
 } from "../../../../Assets/Icons";
 import { getData } from "../../../../Api/getData";
 import { dltManyData } from "../../../../Api/controller";
-import { Pagination, CustomeFuncBox } from "../../../../Component";
+import {
+  Pagination,
+  CustomeFuncBox,
+  SearchTextInput,
+  Slider,
+} from "../../../../Component";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { Link } from "react-router-dom";
 import Search from "./Search";
@@ -18,12 +23,13 @@ import Filter from "./Filter";
 import Display from "./Display";
 
 const limit = 8;
-const initPrs = {
+const initQueriese = {
   limit,
   page: 1,
   sort: {
     createdAt: -1,
   },
+  search: {},
   title: "",
   clearCache: "tag",
 };
@@ -35,24 +41,68 @@ const TagPage = ({ openedMenu }) => {
 
   const [totalPage, setTotalPage] = useState(1);
 
-  const [params, setParams] = useState(initPrs);
-
+  const [queriese, setQueriese] = useState(initQueriese);
+  console.log(queriese);
   const [opened, setOpened] = useState(false);
 
-  const [searching, setSearching] = useState(undefined);
+  const [searchList, setSearchList] = useState([]);
 
   const [searchValue, setSearchValue] = useState("");
 
   const { data: tagData, refetch } = getData(
     "tag",
-    params,
-    params ? true : false,
+    queriese,
+    queriese ? true : false,
     false,
   );
 
-  const [mockArr, setMockArr] = useState([]);
-
   const [checkedList, setCheckedList] = useState([]);
+
+  const handleOnClick = (data) => {
+    setSearchList((prev) => {
+      if (data.searchType === 1) {
+        return [...prev, data];
+      }
+
+      return [data];
+    });
+
+    searchBtnList.current = searchBtnList.current.filter(
+      (prev) => prev.id !== data.id,
+    );
+  };
+
+  const handleClose = (searchData) => {
+    setSearchList((prev) =>
+      prev.filter((search) => search.id !== searchData.id),
+    );
+    setQueriese((prev) => {
+      let queries = structuredClone(prev);
+      delete queries.search[searchData.id];
+
+      return queries;
+    });
+    searchBtnList.current.push(searchData);
+  };
+
+  const handleSearch = (searchName, searchValue) => {
+    setQueriese((prev) => ({
+      ...prev,
+      search: { ...prev.search, [searchName]: searchValue },
+    }));
+  };
+
+  // searchType  = 1 it can combine with other search else it cannot go with other search
+  const searchBtnList = useRef([
+    {
+      id: "title",
+      text: "Text",
+      type: "input:text",
+      searchType: 1,
+      value: 1,
+      handleOnClick: handleOnClick,
+    },
+  ]);
 
   const handleChecked = (id) => {
     setCheckedList((prev) => {
@@ -87,37 +137,6 @@ const TagPage = ({ openedMenu }) => {
     );
   };
 
-  useLayoutEffect(() => {
-    if (tagData) {
-      setTotalPage(tagData?.totalPages);
-      if (limit - tagData.qtt > 0) {
-        setMockArr(Array.from({ length: limit - tagData.qtt }, (_, i) => i));
-      } else {
-        setMockArr([]);
-      }
-    }
-
-    return () => {
-      setCheckedList([]);
-    };
-  }, [tagData]);
-
-  useEffect(() => {
-    let timeOut = setTimeout(() => {
-      setParams((prev) => {
-        return {
-          ...prev,
-          title: searchValue,
-          page: 1,
-        };
-      });
-    }, 600);
-
-    return () => {
-      clearTimeout(timeOut);
-    };
-  }, [searchValue]);
-
   useEffect(() => {
     return () => {
       queryClient.clear();
@@ -128,16 +147,18 @@ const TagPage = ({ openedMenu }) => {
 
   return (
     <div className='overflow-auto h-full relative scrollbar-3'>
-      <div className={`sticky top-[8px] md:mt-[8px]`}>
+      <div className={`sticky left-0 top-[8px] md:mt-[8px]`}>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Tags</h2>
       </div>
 
-      <div className='sticky left-0 top-[52px] z-[2000] w-full'>
+      <div className='sticky  left-0 top-[52px] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
             <button
               className='p-[8px]'
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
                 setOpened((prev) => !prev);
               }}
             >
@@ -145,43 +166,31 @@ const TagPage = ({ openedMenu }) => {
             </button>
             {opened && (
               <CustomeFuncBox
-                style={"left-[100%] top-[100%] w-[150px]"}
+                style={"left-[100%] top-[100%] min-w-[200px]"}
+                opened={opened}
                 setOpened={setOpened}
-                currentId={searching?.id}
-                funcList1={sortBtnList.current}
+                funcList1={searchBtnList.current}
               />
             )}
           </div>
-          <div className='flex-1 flex items-center'>
-            {searching?.text && (
-              <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
-                <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
-                  {searching.text}
-                </span>
-                <div
-                  className='px-[6px] w-[24px]'
-                  onClick={() => {
-                    setSearching(undefined);
-                    setQueriese((prev) => ({
-                      ...prev,
-                      [searching.id]: "",
-                      page: 1,
-                    }));
-                  }}
-                >
-                  <CloseIcon />
-                </div>
-              </button>
-            )}
-            {searching?.type === "input:text" && (
-              <input
-                autoFocus
-                type='text'
-                placeholder='Searching...'
-                className='bg-transparent py-[4px] border-b-[2px] outline-none ml-[16px]'
-              />
-            )}
+
+          <div className='flex-1 flex items-center flex-wrap'>
+            {searchList.length > 0 &&
+              searchList.map((search) => {
+                if (search.type === "input:text") {
+                  return (
+                    <SearchTextInput
+                      key={search.id}
+                      searchData={search}
+                      currValue={queriese.search[search.id]}
+                      handleSearch={handleSearch}
+                      handleClose={handleClose}
+                    />
+                  );
+                }
+              })}
           </div>
+
           <div className=' self-end flex items-center justify-center gap-[8px]'>
             <button>
               <div className='p-[8px] hover:text-green-500'>
@@ -198,21 +207,21 @@ const TagPage = ({ openedMenu }) => {
       </div>
 
       <div className='h-[100vh]'></div>
-
+      {/* 
       <Display
         dataList={tagData.data}
-        page={params.page}
+        page={queriese.page}
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}
         mockArr={mockArr}
         limit={limit}
         checkedList={checkedList}
         refetch={refetch}
-      />
+      /> */}
 
       <Pagination
-        setParams={setParams}
-        currPage={params.page}
+        setQueriese={setQueriese}
+        currPage={queriese.page}
         totalPage={totalPage}
       />
     </div>
@@ -250,7 +259,7 @@ export default TagPage;
       </div>
     </button>
 
-    <Filter params={params} setParams={setParams} />
+    <Filter params={params} setQueriese={setQueriese} />
   </div>
 </div> */
 }
