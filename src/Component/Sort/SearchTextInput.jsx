@@ -24,7 +24,7 @@ const SearchTextInput = ({
   }, [currValue]);
 
   return (
-    <div className='flex items-center'>
+    <div className='flex items-end'>
       <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
         <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
           {searchData.text}
@@ -47,7 +47,8 @@ const SearchTextInput = ({
         ref={inputRef}
         id={searchData.id}
         placeholder='Searching...'
-        className='bg-transparent py-[4px] border-b-[2px] outline-none ml-[16px]'
+        autoCorrect="off"
+        className='bg-transparent py-[4px] border-b-[2px] outline-none ml-[8px]'
       />
     </div>
   );

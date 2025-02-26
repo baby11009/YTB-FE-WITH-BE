@@ -8,10 +8,10 @@ const Sort2 = () => {
       width={24}
       height={24}
       style={{
-        // pointerEvents: "none",
-        // display: "inherit",
-        // width: "100%",
-        // height: "100%",
+        pointerEvents: "none",
+        display: "inherit",
+        width: "100%",
+        height: "100%",
       }}
       fill='#ffffff'
     >

@@ -1,9 +1,15 @@
 import { useRef, useState, useEffect } from "react";
 import { dltData, updateData } from "../../../../Api/controller";
 import { CheckBox2 } from "../../../../Component";
-import { EditIcon, DeleteIcon, ThinArrowIcon } from "../../../../Assets/Icons";
+import {
+  EditIcon,
+  DeleteIcon,
+  ThinArrowIcon,
+  TrashBinIcon,
+} from "../../../../Assets/Icons";
 import { Link } from "react-router-dom";
 import { timeFormat3 } from "../../../../util/timeforMat";
+import { upperCaseFirstChar } from "../../../../util/func";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const UserTbRow = ({
@@ -22,7 +28,7 @@ const UserTbRow = ({
 
   const [opened, setOpened] = useState(false);
 
-  const roleList = ["admin", "user"];
+  const roleColor = useRef({ admin: "text-[#dc3545]", user: "text-[#007bff]" });
 
   const handleChangeRole = async (id, role, currRole) => {
     setOpened(false);
@@ -62,117 +68,81 @@ const UserTbRow = ({
   }, []);
 
   return (
-    <tr className={`${od + 1 !== length && "border-b-[1px]"} `}>
-      <th>
-        <div className='flex items-center gap-[16px]'>
-          <CheckBox2
-            checked={checkedList.includes(data?._id)}
-            setChecked={() => {
-              handleChecked(data?._id);
-            }}
+    <div className='h-[76px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A text-[13px] leading-[24px]'>
+      <div className='sticky left-0 p-[8px_12px_8px_25px] z-[10]'>
+        <CheckBox2
+          checked={checkedList.includes(data?._id)}
+          setChecked={() => {
+            handleChecked(data?._id);
+          }}
+        />
+      </div>
+      <div
+        className='sticky left-[57px] pl-[12px] flex-[2_0_300px] min-w-[300px] 
+        border-r-[1px] border-gray-A z-[10] py-[8px] flex'
+      >
+        <div>
+          <img
+            src={`${import.meta.env.VITE_BASE_API_URI}${
+              import.meta.env.VITE_VIEW_AVA_API
+            }${data?.avatar}`}
+            alt={`${data?.name}-avatar`}
+            className='size-[60px] rounded-[50%]'
           />
-          <button
-            onClick={() => handleChecked(data?._id)}
-            className='font-[400]  '
-          >
-            {od + limit * (page - 1) + 1}
-          </button>
         </div>
-      </th>
-      <th className='hidden 2md:table-cell'>
-        <span className='font-[400] '>{data?.name}</span>
-      </th>
-      <th>
-        <span className='font-[400] w-[80px] xsm:w-full inline-block overflow-hidden text-ellipsis'>
-          {data?.email}
-        </span>
-      </th>
-      <th className=' hidden sm:table-cell'>
-        <div className='flex items-center h-full'>
-          <div className='w-[100px] cursor-pointer relative' ref={containerRef}>
+        <div className='flex-1 ml-[16px] pr-[12px] overflow-hidden'>
+          <div className=' overflow-hidden'>
+            <div
+              className=' h-[20px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[20px]'
+              dangerouslySetInnerHTML={{
+                __html: data?.name,
+              }}
+            ></div>
+          </div>
+          <div className=' overflow-hidden group-hover:hidden'>
+            <div
+              className=' h-[20px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[20px] text-gray-A'
+              dangerouslySetInnerHTML={{
+                __html: data?.email,
+              }}
+            ></div>
+          </div>
+
+          <div className='hidden group-hover:flex'>
             <button
-              className='w-full flex items-center justify-between px-[8px] py-[4px] border-b-[1px] rounded-[4px] '
-              onClick={(e) => setOpened((prev) => !prev)}
+              className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
+              onClick={() => {}}
             >
-              <span className='font-[400]'>{data?.role}</span>
-              <div className='rotate-90'>
-                <ThinArrowIcon />
+              <div className='text-white size-[24px]'>
+                <EditIcon />
               </div>
             </button>
-            {opened && (
-              <div
-                className={`absolute w-full left-0 ${
-                  data + 1 === length ? "bottom-[110%]" : "top-[110%]"
-                } rounded-[5px] bg-[#212121] z-[20] shadow-lg`}
-              >
-                {roleList.map((role, id) => (
-                  <div
-                    key={id}
-                    onClick={() => {
-                      handleChangeRole(data?._id, role, data?.role);
-                    }}
-                    className={`${
-                      data?.role === role && "bg-black-0.1 "
-                    } text-left px-[8px] my-[4px] hover:bg-black-0.2 leading-[32px] font-[400]`}
-                  >
-                    {role}
-                  </div>
-                ))}
+            <button className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'>
+              <div className='text-white size-[24px]'>
+                <TrashBinIcon />
               </div>
-            )}
+            </button>
           </div>
         </div>
-      </th>
-      <th className='hidden md:table-cell'>
-        <div
-          className={` ${
-            data?.confirmed ? "text-green-500" : " text-red-500"
-          } leading-[32px] font-[400]`}
+      </div>
+      <div className='flex-[1_0_150px] min-w-[100px] mx-[12px] py-[8px]'>
+        <span>{timeFormat3(data?.createdAt)}</span>
+      </div>
+      <div
+        className={`flex-[1_0_100px] min-w-[100px] mx-[12px] py-[8px] ${
+          roleColor.current[data?.role]
+        }`}
+      >
+        <span>{upperCaseFirstChar(data?.role)}</span>
+      </div>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] py-[8px]'>
+        <span
+          className={`${data?.confirmed ? "text-green-500" : "text-red-500"}`}
         >
-          {data?.confirmed.toString()}
-        </div>
-      </th>
-      <th className='hidden 2lg:table-cell'>
-        <span className='font-[400]'>{timeFormat3(data?.createdAt)}</span>
-      </th>
-      <th>
-        <div className='flex items-center gap-[16px]'>
-          <Link
-            className='size-[32px] rounded-[5px] flex items-center justify-center 
-           group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-blue-500 transition-all duration-[0.2s] ease-in
-          '
-            to={`upsert/${data._id}`}
-          >
-            <div className='text-[rgba(255,255,255,0.4)] group-hover:text-blue-500  transition-all duration-[0.2s]'>
-              <EditIcon />
-            </div>
-          </Link>
-          <button
-            className='size-[32px] rounded-[5px] flex items-center justify-center 
-           group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-500 transition-all duration-[0.2s] ease-in
-          '
-          >
-            <div
-              className='text-[rgba(255,255,255,0.4)] group-hover:text-red-500  transition-all duration-[0.2s]'
-              onClick={async () => {
-                await dltData(
-                  "user",
-                  data?._id,
-                  "user",
-                  () => {
-                    refetch();
-                  },
-                  undefined,
-                  addToaster,
-                );
-              }}
-            >
-              <DeleteIcon />
-            </div>
-          </button>
-        </div>
-      </th>
-    </tr>
+          {upperCaseFirstChar(data?.confirmed?.toString())}
+        </span>
+      </div>
+    </div>
   );
 };
 export default UserTbRow;

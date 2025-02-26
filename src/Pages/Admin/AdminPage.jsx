@@ -85,7 +85,7 @@ const AdminPage = () => {
            duration-[417ms]`}
         >
           <div
-            className='w-full h-[calc(100vh-56px)] md:px-[16px]
+            className='w-full h-[calc(100vh-56px)] md:pr-[16px]
             mt-[56px] relative '
           >
             <Suspense

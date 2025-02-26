@@ -30,7 +30,6 @@ const initQueriese = {
     createdAt: -1,
   },
   search: {},
-  title: "",
   clearCache: "tag",
 };
 
@@ -42,12 +41,10 @@ const TagPage = ({ openedMenu }) => {
   const [totalPage, setTotalPage] = useState(1);
 
   const [queriese, setQueriese] = useState(initQueriese);
-  console.log(queriese);
-  const [opened, setOpened] = useState(false);
+
+  const [openedSearchBox, setOpenedSearchBox] = useState(false);
 
   const [searchList, setSearchList] = useState([]);
-
-  const [searchValue, setSearchValue] = useState("");
 
   const { data: tagData, refetch } = getData(
     "tag",
@@ -96,7 +93,7 @@ const TagPage = ({ openedMenu }) => {
   const searchBtnList = useRef([
     {
       id: "title",
-      text: "Text",
+      text: "Name",
       type: "input:text",
       searchType: 1,
       value: 1,
@@ -155,20 +152,20 @@ const TagPage = ({ openedMenu }) => {
         <div className='flex gap-[24px] bg-black'>
           <div className='relative'>
             <button
-              className='p-[8px]'
+              className='size-[40px] p-[8px]'
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                setOpened((prev) => !prev);
+                setOpenedSearchBox((prev) => !prev);
               }}
             >
               <SortIcon2 />
             </button>
-            {opened && (
+            {openedSearchBox && (
               <CustomeFuncBox
                 style={"left-[100%] top-[100%] min-w-[200px]"}
-                opened={opened}
-                setOpened={setOpened}
+                opened={openedSearchBox}
+                setOpened={setOpenedSearchBox}
                 funcList1={searchBtnList.current}
               />
             )}
