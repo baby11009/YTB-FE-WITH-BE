@@ -1,71 +1,13 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import { dltData, updateData } from "../../../../Api/controller";
 import { CheckBox2 } from "../../../../Component";
-import {
-  EditIcon,
-  DeleteIcon,
-  ThinArrowIcon,
-  TrashBinIcon,
-} from "../../../../Assets/Icons";
+import { EditIcon, TrashBinIcon } from "../../../../Assets/Icons";
 import { Link } from "react-router-dom";
 import { timeFormat3 } from "../../../../util/timeforMat";
 import { upperCaseFirstChar } from "../../../../util/func";
-import { useAuthContext } from "../../../../Auth Provider/authContext";
 
-const UserTbRow = ({
-  data,
-  od,
-  limit,
-  length,
-  page,
-  refetch,
-  handleChecked,
-  checkedList = [],
-}) => {
-  const { addToaster } = useAuthContext();
-
-  const containerRef = useRef();
-
-  const [opened, setOpened] = useState(false);
-
+const UserTbRow = ({ data, handleChecked, checkedList = [], handleDelete }) => {
   const roleColor = useRef({ admin: "text-[#dc3545]", user: "text-[#007bff]" });
-
-  const handleChangeRole = async (id, role, currRole) => {
-    setOpened(false);
-    if (role === currRole) {
-      alert(`${role} là role hiện tại của user với id ${id}`);
-      return null;
-    }
-    const body = {
-      role,
-    };
-
-    await updateData(
-      "user",
-      id,
-      body,
-      "user",
-      () => {
-        refetch();
-      },
-      undefined,
-      addToaster,
-    );
-  };
-
-  useEffect(() => {
-    const handleClickOutScope = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setOpened(false);
-      }
-    };
-
-    window.addEventListener("mousedown", handleClickOutScope);
-
-    return () => {
-      window.removeEventListener("mousedown", handleClickOutScope);
-    };
-  }, []);
 
   return (
     <div className='h-[76px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A text-[13px] leading-[24px]'>
@@ -92,32 +34,30 @@ const UserTbRow = ({
         </div>
         <div className='flex-1 ml-[16px] pr-[12px] overflow-hidden'>
           <div className=' overflow-hidden'>
-            <div
-              className=' h-[20px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[20px]'
-              dangerouslySetInnerHTML={{
-                __html: data?.name,
-              }}
-            ></div>
+            <div className=' h-[20px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[20px]'>
+              {data?.name}
+            </div>
           </div>
           <div className=' overflow-hidden group-hover:hidden'>
-            <div
-              className=' h-[20px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[20px] text-gray-A'
-              dangerouslySetInnerHTML={{
-                __html: data?.email,
-              }}
-            ></div>
+            <div className=' h-[20px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[20px] text-gray-A'>
+              {data?.email}
+            </div>
           </div>
 
           <div className='hidden group-hover:flex'>
-            <button
+            <Link
               className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-              onClick={() => {}}
+              to={`./upsert/${data?._id}`}
             >
               <div className='text-white size-[24px]'>
                 <EditIcon />
               </div>
-            </button>
-            <button className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'>
+            </Link>
+            <button
+              className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 
+            flex items-center justify-center'
+              onClick={() => handleDelete(data?._id)}
+            >
               <div className='text-white size-[24px]'>
                 <TrashBinIcon />
               </div>

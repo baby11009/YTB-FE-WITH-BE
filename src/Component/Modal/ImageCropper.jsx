@@ -86,7 +86,7 @@ const ImageCropper = ({
 
   return (
     <div
-      className={`w-[95vw] sm:w-[85vw] min-h-[90vh] bg-black rounded-[10px] p-[20px] flex flex-col items-center ${
+      className={`w-[100vw] h-[100vh]  sm:w-[95vw]  sm:h-[95vh] bg-black rounded-[10px] p-[20px] flex flex-col items-center ${
         imgSrc ? "justify-between" : "gap-[32px]"
       }`}
     >
@@ -119,7 +119,7 @@ const ImageCropper = ({
               src={imgSrc}
               draggable={false}
               alt='Upload'
-              style={{ maxHeight: "65vh" }}
+              style={{ maxHeight: `min(65vh,${minHeight}px)` }}
               onLoad={onImageLoad}
             />
           </ReactCrop>
@@ -142,7 +142,7 @@ const ImageCropper = ({
           </div>
         </>
       ) : (
-        <div className='flex flex-col'>
+        <div>
           <label
             className='cursor-pointer w-[85vw] h-[65vh] 2xsm:w-[70vw] md:w-[65vw]  lg:w-[45vw] border-[2px] border-dashed rounded-[10px]
               flex flex-col items-center justify-center p-[12px]'
@@ -173,7 +173,7 @@ const ImageCropper = ({
               className='hidden'
             />
           </label>
-          {error && <p className='text-red-400  mt-[8px]'>{error}</p>}
+          {error && <div className='text-red-400  mt-[8px]'>{error}</div>}
         </div>
       )}
       {crop && (

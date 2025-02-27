@@ -18,6 +18,7 @@ const Input = ({
   error,
   readOnly = false,
 }) => {
+  
   const [isFocused, setIsFocused] = useState(false);
 
   const [actived, setActived] = useState(value !== "" ? true : undefined);

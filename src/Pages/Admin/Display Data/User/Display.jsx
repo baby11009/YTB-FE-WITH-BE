@@ -1,11 +1,12 @@
 import { CheckBox2 } from "../../../../Component";
 import UserTbRow from "./UserTbRow";
-import { LongArrowIcon } from "../../../../Assets/Icons";
+
 const Display = ({
   dataList = [],
   refetch,
   handleChecked,
   handleCheckedAll,
+  handleDelete,
   limit,
   checkedList = [],
   page,
@@ -63,11 +64,7 @@ const Display = ({
           <UserTbRow
             key={id}
             data={data}
-            od={id}
-            limit={limit}
-            length={dataList?.length}
-            page={page}
-            refetch={refetch}
+            handleDelete={handleDelete}
             handleChecked={handleChecked}
             checkedList={checkedList}
           />

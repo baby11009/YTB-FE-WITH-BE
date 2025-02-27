@@ -35,7 +35,7 @@ const TextArea = ({
   const handleOnInput = useCallback(
     (e) => {
       handleOnChange(name, textAreaRef.current.innerHTML);
-
+      const total = textAreaRef.current.innerText.length;
       setTotalCharacters(total);
       if (total > maxLength) {
         setIsErr(true);

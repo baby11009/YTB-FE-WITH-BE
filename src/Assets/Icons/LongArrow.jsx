@@ -1,11 +1,11 @@
-const LongArrow = ({ size }) => {
+const LongArrow = () => {
   return (
     <svg
-      xmlns='http://www.w3.org/2000/svg'
-      height={size || "24"}
       viewBox='0 0 24 24'
-      width={size || "24"}
+      preserveAspectRatio='xMidYMid meet'
       focusable='false'
+      className='style-scope tp-yt-iron-icon'
+      aria-hidden='true'
       style={{
         pointerEvents: "none",
         display: "inherit",
@@ -14,11 +14,12 @@ const LongArrow = ({ size }) => {
       }}
       fill='currentColor'
     >
-      <path
-        clipRule='evenodd'
-        d='M4.116 13.884a1.25 1.25 0 011.768-1.768l4.866 4.866V4a1.25 1.25 0 112.5 0v12.982l4.866-4.866a1.25 1.25 0 011.768 1.768L12 21.768l-7.884-7.884Z'
-        fillRule='evenodd'
-      ></path>
+      <g mirror-in-rtl='' className='style-scope tp-yt-iron-icon'>
+        <path
+          d='M21,11v1H5.64l6.72,6.72l-0.71,0.71L3.72,11.5l7.92-7.92l0.71,0.71L5.64,11H21z'
+          className='style-scope tp-yt-iron-icon'
+        ></path>
+      </g>
     </svg>
   );
 };

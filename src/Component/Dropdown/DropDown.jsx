@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { ThinArrowIcon } from "../../Assets/Icons";
+import { upperCaseFirstChar } from "../../util/func";
 
 const DropDown = ({ disabled, title, list = [], handleOnClick, value }) => {
   const [opened, setOpened] = useState(undefined);
@@ -27,7 +28,7 @@ const DropDown = ({ disabled, title, list = [], handleOnClick, value }) => {
   }, [opened]);
 
   useLayoutEffect(() => {
-    setDisplayValue(list.find((item) => item.id === value)?.label);
+    setDisplayValue(list.find((item) => item.id === value.toString())?.label);
   }, [value]);
 
   return (
@@ -45,7 +46,7 @@ const DropDown = ({ disabled, title, list = [], handleOnClick, value }) => {
             setOpened((prev) => !prev);
           }}
         >
-          <div className='text-left w-[288px]'>
+          <div className='text-left'>
             <div className='text-[12px] leading-[24px] text-gray-A'>
               {title}
             </div>

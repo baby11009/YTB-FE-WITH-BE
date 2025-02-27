@@ -8,7 +8,7 @@ import {
   SearchIcon,
 } from "../../../../Assets/Icons";
 import { getData } from "../../../../Api/getData";
-import { dltManyData } from "../../../../Api/controller";
+import { dltManyData, dltData } from "../../../../Api/controller";
 import {
   Pagination,
   CustomeFuncBox,
@@ -167,6 +167,19 @@ const DisplayUser = ({ openedMenu }) => {
         refetch();
       },
       undefined,
+      addToaster,
+    );
+  };
+
+  const handleDelete = async (id) => {
+    await dltData(
+      "user/",
+      id,
+      "User",
+      undefined,
+      () => {
+        refetch();
+      },
       addToaster,
     );
   };
@@ -333,11 +346,11 @@ const DisplayUser = ({ openedMenu }) => {
           </div>
 
           <div className=' self-end flex items-center justify-center gap-[8px]'>
-            <button>
+            <Link to={"./upsert"}>
               <div className='p-[8px] hover:text-green-500'>
                 <CreateIcon />
               </div>
-            </button>
+            </Link>
             <button>
               <div className='p-[8px] hover:text-red-600'>
                 <TrashBinIcon />
@@ -351,6 +364,7 @@ const DisplayUser = ({ openedMenu }) => {
         refetch={refetch}
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}
+        handleDelete={handleDelete}
         limit={limit}
         checkedList={checkedList}
         page={queriese.page}

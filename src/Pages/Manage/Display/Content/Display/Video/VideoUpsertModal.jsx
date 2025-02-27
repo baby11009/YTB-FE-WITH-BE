@@ -55,6 +55,7 @@ const VideoUpsertModal = ({ title, id }) => {
   const [tagParams, setTagParams] = useState(initTagParams);
 
   const [formData, setFormData] = useState(init);
+  console.log("🚀 ~ formData:", formData);
 
   const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -65,6 +66,7 @@ const VideoUpsertModal = ({ title, id }) => {
   const [realTimeErrs, setRealTimeErrs] = useState({});
 
   const [submitErrs, setSubmitErrs] = useState({});
+  console.log("🚀 ~ submitErrs:", submitErrs);
 
   const { data: videoData, refetch } = getDataWithAuth(
     `/client/video/${id}`,
@@ -127,7 +129,7 @@ const VideoUpsertModal = ({ title, id }) => {
         ) {
           setSubmitErrs((prev) => ({
             ...prev,
-            thumb:
+            image:
               "Image must be at least 720 width and having 16:9 aspect ratio",
           }));
           return;
@@ -189,9 +191,8 @@ const VideoUpsertModal = ({ title, id }) => {
   );
 
   const handleValidate = (formData) => {
-    if (Object.keys(submitErrs).length > 0) {
-      setSubmitErrs({});
-    }
+    setSubmitErrs({});
+
     let hasErrors = false;
 
     const keys = Object.keys(formData).filter(
