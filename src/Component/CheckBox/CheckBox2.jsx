@@ -1,6 +1,6 @@
 import { useState, useEffect, memo } from "react";
 
-const CheckBox2 = ({ checked, setChecked }) => {
+const CheckBox2 = ({ noAnimation, checked, setChecked }) => {
   const [active, setActive] = useState(false);
 
   const [firstRender, setFirstRender] = useState(true);
@@ -43,7 +43,7 @@ const CheckBox2 = ({ checked, setChecked }) => {
         {checked && <div className='check-mark'></div>}
       </div>
 
-      {active && (
+      {active && !noAnimation && (
         <div
           className={`absolute top-[-17px] left-[-17px] size-[54px] rounded-[50%] opacity-[0.3] z-[20] ping
             ${!checked ? "bg-blue-3E" : "bg-white-F1"}

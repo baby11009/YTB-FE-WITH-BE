@@ -10,11 +10,13 @@ import Filter from "./Filter";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 const limit = 8;
-const initPrs = {
+const initQueriese = {
   limit,
   page: 1,
-  email: "",
-  createdAt: "mới nhất",
+  search: {},
+  sort: {
+    createdAt: -1,
+  },
 };
 
 const CommentPage = ({ openedMenu }) => {
@@ -24,7 +26,7 @@ const CommentPage = ({ openedMenu }) => {
 
   const [totalPage, setTotalPage] = useState(1);
 
-  const [params, setParams] = useState(initPrs);
+  const [params, setParams] = useState(initQueriese);
 
   const [searchValue, setSearchValue] = useState("");
 
@@ -51,7 +53,7 @@ const CommentPage = ({ openedMenu }) => {
       const idList = cmtsData?.data?.map((item) => item?._id);
       setCheckedList(idList);
     }
-  }, [checkedList,]);
+  }, [checkedList]);
   const handleDeleteMany = async () => {
     await dltManyData(
       "comment/delete-many",

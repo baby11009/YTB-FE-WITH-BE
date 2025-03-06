@@ -77,3 +77,11 @@ export const getObjectChangedKey = (obj1, obj2) => {
 export const upperCaseFirstChar = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
+
+export const getDisplayUsingValue = (list, value) => {
+  for (const item of list) {
+    if (item.id === value) {
+      return item.display;
+    }
+  }
+};

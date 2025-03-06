@@ -11,16 +11,14 @@ import Filter from "./Filter";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const limit = 8;
-const initPrs = {
+const initQueriese = {
   limit,
   page: 1,
-  reset: "title",
-  title: "",
-  email: "",
-  type: "",
+  search: {},
   sort: {
     createdAt: -1,
   },
+  reset: "title",
 };
 
 const VideoPage = ({ openedMenu }) => {
@@ -30,7 +28,7 @@ const VideoPage = ({ openedMenu }) => {
 
   const [totalPage, setTotalPage] = useState(1);
 
-  const [params, setParams] = useState(initPrs);
+  const [params, setParams] = useState(initQueriese);
 
   const [currTag, setCurrTag] = useState("title");
 

@@ -42,7 +42,7 @@ const Pagination = ({ setQueriese, currPage, totalPage, handleSetPage }) => {
   }, [totalPage, currPage]);
 
   return (
-    <div className='mb-[12px] mt-[16px] flex items-center justify-end gap-[16px]'>
+    <div className=' flex items-center justify-end gap-[16px]'>
       <button
         className={`size-[32px] rounded-[5px] border-[2px] flex items-center justify-center 
           ${

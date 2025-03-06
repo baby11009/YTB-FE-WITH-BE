@@ -3,13 +3,10 @@ import UserTbRow from "./UserTbRow";
 
 const Display = ({
   dataList = [],
-  refetch,
   handleChecked,
   handleCheckedAll,
   handleDelete,
-  limit,
   checkedList = [],
-  page,
 }) => {
   return (
     <div className='min-w-full w-fit'>
@@ -32,25 +29,7 @@ const Display = ({
           User
         </div>
         <div className='flex-[1_0_150px] min-w-[100px] mx-[12px]'>
-          <button
-            onClick={() => {}}
-            // className={`flex items-center  w-full ${
-            //   queriese.sort["createdAt"] ? "text-white-F1 font-bold" : ""
-            // }`}
-          >
-            <span>Date</span>
-            {/* 
-            <div
-              className={`${
-                queriese.sort["createdAt"] === -1 ? "rotate-180" : ""
-              }
-                ${
-                  queriese.sort["createdAt"] ? "visible" : "invisible"
-                } ml-[12px] w-[12px]`}
-            >
-              <LongArrowIcon />
-            </div> */}
-          </button>
+          <span>Date</span>
         </div>
         <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>
           <span>Role</span>

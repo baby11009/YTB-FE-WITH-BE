@@ -1,28 +1,20 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  DeleteAllIcon,
-  CreateIcon,
-  SortIcon2,
-  CloseIcon,
-  TrashBinIcon,
-  LongArrowIcon,
-} from "../../../../Assets/Icons";
+import { CreateIcon, SortIcon2, TrashBinIcon } from "../../../../Assets/Icons";
 import { getData } from "../../../../Api/getData";
-import { dltManyData } from "../../../../Api/controller";
+import { dltManyData, dltData } from "../../../../Api/controller";
 import {
   Pagination,
   CustomeFuncBox,
   SearchTextInput,
-  Slider,
+  SearchSelection,
 } from "../../../../Component";
+import { getDisplayUsingValue } from "../../../../util/func";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { Link } from "react-router-dom";
-import Search from "./Search";
-import Filter from "./Filter";
 import Display from "./Display";
 
-const limit = 8;
+const limit = 12;
 const initQueriese = {
   limit,
   page: 1,
@@ -37,8 +29,6 @@ const TagPage = ({ openedMenu }) => {
   const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
-
-  const [totalPage, setTotalPage] = useState(1);
 
   const [queriese, setQueriese] = useState(initQueriese);
 
@@ -75,7 +65,11 @@ const TagPage = ({ openedMenu }) => {
     );
     setQueriese((prev) => {
       let queries = structuredClone(prev);
-      delete queries.search[searchData.id];
+      if (searchData.buttonType === "sort") {
+        queries.sort[searchData.id] = -1;
+      } else {
+        delete queries.search[searchData.id];
+      }
 
       return queries;
     });
@@ -89,6 +83,15 @@ const TagPage = ({ openedMenu }) => {
     }));
   };
 
+  const handleSort = (sortKey, sortValue) => {
+    if (queriese.sort[sortKey] === sortValue) return;
+    setQueriese((prev) => ({
+      ...prev,
+      sort: { ...prev.sort, [sortKey]: sortValue },
+      page: 1,
+    }));
+  };
+
   // searchType  = 1 it can combine with other search else it cannot go with other search
   const searchBtnList = useRef([
     {
@@ -97,6 +100,18 @@ const TagPage = ({ openedMenu }) => {
       type: "input:text",
       searchType: 1,
       value: 1,
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "createdAt",
+      text: "Date",
+      type: "select",
+      searchType: 1,
+      buttonType: "sort",
+      options: [
+        { id: -1, display: "Newest" },
+        { id: 1, display: "Oldest" },
+      ],
       handleOnClick: handleOnClick,
     },
   ]);
@@ -134,6 +149,19 @@ const TagPage = ({ openedMenu }) => {
     );
   };
 
+  const handleDelete = async (id) => {
+    await dltData(
+      "tag/",
+      id,
+      "Tag",
+      undefined,
+      () => {
+        refetch();
+      },
+      addToaster,
+    );
+  };
+
   useEffect(() => {
     return () => {
       queryClient.clear();
@@ -143,14 +171,14 @@ const TagPage = ({ openedMenu }) => {
   if (!tagData) return;
 
   return (
-    <div className='overflow-auto h-full relative scrollbar-3'>
-      <div className={`sticky left-0 top-[8px] md:mt-[8px]`}>
+    <div className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3 pb-[44px]'>
+      <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Tags</h2>
       </div>
 
-      <div className='sticky  left-0 top-[52px] z-[2000] w-full'>
+      <div className='sticky h-[40px] left-0 top-[52px] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
-          <div className='relative'>
+          <div className='relative flex-shrink-0'>
             <button
               className='size-[40px] p-[8px]'
               onClick={(e) => {
@@ -171,7 +199,7 @@ const TagPage = ({ openedMenu }) => {
             )}
           </div>
 
-          <div className='flex-1 flex items-center flex-wrap'>
+          <div className='flex-1 flex flex-wrap gap-[16px] py-[4px]'>
             {searchList.length > 0 &&
               searchList.map((search) => {
                 if (search.type === "input:text") {
@@ -184,17 +212,36 @@ const TagPage = ({ openedMenu }) => {
                       handleClose={handleClose}
                     />
                   );
+                } else if (search.type === "select") {
+                  return (
+                    <SearchSelection
+                      key={search.id}
+                      searchData={search}
+                      currValue={getDisplayUsingValue(
+                        search.options,
+                        search?.buttonType === "sort"
+                          ? queriese.sort[search.id]
+                          : queriese.search[search.id],
+                      )}
+                      handleSearch={
+                        search?.buttonType === "sort"
+                          ? handleSort
+                          : handleSearch
+                      }
+                      handleClose={handleClose}
+                    />
+                  );
                 }
               })}
           </div>
 
           <div className=' self-end flex items-center justify-center gap-[8px]'>
-            <button>
+            <Link to={"./upsert"}>
               <div className='p-[8px] hover:text-green-500'>
                 <CreateIcon />
               </div>
-            </button>
-            <button>
+            </Link>
+            <button onClick={handleDeleteMany}>
               <div className='p-[8px] hover:text-red-600'>
                 <TrashBinIcon />
               </div>
@@ -203,60 +250,23 @@ const TagPage = ({ openedMenu }) => {
         </div>
       </div>
 
-      <div className='h-[100vh]'></div>
-      {/* 
       <Display
+        openedMenu={openedMenu}
         dataList={tagData.data}
-        page={queriese.page}
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}
-        mockArr={mockArr}
-        limit={limit}
+        handleDelete={handleDelete}
         checkedList={checkedList}
-        refetch={refetch}
-      /> */}
-
-      <Pagination
-        setQueriese={setQueriese}
-        currPage={queriese.page}
-        totalPage={totalPage}
       />
+
+      <div className='w-full bg-black fixed bottom-[0] right-0 mr-[28px] pb-[12px]'>
+        <Pagination
+          setQueriese={setQueriese}
+          currPage={queriese.page}
+          totalPage={tagData?.totalPages}
+        />
+      </div>
     </div>
   );
 };
 export default TagPage;
-{
-  /* <div className='flex flex-col sm:flex-row sm:items-center gap-[12px]'>
-  <div className='flex items-center justify-end sm:justify-start gap-[12px]'>
- 
-    <Search searchValue={searchValue} setSearchValue={setSearchValue} />
-
-  
-    <Link
-      className='size-[32px] rounded-[5px] flex items-center justify-center 
- group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-green-400 transition-all duration-[0.2s] ease-in
-'
-      to={"upsert"}
-    >
-      <div className='text-[rgba(255,255,255,0.4)] group-hover:text-green-400  transition-all duration-[0.2s]'>
-        <CreateIcon />
-      </div>
-    </Link>
-  </div>
-  <div className='flex items-center gap-[12px]'>
-  
-    <button
-      className='size-[32px] rounded-[5px] flex items-center justify-center 
-   group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
-  '
-      onClick={handleDeleteMany}
-    >
-      <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
-        <DeleteAllIcon />
-      </div>
-    </button>
-
-    <Filter params={params} setQueriese={setQueriese} />
-  </div>
-</div> */
-}

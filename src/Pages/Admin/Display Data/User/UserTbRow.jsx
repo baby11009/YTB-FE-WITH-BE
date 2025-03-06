@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { dltData, updateData } from "../../../../Api/controller";
 import { CheckBox2 } from "../../../../Component";
 import { EditIcon, TrashBinIcon } from "../../../../Assets/Icons";
 import { Link } from "react-router-dom";
@@ -7,6 +6,7 @@ import { timeFormat3 } from "../../../../util/timeforMat";
 import { upperCaseFirstChar } from "../../../../util/func";
 
 const UserTbRow = ({ data, handleChecked, checkedList = [], handleDelete }) => {
+  
   const roleColor = useRef({ admin: "text-[#dc3545]", user: "text-[#007bff]" });
 
   return (

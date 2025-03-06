@@ -270,7 +270,7 @@ const UpsertTag = () => {
   return (
     <div>
       <header className='pt-[16px] pb-[32px]'>
-        <h2 className='text-[28px] leading-[44px] font-[500]'>Users</h2>
+        <h2 className='text-[28px] leading-[44px] font-[500]'>Tags</h2>
       </header>
 
       <form

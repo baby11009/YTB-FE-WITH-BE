@@ -1,12 +1,6 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  DeleteAllIcon,
-  CreateIcon,
-  TrashBinIcon,
-  SortIcon2,
-  SearchIcon,
-} from "../../../../Assets/Icons";
+import { CreateIcon, TrashBinIcon, SortIcon2 } from "../../../../Assets/Icons";
 import { getData } from "../../../../Api/getData";
 import { dltManyData, dltData } from "../../../../Api/controller";
 import {
@@ -17,9 +11,8 @@ import {
 } from "../../../../Component";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { Link } from "react-router-dom";
-import Search from "./Search";
-import Filter from "./Filter";
 import Display from "./Display";
+import { getDisplayUsingValue } from "../../../../util/func";
 
 const limit = 10;
 const initPrs = {
@@ -37,19 +30,11 @@ const DisplayUser = ({ openedMenu }) => {
 
   const queryClient = useQueryClient();
 
-  const [totalPage, setTotalPage] = useState(1);
-
   const [queriese, setQueriese] = useState(initPrs);
-
-  const [currTag, setCurrTag] = useState("name");
-
-  const [searchValue, setSearchValue] = useState("");
 
   const [openedSearchBox, setOpenedSearchBox] = useState(false);
 
   const [searchList, setSearchList] = useState([]);
-
-  const tagList = useRef(["name", "email"]);
 
   const { data: usersData, refetch } = getData(
     "user",
@@ -58,9 +43,9 @@ const DisplayUser = ({ openedMenu }) => {
     false,
   );
 
-  const [mockArr, setMockArr] = useState([]);
-
   const [checkedList, setCheckedList] = useState([]);
+
+  const containerRef = useRef();
 
   const handleOnClick = (data) => {
     setSearchList((prev) => {
@@ -82,7 +67,11 @@ const DisplayUser = ({ openedMenu }) => {
     );
     setQueriese((prev) => {
       let queries = structuredClone(prev);
-      delete queries.search[searchData.id];
+      if (searchData.buttonType === "sort") {
+        queries.sort[searchData.id] = -1;
+      } else {
+        delete queries.search[searchData.id];
+      }
 
       return queries;
     });
@@ -94,6 +83,15 @@ const DisplayUser = ({ openedMenu }) => {
     setQueriese((prev) => ({
       ...prev,
       search: { ...prev.search, [searchName]: searchValue },
+      page: 1,
+    }));
+  };
+
+  const handleSort = (sortKey, sortValue) => {
+    if (queriese.sort[sortKey] === sortValue) return;
+    setQueriese((prev) => ({
+      ...prev,
+      sort: { ...prev.sort, [sortKey]: sortValue },
       page: 1,
     }));
   };
@@ -133,6 +131,18 @@ const DisplayUser = ({ openedMenu }) => {
       options: [
         { id: true, display: "True" },
         { id: false, display: "False" },
+      ],
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "createdAt",
+      text: "Date",
+      type: "select",
+      searchType: 1,
+      buttonType: "sort",
+      options: [
+        { id: -1, display: "Newest" },
+        { id: 1, display: "Oldest" },
       ],
       handleOnClick: handleOnClick,
     },
@@ -184,118 +194,30 @@ const DisplayUser = ({ openedMenu }) => {
     );
   };
 
-  useLayoutEffect(() => {
-    if (usersData) {
-      setTotalPage(usersData?.totalPages);
-      if (limit - usersData.qtt > 0) {
-        setMockArr(Array.from({ length: limit - usersData.qtt }, (_, i) => i));
-      } else {
-        setMockArr([]);
-      }
-    }
-
-    return () => {
-      setCheckedList([]);
-    };
-  }, [usersData]);
-
-  useEffect(() => {
-    let timeOut = setTimeout(() => {
-      setQueriese((prev) => {
-        return {
-          ...prev,
-          [currTag]: searchValue,
-          page: 1,
-        };
-      });
-    }, 600);
-
-    return () => {
-      clearTimeout(timeOut);
-    };
-  }, [searchValue]);
-
-  useEffect(() => {
-    setQueriese((prev) => {
-      let obj = { ...prev };
-
-      let tagValue;
-
-      tagList.current.forEach((item) => {
-        if (item !== currTag && obj[item]) {
-          tagValue = obj[item];
-          obj[item] = "";
-          obj[currTag] = tagValue;
-        }
-      });
-
-      return {
-        ...obj,
-        page: 1,
-      };
-    });
-  }, [currTag]);
-
   useEffect(() => {
     return () => {
       queryClient.clear();
     };
   }, []);
 
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = 0;
+    }
+  }, [usersData]);
+
   if (!usersData) return;
 
   return (
-    <div className='overflow-auto h-full relative scrollbar-3'>
-      {/* <div
-        className={`flex sm:items-center justify-between md:py-[16px] ${
-          openedMenu ? "xl:py-[8px]" : ""
-        }`}
-      >
-        <h2 className='text-[28px] leading-[44px] font-[500]'>Users</h2>
-        <div className='flex flex-col sm:flex-row sm:items-center gap-[12px]'>
-          <div className='flex items-center justify-end sm:justify-start gap-[12px]'>
-
-            <Search
-              currTag={currTag}
-              setCurrTag={setCurrTag}
-              searchValue={searchValue}
-              setSearchValue={setSearchValue}
-              tagList={tagList.current}
-            />
-
-     
-            <Link
-              className='size-[32px] rounded-[5px] flex items-center justify-center 
-           group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-green-400 transition-all duration-[0.2s] ease-in
-          '
-              to={"upsert"}
-            >
-              <div className='text-[rgba(255,255,255,0.4)] group-hover:text-green-400  transition-all duration-[0.2s]'>
-                <CreateIcon />
-              </div>
-            </Link>
-          </div>
-          <div className='flex items-center gap-[12px]'>
-         
-            <button
-              className='size-[32px] rounded-[5px] flex items-center justify-center 
-             group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
-            '
-              onClick={handleDeleteMany}
-            >
-              <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
-                <DeleteAllIcon />
-              </div>
-            </button>
-
-            <Filter params={queriese} setQueriese={setQueriese} />
-          </div>
-        </div>
-      </div> */}
+    <div
+      className='overflow-auto h-full relative scrollbar-3'
+      ref={containerRef}
+    >
       <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Users</h2>
       </div>
-      <div className='sticky left-0 top-[52px] z-[2000] w-full'>
+
+      <div className='sticky h-[40px] left-0 top-[52px] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative flex-shrink-0'>
             <button
@@ -336,8 +258,17 @@ const DisplayUser = ({ openedMenu }) => {
                     <SearchSelection
                       key={search.id}
                       searchData={search}
-                      currValue={queriese.search[search.id]}
-                      handleSearch={handleSearch}
+                      currValue={getDisplayUsingValue(
+                        search.options,
+                        search?.buttonType === "sort"
+                          ? queriese.sort[search.id]
+                          : queriese.search[search.id],
+                      )}
+                      handleSearch={
+                        search?.buttonType === "sort"
+                          ? handleSort
+                          : handleSearch
+                      }
                       handleClose={handleClose}
                     />
                   );
@@ -351,7 +282,7 @@ const DisplayUser = ({ openedMenu }) => {
                 <CreateIcon />
               </div>
             </Link>
-            <button>
+            <button onClick={handleDeleteMany}>
               <div className='p-[8px] hover:text-red-600'>
                 <TrashBinIcon />
               </div>
@@ -373,7 +304,7 @@ const DisplayUser = ({ openedMenu }) => {
       <Pagination
         setQueriese={setQueriese}
         currPage={queriese.page}
-        totalPage={totalPage}
+        totalPage={usersData?.totalPages || 0}
       />
     </div>
   );

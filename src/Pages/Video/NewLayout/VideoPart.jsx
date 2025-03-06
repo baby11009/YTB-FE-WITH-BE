@@ -23,6 +23,8 @@ const initCombineQuery = {
   page: 1,
   limit: 12,
   watchedVideoIdList: [],
+  type: "all",
+  split: true,
   sort: undefined,
   prevPlCount: 0,
 };

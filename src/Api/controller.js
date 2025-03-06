@@ -107,21 +107,11 @@ export const dltManyData = async (
     return;
   }
 
+  const finalPath = path + "?" + "idList=" + idList.join(",");
+
   try {
-    const dltDatas = await request
-      .post(
-        `${path}`,
-        {
-          idList,
-        },
-        {
-          headers: {
-            Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-              import.meta.env.VITE_AUTH_TOKEN,
-            )}`,
-          },
-        },
-      )
+    await request
+      .delete(finalPath)
       .then((rsp) => {
         if (handleSuccess) {
           handleSuccess(rsp);

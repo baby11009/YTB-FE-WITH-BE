@@ -1,57 +1,35 @@
 import { CheckBox2 } from "../../../../Component";
-import TagTbRow from "./TagTbRow";
+import TagCard from "./TagCard";
+import { EditIcon, TrashBinIcon } from "../../../../Assets/Icons";
+import { timeFormat3 } from "../../../../util/timeforMat";
 const Display = ({
+  openedMenu,
   dataList = [],
-  refetch,
   handleChecked,
   handleCheckedAll,
-  mockArr = [],
-  limit,
+  handleDelete,
   checkedList = [],
-  page,
 }) => {
   return (
-    <div className='mt-[8px]'>
-      <table className='w-full text-left'>
-        <thead>
-          <tr className='border-b-[1px]'>
-            <th>
-              <div className='flex items-center gap-[16px]'>
-                <CheckBox2
-                  checked={
-                    checkedList.length === dataList.length &&
-                    dataList.length > 0
-                  }
-                  setChecked={handleCheckedAll}
-                />
-
-                <button onClick={handleCheckedAll}>STT</button>
-              </div>
-            </th>
-            <th>Title</th>
-            <th className='hidden xsm:table-cell'>Icon</th>
-            <th className='hidden sm:table-cell'>Ngày tạo</th>
-            <th>Chức năng</th>
-          </tr>
-        </thead>
-        <tbody className=''>
-          {dataList.map((data, id) => (
-            <TagTbRow
-              key={id}
-              data={data}
-              od={id}
-              limit={limit}
-              length={dataList?.length}
-              page={page}
-              refetch={refetch}
-              handleChecked={handleChecked}
-              checkedList={checkedList}
-            />
-          ))}
-          {mockArr.length > 0 &&
-            mockArr.map((id) => <tr key={id} className='h-[56px]'></tr>)}
-        </tbody>
-      </table>
+    <div className='min-w-full w-fit'>
+      <div
+        className={`mt-[16px] gap-[16px] grid  grid-cols-1 xsm:grid-cols-2 sm:grid-cols-3 2md:grid-cols-4 2lg:grid-cols-5
+          ${
+            openedMenu
+              ? "1312:grid-cols-4 1360:grid-cols-5 1573:grid-cols-[repeat(6,minmax(0,260px))"
+              : "1400:grid-cols-[repeat(6,minmax(0,260px))]"
+          }`}
+      >
+        {dataList.map((data) => (
+          <TagCard
+            key={data?._id}
+            data={data}
+            handleChecked={handleChecked}
+            checkedList={checkedList}
+            handleDelete={handleDelete}
+          />
+        ))}
+      </div>
     </div>
   );
 };
