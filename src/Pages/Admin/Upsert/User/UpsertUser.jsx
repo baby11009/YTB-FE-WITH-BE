@@ -8,7 +8,6 @@ import {
 import {
   PlusIcon,
   LongArrowIcon,
-  ThinArrowIcon,
 } from "../../../../Assets/Icons";
 import { Input, DropDown, ImageCropper, TextArea } from "../../../../Component";
 import { createData, updateData } from "../../../../Api/controller";
@@ -254,7 +253,8 @@ const UpsertUser = () => {
       return;
     }
 
-    let data = new FormData();
+    const data = new FormData();
+
     for (const key in finalData) {
       if (key === "image") {
         data.append(key, finalData[key], avaName);
@@ -344,7 +344,7 @@ const UpsertUser = () => {
   return (
     <div className='max-w-[1284px] mx-auto relative'>
       <div className=' sticky top-[56px]  py-[8px] bg-black z-[10] flex items-center'>
-        <h1 className='text-[25px] leading-[32px] font-[500] flex-1'>Users</h1>
+        <h1 className='text-[28px] leading-[44px] font-[500] flex-1'>Users</h1>
         <button
           className='flex-shrink-0 size-[40px] rounded-[50%] hover:bg-black-0.1 p-[8px]'
           onClick={() => {

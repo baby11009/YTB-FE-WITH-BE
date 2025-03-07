@@ -1,14 +1,16 @@
-import { CheckBox2 } from "../../../../Component";
 import TagCard from "./TagCard";
-import { EditIcon, TrashBinIcon } from "../../../../Assets/Icons";
-import { timeFormat3 } from "../../../../util/timeforMat";
+import InsertTagCard from "./InsertTagCard";
+
 const Display = ({
   openedMenu,
   dataList = [],
+  handleAddNewData,
   handleChecked,
   handleCheckedAll,
   handleDelete,
   checkedList = [],
+  currMode,
+  setCurrMode,
 }) => {
   return (
     <div className='min-w-full w-fit'>
@@ -20,6 +22,12 @@ const Display = ({
               : "1400:grid-cols-[repeat(6,minmax(0,260px))]"
           }`}
       >
+        {currMode === "insert" && (
+          <InsertTagCard
+            handleAddNewData={handleAddNewData}
+            setCurrMode={setCurrMode}
+          />
+        )}
         {dataList.map((data) => (
           <TagCard
             key={data?._id}

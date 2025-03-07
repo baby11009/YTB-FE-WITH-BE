@@ -6,6 +6,8 @@ import { getDataWithAuth } from "../../../../Api/getData";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
+import { LongArrowIcon } from "../../../../Assets/Icons";
+import { useNavigate } from "react-router-dom";
 
 const initForm = {
   title: "",
@@ -19,11 +21,14 @@ const UpsertTag = () => {
 
   const queryClient = useQueryClient();
 
-  const {
-    data: tagData,
-    refetch,
-    error: queryError,
-  } = getDataWithAuth(`tag/${id}`, {}, id !== undefined, false);
+  const navigate = useNavigate();
+
+  const { data: tagData, refetch } = getDataWithAuth(
+    `tag/${id}`,
+    {},
+    id !== undefined,
+    false,
+  );
 
   const [formData, setFormData] = useState(initForm);
 
@@ -268,11 +273,20 @@ const UpsertTag = () => {
   }, []);
 
   return (
-    <div>
-      <header className='pt-[16px] pb-[32px]'>
-        <h2 className='text-[28px] leading-[44px] font-[500]'>Tags</h2>
-      </header>
-
+    <div className='max-w-[1284px] mx-auto relative'>
+      <div className=' sticky top-[56px]  py-[8px] bg-black z-[10] flex items-center'>
+        <h1 className='text-[28px] leading-[44px] font-[500] flex-1'>Tags</h1>
+        <button
+          className='flex-shrink-0 size-[40px] rounded-[50%] hover:bg-black-0.1 p-[8px]'
+          onClick={() => {
+            navigate(-1);
+          }}
+        >
+          <div className='w-[24px]'>
+            <LongArrowIcon />
+          </div>
+        </button>
+      </div>
       <form
         noValidate
         onSubmit={handleSubmit}

@@ -12,7 +12,7 @@ const TagCard = ({ data, handleChecked, checkedList = [], handleDelete }) => {
       }}
     >
       <div
-        className='absolute z-[2] size-[160px] rounded-[50%] bg-black bg-center bg-no-repeat bg-cover'
+        className='absolute z-[2] size-[150px] rounded-[50%] bg-black bg-center bg-no-repeat bg-cover'
         style={{
           backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
             import.meta.env.VITE_VIEW_TAG_API
@@ -37,15 +37,25 @@ const TagCard = ({ data, handleChecked, checkedList = [], handleDelete }) => {
         </div>
       </div>
 
-      <div className='size-full flex flex-col items-center mt-[90px] pt-[80px] border-[1px] rounded-[5px]'>
-        <span className='text-[18px] leading-[24px] font-[500]'>
-          {data?.title}
-        </span>
-        <span className='text-[12px] leading-[16px] text-gray-A'>
-          {timeFormat3(data?.createdAt)}
-        </span>
-        <div>Video : 1231</div>
-        <div className='w-full group-hover:visible invisible'>
+      <div
+        className='size-full flex flex-col justify-between mt-[90px] pt-[70px] border-[2px]
+       border-gray-A group-hover:border-white transition-[border] duration-[.15s] ease-in rounded-[5px] p-[8px]'
+      >
+        <div className='text-center'>
+          <div className='w-full h-[20px] line-clamp-1 text-ellipsis'>
+            <span className='text-[16px] leading-[20px] font-[500]  '>
+              {data?.title}
+            </span>
+          </div>
+          <span className='text-[12px] leading-[16px] text-gray-A'>
+            {timeFormat3(data?.createdAt)}
+          </span>
+          <div className='w-full h-[20px] line-clamp-1 text-ellipsis'>
+            <span className='text-[16px] leading-[20px]'>Video : 21312</span>
+          </div>
+        </div>
+        <div className='w-full group-hover:visible group-hover:opacity-[1] opacity-0 invisible transition-all
+         duration-[.15s] ease-in'>
           <div className='flex justify-between'>
             <Link
               className='size-[40px] rounded-[50%] p-[8px] hover:text-green-400'
@@ -57,7 +67,8 @@ const TagCard = ({ data, handleChecked, checkedList = [], handleDelete }) => {
             </Link>
             <button
               className='size-[40px] rounded-[50%] p-[8px] hover:text-red-400 '
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 handleDelete(data?._id);
               }}
             >

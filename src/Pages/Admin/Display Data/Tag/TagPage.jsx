@@ -11,7 +11,6 @@ import {
 } from "../../../../Component";
 import { getDisplayUsingValue } from "../../../../util/func";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
-import { Link } from "react-router-dom";
 import Display from "./Display";
 
 const limit = 12;
@@ -43,7 +42,13 @@ const TagPage = ({ openedMenu }) => {
     false,
   );
 
+  const [tagList, setTagList] = useState([]);
+
+  const tagSet = useRef(new Set());
+
   const [checkedList, setCheckedList] = useState([]);
+
+  const [currMode, setCurrMode] = useState(undefined);
 
   const handleOnClick = (data) => {
     setSearchList((prev) => {
@@ -141,8 +146,15 @@ const TagPage = ({ openedMenu }) => {
       checkedList,
       "tag",
       () => {
+        const checkedSet = new Set(checkedList);
+        const dataList = structuredClone(tagList).filter((data) => {
+          if (!checkedSet.has(data?._id)) {
+            tagSet.current.delete(data?._id);
+            return data;
+          }
+        });
+        setTagList(dataList);
         setCheckedList([]);
-        refetch();
       },
       undefined,
       addToaster,
@@ -156,11 +168,41 @@ const TagPage = ({ openedMenu }) => {
       "Tag",
       undefined,
       () => {
-        refetch();
+        const dataList = structuredClone(tagList).filter((data) => {
+          if (!(data._id === id)) {
+            tagSet.current.delete(data?._id);
+            return data;
+          }
+        });
+        setTagList(dataList);
       },
       addToaster,
     );
   };
+
+  const handleAddNewData = (newData) => {
+    const setArr = [newData._id, ...tagSet.current];
+
+    tagSet.current = new Set(setArr);
+
+    setTagList((prev) => [newData, ...prev]);
+  };
+
+  useEffect(() => {
+    if (tagData) {
+      const dataList = [];
+      tagData.data.forEach((tag) => {
+        if (!tagSet.current.has(tag._id)) {
+          tagSet.current.add(tag._id);
+          dataList.push(tag);
+        }
+      });
+
+      if (dataList.length > 0) {
+        setTagList((prev) => [...prev, ...dataList]);
+      }
+    }
+  }, [tagData]);
 
   useEffect(() => {
     return () => {
@@ -236,11 +278,16 @@ const TagPage = ({ openedMenu }) => {
           </div>
 
           <div className=' self-end flex items-center justify-center gap-[8px]'>
-            <Link to={"./upsert"}>
+            <button
+              className={`${currMode === "insert" ? "invisible" : "visible"}`}
+              onClick={() => {
+                setCurrMode("insert");
+              }}
+            >
               <div className='p-[8px] hover:text-green-500'>
                 <CreateIcon />
               </div>
-            </Link>
+            </button>
             <button onClick={handleDeleteMany}>
               <div className='p-[8px] hover:text-red-600'>
                 <TrashBinIcon />
@@ -252,11 +299,14 @@ const TagPage = ({ openedMenu }) => {
 
       <Display
         openedMenu={openedMenu}
-        dataList={tagData.data}
+        dataList={tagList}
+        handleAddNewData={handleAddNewData}
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}
         handleDelete={handleDelete}
         checkedList={checkedList}
+        currMode={currMode}
+        setCurrMode={setCurrMode}
       />
 
       <div className='w-full bg-black fixed bottom-[0] right-0 mr-[28px] pb-[12px]'>
