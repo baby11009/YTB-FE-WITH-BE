@@ -1,9 +1,14 @@
 import { CheckBox2 } from "../../../../Component";
 import { EditIcon, TrashBinIcon } from "../../../../Assets/Icons";
-import { Link } from "react-router-dom";
 import { timeFormat3 } from "../../../../util/timeforMat";
 
-const TagCard = ({ data, handleChecked, checkedList = [], handleDelete }) => {
+const TagCard = ({
+  data,
+  handleChecked,
+  checkedList = [],
+  handleDelete,
+  startEditing,
+}) => {
   return (
     <div
       className='h-[280px] flex flex-col items-center relative group cursor-pointer'
@@ -54,19 +59,24 @@ const TagCard = ({ data, handleChecked, checkedList = [], handleDelete }) => {
             <span className='text-[16px] leading-[20px]'>Video : 21312</span>
           </div>
         </div>
-        <div className='w-full group-hover:visible group-hover:opacity-[1] opacity-0 invisible transition-all
-         duration-[.15s] ease-in'>
+        <div
+          className='w-full group-hover:visible group-hover:opacity-[1] opacity-0 invisible transition-all
+         duration-[.15s] ease-in'
+        >
           <div className='flex justify-between'>
-            <Link
-              className='size-[40px] rounded-[50%] p-[8px] hover:text-green-400'
-              to={`./upsert/${data?._id}`}
+            <button
+              className='size-[40px] rounded-[50%] p-[8px] hover:text-blue-500'
+              onClick={(e) => {
+                e.stopPropagation();
+                startEditing(data?._id);
+              }}
             >
               <div className='w-[24px]'>
                 <EditIcon />
               </div>
-            </Link>
+            </button>
             <button
-              className='size-[40px] rounded-[50%] p-[8px] hover:text-red-400 '
+              className='size-[40px] rounded-[50%] p-[8px] hover:text-red-500 '
               onClick={(e) => {
                 e.stopPropagation();
                 handleDelete(data?._id);

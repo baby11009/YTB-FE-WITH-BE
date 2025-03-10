@@ -1,14 +1,15 @@
 import TagCard from "./TagCard";
 import InsertTagCard from "./InsertTagCard";
-
+import EditTagCard from "./EditTagCard";
 const Display = ({
   openedMenu,
   dataList = [],
-  handleAddNewData,
+  checkedList = [],
   handleChecked,
   handleCheckedAll,
   handleDelete,
-  checkedList = [],
+  refetch,
+  handleUpdate,
   currMode,
   setCurrMode,
 }) => {
@@ -23,20 +24,31 @@ const Display = ({
           }`}
       >
         {currMode === "insert" && (
-          <InsertTagCard
-            handleAddNewData={handleAddNewData}
-            setCurrMode={setCurrMode}
-          />
+          <InsertTagCard refetch={refetch} setCurrMode={setCurrMode} />
         )}
-        {dataList.map((data) => (
-          <TagCard
-            key={data?._id}
-            data={data}
-            handleChecked={handleChecked}
-            checkedList={checkedList}
-            handleDelete={handleDelete}
-          />
-        ))}
+        {dataList.map((data) => {
+          if (currMode === data?._id) {
+            return (
+              <EditTagCard
+                key={data?._id}
+                data={data}
+                setCurrMode={setCurrMode}
+                handleUpdate={handleUpdate}
+              />
+            );
+          } else {
+            return (
+              <TagCard
+                key={data?._id}
+                data={data}
+                handleChecked={handleChecked}
+                checkedList={checkedList}
+                handleDelete={handleDelete}
+                startEditing={(id) => setCurrMode(id)}
+              />
+            );
+          }
+        })}
       </div>
     </div>
   );

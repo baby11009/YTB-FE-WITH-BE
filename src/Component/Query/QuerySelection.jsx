@@ -2,10 +2,10 @@ import { CloseIcon, ThinArrowIcon } from "../../Assets/Icons";
 import { useState, useEffect, useRef } from "react";
 import { upperCaseFirstChar } from "../../util/func";
 
-const SearchSelection = ({
-  searchData,
+const QuerySelection = ({
+  queryData,
   currValue,
-  handleSearch,
+  handleExecuteQuery,
   handleClose,
 }) => {
   const [opened, setOpened] = useState(false);
@@ -30,12 +30,12 @@ const SearchSelection = ({
     <div className='flex items-end' ref={selectBox}>
       <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
         <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
-          {searchData.text}
+          {queryData.text}
         </span>
         <div
           className='px-[6px] w-[24px]'
           onClick={() => {
-            handleClose(searchData);
+            handleClose(queryData);
           }}
         >
           <CloseIcon />
@@ -71,13 +71,13 @@ const SearchSelection = ({
         >
           <div className='size-full bg-[#1f1f1f] rounded-[12px]'>
             <ul>
-              {searchData.options.map((item) => (
+              {queryData.options.map((item) => (
                 <li
                   key={item.id}
                   className='h-[32px] px-[16px] hover:bg-black-0.2 cursor-pointer'
                   onClick={() => {
                     setOpened(false);
-                    handleSearch(searchData.id, item.id);
+                    handleExecuteQuery (queryData.id, item.id);
                   }}
                 >
                   <span className='text-[14px] leading-[20px] font-[500] '>
@@ -92,4 +92,4 @@ const SearchSelection = ({
     </div>
   );
 };
-export default SearchSelection;
+export default QuerySelection;

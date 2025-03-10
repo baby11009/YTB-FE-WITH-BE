@@ -1,20 +1,18 @@
-import { SaveIcon, CloseIcon, CreateIcon } from "../../../../Assets/Icons";
-import { useState, useRef, useEffect } from "react";
-import { UploadImageIcon } from "../../../../Assets/Icons";
-import { createData } from "../../../../Api/controller";
+import { EditIcon, CloseIcon, UploadImageIcon } from "../../../../Assets/Icons";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
-
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { updateData } from "../../../../Api/controller";
 const initForm = {
   title: "",
   image: undefined,
 };
 
-const InsertTagCard = ({ setCurrMode, refetch }) => {
+const EditTagCard = ({ data, setCurrMode, handleUpdate }) => {
   const { addToaster } = useAuthContext();
 
   const [formData, setFormData] = useState(initForm);
 
-  const [previewImage, setPreviewImage] = useState(undefined);
+  const [previewImage, setPreviewImage] = useState();
 
   const [submitErrs, setSubmitErrs] = useState({});
 
@@ -79,7 +77,7 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
       });
 
       setFormData((prev) => ({ ...prev, image: file }));
-      setPreviewImage({ src: URL.createObjectURL(file), name: file.name });
+      setPreviewImage(URL.createObjectURL(file));
     } catch (error) {
       setSubmitErrs((prev) => ({ ...prev, image: error }));
     }
@@ -91,11 +89,6 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
       title: (title) => {
         if (!title) {
           errors.title = "Title is required";
-        }
-      },
-      image: (image) => {
-        if (!image) {
-          errors.image = "Image is required";
         }
       },
     };
@@ -122,22 +115,44 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
 
     const finalData = new FormData();
 
+    // append all the changed values to the final update data object
     for (const key in formData) {
-      finalData.append(key, formData[key]);
+      if (data[key] !== formData[key]) {
+        finalData.append(key, formData[key]);
+      }
     }
 
-    createData(
+    if (Array.from(finalData.entries()).length < 1) {
+      alert("Nothing changed");
+      return;
+    }
+
+    await updateData(
       "tag",
+      data?._id,
       finalData,
       "Tag",
-      () => {
-        refetch();
+      (rsp) => {
+        handleUpdate(rsp.data?.data);
         setCurrMode(undefined);
       },
       undefined,
       addToaster,
     );
   };
+
+  useLayoutEffect(() => {
+    if (data) {
+      const { icon, title } = data;
+      setFormData({ title, image: undefined });
+
+      setPreviewImage(
+        `${import.meta.env.VITE_BASE_API_URI}${
+          import.meta.env.VITE_VIEW_TAG_API
+        }${icon}`,
+      );
+    }
+  }, [data]);
 
   useEffect(() => {
     if (Object.keys(submitErrs).length > 0) {
@@ -156,12 +171,13 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
       className='h-[280px] flex flex-col items-center relative'
       onSubmit={handleFormSubmit}
     >
-      <div className='absolute z-[1] w-full h-[90px] cursor-default'>
+      <div className='absolute z-[1] w-full h-[90px] cursor-default '>
         <div className='flex justify-between'>
-          <div className='m-[1px] w-[24px] text-green-500'>
-            <CreateIcon />
+          <div
+            className='m-[1px] w-[24px] text-blue-500'
+          >
+            <EditIcon />
           </div>
-
           <button
             type='button'
             onClick={() => {
@@ -174,14 +190,11 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
           </button>
         </div>
       </div>
-
       <div
-        className={`absolute z-[2] size-[150px] rounded-[50%] bg-black
-         ${
-           !previewImage && "border-[2px] border-green-500"
-         } bg-center bg-no-repeat bg-cover cursor-pointer `}
+        className={`absolute z-[2] size-[150px] rounded-[50%] bg-black 
+        bg-center bg-no-repeat bg-cover cursor-pointer `}
         style={{
-          backgroundImage: `url('${previewImage?.src}')`,
+          backgroundImage: `url('${previewImage}')`,
         }}
       >
         <label
@@ -199,7 +212,7 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
           <div className='flex items-center justify-center size-full'>
             {!previewImage && (
               <div className='w-full flex flex-col items-center justify-center font-[500] text-center'>
-                <div className='w-[40px] text-white'>
+                <div className='w-[40px]'>
                   <UploadImageIcon />
                 </div>
               </div>
@@ -220,21 +233,23 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
 
       <div
         className='size-full flex flex-col justify-between mt-[90px] pt-[70px] border-[2px] rounded-[5px] p-[8px]
-       border-green-500'
+       border-blue-500'
       >
-        <div className='w-full h-[24px] line-clamp-1 text-ellipsis text-center'>
-          <input
-            type='text'
-            placeholder='........Title........'
-            className='border-none outline-none bg-transparent text-[16px] leading-[20px] font-[500] placeholder:text-center'
-            minLength={5}
-            maxLength={30}
-            value={formData.title}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, title: e.target.value }))
-            }
-            autoFocus
-          />
+        <div className='text-center'>
+          <div className='w-full h-[20px] line-clamp-1 text-ellipsis'>
+            <input
+              type='text'
+              placeholder='........Title........'
+              className='border-none outline-none bg-transparent text-[16px] leading-[20px] font-[500] placeholder:text-center'
+              minLength={5}
+              maxLength={30}
+              value={formData.title}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
+              }
+              autoFocus
+            />
+          </div>
         </div>
         {Object.keys(submitErrs).length > 0 &&
           Object.keys(submitErrs).map((error, id) => (
@@ -243,12 +258,12 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
             </div>
           ))}
         <div className='ml-auto'>
-          <button className='p-[8px] hover:text-green-500' type='submit'>
-            Add
+          <button className='p-[8px] hover:text-blue-500' type='submit'>
+            Save
           </button>
         </div>
       </div>
     </form>
   );
 };
-export default InsertTagCard;
+export default EditTagCard;

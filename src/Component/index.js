@@ -72,5 +72,5 @@ export { default as RelativeCard } from "./Card/RelativeCard.jsx";
 
 export { default as PlaylistModal } from "./Modal/PlaylistModal.jsx";
 
-export { default as SearchTextInput } from "./Sort/SearchTextInput.jsx";
-export { default as SearchSelection } from "./Sort/SearchSelection.jsx";
+export { default as QueryTextInput } from "./Query/QueryTextInput.jsx";
+export { default as QuerySelection } from "./Query/QuerySelection.jsx";

@@ -1,9 +1,9 @@
 import { useRef, useLayoutEffect } from "react";
 import { CloseIcon } from "../../Assets/Icons";
-const SearchTextInput = ({
-  searchData,
+const QueryTextInput = ({
+  queryData,
   currValue,
-  handleSearch,
+  handleExecuteQuery,
   handleClose,
 }) => {
   const inputRef = useRef();
@@ -13,7 +13,7 @@ const SearchTextInput = ({
       clearTimeout(timeOut.current);
     }
     timeOut.current = setTimeout(() => {
-      handleSearch(searchData.id, e.target.value);
+      handleExecuteQuery(queryData.id, e.target.value);
     }, 600);
   };
 
@@ -27,12 +27,12 @@ const SearchTextInput = ({
     <div className='flex items-end'>
       <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
         <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
-          {searchData.text}
+          {queryData.text}
         </span>
         <div
           className='px-[6px] w-[24px]'
           onClick={() => {
-            handleClose(searchData);
+            handleClose(queryData);
           }}
         >
           <CloseIcon />
@@ -45,7 +45,7 @@ const SearchTextInput = ({
         autoComplete='off'
         onInput={handleOnInput}
         ref={inputRef}
-        id={searchData.id}
+        id={queryData.id}
         placeholder='Searching...'
         autoCorrect="off"
         className='bg-transparent py-[4px] border-b-[2px] outline-none ml-[8px]'
@@ -53,4 +53,4 @@ const SearchTextInput = ({
     </div>
   );
 };
-export default SearchTextInput;
+export default QueryTextInput;

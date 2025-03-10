@@ -14,7 +14,6 @@ import {
   UpsertVideo,
   UpsertComment,
   UpsertPlaylist,
-  UpsertTag,
 } from "./Upsert";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { scrollToTop } from "../../util/scrollCustom";
@@ -35,10 +34,9 @@ const AdminPage = () => {
 
   const pageList = {
     dashboard: <div>DashBoard</div>,
-    user: <DisplayUser openedMenu={openedMenu} />,
+    user: <DisplayUser />,
     "upsert-user": <UpsertUser />,
-    tag: <DisplayTag openedMenu={openedMenu} />,
-    "upsert-tag": <UpsertTag />,
+    tag: <DisplayTag />,
     video: <DisplayVideo openedMenu={openedMenu} />,
     "upsert-video": <UpsertVideo />,
     comment: <DisplayCmt openedMenu={openedMenu} />,

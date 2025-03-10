@@ -6,8 +6,8 @@ import { dltManyData, dltData } from "../../../../Api/controller";
 import {
   Pagination,
   CustomeFuncBox,
-  SearchTextInput,
-  SearchSelection,
+  QueryTextInput,
+  QuerySelection,
 } from "../../../../Component";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { Link } from "react-router-dom";
@@ -18,14 +18,14 @@ const limit = 10;
 const initPrs = {
   limit,
   page: 1,
-  reset: "name",
   sort: {
     createdAt: -1,
   },
   search: {},
 };
 
-const DisplayUser = ({ openedMenu }) => {
+const DisplayUser = () => {
+
   const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
@@ -36,16 +36,16 @@ const DisplayUser = ({ openedMenu }) => {
 
   const [searchList, setSearchList] = useState([]);
 
+  const [checkedList, setCheckedList] = useState([]);
+
+  const containerRef = useRef();
+
   const { data: usersData, refetch } = getData(
     "user",
     queriese,
     queriese ? true : false,
     false,
   );
-
-  const [checkedList, setCheckedList] = useState([]);
-
-  const containerRef = useRef();
 
   const handleOnClick = (data) => {
     setSearchList((prev) => {
@@ -210,7 +210,7 @@ const DisplayUser = ({ openedMenu }) => {
 
   return (
     <div
-      className='overflow-auto h-full relative scrollbar-3'
+      className='overflow-auto h-[calc(100%-44px)] pb-[44px] relative scrollbar-3'
       ref={containerRef}
     >
       <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
@@ -245,7 +245,7 @@ const DisplayUser = ({ openedMenu }) => {
               searchList.map((search) => {
                 if (search.type === "input:text") {
                   return (
-                    <SearchTextInput
+                    <QueryTextInput
                       key={search.id}
                       searchData={search}
                       currValue={queriese.search[search.id]}
@@ -255,7 +255,7 @@ const DisplayUser = ({ openedMenu }) => {
                   );
                 } else if (search.type === "select") {
                   return (
-                    <SearchSelection
+                    <QuerySelection
                       key={search.id}
                       searchData={search}
                       currValue={getDisplayUsingValue(
@@ -290,6 +290,7 @@ const DisplayUser = ({ openedMenu }) => {
           </div>
         </div>
       </div>
+
       <Display
         dataList={usersData.data}
         refetch={refetch}
@@ -301,11 +302,13 @@ const DisplayUser = ({ openedMenu }) => {
         page={queriese.page}
       />
 
-      <Pagination
-        setQueriese={setQueriese}
-        currPage={queriese.page}
-        totalPage={usersData?.totalPages || 0}
-      />
+      <div className='w-full bg-black fixed bottom-[0] right-0 mr-[28px] py-[6px]'>
+        <Pagination
+          setQueriese={setQueriese}
+          currPage={queriese.page}
+          totalPage={usersData?.totalPages || 1}
+        />
+      </div>
     </div>
   );
 };

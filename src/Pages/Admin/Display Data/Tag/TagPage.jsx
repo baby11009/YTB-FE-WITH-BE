@@ -6,8 +6,8 @@ import { dltManyData, dltData } from "../../../../Api/controller";
 import {
   Pagination,
   CustomeFuncBox,
-  SearchTextInput,
-  SearchSelection,
+  QueryTextInput,
+  QuerySelection,
 } from "../../../../Component";
 import { getDisplayUsingValue } from "../../../../util/func";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
@@ -44,11 +44,11 @@ const TagPage = ({ openedMenu }) => {
 
   const [tagList, setTagList] = useState([]);
 
-  const tagSet = useRef(new Set());
-
   const [checkedList, setCheckedList] = useState([]);
 
   const [currMode, setCurrMode] = useState(undefined);
+
+  const containerRef = useRef();
 
   const handleOnClick = (data) => {
     setSearchList((prev) => {
@@ -85,6 +85,7 @@ const TagPage = ({ openedMenu }) => {
     setQueriese((prev) => ({
       ...prev,
       search: { ...prev.search, [searchName]: searchValue },
+      page: 1,
     }));
   };
 
@@ -146,14 +147,7 @@ const TagPage = ({ openedMenu }) => {
       checkedList,
       "tag",
       () => {
-        const checkedSet = new Set(checkedList);
-        const dataList = structuredClone(tagList).filter((data) => {
-          if (!checkedSet.has(data?._id)) {
-            tagSet.current.delete(data?._id);
-            return data;
-          }
-        });
-        setTagList(dataList);
+        refetch();
         setCheckedList([]);
       },
       undefined,
@@ -168,39 +162,28 @@ const TagPage = ({ openedMenu }) => {
       "Tag",
       undefined,
       () => {
-        const dataList = structuredClone(tagList).filter((data) => {
-          if (!(data._id === id)) {
-            tagSet.current.delete(data?._id);
-            return data;
-          }
-        });
-        setTagList(dataList);
+        refetch();
       },
       addToaster,
     );
   };
 
-  const handleAddNewData = (newData) => {
-    const setArr = [newData._id, ...tagSet.current];
-
-    tagSet.current = new Set(setArr);
-
-    setTagList((prev) => [newData, ...prev]);
+  const handleUpdate = (data) => {
+    setTagList((prev) => {
+      return prev.map((tag) => {
+        if (tag._id === data._id) {
+          return data;
+        }
+        return tag;
+      });
+    });
   };
 
   useEffect(() => {
     if (tagData) {
-      const dataList = [];
-      tagData.data.forEach((tag) => {
-        if (!tagSet.current.has(tag._id)) {
-          tagSet.current.add(tag._id);
-          dataList.push(tag);
-        }
-      });
-
-      if (dataList.length > 0) {
-        setTagList((prev) => [...prev, ...dataList]);
-      }
+      setTagList([...tagData.data]);
+      containerRef.current.scrollTop = 0;
+      setCurrMode(undefined);
     }
   }, [tagData]);
 
@@ -213,7 +196,10 @@ const TagPage = ({ openedMenu }) => {
   if (!tagData) return;
 
   return (
-    <div className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3 pb-[44px]'>
+    <div
+      className='overflow-auto h-[calc(100%-44px)] pb-[44px] relative scrollbar-3'
+      ref={containerRef}
+    >
       <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Tags</h2>
       </div>
@@ -246,7 +232,7 @@ const TagPage = ({ openedMenu }) => {
               searchList.map((search) => {
                 if (search.type === "input:text") {
                   return (
-                    <SearchTextInput
+                    <QueryTextInput
                       key={search.id}
                       searchData={search}
                       currValue={queriese.search[search.id]}
@@ -256,7 +242,7 @@ const TagPage = ({ openedMenu }) => {
                   );
                 } else if (search.type === "select") {
                   return (
-                    <SearchSelection
+                    <QuerySelection
                       key={search.id}
                       searchData={search}
                       currValue={getDisplayUsingValue(
@@ -300,20 +286,21 @@ const TagPage = ({ openedMenu }) => {
       <Display
         openedMenu={openedMenu}
         dataList={tagList}
-        handleAddNewData={handleAddNewData}
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}
         handleDelete={handleDelete}
+        refetch={refetch}
+        handleUpdate={handleUpdate}
         checkedList={checkedList}
         currMode={currMode}
         setCurrMode={setCurrMode}
       />
 
-      <div className='w-full bg-black fixed bottom-[0] right-0 mr-[28px] pb-[12px]'>
+      <div className='w-full bg-black fixed bottom-[0] right-0 mr-[28px] py-[6px]'>
         <Pagination
           setQueriese={setQueriese}
           currPage={queriese.page}
-          totalPage={tagData?.totalPages}
+          totalPage={tagData?.totalPages || 1}
         />
       </div>
     </div>
