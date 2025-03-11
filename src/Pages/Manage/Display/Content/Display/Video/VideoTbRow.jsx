@@ -10,7 +10,6 @@ import { timeFormat3 } from "../../../../../../util/timeforMat";
 import { dltData } from "../../../../../../Api/controller";
 import VideoUpsertModal from "./VideoUpsertModal";
 
-
 const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
   const { setIsShowing, addToaster } = useAuthContext();
 
@@ -25,7 +24,7 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
       undefined,
       addToaster,
     );
-  }
+  };
 
   const showDeleteConfirm = () => {
     setIsShowing(
@@ -42,9 +41,10 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
   };
 
   return (
-    <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
+    <div
+      className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A text-[13px] leading-[24px]'>
       <div
-        className='sticky left-0 p-[12px_12px_8px_25px]
+        className='sticky left-0 p-[20px] flex items-center
        bg-black group-hover:bg-[#272727] z-[5]'
       >
         <CheckBox2
@@ -56,7 +56,7 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
       </div>
 
       <div
-        className='sticky left-[57px] flex-[2_0_400px] min-w-[400px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
+        className='sticky left-[60px] flex-[2_0_400px] min-w-[400px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
           border-r-[1px] border-gray-A'
       >
         <div className='w-full flex relative'>
@@ -125,19 +125,19 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
           </div>
         </div>
       </div>
-      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-[13px] leading-[24px]'>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]'>
         {timeFormat3(data?.createdAt)}
       </div>
-      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right '>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]  text-right '>
         {formatNumber(data?.view)}
       </div>
-      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right'>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]  text-right'>
         {formatNumber(data?.totalCmt)}
       </div>
-      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right'>
+      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px]  text-right'>
         {formatNumber(data?.like)}
       </div>
-      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right'>
+      <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px]  text-right'>
         {formatNumber(data?.dislike)}
       </div>
     </div>

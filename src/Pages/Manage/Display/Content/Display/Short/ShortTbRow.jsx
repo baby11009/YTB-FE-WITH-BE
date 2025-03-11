@@ -41,9 +41,9 @@ const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
   }
 
   return (
-    <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
+    <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A text-[13px] leading-[24px]'>
       <div
-        className={`sticky left-0 p-[12px_12px_8px_25px]
+        className={`sticky left-0 px-[20px] flex items-center
      bg-black group-hover:bg-[#272727] z-[5]`}
       >
         <CheckBox2
@@ -55,7 +55,7 @@ const ShortTbRow = ({ handleChecked, checked, data, od, refetch }) => {
       </div>
 
       <div
-        className='sticky left-[57px] flex-[2_0_400px] min-w-[400px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
+        className='sticky left-[60px] flex-[2_0_400px] min-w-[400px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
         border-r-[1px] border-gray-A'
       >
         <div className='w-full flex relative'>

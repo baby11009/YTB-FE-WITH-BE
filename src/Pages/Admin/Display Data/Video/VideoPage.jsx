@@ -3,7 +3,7 @@ import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CreateIcon, SortIcon2, TrashBinIcon } from "../../../../Assets/Icons";
 import { getDataWithAuth } from "../../../../Api/getData";
-import { dltManyData } from "../../../../Api/controller";
+import { dltManyData, dltData } from "../../../../Api/controller";
 import { getDisplayUsingValue } from "../../../../util/func";
 import Display from "./Display";
 import {
@@ -12,8 +12,6 @@ import {
   QueryTextInput,
   QuerySelection,
 } from "../../../../Component";
-import Search from "./Search";
-import Filter from "./Filter";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const limit = 10;
@@ -32,9 +30,8 @@ const VideoPage = () => {
   const queryClient = useQueryClient();
 
   const [queriese, setQueriese] = useState(initQueriese);
-  console.log("🚀 ~ queriese:", queriese);
 
-  const [openedSearchBox, setOpenedSearchBox] = useState(false);
+  const [isQueryBoxOpened, setIsQueryBoxOpened] = useState(false);
 
   const [queryOptions, setQueryOptions] = useState([]);
 
@@ -42,48 +39,24 @@ const VideoPage = () => {
 
   const containerRef = useRef();
 
+  const funcContainerRef= useRef()
+
   const { data: videosData, refetch } = getDataWithAuth(
     "video",
     queriese,
-    false,
+    !!queriese,
     false,
   );
 
   const handleOnClick = (queryData) => {
-    setQueryOptions((prev) => {
-      if (queryData?.unique) {
-        const newOptions = prev.filter(
-          (prevQuery) => prevQuery.buttonType !== "sort",
-        );
-        newOptions.push(queryData);
+    setQueryOptions((prev) => [...prev, queryData]);
 
-        return newOptions;
+    queryOptionBtns.current = queryOptionBtns.current.map((query) => {
+      if (query.id === queryData.id) {
+        query.renderCondition = false;
       }
-
-      return [...prev, queryData];
+      return query;
     });
-
-    if (queryData?.unique) {
-      queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
-        if (queryOption.id === queryData.id) {
-          queryOption.renderCondition = false;
-        } else if (
-          queryOption.buttonType === "sort" &&
-          !queryOption.renderCondition
-        ) {
-          queryOption.renderCondition = true;
-        }
-
-        return queryOption;
-      });
-    } else {
-      queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
-        if (queryOption.id === queryData.id) {
-          queryOption.renderCondition = false;
-        }
-        return queryOption;
-      });
-    }
   };
 
   const handleClose = (queryData) => {
@@ -95,12 +68,13 @@ const VideoPage = () => {
       const { search, sort } = prev;
 
       if (queryData.buttonType === "sort") {
-        if (queryData.unique) {
-          const { [queryData.id]: _, ...rest } = sort;
+        const { [queryData.id]: _, ...rest } = sort;
+        // Check if is there any sort query in the queirese
+        // If not, set default sort is createdAt = -1
+        if (Object.keys(rest).length > 0) {
           prev.sort = rest;
         } else {
-          sort[queryData.id] = -1;
-          prev.sort = sort;
+          prev.sort = { createdAt: -1 };
         }
       } else {
         const { [queryData.id]: _, ...rest } = search;
@@ -110,36 +84,51 @@ const VideoPage = () => {
       return prev;
     });
 
-    if (queryData.unique) {
-    } else {
-      queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
-        if (queryOption.id === queryData.id) {
-          queryOption.renderCondition = true;
-        }
-        return queryOption;
-      });
-    }
+    queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
+      if (queryOption.id === queryData.id) {
+        queryOption.renderCondition = true;
+      }
+      return queryOption;
+    });
   };
 
-  const handleSearch = (searchName, searchValue) => {
-    if (queriese.search[searchName] === searchValue) return;
+  const handleSearch = (searchKey, searchValue) => {
+    if (queriese.search[searchKey] === searchValue) return;
     setQueriese((prev) => ({
       ...prev,
-      search: { ...prev.search, [searchName]: searchValue },
+      search: { ...prev.search, [searchKey]: searchValue },
       page: 1,
     }));
   };
 
   const handleSort = (sortKey, sortValue) => {
     if (queriese.sort[sortKey] === sortValue) return;
+
+    const sortOptionIds = queryOptions.map((query) => {
+      if (query.buttonType === "sort") {
+        return query.id;
+      }
+    });
+
+    const sortObj = {};
+
+    sortOptionIds.forEach((sortOptionId) => {
+      let value;
+      if (sortOptionId === sortKey) {
+        value = sortValue;
+      } else if (queriese.sort[sortOptionId]) {
+        value = queriese.sort[sortOptionId];
+      }
+      sortObj[sortOptionId] = value;
+    });
+
     setQueriese((prev) => ({
       ...prev,
-      sort: { ...prev.sort, [sortKey]: sortValue },
+      sort: sortObj,
       page: 1,
     }));
   };
 
-  // searchType  = 1 it can combine with other search else it cannot go with other search
   const queryOptionBtns = useRef([
     {
       id: "title",
@@ -162,11 +151,11 @@ const VideoPage = () => {
       text: "Type",
       type: "select",
       buttonType: "search",
+      renderCondition: true,
       options: [
         { id: "video", display: "Video" },
         { id: "short", display: "Short" },
       ],
-      renderCondition: true,
       handleOnClick: handleOnClick,
     },
     {
@@ -174,11 +163,11 @@ const VideoPage = () => {
       text: "Date",
       type: "select",
       buttonType: "sort",
+      renderCondition: true,
       options: [
         { id: -1, display: "Newest" },
         { id: 1, display: "Oldest" },
       ],
-      renderCondition: true,
       handleOnClick: handleOnClick,
     },
     {
@@ -186,12 +175,11 @@ const VideoPage = () => {
       text: "View",
       type: "select",
       buttonType: "sort",
-      unique: true,
+      renderCondition: true,
       options: [
         { id: -1, display: "Most popular" },
         { id: 1, display: "Least popular" },
       ],
-      renderCondition: true,
       handleOnClick: handleOnClick,
     },
     {
@@ -199,12 +187,11 @@ const VideoPage = () => {
       text: "Like",
       type: "select",
       buttonType: "sort",
-      unique: true,
+      renderCondition: true,
       options: [
         { id: -1, display: "Most liked" },
         { id: 1, display: "Least liked" },
       ],
-      renderCondition: true,
       handleOnClick: handleOnClick,
     },
     {
@@ -212,12 +199,11 @@ const VideoPage = () => {
       text: "Dislike",
       type: "select",
       buttonType: "sort",
-      unique: true,
+      renderCondition: true,
       options: [
         { id: -1, display: "Most disliked" },
         { id: 1, display: "Least disliked" },
       ],
-      renderCondition: true,
       handleOnClick: handleOnClick,
     },
     {
@@ -225,12 +211,11 @@ const VideoPage = () => {
       text: "Comment",
       type: "select",
       buttonType: "sort",
-      unique: true,
+      renderCondition: true,
       options: [
         { id: -1, display: "Most commented" },
         { id: 1, display: "Least commented" },
       ],
-      renderCondition: true,
       handleOnClick: handleOnClick,
     },
   ]);
@@ -268,8 +253,22 @@ const VideoPage = () => {
     );
   };
 
+  const handleDelete = async (id) => {
+    await dltData(
+      "video/",
+      id,
+      "Video",
+      undefined,
+      () => {
+        refetch();
+      },
+      addToaster,
+    );
+  };
+
   useLayoutEffect(() => {
-    if (videosData) {
+    if (videosData && containerRef.current) {
+      containerRef.current.scrollTop = 0;
     }
 
     return () => {
@@ -283,7 +282,7 @@ const VideoPage = () => {
     };
   }, []);
 
-  // if (!videosData) return;
+  if (!videosData) return;
 
   return (
     <div
@@ -293,7 +292,7 @@ const VideoPage = () => {
       <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Videos</h2>
       </div>
-      <div className='sticky h-[40px] left-0 top-[52px] z-[2000] w-full'>
+      <div className='sticky left-0 top-[52px] z-[2000] w-full'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative flex-shrink-0'>
             <button
@@ -301,22 +300,22 @@ const VideoPage = () => {
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                setOpenedSearchBox((prev) => !prev);
+                setIsQueryBoxOpened((prev) => !prev);
               }}
             >
               <SortIcon2 />
             </button>
-            {openedSearchBox && (
+            {isQueryBoxOpened && (
               <CustomeFuncBox
                 style={"left-[100%] top-[100%] min-w-[200px]"}
-                opened={openedSearchBox}
-                setOpened={setOpenedSearchBox}
+                opened={isQueryBoxOpened}
+                setOpened={setIsQueryBoxOpened}
                 funcList1={queryOptionBtns.current}
               />
             )}
           </div>
 
-          <div className='flex-1 flex flex-wrap gap-[16px] py-[4px]'>
+          <div className='flex-1 flex flex-wrap items-center gap-[16px]'>
             {queryOptions.length > 0 &&
               queryOptions.map((query) => {
                 if (query.type === "input:text") {
@@ -364,6 +363,15 @@ const VideoPage = () => {
           </div>
         </div>
       </div>
+
+      <Display
+        dataList={videosData.data}
+        checkedList={checkedList}
+        handleChecked={handleChecked}
+        handleCheckedAll={handleCheckedAll}
+        handleDelete={handleDelete}
+      />
+
       <div className='w-full bg-black fixed bottom-[0] right-0 mr-[28px] py-[6px]'>
         <Pagination
           setQueriese={setQueriese}
@@ -375,61 +383,3 @@ const VideoPage = () => {
   );
 };
 export default VideoPage;
-
-// <div
-//         className={`flex items-center justify-between md:py-[16px] ${
-//           openedMenu ? "xl:py-[8px]" : ""
-//         }`}
-//       >
-//         <h2 className='text-[28px] leading-[44px] font-[500]'>Videos</h2>
-//         <div className='flex flex-col sm:flex-row sm:items-center gap-[12px]'>
-//           <div className='flex items-center justify-end sm:justify-start gap-[12px]'>
-//             {/* Search */}
-//             <Search
-//               currTag={currTag}
-//               setCurrTag={setCurrTag}
-//               searchValue={searchValue}
-//               setSearchValue={setSearchValue}
-//               tagList={tagList.current}
-//             />
-
-//             {/* Create */}
-//             <Link
-//               className='size-[32px] rounded-[5px] flex items-center justify-center
-//             group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-green-400 transition-all duration-[0.2s] ease-in
-//             '
-//               to={"upsert"}
-//             >
-//               <div className='text-[rgba(255,255,255,0.4)] group-hover:text-green-400  transition-all duration-[0.2s]'>
-//                 <CreateIcon />
-//               </div>
-//             </Link>
-//           </div>
-//           <div className='flex items-center gap-[12px]'>
-//             {/* Delete many */}
-//             <button
-//               className='size-[32px] rounded-[5px] flex items-center justify-center
-//              group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
-//             '
-//               onClick={handleDeleteMany}
-//             >
-//               <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
-//                 <DeleteAllIcon />
-//               </div>
-//             </button>
-
-//             {/* Filter */}
-//             <Filter params={queriese} setParams={setQueriese} />
-//           </div>
-//         </div>
-//       </div>
-//       <Display
-//         dataList={videosData.data}
-//         page={queriese.page}
-//         mockArr={mockArr}
-//         limit={limit}
-//         checkedList={checkedList}
-//         refetch={refetch}
-//         handleChecked={handleChecked}
-//         handleCheckedAll={handleCheckedAll}
-//       />

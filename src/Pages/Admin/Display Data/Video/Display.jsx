@@ -3,58 +3,56 @@ import VideoTbRow from "./VideoTbRow";
 
 const Display = ({
   dataList = [],
-  refetch,
-  mockArr = [],
-  limit,
   checkedList = [],
-  page,
   handleChecked,
   handleCheckedAll,
+  handleDelete,
 }) => {
   return (
-    <div className='mt-[8px]'>
-      <table className='w-full text-left'>
-        <thead>
-          <tr className='border-b-[1px]'>
-            <th>
-              <div className='flex items-center gap-[16px]'>
-                <CheckBox2
-                  checked={
-                    checkedList.length === dataList.length &&
-                    dataList.length > 0
-                  }
-                  setChecked={handleCheckedAll}
-                />
-
-                <button onClick={handleCheckedAll}>STT</button>
-              </div>
-            </th>
-            <th className='hidden 2md:table-cell'>Tiêu đề</th>
-            <th>Thumbnail</th>
-            <th className='hidden xsm:table-cell'>Người đăng</th>
-            <th className='hidden 1-5sm:table-cell'>Thể loại</th>
-            <th className='hidden 2lg:table-cell'>Ngày tạo</th>
-            <th>Chức năng</th>
-          </tr>
-        </thead>
-        <tbody className=''>
-          {dataList.map((data, id) => (
-            <VideoTbRow
-              key={id}
-              limit={limit}
-              data={data}
-              od={id}
-              length={dataList?.length}
-              page={page}
-              refetch={refetch}
-              checkedList={checkedList}
-              handleChecked={handleChecked}
-            />
-          ))}
-          {mockArr.length > 0 &&
-            mockArr.map((id) => <tr key={id} className='h-[56px]'></tr>)}
-        </tbody>
-      </table>
+    <div className='min-w-full w-fit'>
+      <div
+        className='sticky left-0 top-[92px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
+         text-gray-A items-center border-y-[1px] border-gray-A flex'
+      >
+        <div className='sticky left-0 h-[48px] px-[20px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
+          <CheckBox2
+            checked={
+              checkedList.length === dataList.length && dataList.length > 0
+            }
+            setChecked={handleCheckedAll}
+          />
+        </div>
+        <div
+          className='sticky left-[60px] pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
+              border-r-[1px] border-gray-A z-[10]'
+        >
+          Video
+        </div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Date</div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] text-end'>
+          View
+        </div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] text-end'>
+          Comments
+        </div>
+        <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] text-end'>
+          Like
+        </div>
+        <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] text-end'>
+          Dislike
+        </div>
+      </div>
+      <div className='flex flex-col z-[2] relative'>
+        {dataList.map((data, id) => (
+          <VideoTbRow
+            key={id}
+            data={data}
+            handleDelete={handleDelete}
+            handleChecked={handleChecked}
+            checked={checkedList.includes(data?._id)}
+          />
+        ))}
+      </div>
     </div>
   );
 };

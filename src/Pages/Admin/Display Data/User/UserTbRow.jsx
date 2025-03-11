@@ -5,23 +5,22 @@ import { Link } from "react-router-dom";
 import { timeFormat3 } from "../../../../util/timeforMat";
 import { upperCaseFirstChar } from "../../../../util/func";
 
-const UserTbRow = ({ data, handleChecked, checkedList = [], handleDelete }) => {
-  
+const UserTbRow = ({ data, handleChecked, checked, handleDelete }) => {
   const roleColor = useRef({ admin: "text-[#dc3545]", user: "text-[#007bff]" });
 
   return (
     <div className='h-[76px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A text-[13px] leading-[24px]'>
-      <div className='sticky left-0 p-[8px_12px_8px_25px] z-[10]'>
+      <div className='sticky left-0 px-[20px] z-[10] flex items-center'>
         <CheckBox2
-          checked={checkedList.includes(data?._id)}
+          checked={checked}
           setChecked={() => {
             handleChecked(data?._id);
           }}
         />
       </div>
       <div
-        className='sticky left-[57px] pl-[12px] flex-[2_0_300px] min-w-[300px] 
-        border-r-[1px] border-gray-A z-[10] py-[8px] flex'
+        className='sticky left-[60px] pl-[12px] flex-[2_0_300px] min-w-[300px] 
+        border-r-[1px] border-gray-A z-[10] bg-black group-hover:bg-[#272727] py-[8px] flex'
       >
         <div>
           <img

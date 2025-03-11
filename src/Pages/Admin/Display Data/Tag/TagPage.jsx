@@ -31,9 +31,9 @@ const TagPage = ({ openedMenu }) => {
 
   const [queriese, setQueriese] = useState(initQueriese);
 
-  const [openedSearchBox, setOpenedSearchBox] = useState(false);
+  const [isQueryBoxOpened, setIsQueryBoxOpened] = useState(false);
 
-  const [searchList, setSearchList] = useState([]);
+  const [queryOptions, setQueryOptions] = useState([]);
 
   const { data: tagData, refetch } = getData(
     "tag",
@@ -50,70 +50,102 @@ const TagPage = ({ openedMenu }) => {
 
   const containerRef = useRef();
 
-  const handleOnClick = (data) => {
-    setSearchList((prev) => {
-      if (data.searchType === 1) {
-        return [...prev, data];
+  const handleOnClick = (queryData) => {
+    setQueryOptions((prev) => [...prev, queryData]);
+
+    queryOptionBtns.current = queryOptionBtns.current.map((query) => {
+      if (query.id === queryData.id) {
+        query.renderCondition = false;
       }
-
-      return [data];
+      return query;
     });
-
-    searchBtnList.current = searchBtnList.current.filter(
-      (prev) => prev.id !== data.id,
-    );
   };
 
-  const handleClose = (searchData) => {
-    setSearchList((prev) =>
-      prev.filter((search) => search.id !== searchData.id),
+  const handleClose = (queryData) => {
+    setQueryOptions((prev) =>
+      prev.filter((search) => search.id !== queryData.id),
     );
+
     setQueriese((prev) => {
-      let queries = structuredClone(prev);
-      if (searchData.buttonType === "sort") {
-        queries.sort[searchData.id] = -1;
+      const { search, sort } = prev;
+
+      if (queryData.buttonType === "sort") {
+        const { [queryData.id]: _, ...rest } = sort;
+        // Check if is there any sort query in the queirese
+        // If not, set default sort is createdAt = -1
+        if (Object.keys(rest).length > 0) {
+          prev.sort = rest;
+        } else {
+          prev.sort = { createdAt: -1 };
+        }
       } else {
-        delete queries.search[searchData.id];
+        const { [queryData.id]: _, ...rest } = search;
+        prev.search = rest;
       }
 
-      return queries;
+      return prev;
     });
-    searchBtnList.current.push(searchData);
+
+    queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
+      if (queryOption.id === queryData.id) {
+        queryOption.renderCondition = true;
+      }
+      return queryOption;
+    });
   };
 
-  const handleSearch = (searchName, searchValue) => {
+  const handleSearch = (searchKey, searchValue) => {
+    if (queriese.search[searchKey] === searchValue) return;
     setQueriese((prev) => ({
       ...prev,
-      search: { ...prev.search, [searchName]: searchValue },
+      search: { ...prev.search, [searchKey]: searchValue },
       page: 1,
     }));
   };
 
   const handleSort = (sortKey, sortValue) => {
     if (queriese.sort[sortKey] === sortValue) return;
+
+    const sortOptionIds = queryOptions.map((query) => {
+      if (query.buttonType === "sort") {
+        return query.id;
+      }
+    });
+
+    const sortObj = {};
+
+    sortOptionIds.forEach((sortOptionId) => {
+      let value;
+      if (sortOptionId === sortKey) {
+        value = sortValue;
+      } else if (queriese.sort[sortOptionId]) {
+        value = queriese.sort[sortOptionId];
+      }
+      sortObj[sortOptionId] = value;
+    });
+
     setQueriese((prev) => ({
       ...prev,
-      sort: { ...prev.sort, [sortKey]: sortValue },
+      sort: sortObj,
       page: 1,
     }));
   };
 
-  // searchType  = 1 it can combine with other search else it cannot go with other search
-  const searchBtnList = useRef([
+  const queryOptionBtns = useRef([
     {
       id: "title",
       text: "Name",
       type: "input:text",
-      searchType: 1,
-      value: 1,
+      buttonType: "search",
+      renderCondition: true,
       handleOnClick: handleOnClick,
     },
     {
       id: "createdAt",
       text: "Date",
       type: "select",
-      searchType: 1,
       buttonType: "sort",
+      renderCondition: true,
       options: [
         { id: -1, display: "Newest" },
         { id: 1, display: "Oldest" },
@@ -185,6 +217,10 @@ const TagPage = ({ openedMenu }) => {
       containerRef.current.scrollTop = 0;
       setCurrMode(undefined);
     }
+
+    return () => {
+      setCheckedList([]);
+    };
   }, [tagData]);
 
   useEffect(() => {
@@ -212,49 +248,47 @@ const TagPage = ({ openedMenu }) => {
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                setOpenedSearchBox((prev) => !prev);
+                setIsQueryBoxOpened((prev) => !prev);
               }}
             >
               <SortIcon2 />
             </button>
-            {openedSearchBox && (
+            {isQueryBoxOpened && (
               <CustomeFuncBox
                 style={"left-[100%] top-[100%] min-w-[200px]"}
-                opened={openedSearchBox}
-                setOpened={setOpenedSearchBox}
-                funcList1={searchBtnList.current}
+                opened={isQueryBoxOpened}
+                setOpened={setIsQueryBoxOpened}
+                funcList1={queryOptionBtns.current}
               />
             )}
           </div>
 
           <div className='flex-1 flex flex-wrap gap-[16px] py-[4px]'>
-            {searchList.length > 0 &&
-              searchList.map((search) => {
-                if (search.type === "input:text") {
+            {queryOptions.length > 0 &&
+              queryOptions.map((query) => {
+                if (query.type === "input:text") {
                   return (
                     <QueryTextInput
-                      key={search.id}
-                      searchData={search}
-                      currValue={queriese.search[search.id]}
-                      handleSearch={handleSearch}
+                      key={query.id}
+                      queryData={query}
+                      currValue={queriese.search[query.id]}
+                      handleExecuteQuery={handleSearch}
                       handleClose={handleClose}
                     />
                   );
-                } else if (search.type === "select") {
+                } else if (query.type === "select") {
                   return (
                     <QuerySelection
-                      key={search.id}
-                      searchData={search}
+                      key={query.id}
+                      queryData={query}
                       currValue={getDisplayUsingValue(
-                        search.options,
-                        search?.buttonType === "sort"
-                          ? queriese.sort[search.id]
-                          : queriese.search[search.id],
+                        query.options,
+                        query?.buttonType === "sort"
+                          ? queriese.sort[query.id]
+                          : queriese.search[query.id],
                       )}
-                      handleSearch={
-                        search?.buttonType === "sort"
-                          ? handleSort
-                          : handleSearch
+                      handleExecuteQuery={
+                        query?.buttonType === "sort" ? handleSort : handleSearch
                       }
                       handleClose={handleClose}
                     />

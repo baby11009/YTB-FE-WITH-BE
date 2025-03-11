@@ -12,7 +12,7 @@ const Content = ({}) => {
           <h1 className='pt-[24px] text-nowrap text-[25px] leading-[32px] font-[600]'>
             Channel's content
           </h1>
-          <div className='pt-[24px]'>
+          <div className='pt-[12px]'>
             <Navigate pathParam={Object.values(params)[1]} />
           </div>
         </div>

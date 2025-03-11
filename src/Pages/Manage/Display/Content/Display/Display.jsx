@@ -24,7 +24,7 @@ const Display = ({ path, pathParam }) => {
   }, [pathParam]);
 
   return (
-    <div className='px-[8px] md:px-0 h-[calc(100vh-182px)]'>{pageRender}</div>
+    <div className='px-[8px] md:px-0 h-[calc(100vh-170px)]'>{pageRender}</div>
   );
 };
 export default Display;
