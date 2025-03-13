@@ -233,7 +233,7 @@ const TagPage = ({ openedMenu }) => {
 
   return (
     <div
-      className='overflow-auto h-[calc(100%-44px)] pb-[44px] relative scrollbar-3'
+      className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3'
       ref={containerRef}
     >
       <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>

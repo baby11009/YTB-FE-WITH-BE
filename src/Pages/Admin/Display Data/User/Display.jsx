@@ -11,10 +11,10 @@ const Display = ({
   return (
     <div className='min-w-full w-fit'>
       <div
-        className='sticky left-0 top-[92px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
+        className='sticky  top-[92px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
            text-gray-A items-center border-y-[1px] border-gray-A flex'
       >
-        <div className='sticky left-0 h-[48px] px-[20px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
+        <div className='h-[48px] px-[20px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
           <CheckBox2
             checked={
               checkedList.length === dataList.length && dataList.length > 0
@@ -23,7 +23,7 @@ const Display = ({
           />
         </div>
         <div
-          className='sticky left-[60px] pl-[12px] flex-[2_0_300px] min-w-[300px]  bg-black
+          className='pl-[12px] flex-[2_0_300px] min-w-[300px]  bg-black
               border-r-[1px] border-gray-A z-[10]'
         >
           User

@@ -39,7 +39,7 @@ const VideoPage = () => {
 
   const containerRef = useRef();
 
-  const funcContainerRef= useRef()
+  const funcContainerRef = useRef();
 
   const { data: videosData, refetch } = getDataWithAuth(
     "video",
@@ -141,6 +141,14 @@ const VideoPage = () => {
     {
       id: "email",
       text: "Email",
+      type: "input:text",
+      buttonType: "search",
+      renderCondition: true,
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "name",
+      text: "Channel name",
       type: "input:text",
       buttonType: "search",
       renderCondition: true,
@@ -268,6 +276,7 @@ const VideoPage = () => {
 
   useLayoutEffect(() => {
     if (videosData && containerRef.current) {
+      console.log("🚀 ~ videosData:", videosData);
       containerRef.current.scrollTop = 0;
     }
 
@@ -282,11 +291,9 @@ const VideoPage = () => {
     };
   }, []);
 
-  if (!videosData) return;
-
   return (
     <div
-      className='overflow-auto h-[calc(100%-44px)] pb-[44px] relative scrollbar-3'
+      className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3'
       ref={containerRef}
     >
       <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
@@ -365,14 +372,14 @@ const VideoPage = () => {
       </div>
 
       <Display
-        dataList={videosData.data}
+        dataList={videosData?.data}
         checkedList={checkedList}
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}
         handleDelete={handleDelete}
       />
 
-      <div className='w-full bg-black fixed bottom-[0] right-0 mr-[28px] py-[6px]'>
+      <div className='w-full bg-black fixed bottom-[0] right-0 py-[6px]'>
         <Pagination
           setQueriese={setQueriese}
           currPage={queriese.page}

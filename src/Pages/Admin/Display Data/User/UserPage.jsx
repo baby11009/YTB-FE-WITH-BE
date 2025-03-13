@@ -248,14 +248,14 @@ const DisplayUser = () => {
 
   return (
     <div
-      className='overflow-auto h-[calc(100%-44px)] pb-[44px] relative scrollbar-3'
+      className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3'
       ref={containerRef}
     >
       <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Users</h2>
       </div>
 
-      <div className='sticky h-[40px] left-0 top-[52px] z-[2000] w-full'>
+      <div className='sticky h-[40px] top-[52px] z-[2000] min-w-[738px]'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative flex-shrink-0'>
             <button
@@ -335,7 +335,7 @@ const DisplayUser = () => {
         handleDelete={handleDelete}
       />
 
-      <div className='w-full bg-black fixed bottom-[0] right-0 mr-[28px] py-[6px]'>
+      <div className='w-full bg-black fixed bottom-[0] right-0 py-[6px]'>
         <Pagination
           setQueriese={setQueriese}
           currPage={queriese.page}

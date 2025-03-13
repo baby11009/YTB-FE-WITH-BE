@@ -83,20 +83,10 @@ const AdminPage = () => {
            duration-[417ms]`}
         >
           <div
-            className='w-full h-[calc(100vh-56px)] md:pr-[16px]
+            className='w-full h-[calc(100vh-56px)]
             mt-[56px] relative '
           >
-            <Suspense
-              fallback={
-                <div className=' h-screen flex items-center justify-center'>
-                  <h2 className='text-[30px] leading-[32px] font-[500]'>
-                    Loading.....
-                  </h2>
-                </div>
-              }
-            >
-              {pageRender}
-            </Suspense>
+            {pageRender}
           </div>
         </div>
       </>

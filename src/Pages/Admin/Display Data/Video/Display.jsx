@@ -8,13 +8,14 @@ const Display = ({
   handleCheckedAll,
   handleDelete,
 }) => {
+  console.log("🚀 ~ dataList:", dataList);
   return (
     <div className='min-w-full w-fit'>
       <div
         className='sticky left-0 top-[92px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
          text-gray-A items-center border-y-[1px] border-gray-A flex'
       >
-        <div className='sticky left-0 h-[48px] px-[20px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
+        <div className='h-[48px] px-[20px] flex items-center justify-center gap-[12px] z-[10]'>
           <CheckBox2
             checked={
               checkedList.length === dataList.length && dataList.length > 0
@@ -22,12 +23,11 @@ const Display = ({
             setChecked={handleCheckedAll}
           />
         </div>
-        <div
-          className='sticky left-[60px] pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
-              border-r-[1px] border-gray-A z-[10]'
-        >
-          Video
+        <div className='pl-[12px] flex-[2_0_400px] min-w-[400px] '>Video</div>
+        <div className='pl-[12px] flex-[1_0_224px] min-w-[224px] border-x-[1px] border-gray-A'>
+          Channel
         </div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Type</div>
         <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Date</div>
         <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] text-end'>
           View
@@ -43,15 +43,17 @@ const Display = ({
         </div>
       </div>
       <div className='flex flex-col z-[2] relative'>
-        {dataList.map((data, id) => (
-          <VideoTbRow
-            key={id}
-            data={data}
-            handleDelete={handleDelete}
-            handleChecked={handleChecked}
-            checked={checkedList.includes(data?._id)}
-          />
-        ))}
+        {dataList &&
+          dataList.length > 0 &&
+          dataList.map((data, id) => (
+            <VideoTbRow
+              key={id}
+              data={data}
+              handleDelete={handleDelete}
+              handleChecked={handleChecked}
+              checked={checkedList.includes(data?._id)}
+            />
+          ))}
       </div>
     </div>
   );

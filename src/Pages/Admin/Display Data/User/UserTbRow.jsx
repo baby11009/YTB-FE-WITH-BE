@@ -10,7 +10,7 @@ const UserTbRow = ({ data, handleChecked, checked, handleDelete }) => {
 
   return (
     <div className='h-[76px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A text-[13px] leading-[24px]'>
-      <div className='sticky left-0 px-[20px] z-[10] flex items-center'>
+      <div className='px-[20px] z-[10] flex items-center'>
         <CheckBox2
           checked={checked}
           setChecked={() => {
@@ -19,7 +19,7 @@ const UserTbRow = ({ data, handleChecked, checked, handleDelete }) => {
         />
       </div>
       <div
-        className='sticky left-[60px] pl-[12px] flex-[2_0_300px] min-w-[300px] 
+        className='pl-[12px] flex-[2_0_300px] min-w-[300px] 
         border-r-[1px] border-gray-A z-[10] bg-black group-hover:bg-[#272727] py-[8px] flex'
       >
         <div>

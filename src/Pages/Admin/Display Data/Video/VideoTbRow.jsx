@@ -12,8 +12,8 @@ const VideoTbRow = ({ data, handleChecked, checked, handleDelete }) => {
   return (
     <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
       <div
-        className='sticky left-0 px-[20px] flex items-center
-     bg-black group-hover:bg-[#272727] z-[5]'
+        className='px-[20px] flex items-center
+     '
       >
         <CheckBox2
           checked={checked}
@@ -24,8 +24,8 @@ const VideoTbRow = ({ data, handleChecked, checked, handleDelete }) => {
       </div>
 
       <div
-        className='sticky left-[60px] flex-[2_0_400px] min-w-[400px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
-        border-r-[1px] border-gray-A'
+        className='flex-[2_0_400px] min-w-[400px] p-[8px_0_8px_12px] flex
+       '
       >
         <div className='w-full flex relative'>
           <div className='min-w-[120px] aspect-video  rounded-[5px] overflow-hidden z-[2]'>
@@ -49,12 +49,9 @@ const VideoTbRow = ({ data, handleChecked, checked, handleDelete }) => {
           </div>
           <div className='flex-1 ml-[16px] pr-[12px] overflow-hidden'>
             <div className=' overflow-hidden'>
-              <div
-                className=' h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'
-                dangerouslySetInnerHTML={{
-                  __html: data?.title,
-                }}
-              ></div>
+              <div className=' h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'>
+                {data?.title}
+              </div>
             </div>
             <div
               className='h-[16px] line-clamp-1 text-ellipsis break-all
@@ -91,20 +88,43 @@ const VideoTbRow = ({ data, handleChecked, checked, handleDelete }) => {
           </div>
         </div>
       </div>
+      <div className='flex-[1_0_224px] min-w-[224px] px-[12px] py-[8px]  border-x-[1px] border-gray-A'>
+        <div className='flex items-center justify-start h-full'>
+          <img
+            src={`${import.meta.env.VITE_BASE_API_URI}${
+              import.meta.env.VITE_VIEW_AVA_API
+            }${data.user_info.avatar}`}
+            alt={`${data.user_info.email}-avatar`}
+            loading='lazy'
+            className='size-[60px] rounded-[50%]'
+          />
+          <div className='h-full ml-[12px]'>
+            <div className='h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'>
+              {data.user_info.name}
+            </div>
+            <div className='h-[20px] line-clamp-1 text-ellipsis break-all text-[11px] leading-[20px] text-gray-A'>
+              {data.user_info.email}
+            </div>
+          </div>
+        </div>
+      </div>
       <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-[13px] leading-[24px]'>
-        {timeFormat3(data?.createdAt)}
+        {data.type}
+      </div>
+      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-[13px] leading-[24px]'>
+        {timeFormat3(data.createdAt)}
       </div>
       <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right '>
-        {formatNumber(data?.view)}
+        {formatNumber(data.view)}
       </div>
       <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right'>
-        {formatNumber(data?.totalCmt)}
+        {formatNumber(data.totalCmt)}
       </div>
       <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right'>
-        {formatNumber(data?.like)}
+        {formatNumber(data.like)}
       </div>
       <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] my-[8px]  text-[13px] leading-[24px] text-right'>
-        {formatNumber(data?.dislike)}
+        {formatNumber(data.dislike)}
       </div>
     </div>
   );
