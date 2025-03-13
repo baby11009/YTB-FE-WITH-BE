@@ -1,4 +1,4 @@
-import { CheckBox2, DeleteConfirm } from "../../../../../../Component";
+import { CheckBox2 } from "../../../../../../Component";
 import { formatNumber } from "../../../../../../util/numberFormat";
 import {
   TrashBinIcon,
@@ -7,44 +7,15 @@ import {
 } from "../../../../../../Assets/Icons";
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../../../util/timeforMat";
-import { dltData } from "../../../../../../Api/controller";
 import VideoUpsertModal from "./VideoUpsertModal";
 
-const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
-  const { setIsShowing, addToaster } = useAuthContext();
-
-  const handleDelete = async () => {
-    await dltData(
-      "/client/video",
-      data?._id,
-      "video",
-      () => {
-        refetch();
-      },
-      undefined,
-      addToaster,
-    );
-  };
-
-  const showDeleteConfirm = () => {
-    setIsShowing(
-      <DeleteConfirm
-        handleDelete={handleDelete}
-        type={"Video"}
-        data={data?._id}
-      />,
-    );
-  };
-
-  const showUpsertModal = () => {
-    setIsShowing(<VideoUpsertModal title={"Editing video"} id={data?._id} />);
-  };
+const VideoTbRow = ({ checked, data, handleChecked, showDeleteConfirm }) => {
+  const { setIsShowing } = useAuthContext();
 
   return (
-    <div
-      className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A text-[13px] leading-[24px]'>
+    <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A text-[13px] leading-[24px]'>
       <div
-        className='sticky left-0 p-[20px] flex items-center
+        className='p-[20px] flex items-center
        bg-black group-hover:bg-[#272727] z-[5]'
       >
         <CheckBox2
@@ -56,7 +27,7 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
       </div>
 
       <div
-        className='sticky left-[60px] flex-[2_0_400px] min-w-[400px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
+        className='flex-[2_0_400px] min-w-[400px] p-[8px_0_8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
           border-r-[1px] border-gray-A'
       >
         <div className='w-full flex relative'>
@@ -97,7 +68,9 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
               <button
                 className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
                 onClick={() => {
-                  showUpsertModal("detail");
+                  setIsShowing(
+                    <VideoUpsertModal title={"Editing video"} id={data?._id} />,
+                  );
                 }}
               >
                 <div className='text-white size-[24px]'>
@@ -115,7 +88,9 @@ const VideoTbRow = ({ handleChecked, checked, data, refetch }) => {
               </a>
               <button
                 className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-                onClick={showDeleteConfirm}
+                onClick={() => {
+                  showDeleteConfirm(data.id);
+                }}
               >
                 <div className='text-white size-[24px]'>
                   <TrashBinIcon />

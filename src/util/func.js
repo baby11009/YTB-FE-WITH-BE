@@ -85,3 +85,17 @@ export const getDisplayUsingValue = (list, value) => {
     }
   }
 };
+
+export const handleCopyVideoLink = (videoId, type) => {
+  let url;
+  switch (type) {
+    case "video":
+      url = `http://localhost:5173/video?id=${videoId}`;
+      break;
+    case "short":
+      url = `http://localhost:5173/short/${videoId}`;
+      break;
+  }
+
+  return navigator.clipboard.writeText(url);
+};

@@ -2,11 +2,8 @@ import { CustomeFuncBox2, PlaylistCard } from "../../../Component";
 import { useState, useEffect, useLayoutEffect } from "react";
 import { getDataWithAuth } from "../../../Api/getData";
 import { IsEnd } from "../../../util/scrollPosition";
-import { useQueryClient } from "@tanstack/react-query";
 
 const PlaylistsPart = ({ openedMenu }) => {
-  const queryClient = useQueryClient();
-
   const [activeId, setActiveId] = useState({
     id: 2,
     text: "Newest",
@@ -14,7 +11,7 @@ const PlaylistsPart = ({ openedMenu }) => {
 
   const [isEnd, setIsEnd] = useState(false);
 
-  const [params, setParams] = useState({
+  const [queriese, setQueriese] = useState({
     page: 1,
     limit: 16,
     videoLimit: 1,
@@ -23,24 +20,22 @@ const PlaylistsPart = ({ openedMenu }) => {
 
   const { data: playlists } = getDataWithAuth(
     "/client/playlist",
-    params,
+    queriese,
     true,
     false,
   );
 
-  const [showQtt, setShowQtt] = useState(4);
-
   const [dataList, setDataList] = useState([]);
 
   const handleSetActive = (data) => {
-    if (params.sort[data.slug]) {
+    if (queriese.sort[data.slug]) {
       return;
     }
     setActiveId({
       id: data.id,
       text: data.text,
     });
-    setParams((prev) => ({ ...prev, sort: { [data.slug]: data?.data } }));
+    setQueriese((prev) => ({ ...prev, sort: { [data.slug]: data?.data } }));
   };
 
   const funcList = [
@@ -60,45 +55,6 @@ const PlaylistsPart = ({ openedMenu }) => {
     },
   ];
 
-  const handleResize = () => {
-    if (window.innerWidth < 426) {
-      setShowQtt(1);
-    } else if (window.innerWidth < 640) {
-      setShowQtt(2);
-    } else if (window.innerWidth < 1168) {
-      setShowQtt(3);
-    } else if (window.innerWidth < 1280) {
-      setShowQtt(4);
-    } else if (window.innerWidth < 1436) {
-      if (openedMenu) {
-        setShowQtt(3);
-      } else setShowQtt(4);
-    } else if (window.innerWidth < 1760) {
-      if (openedMenu) {
-        setShowQtt(4);
-      } else setShowQtt(5);
-    } else if (window.innerWidth < 2086) {
-      if (openedMenu) {
-        setShowQtt(5);
-      } else setShowQtt(6);
-    } else setShowQtt(7);
-  };
-
-  useEffect(() => {
-    handleResize();
-
-    window.addEventListener("resize", () => {
-      handleResize();
-    });
-
-    return () => {
-      window.removeEventListener("resize", () => {
-        handleResize();
-      });
-      queryClient.clear();
-    };
-  }, [openedMenu]);
-
   useLayoutEffect(() => {
     document.addEventListener("scroll", () => {
       IsEnd(setIsEnd);
@@ -112,8 +68,8 @@ const PlaylistsPart = ({ openedMenu }) => {
   }, []);
 
   useEffect(() => {
-    if (isEnd && params.page < playlists?.totalPage) {
-      setParams((prev) => ({ ...prev, page: prev.page + 1 }));
+    if (isEnd && queriese.page < playlists?.totalPage) {
+      setQueriese((prev) => ({ ...prev, page: prev.page + 1 }));
     }
   }, [isEnd]);
 
@@ -134,10 +90,11 @@ const PlaylistsPart = ({ openedMenu }) => {
       {dataList.length > 0 && (
         <div className='pt-[24px] mx-[16px] flex '>
           <div
-            className={` grid`}
-            style={{
-              gridTemplateColumns: `repeat(${showQtt}, minmax(0, 1fr))`,
-            }}
+            className={`grid 4xl:grid-cols-7 ${
+              openedMenu
+                ? "3xl:grid-cols-5 1-5xl:grid-cols-4 1275:grid-cols-3"
+                : "3xl:grid-cols-6 1-5xl:grid-cols-5 1275:grid-cols-4"
+            } 2lg:grid-cols-4 642:grid-cols-3 xsm:grid-cols-2 grid-cols-1`}
           >
             {dataList.map((item, id) => (
               <PlaylistCard key={id} data={item} showL3={item?.size > 1} />

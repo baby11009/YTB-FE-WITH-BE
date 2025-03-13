@@ -16,7 +16,7 @@ import VideoTbRow from "./VideoTbRow";
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import VideoUpsertModal from "./VideoUpsertModal";
 import { getDataWithAuth } from "../../../../../../Api/getData";
-import { dltManyData } from "../../../../../../Api/controller";
+import { dltManyData, dltData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
 import { getDisplayUsingValue } from "../../../../../../util/func";
 
@@ -58,14 +58,16 @@ const Video = () => {
   );
 
   const handleCheckedAll = useCallback(() => {
-    if (checkedList.length === dataList.length) {
-      setCheckedList([]);
-    } else {
+    setCheckedList((prev) => {
+      if (prev.length === dataList.length) {
+        return [];
+      }
+
       const idList = dataList.map((item) => item?._id);
 
-      setCheckedList(idList);
-    }
-  }, []);
+      return idList;
+    });
+  }, [dataList]);
 
   const handleChecked = useCallback((id) => {
     setCheckedList((prev) => {
@@ -231,24 +233,40 @@ const Video = () => {
     },
   ]);
 
-  const handleDeleteMany = async () => {
-    await dltManyData(
-      "/client/video/delete-many",
-      checkedList,
-      "video",
-      () => {
-        setCheckedList([]);
-        refetch();
-      },
-      undefined,
-      addToaster,
+  const showDeleteConfirm = (id) => {
+    const handleDelete = async () => {
+      await dltData(
+        "/client/comment",
+        id,
+        "comment",
+        () => {
+          refetch();
+        },
+        undefined,
+        addToaster,
+      );
+    };
+
+    setIsShowing(
+      <DeleteConfirm handleDelete={handleDelete} type={"Comment"} data={id} />,
     );
   };
-  const showDltConfirm = () => {
-    if (checkedList.length < 1) {
-      alert("Please select at least one item");
-      return;
-    }
+
+  const showDeleteManyConfirm = () => {
+    const handleDeleteMany = async () => {
+      await dltManyData(
+        "/client/video/delete-many",
+        checkedList,
+        "video",
+        () => {
+          setCheckedList([]);
+          refetch();
+        },
+        undefined,
+        addToaster,
+      );
+    };
+
     setIsShowing(
       <DeleteConfirm
         handleDelete={handleDeleteMany}
@@ -289,14 +307,14 @@ const Video = () => {
 
   return (
     <div
-      className='overflow-auto h-[calc(100%-44px)] pb-[44px] relative scrollbar-3'
+      className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3'
       ref={containerRef}
     >
       <div
-        className='sticky left-0 top-0 z-[2000] w-full'
+        className='sticky top-0 z-[2000] min-w-[1000px]'
         ref={funcContainerRef}
       >
-        <div className='flex gap-[24px] bg-black'>
+        <div className='flex flex-wrap gap-[24px] bg-black'>
           <div className='relative flex-shrink-0'>
             <button
               className='size-[40px] p-[8px]'
@@ -352,17 +370,19 @@ const Video = () => {
               })}
           </div>
 
-          <div className=' self-end flex items-center justify-center gap-[8px]'>
+          <div className=' self-end shrink-0 flex items-center justify-center gap-[8px]'>
             <button onClick={showUpsertModal}>
               <div className='p-[8px] hover:text-green-500'>
                 <CreateIcon />
               </div>
             </button>
-            <button onClick={showDltConfirm}>
-              <div className='p-[8px] hover:text-red-600'>
-                <TrashBinIcon />
-              </div>
-            </button>
+            {checkedList.length > 0 && (
+              <button onClick={showDeleteManyConfirm}>
+                <div className='p-[8px] hover:text-red-600'>
+                  <TrashBinIcon />
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -375,7 +395,7 @@ const Video = () => {
            text-gray-A items-center border-y-[1px] border-gray-A flex'
           ref={tableHeader}
         >
-          <div className='sticky left-0 h-[48px] px-[20px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
+          <div className='h-[48px] px-[20px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
             <CheckBox2
               checked={
                 checkedList.length === data?.data.length &&
@@ -385,7 +405,7 @@ const Video = () => {
             />
           </div>
           <div
-            className='sticky left-[60px] pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
+            className='pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
               border-r-[1px] border-gray-A z-[10]'
           >
             Video
@@ -404,21 +424,22 @@ const Video = () => {
             Dislike
           </div>
         </div>
+
         {/* Body */}
         <div className='flex flex-col z-[2]'>
           {dataList.map((item) => (
             <VideoTbRow
               key={item?._id}
-              handleChecked={handleChecked}
-              checked={checkedList.includes(item?._id)}
               data={item}
-              refetch={refetch}
+              checked={checkedList.includes(item?._id)}
+              handleChecked={handleChecked}
+              showDeleteConfirm={showDeleteConfirm}
             />
           ))}
         </div>
       </div>
 
-      <div className='w-full bg-black fixed bottom-[0] right-0 mr-[28px] py-[6px]'>
+      <div className='w-full bg-black fixed bottom-[0] right-0 mr-[12px] py-[6px]'>
         <Pagination
           setQueriese={setQueriese}
           currPage={queriese?.page}

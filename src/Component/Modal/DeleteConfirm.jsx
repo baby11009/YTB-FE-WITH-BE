@@ -38,14 +38,6 @@ const DeleteConfirm = ({ handleDelete, type, data }) => {
       ></textarea>
       <div className='flex items-center gap-[24px] justify-center mt-[12px]'>
         <button
-          className={`py-[4px] px-[12px] rounded-[5px] bg-black-0.1`}
-          onClick={() => {
-            setIsShowing(undefined);
-          }}
-        >
-          <span>Cancel</span>
-        </button>
-        <button
           className={`py-[4px] px-[12px] rounded-[5px] bg-blue-600 ${
             value !== "OK" ? "opacity-[0.7]" : ""
           } `}
@@ -53,6 +45,14 @@ const DeleteConfirm = ({ handleDelete, type, data }) => {
           onClick={handleOnClick}
         >
           <span>Confirm</span>
+        </button>
+        <button
+          className={`py-[4px] px-[12px] rounded-[5px] bg-black-0.1`}
+          onClick={() => {
+            setIsShowing(undefined);
+          }}
+        >
+          <span>Cancel</span>
         </button>
       </div>
     </div>

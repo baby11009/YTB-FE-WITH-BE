@@ -4,62 +4,14 @@ import {
   Share2Icon,
   YoutubeBlankIcon,
 } from "../../../../Assets/Icons";
-import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { timeFormat3 } from "../../../../util/timeforMat";
-import { dltData } from "../../../../Api/controller";
-import { useCallback } from "react";
+import { handleCopyVideoLink } from "../../../../util/func";
 
-const CmtTbRow = ({ handleChecked, checked, data, refetch }) => {
-  const { setIsShowing, addToaster } = useAuthContext();
-
-  const handleDelete = async () => {
-    await dltData(
-      "/client/comment",
-      data?._id,
-      "comment",
-      () => {
-        refetch();
-      },
-      undefined,
-      addToaster,
-    );
-  };
-
-  const showDeleteConfirm = () => {
-    setIsShowing(
-      <DeleteConfirm
-        handleDelete={handleDelete}
-        type={"Comment"}
-        data={data?._id}
-      />,
-    );
-  };
-
-  const handleCopyVideoLink = (videoId, type) => {
-    let url;
-    switch (type) {
-      case "video":
-        url = `http://localhost:5173/video?id=${videoId}`;
-        break;
-      case "short":
-        url = `http://localhost:5173/short/${videoId}`;
-        break;
-    }
-
-    navigator.clipboard
-      .writeText(url)
-      .then(() => {
-        addToaster("Link copied to clipboard.");
-      })
-      .catch(() => {
-        addToaster("Failed to copy link");
-      });
-  };
-
+const CmtTbRow = ({ checked, data, handleChecked, showDeleteConfirm }) => {
   return (
     <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
       <div
-        className='sticky left-0 p-[12px_12px_8px_25px]
+        className='px-[20px] flex items-center
        bg-black group-hover:bg-[#272727] z-[5]'
       >
         <CheckBox2
@@ -70,7 +22,7 @@ const CmtTbRow = ({ handleChecked, checked, data, refetch }) => {
         />
       </div>
       <div
-        className='sticky left-[57px] flex-[2_0_400px] min-w-[400px] p-[8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
+        className='flex-[2_0_400px] min-w-[400px] p-[8px_12px] z-[5] flex bg-black group-hover:bg-[#272727]
           border-r-[1px] border-gray-A'
       >
         <div className='w-full overflow-hidden relative flex flex-col'>
@@ -86,7 +38,9 @@ const CmtTbRow = ({ handleChecked, checked, data, refetch }) => {
           <div className='hidden group-hover:flex'>
             <button
               className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-              onClick={showDeleteConfirm}
+              onClick={() => {
+                showDeleteConfirm(data._id);
+              }}
             >
               <div className='text-white size-[24px]'>
                 <TrashBinIcon />
@@ -139,7 +93,13 @@ const CmtTbRow = ({ handleChecked, checked, data, refetch }) => {
                   handleCopyVideoLink(
                     data?.video_info?._id,
                     data?.video_info?.type,
-                  );
+                  )
+                    .then(() => {
+                      addToaster("Link copied to clipboard.");
+                    })
+                    .catch(() => {
+                      addToaster("Failed to copy link");
+                    });
                 }}
               >
                 <div className='text-white size-[24px]'>

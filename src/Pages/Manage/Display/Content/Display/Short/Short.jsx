@@ -61,14 +61,16 @@ const Short = () => {
   );
 
   const handleCheckedAll = useCallback(() => {
-    if (checkedList.length === dataList.length) {
-      setCheckedList([]);
-    } else {
+    setCheckedList((prev) => {
+      if (prev.length === dataList.length) {
+        return [];
+      }
+
       const idList = dataList.map((item) => item?._id);
 
-      setCheckedList(idList);
-    }
-  }, [checkedList, dataList]);
+      return idList;
+    });
+  }, [dataList]);
 
   const handleChecked = useCallback((id) => {
     setCheckedList((prev) => {
@@ -233,26 +235,41 @@ const Short = () => {
       handleOnClick: handleOnClick,
     },
   ]);
+  
+  const showDeleteConfirm = (id) => {
+    const handleDelete = async () => {
+      await dltData(
+        "/client/comment",
+        id,
+        "comment",
+        () => {
+          refetch();
+        },
+        undefined,
+        addToaster,
+      );
+    };
 
-  const handleDeleteMany = async () => {
-    await dltManyData(
-      "/client/video/delete-many",
-      checkedList,
-      "short",
-      () => {
-        setCheckedList([]);
-        refetch();
-      },
-      undefined,
-      addToaster,
+    setIsShowing(
+      <DeleteConfirm handleDelete={handleDelete} type={"Comment"} data={id} />,
     );
   };
 
-  const showDltConfirm = () => {
-    if (checkedList.length < 1) {
-      alert("Please select at least one item");
-      return;
-    }
+  const showDeleteManyConfirm = () => {
+    const handleDeleteMany = async () => {
+      await dltManyData(
+        "/client/video/delete-many",
+        checkedList,
+        "short",
+        () => {
+          setCheckedList([]);
+          refetch();
+        },
+        undefined,
+        addToaster,
+      );
+    };
+
     setIsShowing(
       <DeleteConfirm
         handleDelete={handleDeleteMany}
@@ -293,11 +310,11 @@ const Short = () => {
 
   return (
     <div
-      className='overflow-auto max-h-full min-h-[500px] relative scrollbar-3'
+      className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3'
       ref={containerRef}
     >
       <div
-        className='sticky left-0 top-0 z-[2000] w-full'
+        className='sticky left-0 top-0 z-[2000] min-w-[1000px]'
         ref={funcContainerRef}
       >
         <div className='flex gap-[24px] bg-black'>
@@ -362,11 +379,13 @@ const Short = () => {
                 <CreateIcon />
               </div>
             </button>
-            <button onClick={showDltConfirm}>
-              <div className='p-[8px] hover:text-red-600'>
-                <TrashBinIcon />
-              </div>
-            </button>
+            {checkedList.length > 0 && (
+              <button onClick={showDeleteManyConfirm}>
+                <div className='p-[8px] hover:text-red-600'>
+                  <TrashBinIcon />
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -379,7 +398,7 @@ const Short = () => {
            text-gray-A items-center border-y-[1px] border-gray-A flex'
           ref={tableHeader}
         >
-          <div className='sticky left-0 h-[48px] px-[20px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
+          <div className='h-[48px] px-[20px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
             <CheckBox2
               checked={
                 checkedList.length === data?.data.length &&
@@ -389,7 +408,7 @@ const Short = () => {
             />
           </div>
           <div
-            className='sticky left-[60px] pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
+            className='pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
               border-r-[1px] border-gray-A z-[10]'
           >
             Video
@@ -413,19 +432,21 @@ const Short = () => {
           {dataList.map((item) => (
             <ShortTbRow
               key={item?._id}
-              handleChecked={handleChecked}
-              checked={checkedList.includes(item?._id)}
               data={item}
-              refetch={refetch}
+              checked={checkedList.includes(item?._id)}
+              handleChecked={handleChecked}
+              showDeleteConfirm={showDeleteConfirm}
             />
           ))}
         </div>
       </div>
-      <Pagination
-        setQueriese={setQueriese}
-        currPage={queriese?.page}
-        totalPage={data?.totalPages}
-      />
+      <div className='w-full bg-black fixed bottom-[0] right-0 mr-[12px] py-[6px]'>
+        <Pagination
+          setQueriese={setQueriese}
+          currPage={queriese?.page}
+          totalPage={data?.totalPages}
+        />
+      </div>
     </div>
   );
 };

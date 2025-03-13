@@ -1,46 +1,33 @@
-import {
-  SortIcon2,
-  CloseIcon,
-  TrashBinIcon,
-  LongArrowIcon,
-} from "../../../../../../Assets/Icons";
-import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useLayoutEffect,
-} from "react";
+import { SortIcon2, TrashBinIcon } from "../../../../../../Assets/Icons";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   CustomeFuncBox,
   CheckBox2,
   DeleteConfirm,
   Pagination,
+  QuerySelection,
+  QueryTextInput,
 } from "../../../../../../Component";
 import PlaylistTbRow from "./PlaylistTbRow";
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import { getData } from "../../../../../../Api/getData";
 import { dltManyData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
+import { getDisplayUsingValue } from "../../../../../../util/func";
 
 const initParams = {
-  title: "",
   limit: 8,
   page: 1,
-  sort: { createdAt: -1, size: -1 },
+  sort: { createdAt: -1 },
   exCludeTypes: ["liked", "watch_later"],
-  videoLimit: 4,
-  clearCache: "playlist",
+  search: {},
+  videoLimit: 1,
 };
 
 const Playlist = () => {
   const queryClient = useQueryClient();
 
   const { setIsShowing, addToaster } = useAuthContext();
-
-  const [searching, setSearching] = useState(undefined);
-
-  const [opened, setOpened] = useState(false);
 
   const [queriese, setQueriese] = useState(initParams);
 
@@ -52,17 +39,27 @@ const Playlist = () => {
 
   const [dataList, setDataList] = useState([]);
 
+  const [isQueryBoxOpened, setIsQueryBoxOpened] = useState(false);
+
+  const [queryOptions, setQueryOptions] = useState([]);
+
   const containerRef = useRef();
 
+  const funcContainerRef = useRef();
+
+  const tableHeader = useRef();
+
   const handleCheckedAll = useCallback(() => {
-    if (checkedList.length === dataList.length) {
-      setCheckedList([]);
-    } else {
+    setCheckedList((prev) => {
+      if (prev.length === dataList.length) {
+        return [];
+      }
+
       const idList = dataList.map((item) => item?._id);
 
-      setCheckedList(idList);
-    }
-  }, [checkedList, dataList]);
+      return idList;
+    });
+  }, [dataList]);
 
   const handleChecked = useCallback((id) => {
     setCheckedList((prev) => {
@@ -75,75 +72,156 @@ const Playlist = () => {
     });
   }, []);
 
-  const handleOnClick = (data) => {
-    setSearching((prev) => {
-      if (prev && prev.id === data.id) {
-        return undefined;
-      }
+  const handleOnClick = (queryData) => {
+    setQueryOptions((prev) => [...prev, queryData]);
 
-      return data;
+    queryOptionBtns.current = queryOptionBtns.current.map((query) => {
+      if (query.id === queryData.id) {
+        query.renderCondition = false;
+      }
+      return query;
     });
   };
 
-  const timeoutRef = useRef();
+  const handleClose = (queryData) => {
+    setQueryOptions((prev) =>
+      prev.filter((search) => search.id !== queryData.id),
+    );
 
-  const handleOnSearch = (searchType, value) => {
-    clearTimeout(timeoutRef.current);
-    setTimeout(() => {
-      setQueriese((prev) => ({
-        ...prev,
-        [`${searchType}`]: value,
-        page: 1,
-      }));
-    }, 600);
-  };
+    setQueriese((prev) => {
+      const { search, sort } = prev;
 
-  const handleSortUnique = (key, value) => {
-    const uniqueSortKeys = ["size"];
-    const sortObj = { ...queriese.sort };
-
-    const sortObjKeys = Object.keys(sortObj);
-    if (sortObjKeys.includes(key)) {
-      sortObj[key] = value;
-    } else if (uniqueSortKeys.includes(key)) {
-      sortObjKeys.forEach((key) => {
-        if (uniqueSortKeys.includes(key)) {
-          delete sortObj[key];
+      if (queryData.buttonType === "sort") {
+        const { [queryData.id]: _, ...rest } = sort;
+        // Check if is there any sort query in the queirese
+        // If not, set default sort is createdAt = -1
+        if (Object.keys(rest).length > 0) {
+          prev.sort = rest;
+        } else {
+          prev.sort = { createdAt: -1 };
         }
-      });
-      sortObj[key] = value;
-    }
-    setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
+      } else {
+        const { [queryData.id]: _, ...rest } = search;
+        prev.search = rest;
+      }
+
+      return prev;
+    });
+
+    queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
+      if (queryOption.id === queryData.id) {
+        queryOption.renderCondition = true;
+      }
+      return queryOption;
+    });
   };
 
-  const funcList = useRef([
+  const handleSearch = (searchKey, searchValue) => {
+    if (queriese.search[searchKey] === searchValue) return;
+    setQueriese((prev) => ({
+      ...prev,
+      search: { ...prev.search, [searchKey]: searchValue },
+      page: 1,
+    }));
+  };
+
+  const handleSort = (sortKey, sortValue) => {
+    if (queriese.sort[sortKey] === sortValue) return;
+
+    const sortOptionIds = queryOptions.map((query) => {
+      if (query.buttonType === "sort") {
+        return query.id;
+      }
+    });
+
+    const sortObj = {};
+
+    sortOptionIds.forEach((sortOptionId) => {
+      let value;
+      if (sortOptionId === sortKey) {
+        value = sortValue;
+      } else if (queriese.sort[sortOptionId]) {
+        value = queriese.sort[sortOptionId];
+      }
+      sortObj[sortOptionId] = value;
+    });
+
+    setQueriese((prev) => ({
+      ...prev,
+      sort: sortObj,
+      page: 1,
+    }));
+  };
+
+  const queryOptionBtns = useRef([
     {
       id: "title",
-      text: "Text",
+      text: "Title",
       type: "input:text",
+      buttonType: "search",
+      renderCondition: true,
+      handleOnClick: handleOnClick,
+    },
+
+    {
+      id: "createdAt",
+      text: "Date",
+      type: "select",
+      buttonType: "sort",
+      renderCondition: true,
+      options: [
+        { id: -1, display: "Newest" },
+        { id: 1, display: "Oldest" },
+      ],
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "size",
+      text: "Playlist size",
+      type: "select",
+      buttonType: "sort",
+      renderCondition: true,
+      options: [
+        { id: -1, display: "Largest" },
+        { id: 1, display: "Smallest" },
+      ],
       handleOnClick: handleOnClick,
     },
   ]);
 
-  const handleDeleteMany = async () => {
-    await dltManyData(
-      "/client/playlist/delete-many",
-      checkedList,
-      "playlist",
-      () => {
-        setCheckedList([]);
-        refetch();
-      },
-      undefined,
-      addToaster,
+  const showDeleteConfirm = (id) => {
+    const handleDelete = async () => {
+      await dltData(
+        "/client/comment",
+        id,
+        "comment",
+        () => {
+          refetch();
+        },
+        undefined,
+        addToaster,
+      );
+    };
+
+    setIsShowing(
+      <DeleteConfirm handleDelete={handleDelete} type={"Comment"} data={id} />,
     );
   };
-  
-  const showDltConfirm = () => {
-    if (checkedList.length < 1) {
-      alert("Please select at least one item");
-      return;
-    }
+
+  const showDeleteManyConfirm = () => {
+    const handleDeleteMany = async () => {
+      await dltManyData(
+        "/client/playlist/delete-many",
+        checkedList,
+        "playlist",
+        () => {
+          setCheckedList([]);
+          refetch();
+        },
+        undefined,
+        addToaster,
+      );
+    };
     setIsShowing(
       <DeleteConfirm
         handleDelete={handleDeleteMany}
@@ -153,7 +231,13 @@ const Playlist = () => {
     );
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      tableHeader.current.style.top =
+        funcContainerRef.current.clientHeight - 0.4 + "px";
+    });
+    observer.observe(funcContainerRef.current);
+
     const handleResize = (e) => {
       const scrollW = containerRef.current.scrollWidth;
       const clientW = containerRef.current.clientWidth;
@@ -163,14 +247,10 @@ const Playlist = () => {
     window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
+      observer.disconnect();
       setIsShowing(undefined);
       queryClient.clear();
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -183,68 +263,77 @@ const Playlist = () => {
 
   return (
     <div
-      className='overflow-auto h-full relative scrollbar-3'
+      className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3'
       ref={containerRef}
     >
-      <div className='sticky left-0 top-[0] z-[2000] w-full'>
+      <div
+        className='sticky top-0 z-[2000] min-w-[772px]'
+        ref={funcContainerRef}
+      >
         <div className='flex gap-[24px] bg-black'>
-          <div className='relative'>
+          <div className='relative flex-shrink-0'>
             <button
-              className=' p-[8px]'
-              onClick={() => {
-                setOpened((prev) => !prev);
+              className='size-[40px] p-[8px]'
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setIsQueryBoxOpened((prev) => !prev);
               }}
             >
               <SortIcon2 />
             </button>
-            {opened && (
+            {isQueryBoxOpened && (
               <CustomeFuncBox
-                style={"left-[100%] top-[100%] w-[150px]"}
-                setOpened={setOpened}
-                currentId={searching?.id}
-                funcList1={funcList.current}
+                style={"left-[100%] top-[100%] min-w-[200px]"}
+                opened={isQueryBoxOpened}
+                setOpened={setIsQueryBoxOpened}
+                funcList1={queryOptionBtns.current}
               />
             )}
           </div>
-          <div className='flex-1 flex items-center'>
-            {searching && (
-              <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
-                <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
-                  {searching.text}
-                </span>
-                <div
-                  className='px-[6px] w-[24px]'
-                  onClick={() => {
-                    setSearching(undefined);
-                    setQueriese((prev) => ({
-                      ...prev,
-                      [searching.id]: "",
-                      page: 1,
-                    }));
-                  }}
-                >
-                  <CloseIcon />
+
+          <div className='flex-1 flex flex-wrap gap-[16px] items-center'>
+            {queryOptions.length > 0 &&
+              queryOptions.map((query) => {
+                if (query.type === "input:text") {
+                  return (
+                    <QueryTextInput
+                      key={query.id}
+                      queryData={query}
+                      currValue={queriese.search[query.id]}
+                      handleExecuteQuery={handleSearch}
+                      handleClose={handleClose}
+                    />
+                  );
+                } else if (query.type === "select") {
+                  return (
+                    <QuerySelection
+                      key={query.id}
+                      queryData={query}
+                      currValue={getDisplayUsingValue(
+                        query.options,
+                        query?.buttonType === "sort"
+                          ? queriese.sort[query.id]
+                          : queriese.search[query.id],
+                      )}
+                      handleExecuteQuery={
+                        query?.buttonType === "sort" ? handleSort : handleSearch
+                      }
+                      handleClose={handleClose}
+                    />
+                  );
+                }
+              })}
+          </div>
+
+          <div className=' self-end shrink-0 h-[40px]'>
+            {checkedList.length > 0 && (
+              <button onClick={showDeleteManyConfirm}>
+                <div className='p-[8px] hover:text-red-600'>
+                  <TrashBinIcon />
                 </div>
               </button>
             )}
-            {searching?.type === "input:text" && (
-              <input
-                autoFocus
-                type='text'
-                placeholder='Searching...'
-                className='bg-transparent py-[4px] border-b-[2px] outline-none ml-[16px]'
-                onChange={(e) => {
-                  handleOnSearch(searching.id, e.target.value);
-                }}
-              />
-            )}
-          </div>
-          <div className='self-end flex items-center justify-center gap-[8px]'>
-            <button onClick={showDltConfirm}>
-              <div className='p-[8px] hover:text-red-600'>
-                <TrashBinIcon />
-              </div>
-            </button>
           </div>
         </div>
       </div>
@@ -253,22 +342,21 @@ const Playlist = () => {
       <div className='min-w-full w-fit'>
         {/* Head */}
         <div
-          className='sticky top-[40px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
-           text-gray-A items-center border-y-[1px] border-gray-A flex '
+          className='sticky z-[10] top-[40px] bg-black text-[12px] font-[500] leading-[48px]
+           text-gray-A items-center border-y-[1px] border-gray-A flex'
+          ref={tableHeader}
         >
-          <div
-            className='sticky left-0 h-[48px] p-[0_12px_0_24px] flex items-center justify-center 
-          gap-[12px] bg-black'
-          >
+          <div className='h-[48px] px-[20px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
             <CheckBox2
               checked={
-                dataList.length > 0 && checkedList?.length === dataList.length
+                checkedList.length === data?.data.length &&
+                data?.data.length > 0
               }
               setChecked={handleCheckedAll}
             />
           </div>
           <div
-            className={`sticky left-[57px] pl-[12px] flex-[2_0_382px] min-w-[382px]  bg-black  
+            className={`pl-[12px] flex-[2_0_382px] min-w-[382px]  bg-black  
               border-r-[1px] z-[10] ${
                 horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
               }`}
@@ -276,50 +364,9 @@ const Playlist = () => {
             Playlist
           </div>
           <div className='flex-[1_0_100px] min-w-[100px] px-[12px]'>Type</div>
-          <div className='flex-[1_0_100px] min-w-[100px] px-[12px]'>
-            <button
-              onClick={() => {
-                handleSortUnique(
-                  "createdAt",
-                  queriese.sort["createdAt"] === -1 ? 1 : -1,
-                );
-              }}
-              className={`flex items-center justify-center gap-[8px] ${
-                queriese.sort["createdAt"] ? "text-white-F1 font-bold" : ""
-              }`}
-            >
-              <span>Date </span>
-              {queriese.sort["createdAt"] && (
-                <div
-                  className={`${
-                    queriese.sort["createdAt"] === -1 ? "rotate-180" : ""
-                  } text-[12px]`}
-                >
-                  <LongArrowIcon size={14} />
-                </div>
-              )}
-            </button>
-          </div>
-          <div className='flex-[1_0_130px] min-w-[130px] px-[12px]'>
-            <button
-              onClick={() => {
-                handleSortUnique("size", queriese.sort["size"] === -1 ? 1 : -1);
-              }}
-              className={`flex items-center justify-end gap-[8px] w-full ${
-                queriese.sort["size"] ? "text-white-F1 font-bold" : ""
-              }`}
-            >
-              <span>Video count</span>
-              {queriese.sort["size"] && (
-                <div
-                  className={`${
-                    queriese.sort["size"] === -1 ? "rotate-180" : ""
-                  } text-[12px]`}
-                >
-                  <LongArrowIcon size={14} />
-                </div>
-              )}
-            </button>
+          <div className='flex-[1_0_100px] min-w-[100px] px-[12px]'>Date</div>
+          <div className='flex-[1_0_130px] min-w-[130px] px-[12px] text-right'>
+            Video count
           </div>
         </div>
         {/* Body */}
@@ -328,22 +375,21 @@ const Playlist = () => {
             dataList.map((item, id) => (
               <PlaylistTbRow
                 key={id}
-                handleChecked={handleChecked}
-                checked={checkedList?.includes(item?._id)}
                 data={item}
-                refetch={refetch}
+                checked={checkedList?.includes(item?._id)}
+                handleChecked={handleChecked}
                 horizonScrollVisible={horizonScrollVisible}
+                showDeleteConfirm={showDeleteConfirm}
               />
             ))}
         </div>
-
-        <div className='mb-[86px] px-[24px]'>
-          <Pagination
-            setQueriese={setQueriese}
-            currPage={queriese?.page}
-            totalPage={data?.totalPages}
-          />
-        </div>
+      </div>
+      <div className='w-full bg-black fixed bottom-[0] right-0 mr-[12px] py-[6px]'>
+        <Pagination
+          setQueriese={setQueriese}
+          currPage={queriese?.page}
+          totalPage={data?.totalPages}
+        />
       </div>
     </div>
   );

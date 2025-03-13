@@ -20,37 +20,13 @@ const type = {
 };
 
 const PlaylistTbRow = ({
-  handleChecked,
-  checked,
   data,
-  od,
-  refetch,
+  checked,
+  handleChecked,
   horizonScrollVisible,
+  showDeleteConfirm,
 }) => {
-  const { setIsShowing, addToaster } = useAuthContext();
-
-  const handleDelete = async () => {
-    await dltData(
-      "/client/playlist",
-      data?._id,
-      "playlist",
-      () => {
-        refetch();
-      },
-      undefined,
-      addToaster,
-    );
-  };
-
-  const showDeleteConfirm = () => {
-    setIsShowing(
-      <DeleteConfirm
-        handleDelete={handleDelete}
-        type={"Playlist"}
-        data={data?._id}
-      />,
-    );
-  };
+  const { setIsShowing } = useAuthContext();
 
   const showUpsertModal = (func) => {
     setIsShowing(
@@ -67,8 +43,8 @@ const PlaylistTbRow = ({
   return (
     <div className='h-[84px] group hover:bg-black-0.1 flex border-b-[1px] border-gray-A'>
       <div
-        className={`sticky left-0 p-[12px_12px_8px_24px] 
-       bg-black group-hover:bg-[#272727] `}
+        className='px-[20px] bg-black group-hover:bg-[#272727]
+       flex items-center justify-center gap-[12px] z-[10]'
       >
         <CheckBox2
           checked={checked}
@@ -78,7 +54,7 @@ const PlaylistTbRow = ({
         />
       </div>
       <div
-        className={`sticky left-[57px] flex-[2_0_382px] min-w-[382px] p-[8px_0_8px_12px] flex bg-black group-hover:bg-[#272727]
+        className={`flex-[2_0_382px] min-w-[382px] p-[8px_0_8px_12px] flex bg-black group-hover:bg-[#272727]
          border-r-[1px]  z-[5] ${
            horizonScrollVisible ? "border-gray-A" : "border-[transparent]"
          }`}
@@ -147,7 +123,7 @@ const PlaylistTbRow = ({
             </button>
             <button
               className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-              onClick={showDeleteConfirm}
+              onClick={() => showDeleteConfirm(data._id)}
             >
               <div className='text-white size-[24px]'>
                 <TrashBinIcon />

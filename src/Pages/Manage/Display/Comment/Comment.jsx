@@ -1,32 +1,25 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { getData } from "../../../../Api/getData";
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-} from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Pagination,
   DeleteConfirm,
   CustomeFuncBox,
   CheckBox2,
+  QuerySelection,
+  QueryTextInput,
 } from "../../../../Component";
-import {
-  CloseIcon,
-  SortIcon2,
-  TrashBinIcon,
-  LongArrowIcon,
-} from "../../../../Assets/Icons";
+import { SortIcon2, TrashBinIcon } from "../../../../Assets/Icons";
 import CmtTbRow from "./CmtTbRow";
+import { dltManyData, dltData } from "../../../../Api/controller";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
+import { getDisplayUsingValue } from "../../../../util/func";
 
 const initQueriese = {
-  text: "",
   limit: 10,
   page: 1,
+  search: {},
   sort: { createdAt: -1 },
-  clearCache: "comment",
 };
 
 const Comment = () => {
@@ -34,34 +27,35 @@ const Comment = () => {
 
   const { setIsShowing, addToaster } = useAuthContext();
 
-  const [searching, setSearching] = useState(undefined);
-
-  const [opened, setOpened] = useState(false);
-
   const [queriese, setQueriese] = useState(initQueriese);
-
-  const [checkedList, setCheckedList] = useState([]);
 
   const [dataList, setDataList] = useState([]);
 
+  const [checkedList, setCheckedList] = useState([]);
+
+  const [isQueryBoxOpened, setIsQueryBoxOpened] = useState(false);
+
+  const [queryOptions, setQueryOptions] = useState([]);
+
   const containerRef = useRef();
 
-  const { data, refetch, isError, error } = getData(
-    "/client/comment",
-    queriese,
-    true,
-    false,
-  );
+  const funcContainerRef = useRef();
+
+  const tableHeader = useRef();
+
+  const { data, refetch } = getData("/client/comment", queriese, true, false);
 
   const handleCheckedAll = useCallback(() => {
-    if (checkedList.length === dataList?.length) {
-      setCheckedList([]);
-    } else {
-      const idList = data?.data?.map((item) => item?._id);
+    setCheckedList((prev) => {
+      if (prev.length === dataList.length) {
+        return [];
+      }
 
-      setCheckedList(idList);
-    }
-  }, [checkedList, dataList]);
+      const idList = dataList.map((item) => item?._id);
+
+      return idList;
+    });
+  }, [dataList]);
 
   const handleChecked = useCallback((id) => {
     setCheckedList((prev) => {
@@ -74,68 +68,175 @@ const Comment = () => {
     });
   }, []);
 
-  const handleOnClick = (data) => {
-    setSearching((prev) => {
-      if (prev && prev.id === data.id) {
-        return undefined;
-      }
+  const handleOnClick = (queryData) => {
+    setQueryOptions((prev) => [...prev, queryData]);
 
-      return data;
+    queryOptionBtns.current = queryOptionBtns.current.map((query) => {
+      if (query.id === queryData.id) {
+        query.renderCondition = false;
+      }
+      return query;
     });
-  }
+  };
 
-  const timeoutRef = useRef();
+  const handleClose = (queryData) => {
+    setQueryOptions((prev) =>
+      prev.filter((search) => search.id !== queryData.id),
+    );
 
-  const handleOnSearch = (e) => {
-    clearTimeout(timeoutRef.current);
-    setTimeout(() => {
-      setQueriese((prev) => ({ ...prev, text: e.target.value, page: 1 }));
-    }, 600);
-  }
+    setQueriese((prev) => {
+      const { search, sort } = prev;
 
-  const handleSort = 
-    (key, value) => {
-      const addOnSortKeys = new Set(["createdAt"]);
-
-      const sortObj = structuredClone(queriese.sort);
-
-      const sortObjKeys = new Set(Object.keys(sortObj));
-      if (sortObjKeys.has(key)) {
-        sortObj[key] = value;
-      } else if (addOnSortKeys.has(key)) {
-        sortObj[key] = value;
+      if (queryData.buttonType === "sort") {
+        const { [queryData.id]: _, ...rest } = sort;
+        // Check if is there any sort query in the queirese
+        // If not, set default sort is createdAt = -1
+        if (Object.keys(rest).length > 0) {
+          prev.sort = rest;
+        } else {
+          prev.sort = { createdAt: -1 };
+        }
+      } else {
+        const { [queryData.id]: _, ...rest } = search;
+        prev.search = rest;
       }
-      setQueriese((prev) => ({ ...prev, sort: sortObj, page: 1 }));
-    }
 
-  const funcList = useRef([
+      return prev;
+    });
+
+    queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
+      if (queryOption.id === queryData.id) {
+        queryOption.renderCondition = true;
+      }
+      return queryOption;
+    });
+  };
+
+  const handleSearch = (searchKey, searchValue) => {
+    if (queriese.search[searchKey] === searchValue) return;
+    setQueriese((prev) => ({
+      ...prev,
+      search: { ...prev.search, [searchKey]: searchValue },
+      page: 1,
+    }));
+  };
+
+  const handleSort = (sortKey, sortValue) => {
+    if (queriese.sort[sortKey] === sortValue) return;
+
+    const sortOptionIds = queryOptions.map((query) => {
+      if (query.buttonType === "sort") {
+        return query.id;
+      }
+    });
+
+    const sortObj = {};
+
+    sortOptionIds.forEach((sortOptionId) => {
+      let value;
+      if (sortOptionId === sortKey) {
+        value = sortValue;
+      } else if (queriese.sort[sortOptionId]) {
+        value = queriese.sort[sortOptionId];
+      }
+      sortObj[sortOptionId] = value;
+    });
+
+    setQueriese((prev) => ({
+      ...prev,
+      sort: sortObj,
+      page: 1,
+    }));
+  };
+
+  const queryOptionBtns = useRef([
     {
       id: "text",
-      text: "Text",
+      text: "Content",
       type: "input:text",
+      buttonType: "search",
+      renderCondition: true,
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "videoTitle",
+      text: "Video Title",
+      type: "input:text",
+      buttonType: "search",
+      renderCondition: true,
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "createdAt",
+      text: "Date",
+      type: "select",
+      buttonType: "sort",
+      renderCondition: true,
+      options: [
+        { id: -1, display: "Newest" },
+        { id: 1, display: "Oldest" },
+      ],
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "like",
+      text: "Like",
+      type: "select",
+      buttonType: "sort",
+      renderCondition: true,
+      options: [
+        { id: -1, display: "Most liked" },
+        { id: 1, display: "Least liked" },
+      ],
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "dislike",
+      text: "Dislike",
+      type: "select",
+      buttonType: "sort",
+      renderCondition: true,
+      options: [
+        { id: -1, display: "Most disliked" },
+        { id: 1, display: "Least disliked" },
+      ],
       handleOnClick: handleOnClick,
     },
   ]);
 
-  const handleDeleteMany = async () => {
-    await dltManyData(
-      "/client/comment/delete-many",
-      checkedList,
-      "comment",
-      () => {
-        setCheckedList([]);
-        refetch();
-      },
-      undefined,
-      addToaster,
-    );
-  }
+  const showDeleteConfirm = (id) => {
+    const handleDelete = async () => {
+      await dltData(
+        "/client/comment",
+        id,
+        "comment",
+        () => {
+          refetch();
+        },
+        undefined,
+        addToaster,
+      );
+    };
 
-  const showDltConfirm = () => {
-    if (checkedList.length < 1) {
-      alert("Please select at least one item");
-      return;
-    }
+    setIsShowing(
+      <DeleteConfirm handleDelete={handleDelete} type={"Comment"} data={id} />,
+    );
+  };
+
+  const showDeleteManyConfirm = () => {
+    const handleDeleteMany = async () => {
+      await dltManyData(
+        "/client/comment/delete-many",
+        checkedList,
+        "comment",
+        () => {
+          setCheckedList([]);
+          refetch();
+        },
+        undefined,
+        addToaster,
+      );
+    };
 
     setIsShowing(
       <DeleteConfirm
@@ -144,7 +245,7 @@ const Comment = () => {
         data={checkedList.join(", ")}
       />,
     );
-  }
+  };
 
   useEffect(() => {
     return () => {
@@ -164,82 +265,91 @@ const Comment = () => {
     setCheckedList([]);
   }, [queriese.page]);
 
-  if (isError) {
-    console.log(error);
-    return;
-  }
-
   return (
     <div>
-      <div className='z-[2000] bg-black px-[8px] md:px-0'>
+      <div className='z-[2000] bg-black md:mr-[12px]'>
         <div>
-          <h2 className='pt-[24px] text-nowrap text-[25px] leading-[32px] font-[600]'>
+          <h1 className='pt-[24px] text-nowrap text-[25px] leading-[32px] font-[600]'>
             Your comments
-          </h2>
+          </h1>
         </div>
       </div>
-      <div className='px-[8px] md:px-0 h-[calc(100vh-110px)]'>
+
+      <div className='md:mr-[12px] h-[calc(100vh-110px)]'>
         <div
-          className='overflow-auto h-full relative scrollbar-3'
+          className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3'
           ref={containerRef}
         >
-          <div className='sticky left-0 top-[0] z-[2000]'>
-            <div className='flex gap-[24px] bg-black h-[40px]'>
-              <div className='relative'>
+          <div
+            className='sticky top-0 z-[2000] min-w-[1176px]'
+            ref={funcContainerRef}
+          >
+            <div className='flex flex-wrap gap-[24px] bg-black'>
+              <div className='relative flex-shrink-0'>
                 <button
-                  className=' p-[8px]'
-                  onClick={() => {
-                    setOpened((prev) => !prev);
+                  className='size-[40px] p-[8px]'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setIsQueryBoxOpened((prev) => !prev);
                   }}
                 >
                   <SortIcon2 />
                 </button>
-                {opened && (
+                {isQueryBoxOpened && (
                   <CustomeFuncBox
-                    style={"left-[100%] top-[100%] w-[150px]"}
-                    setOpened={setOpened}
-                    currentId={searching?.id}
-                    funcList1={funcList.current}
+                    style={"left-[100%] top-[100%] min-w-[200px]"}
+                    opened={isQueryBoxOpened}
+                    setOpened={setIsQueryBoxOpened}
+                    funcList1={queryOptionBtns.current}
                   />
                 )}
               </div>
-              <div className='flex-1 flex items-center'>
-                {searching && (
-                  <button className='flex items-center rounded-[5px] bg-black-0.2 h-[32px]'>
-                    <span className='ml-[12px] font-[500] leading-[20px] text-[14px]'>
-                      {searching.text}
-                    </span>
-                    <div
-                      className='px-[6px] w-[24px]'
-                      onClick={() => {
-                        setSearching(undefined);
-                        setQueriese((prev) => ({
-                          ...prev,
-                          [searching.id]: "",
-                          page: 1,
-                        }));
-                      }}
-                    >
-                      <CloseIcon />
+
+              <div className='flex-1 flex flex-wrap gap-[16px] items-center'>
+                {queryOptions.length > 0 &&
+                  queryOptions.map((query) => {
+                    if (query.type === "input:text") {
+                      return (
+                        <QueryTextInput
+                          key={query.id}
+                          queryData={query}
+                          currValue={queriese.search[query.id]}
+                          handleExecuteQuery={handleSearch}
+                          handleClose={handleClose}
+                        />
+                      );
+                    } else if (query.type === "select") {
+                      return (
+                        <QuerySelection
+                          key={query.id}
+                          queryData={query}
+                          currValue={getDisplayUsingValue(
+                            query.options,
+                            query?.buttonType === "sort"
+                              ? queriese.sort[query.id]
+                              : queriese.search[query.id],
+                          )}
+                          handleExecuteQuery={
+                            query?.buttonType === "sort"
+                              ? handleSort
+                              : handleSearch
+                          }
+                          handleClose={handleClose}
+                        />
+                      );
+                    }
+                  })}
+              </div>
+
+              <div className='self-end shrink-0 h-[40px]'>
+                {checkedList.length > 0 && (
+                  <button onClick={showDeleteManyConfirm}>
+                    <div className='p-[8px] hover:text-red-600'>
+                      <TrashBinIcon />
                     </div>
                   </button>
                 )}
-                {searching?.type === "input:text" && (
-                  <input
-                    autoFocus
-                    type='text'
-                    placeholder='Searching...'
-                    className='bg-transparent py-[4px] border-b-[2px] outline-none ml-[16px]'
-                    onChange={handleOnSearch}
-                  />
-                )}
-              </div>
-              <div>
-                <button onClick={showDltConfirm}>
-                  <div className='p-[8px] hover:text-red-600'>
-                    <TrashBinIcon />
-                  </div>
-                </button>
               </div>
             </div>
           </div>
@@ -247,10 +357,11 @@ const Comment = () => {
           <div className='min-w-full w-fit'>
             {/* Head */}
             <div
-              className='sticky top-[40px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
-           text-gray-A items-center border-y-[1px] border-gray-A flex'
+              className='sticky z-[10] top-[40px] bg-black text-[12px] font-[500] leading-[48px]
+             text-gray-A items-center border-y-[1px] border-gray-A flex'
+              ref={tableHeader}
             >
-              <div className='sticky left-0 h-[48px] p-[0_12px_0_25px] bg-black flex items-center justify-center gap-[12px] z-[10]'>
+              <div className='h-[48px] p-[14px_20px] bg-black z-[10]'>
                 <CheckBox2
                   checked={
                     checkedList.length === data?.data.length &&
@@ -260,7 +371,7 @@ const Comment = () => {
                 />
               </div>
               <div
-                className='sticky left-[57px] pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
+                className='pl-[12px] flex-[2_0_400px] min-w-[400px]  bg-black  
               border-r-[1px] border-gray-A z-[10]'
               >
                 Comment
@@ -269,30 +380,7 @@ const Comment = () => {
                 Video
               </div>
               <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>
-                <button
-                  onClick={() => {
-                    handleSort(
-                      "createdAt",
-                      queriese.sort["createdAt"] === -1 ? 1 : -1,
-                    );
-                  }}
-                  className={`flex items-center  w-full ${
-                    queriese.sort["createdAt"] ? "text-white-F1 font-bold" : ""
-                  }`}
-                >
-                  <span>Date </span>
-
-                  <div
-                    className={`${
-                      queriese.sort["createdAt"] === -1 ? "rotate-180" : ""
-                    }
-                ${
-                  queriese.sort["createdAt"] ? "visible" : "invisible"
-                } ml-[12px] w-[12px]`}
-                  >
-                    <LongArrowIcon />
-                  </div>
-                </button>
+                Date
               </div>
               <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] text-right'>
                 Like
@@ -307,19 +395,21 @@ const Comment = () => {
                 dataList.map((item) => (
                   <CmtTbRow
                     key={item?._id}
-                    handleChecked={handleChecked}
-                    checked={checkedList.includes(item?._id)}
                     data={item}
-                    refetch={refetch}
+                    checked={checkedList.includes(item?._id)}
+                    handleChecked={handleChecked}
+                    showDeleteConfirm={showDeleteConfirm}
                   />
                 ))}
             </div>
           </div>
-          <Pagination
-            setParams={setQueriese}
-            currPage={queriese?.page}
-            totalPage={data?.totalPages}
-          />
+          <div className='w-full bg-black fixed bottom-[0] right-0 mr-[12px] py-[6px]'>
+            <Pagination
+              setQueriese={setQueriese}
+              currPage={queriese?.page}
+              totalPage={data?.totalPages}
+            />
+          </div>
         </div>
       </div>
     </div>
