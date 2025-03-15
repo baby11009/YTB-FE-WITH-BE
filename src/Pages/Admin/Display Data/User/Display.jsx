@@ -39,15 +39,17 @@ const Display = ({
         </div>
       </div>
       <div className='flex flex-col z-[2] relative'>
-        {dataList.map((data, id) => (
-          <UserTbRow
-            key={id}
-            data={data}
-            handleDelete={handleDelete}
-            handleChecked={handleChecked}
-            checked={checkedList.includes(data?._id)}
-          />
-        ))}
+        {dataList &&
+          dataList.length > 0 &&
+          dataList.map((data, id) => (
+            <UserTbRow
+              key={id}
+              data={data}
+              handleDelete={handleDelete}
+              handleChecked={handleChecked}
+              checked={checkedList.includes(data?._id)}
+            />
+          ))}
       </div>
     </div>
   );

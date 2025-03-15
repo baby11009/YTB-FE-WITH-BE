@@ -244,8 +244,6 @@ const DisplayUser = () => {
     };
   }, [usersData]);
 
-  if (!usersData) return;
-
   return (
     <div
       className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3'
@@ -328,7 +326,7 @@ const DisplayUser = () => {
       </div>
 
       <Display
-        dataList={usersData.data}
+        dataList={usersData?.data}
         checkedList={checkedList}
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}

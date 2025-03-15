@@ -24,8 +24,8 @@ const initQueriese = {
   clearCache: "tag",
 };
 
-const TagPage = ({ openedMenu }) => {
-  const { addToaster } = useAuthContext();
+const TagPage = () => {
+  const { addToaster, openedMenu } = useAuthContext();
 
   const queryClient = useQueryClient();
 
@@ -228,8 +228,6 @@ const TagPage = ({ openedMenu }) => {
       queryClient.clear();
     };
   }, []);
-
-  if (!tagData) return;
 
   return (
     <div

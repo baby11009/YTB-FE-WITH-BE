@@ -1,17 +1,24 @@
-import { useRef, useState, useEffect, useLayoutEffect } from "react";
-import { UploadImageIcon } from "../../../../Assets/Icons";
+import {
+  useRef,
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from "react";
+import { UploadImageIcon, YoutubeBlankIcon } from "../../../../Assets/Icons";
 import {
   Input,
-  DropDown,
   InfiniteDropDown,
   InfiniteDropDownWithCheck,
   HovUserCard,
+  TextArea,
 } from "../../../../Component";
 import { createData, updateData } from "../../../../Api/controller";
-import { getDataWithAuth } from "../../../../Api/getData";
+import { getData } from "../../../../Api/getData";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
+import { isObjectEmpty } from "../../../../util/func";
 
 const init = {
   userId: "",
@@ -19,23 +26,24 @@ const init = {
   image: undefined,
   video: undefined,
   type: "video",
-  tag: [],
+  tags: [],
   view: 0,
   like: 0,
   dislike: 0,
+  description: "",
 };
 
-const initUserParams = {
-  email: "",
+const initUserQueriese = {
+  search: {},
   limit: 10,
   page: 1,
-  clearCache: "user",
 };
 
-const initTagParams = {
-  title: "",
+const initTagQueriese = {
+  search: {},
   page: 1,
   limit: 10,
+  priorityList: [],
   clearCache: "tag",
 };
 
@@ -44,7 +52,7 @@ const currUserInit = {
   email: "",
 };
 
-const UpsertVideo = () => {
+const UpsertVideo = ({ type }) => {
   const { id } = useParams();
 
   const { addToaster } = useAuthContext();
@@ -55,33 +63,11 @@ const UpsertVideo = () => {
 
   const [openedTags, setOpenedTags] = useState(false);
 
-  const [userParams, setUserParams] = useState(initUserParams);
+  const [userQueriese, setUserQueriese] = useState(initUserQueriese);
 
-  const [tagParams, setTagParams] = useState(initTagParams);
+  const [tagQueriese, setTagQueriese] = useState(initTagQueriese);
 
-  const {
-    data: videoData,
-    refetch,
-    error: queryError,
-    isLoading: videoLoading,
-    isError: videoisError,
-  } = getDataWithAuth(`video/${id}`, {}, id !== undefined, false);
-
-  const {
-    data,
-    error: userError,
-    isLoading,
-    isError,
-  } = getDataWithAuth("user", userParams, openedUsers, false);
-
-  const {
-    data: tagList,
-    error: tagErr,
-    isLoading: tagIsLoading,
-    isError: tagIsErr,
-  } = getDataWithAuth("tag", tagParams, openedTags, false);
-
-  const [formData, setFormData] = useState(init);
+  const [formData, setFormData] = useState({ ...init, type: type });
 
   const [previewThumb, setPreviewThumb] = useState("");
 
@@ -89,16 +75,32 @@ const UpsertVideo = () => {
 
   const [currUser, setCurrUser] = useState(currUserInit);
 
-  const [error, setError] = useState({
-    inputName: [],
-    message: [],
-  });
+  const [realTimeErrs, setRealTimeErrs] = useState({});
 
-  const types = useRef(["video", "short"]);
+  const [submitErrs, setSubmitErrs] = useState({});
 
-  const thumbRef = useRef();
+  const thumbInputRef = useRef();
 
-  const videoRef = useRef();
+  const videoInputRef = useRef();
+
+  const { data: videoData, refetch } = getData(
+    `video/${id}`,
+    { type },
+    id !== undefined,
+    false,
+  );
+
+  const {
+    data: userData,
+    error: userError,
+    isLoading,
+  } = getData("user", userQueriese, openedUsers, false);
+
+  const {
+    data: tagData,
+    error: tagErr,
+    isLoading: tagIsLoading,
+  } = getData("tag", tagQueriese, openedTags, false);
 
   const handleOnChange = (name, value) => {
     setFormData((prev) => ({
@@ -107,133 +109,182 @@ const UpsertVideo = () => {
     }));
   };
 
+  const handleSetRealTimeErr = useCallback((errName, errMessage) => {
+    setRealTimeErrs((prev) => ({ ...prev, [errName]: errMessage }));
+  }, []);
+
+  const handleRemoveRealTimeErr = useCallback(
+    (errName) => {
+      if (!Object.keys(realTimeErrs).includes(errName)) return;
+
+      setRealTimeErrs((prev) => {
+        const errs = structuredClone(prev);
+        delete errs[errName];
+        return errs;
+      });
+    },
+    [realTimeErrs],
+  );
+
   const handleUploadThumb = (e) => {
+    setSubmitErrs({});
+
     const file = e.files[0];
+
     if (!file) {
-      setError((prev) => ({
-        inputName: [...prev.inputName, "thumbnail"],
-        message: [...prev.message, "Không thể tải file"],
-      }));
+      setSubmitErrs((prev) => ({ ...prev, image: "Failed to upload file" }));
       return;
     }
+
     if (!file.type.startsWith("image/")) {
-      setError((prev) => ({
-        inputName: [...prev.inputName, "thumbnail"],
-        message: [...prev.message, "Chỉ nhận file hình ảnh"],
-      }));
+      setSubmitErrs((prev) => ({ ...prev, image: "Just accepted image file" }));
       e.value = "";
       return;
     }
-    const maxSize = 15 * 1024 * 1024; //10MB
+
+    const maxSize = 2 * 1024 * 1024; //10MB
+
     if (file.size > maxSize) {
-      setError((prev) => ({
-        inputName: [...prev.inputName, "avatar"],
-        message: [...prev.message, "Kích thước file lớn hơn 15MB"],
+      setSubmitErrs((prev) => ({
+        ...prev,
+        image: "File size exceeds 2MB",
       }));
       e.value = "";
       return;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      image: file,
-    }));
-    setPreviewThumb(URL.createObjectURL(file));
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      const imageElement = new Image();
+      const imageUrl = reader.result?.toString() || "";
+      imageElement.src = imageUrl;
+
+      imageElement.addEventListener("load", (e) => {
+        const { naturalWidth, naturalHeight } = e.currentTarget;
+        // if (
+        //   naturalWidth < 640 ||
+        //   Number((naturalWidth / naturalHeight).toFixed(2)) !== 16 / 9
+        // ) {
+        //   setSubmitErrs((prev) => ({
+        //     ...prev,
+        //     image:
+        //       "Image must be at least 640 width and having 16:9 aspect ratio",
+        //   }));
+        //   return;
+        // }
+
+        setFormData((prev) => ({
+          ...prev,
+          image: file,
+        }));
+        setPreviewThumb(URL.createObjectURL(file));
+      });
+    });
+
+    reader.readAsDataURL(file);
   };
 
   const handleUploadVideo = (e) => {
+    setSubmitErrs({});
+
     const file = e.files[0];
 
     if (!file) {
-      setError((prev) => ({
-        inputName: [...prev.inputName, "video"],
-        message: [...prev.message, "Không thể tải file"],
+      setSubmitErrs((prev) => ({
+        ...prev,
+        video: "Failed to upload video",
       }));
       return;
     }
     if (!file.type.startsWith("video/")) {
-      setError((prev) => ({
-        inputName: [...prev.inputName, "video"],
-        message: [...prev.message, "Chỉ nhận file video"],
+      setSubmitErrs((prev) => ({
+        ...prev,
+        video: "Just accepted video file",
       }));
       e.value = "";
       return;
+    }
+
+    if (previewVideo) {
+      URL.revokeObjectURL(previewVideo);
     }
 
     setFormData((prev) => ({
       ...prev,
       video: file,
     }));
+
     setPreviewVideo(URL.createObjectURL(file));
   };
 
   const handleValidate = () => {
-    if (error.inputName.length > 0) {
-      setError({ inputName: [], message: [] });
-    }
-    let hasErrors = false;
+    setSubmitErrs({});
 
-    const keys = Object.keys(formData).filter(
-      (key) =>
-        key !== "type" && key !== "like" && key !== "dislike" && key !== "view",
+    const { type, view, like, dislike, description, ...neededValidateFields } =
+      formData;
+
+    const errors = Object.entries(neededValidateFields).reduce(
+      (acc, [key, value]) => {
+        if (!value) {
+          acc[key] =
+            key === "image" || key === "video"
+              ? "File not uploaded"
+              : "Cannot be empty";
+        }
+        return acc;
+      },
+      {},
     );
 
-    keys.forEach((key) => {
-      if (formData[key] === "" || !formData[key]) {
-        let errMsg = "Không được để trống";
-        if (key === "image" || key === "video") {
-          errMsg = "Chưa upload file";
-        }
-        setError((prev) => ({
-          inputName: [...prev.inputName, key],
-          message: [...prev.message, errMsg],
-        }));
-        hasErrors = true;
-      }
-    });
-
-    if (hasErrors) {
-      return true;
+    if (!isObjectEmpty(errors)) {
+      setSubmitErrs(errors);
+      return false;
     }
+
+    return true;
   };
 
   const handleValidateUpdate = () => {
-    if (error.inputName.length > 0) {
-      setError({ inputName: [], message: [] });
-    }
-    let hasErrors = false;
-    const keys = Object.keys(formData).filter(
-      (key) =>
-        key !== "type" &&
-        key !== "image" &&
-        key !== "video" &&
-        key !== "view" &&
-        key !== "like" &&
-        key !== "dislike",
+    setSubmitErrs({});
+
+    const {
+      type,
+      image,
+      video,
+      description,
+      like,
+      dislike,
+      view,
+      ...neededValidateFields
+    } = formData;
+
+    const errors = Object.entries(neededValidateFields).reduce(
+      (acc, [key, value]) => {
+        if (!value) {
+          acc[key] = "Cannot be empty";
+        }
+        return acc;
+      },
+      {},
     );
-    keys.forEach((key) => {
-      if (formData[key] === "" || !formData[key]) {
-        let errMsg = "Không được để trống";
-        setError((prev) => ({
-          inputName: [...prev.inputName, key],
-          message: [...prev.message, errMsg],
-        }));
-        hasErrors = true;
-      }
-    });
-    if (hasErrors) {
-      return true;
+
+    if (!isObjectEmpty(errors)) {
+      setSubmitErrs(errors);
+      return false;
     }
+
+    return true;
   };
 
   const create = async () => {
-    const error = handleValidate();
+    const isValidate = handleValidate();
 
-    if (error) {
+    if (!isValidate) {
       return;
     }
 
-    let data = new FormData();
+    const data = new FormData();
+
     for (const key in formData) {
       data.append(key, formData[key]);
     }
@@ -254,24 +305,21 @@ const UpsertVideo = () => {
   };
 
   const update = async () => {
-    const error = handleValidateUpdate();
+    const isValidate = handleValidateUpdate();
 
-    if (error) {
+    if (!isValidate) {
       return;
     }
 
-    let finalData = {
-      title: formData.title,
-      type: formData.type,
-      view: formData.view,
-      like: formData.like,
-      dislike: formData.dislike,
-      tag: formData.tag,
-    };
+    const { userId, video, image, ...finalData } = formData;
 
     for (const key in finalData) {
       if (videoData?.data?.hasOwnProperty(key)) {
-        if (videoData?.data[key] === finalData[key]) {
+        if (
+          (typeof finalData[key] === "string" &&
+            videoData.data[key] === finalData[key]) ||
+          JSON.stringify(finalData[key]) === JSON.stringify(videoData.data[key])
+        ) {
           delete finalData[key];
         }
       }
@@ -281,14 +329,15 @@ const UpsertVideo = () => {
       finalData.image = formData.image;
     }
 
-    if (Object.keys(finalData).length === 0) {
-      alert("Không có gì thay đổi");
+    if (isObjectEmpty(finalData)) {
+      alert("Nothing changed");
       return;
     }
 
-    let data = new FormData();
+    const data = new FormData();
+
     for (const key in finalData) {
-      if (key === "tag") {
+      if (key === "tags") {
         // Chuyển mảng thành json để dữ nguyên giá trị trong FormData
         data.append(key, JSON.stringify(finalData[key]));
       } else {
@@ -322,37 +371,46 @@ const UpsertVideo = () => {
   useLayoutEffect(() => {
     if (videoData) {
       const dataForm = {
-        userId: videoData?.data?.user_info?._id,
-        title: videoData?.data?.title,
+        userId: videoData.data.user_info._id,
+        title: videoData.data.title,
         image: undefined,
         video: undefined,
-        type: videoData?.data?.type,
-        view: videoData?.data?.view,
-        like: videoData?.data?.like,
-        dislike: videoData?.data?.dislike,
+        type: videoData.data.type,
+        view: videoData.data.view,
+        like: videoData.data.like,
+        dislike: videoData.data.dislike,
+        description: videoData.data.description,
       };
-      if (videoData?.data?.tag_info) {
-        dataForm.tag = videoData?.data?.tag_info.map((tag) => tag._id);
+
+      if (videoData.data.tags_info) {
+        dataForm.tags = videoData.data.tags;
+        setTagQueriese((prev) => ({
+          ...prev,
+          priorityList: videoData.data.tags,
+        }));
       }
+
       setFormData(dataForm);
+
       setCurrUser({
-        userId: videoData?.data?.user_info?._id,
-        email: videoData?.data?.user_info?.email,
+        userId: videoData.data.user_info?._id,
+        email: videoData.data.user_info?.email,
       });
+
       setPreviewThumb(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_THUMB_API
-        }${videoData?.data?.thumb}`,
+        }${videoData.data.thumb}`,
       );
+
       setPreviewVideo(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_VIDEO_API
-        }${videoData?.data?.video}`,
+        }${videoData.data.video}?type=video`,
       );
     }
 
     return () => {
-      setFormData(init);
       setPreviewVideo(undefined);
       setPreviewThumb(undefined);
       setCurrUser(currUserInit);
@@ -361,31 +419,33 @@ const UpsertVideo = () => {
 
   useEffect(() => {
     if (!openedUsers) {
-      queryClient.removeQueries("user");
+      queryClient.removeQueries({
+        queryKey: Object.values(userQueriese),
+      });
     }
-  }, [openedUsers]);
+  }, [openedUsers, userQueriese]);
 
   useEffect(() => {
     if (!openedTags) {
-      queryClient.removeQueries("tag");
+      queryClient.removeQueries({
+        queryKey: Object.values(tagQueriese),
+      });
     }
-  }, [openedTags]);
+  }, [openedTags, tagQueriese]);
 
   useEffect(() => {
     let timeOut;
-    if (error.inputName.length > 0) {
+
+    if (!isObjectEmpty(submitErrs)) {
       timeOut = setTimeout(() => {
-        setError({
-          inputName: [],
-          message: [],
-        });
+        setSubmitErrs({});
       }, 2500);
     }
 
     return () => {
       clearTimeout(timeOut);
     };
-  }, [error]);
+  }, [submitErrs]);
 
   useEffect(() => {
     if (currUser.userId) {
@@ -403,49 +463,52 @@ const UpsertVideo = () => {
   }, []);
 
   return (
-    <div>
-      <header className='pt-[16px] '>
+    <div className='max-w-[1500px] overflow-auto scrollbar-3'>
+      <header className='pt-[16px]'>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Videos</h2>
       </header>
 
-      <form noValidate onSubmit={handleSubmit} className=' mb-[100px]'>
-        <div className='flex items-center justify-center flex-wrap gap-[24px]'>
+      <form
+        noValidate
+        onSubmit={handleSubmit}
+        className='mb-[100px] min-w-[400px] '
+      >
+        <div className='flex items-center justify-center flex-wrap gap-x-[16px]'>
           {/* thumbnail */}
-          <div
-            className='basis-[100%]  2md:basis-[40%] 
-            max-h-[360px] h-[40vh] 2md:h-[45vh]'
-          >
+          <div className='basis-[100%] 2md:basis-[calc(50%-8px)]'>
             <label
               htmlFor='thumbnail'
-              className='inline-block size-full relative cursor-pointer 
-          border-[2px] border-dashed rounded-[10px] p-[16px]'
+              className={`block aspect-video max-h-[405px] size-full relative cursor-pointer 
+                    rounded-[10px] overflow-hidden  border-[1px] transition-[border] ease-in ${
+                      previewThumb ? "" : "border-[#6b6767] hover:border-white"
+                    }`}
               onDragOver={(e) => {
                 e.preventDefault();
               }}
               onDrop={(e) => {
                 e.preventDefault();
-                thumbRef.current.files = e.dataTransfer.files;
-                handleUploadThumb(thumbRef.current);
+                thumbInputRef.current.files = e.dataTransfer.files;
+                handleUploadThumb(thumbInputRef.current);
               }}
             >
-              <div className='flex items-center justify-center size-full'>
+              <div className='flex items-center justify-center size-full '>
                 {previewThumb ? (
                   <div
-                    className='size-full bg-contain bg-center bg-no-repeat'
+                    className='size-full bg-contain bg-center bg-no-repeat rounded-[10px]'
                     style={{
                       backgroundImage: `url("${previewThumb}")`,
                     }}
                   ></div>
                 ) : (
                   <div className='w-full flex flex-col items-center justify-center font-[500] text-center'>
-                    <div>
+                    <div className='w-[54px] sm:w-[64px]'>
                       <UploadImageIcon />
                     </div>
-                    <h2 className='mt-[12px]'>
-                      Nhấn vào để tải thumbnail của video hoặc kéo thả
+                    <h2 className='mt-[12px] text-[12px] xsm:text-[16px]'>
+                      Click to upload video's thumbnai or drag and drop
                     </h2>
-                    <p className='text-gray-A text-[12px] leading-[18px]'>
-                      Chỉ hỗ trợ : JPG, PNG,.. (Tối đa 10MB)
+                    <p className='text-gray-A text-[10px] xsm:text-[12px] leading-[18px]'>
+                      Just support : JPG, PNG,.. (Maximum 2MB)
                     </p>
                   </div>
                 )}
@@ -455,33 +518,28 @@ const UpsertVideo = () => {
                 name='thumbnail'
                 id='thumbnail'
                 accept='image/*'
-                ref={thumbRef}
+                ref={thumbInputRef}
                 onChange={(e) => handleUploadThumb(e.target)}
                 className='hidden'
               />
             </label>
 
-            <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-              <span>
-                {error.inputName.includes("image")
-                  ? error.message[error.inputName.indexOf("image")]
-                  : ""}
-              </span>
+            <div
+              className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] m-[8px]
+                line-clamp-1 text-ellipsis break-all'
+            >
+              <span>{submitErrs["image"] ? submitErrs["image"] : ""}</span>
             </div>
           </div>
 
           {/* Video */}
-
-          <div
-            className='basis-[100%]  2md:flex-1
-            max-h-[360px] h-[50vh] 2md:h-[45vh]'
-          >
+          <div className='basis-[100%] 2md:basis-[calc(50%-8px)]'>
             <label
               htmlFor='video'
-              className={`inline-block size-full relative 
-                border-[2px] border-dashed rounded-[10px] p-[16px]
-                ${!id ? "cursor-pointer " : " cursor-default"}
-                `}
+              className={`block w-full aspect-video max-h-[405px]  relative cursor-pointer 
+                    rounded-[10px] overflow-hidden border-[1px] transition-[border] ease-in ${
+                      previewVideo ? "" : "border-[#6b6767] hover:border-white"
+                    }`}
               onDragOver={(e) => {
                 e.preventDefault();
               }}
@@ -490,27 +548,31 @@ const UpsertVideo = () => {
                   return;
                 }
                 e.preventDefault();
-                videoRef.current.files = e.dataTransfer.files;
-                handleUploadVideo(videoRef.current);
+                videoInputRef.current.files = e.dataTransfer.files;
+                handleUploadVideo(videoInputRef.current);
               }}
             >
-              <div className='flex items-center justify-center size-full'>
+              <div className='flex items-center justify-center size-full '>
                 {previewVideo ? (
                   <video
-                    src={previewVideo}
-                    className='h-full object-contain'
+                    onDoubleClick={() => {
+                      videoInputRef.current.click();
+                    }}
+                    className='size-full object-contain '
                     controls
+                    controlsList='nofullscreen'
+                    src={previewVideo}
                   ></video>
                 ) : (
                   <div className='w-full flex flex-col items-center justify-center font-[500] text-center'>
-                    <div>
-                      <UploadImageIcon />
+                    <div className='w-[56px] sm:w-[64px]'>
+                      <YoutubeBlankIcon />
                     </div>
-                    <h2 className='mt-[12px]'>
-                      Nhấn vào để tải video hoặc kéo thả
+                    <h2 className='mt-[12px] text-[12px] xsm:text-[16px]'>
+                      Click to upload video or drag and drop
                     </h2>
-                    <p className='text-gray-A text-[12px] leading-[18px]'>
-                      Chỉ hỗ trợ : MP4, WEBM,...
+                    <p className='text-gray-A text-[10px] xsm:text-[12px] leading-[18px]'>
+                      Just support : MP4, WEBM,...
                     </p>
                   </div>
                 )}
@@ -521,73 +583,84 @@ const UpsertVideo = () => {
                 id='video'
                 readOnly={id ? false : true}
                 accept='video/*'
-                ref={videoRef}
+                ref={videoInputRef}
                 disabled={id ? true : false}
                 onChange={(e) => handleUploadVideo(e.target)}
                 className='hidden'
               />
             </label>
-            <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-              <span>
-                {error.inputName.includes("video")
-                  ? error.message[error.inputName.indexOf("video")]
-                  : ""}
-              </span>
+
+            <div
+              className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] m-[8px]
+            line-clamp-1 text-ellipsis break-all'
+            >
+              <span>{submitErrs["video"] ? submitErrs["video"] : ""}</span>
             </div>
           </div>
         </div>
 
-        <div className='flex flex-wrap gap-[16px] mt-[48px]'>
-          <div className='basis-[100%]  2md:basis-[32%]'>
-            <Input
-              dataId={id}
-              maxWidth={"lg:max-w-[360px]"}
-              id={"title"}
-              type={"text"}
-              label={"Video title"}
+        <div className='flex flex-wrap gap-x-[16px]'>
+          <div className=' basis-[100%]  2md:basis-[calc(50%-8px)] overflow-hidden'>
+            <TextArea
+              title={"Title"}
+              name={"title"}
+              preventCharactersList={new Set(["Enter"])}
               value={formData.title}
-              defaultValue={videoData?.data?.title}
+              defaultValue={videoData?.data.title}
               handleOnChange={handleOnChange}
-              error={
-                error.inputName.includes("title")
-                  ? `${error.message[error.inputName.indexOf("title")]}`
-                  : ""
-              }
+              maxLength={155}
+              handleSetRealTimeErr={handleSetRealTimeErr}
+              handleRemoveRealTimeErr={handleRemoveRealTimeErr}
+              errMsg={submitErrs["title"] ? submitErrs["title"] : ""}
+              placeholder={"Enter video title"}
             />
           </div>
+          <div className='basis-[100%]  2md:basis-[calc(50%-8px)] overflow-hidden'>
+            <TextArea
+              title={"Description"}
+              name={"description"}
+              value={formData.description}
+              defaultValue={videoData?.data.description}
+              handleOnChange={handleOnChange}
+              handleSetRealTimeErr={handleSetRealTimeErr}
+              handleRemoveRealTimeErr={handleRemoveRealTimeErr}
+              errMsg={
+                submitErrs["description"] ? submitErrs["description"] : ""
+              }
+              placeholder={"Enter video description"}
+            />
+          </div>
+        </div>
 
+        <div className='grid gap-x-[16px] grid-cols-1 md:grid-cols-2 xl:grid-cols-3'>
           {/* User */}
-
-          <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[100]'>
+          <div className='z-[100]'>
             <InfiniteDropDown
               disabled={videoData ? true : false}
               title={"User"}
-              value={currUser.email || "Chưa chọn"}
+              dataType={"user"}
+              value={currUser.email || "Not picked yet"}
               setIsOpened={setOpenedUsers}
-              list={data?.data}
+              list={userData?.data}
               isLoading={isLoading}
-              isError={isError}
               displayData={"email"}
-              errorMsg={userError?.response?.data?.msg}
-              handleSetParams={(value, pageInc) => {
-                setUserParams((prev) => {
-                  let finalobj = {
-                    ...prev,
-                  };
-
+              fetchingError={userError?.response?.data?.msg}
+              validateError={submitErrs["userId"]}
+              handleSetQueriese={(value, pageInc) => {
+                setUserQueriese((prev) => {
+                  const prevClone = { ...prev };
                   if (value !== undefined) {
-                    finalobj.email = value;
-                    finalobj.page = 1;
+                    prevClone.search["email"] = value;
+                    prevClone.page = 1;
                   }
 
                   if (pageInc !== undefined) {
-                    finalobj.page = finalobj.page + pageInc;
+                    prevClone.page = prevClone.page + pageInc;
                   }
 
-                  return finalobj;
+                  return prevClone;
                 });
               }}
-              params={userParams}
               handleSetCurr={(data) => {
                 setCurrUser({
                   userId: data?._id,
@@ -596,119 +669,75 @@ const UpsertVideo = () => {
               }}
               HoverCard={HovUserCard}
             />
-            <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] my-[6px] px-[8px]'>
-              <span>
-                {error.inputName.includes("userId")
-                  ? error.message[error.inputName.indexOf("userId")]
-                  : ""}
-              </span>
-            </div>
           </div>
 
-          {/* Type*/}
-          <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[90]'>
-            <DropDown
-              list={types.current}
-              title={"Type"}
-              value={formData.type}
-              handleOnClick={(type) => {
-                setFormData((prev) => ({ ...prev, type }));
+          {/* Tag */}
+          <div className='mb-[32px]'>
+            <InfiniteDropDownWithCheck
+              title={"Tag"}
+              valueList={formData.tags}
+              setIsOpened={setOpenedTags}
+              list={tagData?.data}
+              displayValue={"title"}
+              isLoading={tagIsLoading}
+              fetchingError={tagErr?.response?.data?.msg}
+              setData={(value) => {
+                setFormData((prev) => ({ ...prev, tags: value }));
+              }}
+              handleSetQueriese={(value, pageInc) => {
+                setTagQueriese((prev) => {
+                  const prevClone = {
+                    ...prev,
+                  };
+
+                  if (value !== undefined) {
+                    prevClone.search["title"] = value;
+                    prevClone.page = 1;
+                  }
+
+                  if (pageInc !== undefined) {
+                    prevClone.page = prevClone.page + pageInc;
+                  }
+
+                  return prevClone;
+                });
               }}
             />
           </div>
 
           {/* View */}
-          <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] '>
+          <div className=''>
             <Input
-              maxWidth={"lg:max-w-[360px]"}
               id={"view"}
               type={"number"}
               label={"View"}
               value={formData.view || 0}
               defaultValue={videoData?.data?.view}
               handleOnChange={handleOnChange}
-              error={
-                error.inputName.includes("view")
-                  ? `${error.message[error.inputName.indexOf("view")]}`
-                  : ""
-              }
             />
           </div>
           {/* Like */}
-          <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] '>
+          <div className=''>
             <Input
-              maxWidth={"lg:max-w-[360px]"}
               id={"like"}
               type={"number"}
               label={"Like"}
               value={formData.like || 0}
               defaultValue={videoData?.data?.like}
               handleOnChange={handleOnChange}
-              error={
-                error.inputName.includes("like")
-                  ? `${error.message[error.inputName.indexOf("like")]}`
-                  : ""
-              }
             />
           </div>
 
           {/* Dislike */}
-          <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] '>
+          <div className=''>
             <Input
-              maxWidth={"lg:max-w-[360px]"}
               id={"dislike"}
               type={"number"}
               label={"Dislike"}
               value={formData.dislike || 0}
               defaultValue={videoData?.data?.dislike}
               handleOnChange={handleOnChange}
-              error={
-                error.inputName.includes("dislike")
-                  ? `${error.message[error.inputName.indexOf("dislike")]}`
-                  : ""
-              }
             />
-          </div>
-
-          <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] '>
-            <InfiniteDropDownWithCheck
-              title={"Tag"}
-              valueList={formData.tag}
-              setIsOpened={setOpenedTags}
-              list={tagList?.data}
-              displayValue={"title"}
-              isLoading={tagIsLoading}
-              isError={tagIsErr}
-              errorMsg={tagErr?.response?.data?.msg}
-              setData={(value) => {
-                setFormData((prev) => ({ ...prev, tag: value }));
-              }}
-              handleSetParams={(value, pageInc) => {
-                setTagParams((prev) => {
-                  let finalobj = {
-                    ...prev,
-                  };
-
-                  if (value !== undefined) {
-                    finalobj.title = value;
-                    finalobj.page = 1;
-                  }
-
-                  if (pageInc !== undefined) {
-                    finalobj.page = finalobj.page + pageInc;
-                  }
-
-                  return finalobj;
-                });
-              }}
-            />
-            <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-              <span>
-                {error.inputName.includes("videoIdList")
-                  ? error.message[error.inputName.indexOf("videoIdList")]
-                  : ""}
-              </span>
-            </div>
           </div>
         </div>
 

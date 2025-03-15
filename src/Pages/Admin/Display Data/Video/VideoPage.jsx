@@ -4,7 +4,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CreateIcon, SortIcon2, TrashBinIcon } from "../../../../Assets/Icons";
 import { getDataWithAuth } from "../../../../Api/getData";
 import { dltManyData, dltData } from "../../../../Api/controller";
-import { getDisplayUsingValue } from "../../../../util/func";
+import {
+  getDisplayUsingValue,
+  upperCaseFirstChar,
+} from "../../../../util/func";
 import Display from "./Display";
 import {
   Pagination,
@@ -24,12 +27,15 @@ const initQueriese = {
   },
 };
 
-const VideoPage = () => {
+const VideoPage = ({ type }) => {
   const { addToaster } = useAuthContext();
 
   const queryClient = useQueryClient();
 
-  const [queriese, setQueriese] = useState(initQueriese);
+  const [queriese, setQueriese] = useState({
+    ...initQueriese,
+    search: { type: type },
+  });
 
   const [isQueryBoxOpened, setIsQueryBoxOpened] = useState(false);
 
@@ -38,8 +44,6 @@ const VideoPage = () => {
   const [checkedList, setCheckedList] = useState([]);
 
   const containerRef = useRef();
-
-  const funcContainerRef = useRef();
 
   const { data: videosData, refetch } = getDataWithAuth(
     "video",
@@ -155,18 +159,6 @@ const VideoPage = () => {
       handleOnClick: handleOnClick,
     },
     {
-      id: "type",
-      text: "Type",
-      type: "select",
-      buttonType: "search",
-      renderCondition: true,
-      options: [
-        { id: "video", display: "Video" },
-        { id: "short", display: "Short" },
-      ],
-      handleOnClick: handleOnClick,
-    },
-    {
       id: "createdAt",
       text: "Date",
       type: "select",
@@ -276,7 +268,6 @@ const VideoPage = () => {
 
   useLayoutEffect(() => {
     if (videosData && containerRef.current) {
-      console.log("🚀 ~ videosData:", videosData);
       containerRef.current.scrollTop = 0;
     }
 
@@ -297,9 +288,11 @@ const VideoPage = () => {
       ref={containerRef}
     >
       <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
-        <h2 className='text-[28px] leading-[44px] font-[500]'>Videos</h2>
+        <h2 className='text-[28px] leading-[44px] font-[500]'>
+          {upperCaseFirstChar(type)}
+        </h2>
       </div>
-      <div className='sticky left-0 top-[52px] z-[2000] w-full'>
+      <div className='sticky left-0 top-[52px] z-[2000] min-w-[1348px]'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative flex-shrink-0'>
             <button

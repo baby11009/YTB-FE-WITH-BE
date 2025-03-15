@@ -5,51 +5,45 @@ import { IsElementEnd } from "../../util/scrollPosition";
 import { useAuthContext } from "../../Auth Provider/authContext";
 
 const InfiniteDropDown = ({
+  disabled,
   title,
-  value,
-  setIsOpened,
   dataType,
   list,
-  isLoading,
-  isError,
-  errorMsg,
-  handleSetParams,
-  handleSetCurr,
-  disabled,
-  prsRemoveValue,
   displayData,
+  isLoading,
+  fetchingError,
+  value,
+  validateError,
+  setIsOpened,
+  handleSetQueriese,
+  handleSetCurr,
   HoverCard,
 }) => {
-  const queryClient = useQueryClient();
-
-  const { setShowHover, handleCursorPositon } = useAuthContext();
-
   const [opened, setOpened] = useState(undefined);
 
   const [dataList, setDataList] = useState([]);
-
   const [addNewValue, setAddNewValue] = useState(false);
 
   const [isEnd, setIsEnd] = useState(false);
 
   const containerRef = useRef();
 
-  const refscroll = useCallback((e) => {
+  const timeOutRef = useRef();
+
+  const refscroll = (e) => {
     if (e) {
       e.addEventListener("scroll", (e) => {
         IsElementEnd(setIsEnd, e);
       });
     }
-  }, []);
-
-  const timeOutRef = useRef();
+  };
 
   const handleSearch = (e) => {
     clearTimeout(timeOutRef.current);
 
     timeOutRef.current = setTimeout(() => {
       setAddNewValue(true);
-      handleSetParams(e.target.value);
+      handleSetQueriese(e.target.value);
     }, 600);
   };
 
@@ -73,14 +67,9 @@ const InfiniteDropDown = ({
 
     return () => {
       window.removeEventListener("mousedown", handleClickOutScope);
-      handleSetParams("");
-      if (!opened) {
-        timeOutRef.current = setTimeout(() => {
-          setDataList([]);
-        }, 500);
-      }
+      handleSetQueriese("");
+      setDataList([]);
       setAddNewValue(false);
-      setShowHover(undefined);
     };
   }, [opened]);
 
@@ -97,43 +86,45 @@ const InfiniteDropDown = ({
 
   useEffect(() => {
     if (isEnd) {
-      handleSetParams(undefined, 1);
+      handleSetQueriese(undefined, 1);
     }
   }, [isEnd]);
 
-  useEffect(() => {
-    return () => {
-      if (prsRemoveValue) {
-        queryClient.resetQueries([prsRemoveValue]);
-      }
-    };
-  }, []);
-
   return (
-    <div className='flex items-center w-full' ref={containerRef}>
-      <div className='border-b-[1px] pb-[8px] relative w-[100%] sm:max-w-[360px]'>
-        <button
-          className='flex items-center justify-between w-full px-[8px]'
-          type='button'
-          onClick={() => {
-            setOpened((prev) => !prev);
-          }}
-          disabled={disabled}
-        >
-          <p className='max-w-[250px] text-[16px] overflow-hidden text-ellipsis text-nowrap'>
-            {title + " : " + value}
-          </p>
-          <div
-            className={`${
-              opened ? "rotate-[-90deg]" : "rotate-90"
-            } transition-transform duration-[0.3s] mt-[3px]`}
+    <div>
+      <div
+        className='z-[150] border-[1px] rounded-[8px]
+    border-[#6b6767] transition-all ease-in hover:border-[white]'
+        ref={containerRef}
+      >
+        <div className='relative pl-[12px]'>
+          <button
+            disabled={disabled}
+            className='flex items-center justify-between w-full  h-[56px] z-[100]'
+            type='button'
+            onClick={() => {
+              setOpened((prev) => !prev);
+            }}
           >
-            <ThinArrowIcon />
-          </div>
-        </button>
+            <div className='flex-1 text-left'>
+              <div className='text-[12px] leading-[24px] text-gray-A'>
+                {title}
+              </div>
+              <div className='text-[15px]'>{value}</div>
+            </div>
+            {!disabled && (
+              <div
+                className={`${
+                  opened ? "rotate-[-90deg]" : "rotate-90"
+                } transition-transform duration-[0.3s] w-[20px] ml-[16px] mr-[12px]`}
+              >
+                <ThinArrowIcon />
+              </div>
+            )}
+          </button>
 
-        <div
-          className={`absolute top-[133%] w-full h-[180px]
+          <div
+            className={`absolute left-0 top-[calc(100%+15px)] w-full h-[180px]
             rounded-[5px] bg-black-21 z-[100] 
          ${
            opened === undefined
@@ -143,58 +134,65 @@ const InfiniteDropDown = ({
              : "animate-slideOut "
          }
         `}
-        >
-          <div className='size-full flex flex-col'>
-            <div className='flex items-center justify-center ml-[12px] mr-[14px] mb-[12px] py-[8px] border-b-[1px]'>
-              <input
-                type='text'
-                className='flex-1 bg-transparent outline-none'
-                onChange={handleSearch}
-              />
-              <div>
-                <SearchIcon />
+          >
+            <div className='size-full flex flex-col'>
+              <div className='flex items-center justify-center ml-[12px] mr-[14px] mb-[12px] py-[8px] border-b-[1px]'>
+                <input
+                  type='text'
+                  className='flex-1 bg-transparent outline-none'
+                  onChange={handleSearch}
+                />
+                <div>
+                  <SearchIcon />
+                </div>
               </div>
-            </div>
-            <div className='flex-1 w-full overflow-y-auto' ref={refscroll}>
-              {isLoading && dataList.length === 0 ? (
-                <div className='flex h-full items-center justify-center '>
-                  <div
-                    className=' animate-spin size-[40px] rounded-[50%] border-[2px] 
+              <div className='flex-1 w-full overflow-y-auto' ref={refscroll}>
+                {isLoading && dataList.length === 0 ? (
+                  <div className='flex h-full items-center justify-center '>
+                    <div
+                      className=' animate-spin size-[40px] rounded-[50%] border-[2px] 
                   border-b-transparent border-l-transparent border-white'
-                  ></div>
-                </div>
-              ) : isError ? (
-                <div>{errorMsg}</div>
-              ) : dataList.length !== 0 ? (
-                dataList.map((item, id) => (
-                  <button
-                    key={id}
-                    type='button'
-                    className='px-[12px] py-[4px] text-start w-full hover:bg-black-0.2 relative'
-                    onClick={() => {
-                      handleSetCurr(item);
-                    }}
-                    onMouseMove={(e) => {
-                      handleCursorPositon(e);
-                    }}
-                    onMouseEnter={(e) => {
-                      setShowHover(<HoverCard data={item} />);
-                    }}
-                    onMouseLeave={() => {
-                      setShowHover(null);
-                    }}
-                  >
-                    <span> {item[displayData]}</span>
-                  </button>
-                ))
-              ) : (
-                <div className='flex items-center justify-center h-full'>
-                  Not found any {dataType}
-                </div>
-              )}
+                    ></div>
+                  </div>
+                ) : fetchingError ? (
+                  <div>{fetchingError}</div>
+                ) : dataList.length !== 0 ? (
+                  dataList.map((item, id) => (
+                    <button
+                      key={id}
+                      type='button'
+                      className='px-[12px] py-[4px] text-start w-full hover:bg-black-0.2 relative'
+                      onClick={() => {
+                        handleSetCurr(item);
+                      }}
+                      // onMouseMove={(e) => {
+                      //   handleCursorPositon(e);
+                      // }}
+                      // onMouseEnter={(e) => {
+                      //   setShowHover(<HoverCard data={item} />);
+                      // }}
+                      // onMouseLeave={() => {
+                      //   setShowHover(null);
+                      // }}
+                    >
+                      <span> {item[displayData]}</span>
+                    </button>
+                  ))
+                ) : (
+                  <div className='flex items-center justify-center h-full'>
+                    Not found any {dataType}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
+      </div>
+      <div
+        className='text-[12px] font-[500] leading-[16px] h-[16px] m-[8px]
+         text-red-FF line-clamp-1 text-ellipsis break-all'
+      >
+        <span>{validateError}</span>
       </div>
     </div>
   );

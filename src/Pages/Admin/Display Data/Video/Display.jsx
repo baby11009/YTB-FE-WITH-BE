@@ -8,7 +8,7 @@ const Display = ({
   handleCheckedAll,
   handleDelete,
 }) => {
-  console.log("🚀 ~ dataList:", dataList);
+ 
   return (
     <div className='min-w-full w-fit'>
       <div

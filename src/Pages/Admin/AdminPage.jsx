@@ -20,11 +20,9 @@ import { scrollToTop } from "../../util/scrollCustom";
 import { useAuthContext } from "../../Auth Provider/authContext";
 
 const AdminPage = () => {
-  const { user } = useAuthContext();
+  const { user, openedMenu, setOpenedMenu } = useAuthContext();
 
   const navigate = useNavigate();
-
-  const [openedMenu, setOpenedMenu] = useState(true);
 
   const [pageRender, setPageRender] = useState(undefined);
 
@@ -37,11 +35,13 @@ const AdminPage = () => {
     user: <DisplayUser />,
     "upsert-user": <UpsertUser />,
     tag: <DisplayTag />,
-    video: <DisplayVideo openedMenu={openedMenu} />,
-    "upsert-video": <UpsertVideo />,
-    comment: <DisplayCmt openedMenu={openedMenu} />,
+    video: <DisplayVideo type='video' key='video' />,
+    "upsert-video": <UpsertVideo type='video' key='video' />,
+    short: <DisplayVideo type='short' key='short' />,
+    "upsert-short": <UpsertVideo type='short' key='short' />,
+    comment: <DisplayCmt />,
     "upsert-comment": <UpsertComment />,
-    playlist: <DisplayPlaylist openedMenu={openedMenu} />,
+    playlist: <DisplayPlaylist />,
     "upsert-playlist": <UpsertPlaylist />,
   };
 
@@ -56,7 +56,7 @@ const AdminPage = () => {
     } else {
       navigate("/");
     }
-  }, [params, openedMenu]);
+  }, [params]);
 
   useEffect(() => {
     scrollToTop();

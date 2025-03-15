@@ -55,7 +55,7 @@ const DropDown = ({ disabled, title, list = [], handleOnClick, value }) => {
           <div
             className={`${
               opened ? "rotate-[-90deg]" : "rotate-90"
-            } transition-transform duration-[0.3s] size-[24px] ml-[16px] mr-[12px]`}
+            } transition-transform duration-[0.3s] w-[20px] ml-[16px] mr-[12px]`}
           >
             <ThinArrowIcon />
           </div>

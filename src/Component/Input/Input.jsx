@@ -8,7 +8,6 @@ import {
 import { ShowPasswordIcon, HidePasswordIcon } from "../../Assets/Icons";
 
 const Input = ({
-  maxWidth,
   value,
   defaultValue,
   handleOnChange,
@@ -18,7 +17,6 @@ const Input = ({
   error,
   readOnly = false,
 }) => {
-  
   const [isFocused, setIsFocused] = useState(false);
 
   const [actived, setActived] = useState(value !== "" ? true : undefined);
@@ -28,8 +26,6 @@ const Input = ({
   const containerRef = useRef();
 
   const inputRef = useRef();
-
-  const lableRef = useRef();
 
   const handleTogglePw = () => {
     inputRef.current.type = hiddenPass ? "password" : "text";
@@ -84,74 +80,68 @@ const Input = ({
     }
   }, [actived]);
 
-  const handleChangeValue = useCallback((e) => {
+  const handleChangeValue = (e) => {
     let name = e.target.name;
     let value = e.target.value;
     if (e.target.type === "number") {
       value = Number(value);
     }
     handleOnChange(name, value);
-  }, []);
+  };
 
   return (
-    <div
-      className={`w-full relative ${maxWidth || "sm:max-w-[360px]"}`}
-      ref={containerRef}
-    >
-      <div className='border-b-[1px] flex items-center px-[8px]'>
-        <input
-          type={type || "text"}
-          name={id}
-          id={id}
-          className='bg-transparent outline-none flex-1 pb-[8px] w-full'
-          value={value}
-          onChange={handleChangeValue}
-          onFocus={() => {
-            setActived(true);
-            setIsFocused(true);
-          }}
-          aria-autocomplete='none'
-          ref={inputRef}
-          readOnly={readOnly}
-        />
-
-        {type === "password" && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleTogglePw();
-            }}
-            type='button'
-            className={`size-[24px] flex items-center justify-center ${
-              actived && value ? "visible" : "invisible"
-            }`}
+    <>
+      <div
+        className={`relative border-[1px] rounded-[8px]
+    border-[#6b6767] transition-all ease-in hover:border-[white]`}
+        ref={containerRef}
+      >
+        <div className='flex flex-col justify-center  w-full h-[56px] z-[100] pl-[12px] '>
+          <label
+            htmlFor={id}
+            className='text-[12px] leading-[24px] text-gray-A'
           >
-            <div>
-              {hiddenPass ? <HidePasswordIcon /> : <ShowPasswordIcon />}
-            </div>
-          </button>
-        )}
+            {label}
+          </label>
 
-        <label
-          htmlFor={id}
-          key={label}
-          ref={lableRef}
-          className={`cursor-pointer absolute
-            ${isFocused ? "transition-all duration-[0.25s] ease-in" : ""}
-            ${
-              actived
-                ? "scale-100 left-0  top-[-24px]"
-                : "scale-95 left-[8px] top-0"
-            }`}
-        >
-          {label}
-        </label>
+          <input
+            type={type || "text"}
+            name={id}
+            id={id}
+            className='bg-transparent outline-none'
+            value={value}
+            onChange={handleChangeValue}
+            onFocus={() => {
+              setActived(true);
+              setIsFocused(true);
+            }}
+            aria-autocomplete='none'
+            ref={inputRef}
+            readOnly={readOnly}
+          />
+
+          {type === "password" && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleTogglePw();
+              }}
+              type='button'
+              className={`size-[24px] flex items-center justify-center ${
+                actived && value ? "visible" : "invisible"
+              }`}
+            >
+              <div>
+                {hiddenPass ? <HidePasswordIcon /> : <ShowPasswordIcon />}
+              </div>
+            </button>
+          )}
+        </div>
       </div>
-
       <div className='text-[12px] text-red-FF  leading-[16px] h-[16px] my-[6px] px-[8px]'>
         <span>{error}</span>
       </div>
-    </div>
+    </>
   );
 };
 export default Input;

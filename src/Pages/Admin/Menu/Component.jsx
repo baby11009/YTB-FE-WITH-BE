@@ -5,6 +5,8 @@ import {
   UserIcon,
   ActiveUserIcon,
   VideoIcon,
+  ShortIcon,
+  ActiveShortIcon,
   ActiveVideoIcon,
   CommentIcon,
   UnActiveCommentIcon,
@@ -41,6 +43,12 @@ export const BtnList = [
     path: "/admin/video",
   },
   {
+    title: "Short",
+    icon: <ShortIcon />,
+    active: <ActiveShortIcon />,
+    path: "/admin/short",
+  },
+  {
     title: "Comment",
     icon: <UnActiveCommentIcon />,
     active: <CommentIcon />,
@@ -56,7 +64,7 @@ export const BtnList = [
 
 export const FuncBtnList = [
   {
-    title: "Đăng xuất",
+    title: "SignOut",
     icon: <LogOutIcon />,
   },
 ];

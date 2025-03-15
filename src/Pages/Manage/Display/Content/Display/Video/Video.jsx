@@ -18,7 +18,10 @@ import VideoUpsertModal from "./VideoUpsertModal";
 import { getDataWithAuth } from "../../../../../../Api/getData";
 import { dltManyData, dltData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
-import { getDisplayUsingValue } from "../../../../../../util/func";
+import {
+  getDisplayUsingValue,
+  upperCaseFirstChar,
+} from "../../../../../../util/func";
 
 const initQueriese = {
   limit: 10,

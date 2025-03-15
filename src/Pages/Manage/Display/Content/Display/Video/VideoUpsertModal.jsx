@@ -19,17 +19,19 @@ import { getDataWithAuth } from "../../../../../../Api/getData";
 import { createData, updateData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
 import Hls from "hls.js";
+import { isObjectEmpty } from "../../../../../../util/func";
 
 const init = {
   title: "",
   image: undefined,
   video: undefined,
   type: "video",
-  tag: [],
+  tags: [],
   description: "",
 };
-const initTagParams = {
-  title: "",
+
+const initTagQueriese = {
+  search: {},
   page: 1,
   limit: 10,
   clearCache: "tag",
@@ -52,10 +54,9 @@ const VideoUpsertModal = ({ title, id }) => {
 
   const [openedTags, setOpenedTags] = useState(false);
 
-  const [tagParams, setTagParams] = useState(initTagParams);
+  const [tagParams, setTagParams] = useState(initTagQueriese);
 
   const [formData, setFormData] = useState(init);
-  console.log("🚀 ~ formData:", formData);
 
   const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -66,7 +67,6 @@ const VideoUpsertModal = ({ title, id }) => {
   const [realTimeErrs, setRealTimeErrs] = useState({});
 
   const [submitErrs, setSubmitErrs] = useState({});
-  console.log("🚀 ~ submitErrs:", submitErrs);
 
   const { data: videoData, refetch } = getDataWithAuth(
     `/client/video/${id}`,
@@ -98,17 +98,19 @@ const VideoUpsertModal = ({ title, id }) => {
       setSubmitErrs((prev) => ({ ...prev, image: "Failed to upload file" }));
       return;
     }
+
     if (!file.type.startsWith("image/")) {
       setSubmitErrs((prev) => ({ ...prev, image: "Just accepted image file" }));
       e.value = "";
       return;
     }
+
     const maxSize = 2 * 1024 * 1024; //2MB
 
     if (file.size > maxSize) {
       setSubmitErrs((prev) => ({
         ...prev,
-        image: "File size exceeds maximum",
+        image: "File size exceeds 2MB",
       }));
       e.value = "";
       return;
@@ -190,66 +192,66 @@ const VideoUpsertModal = ({ title, id }) => {
     [realTimeErrs],
   );
 
-  const handleValidate = (formData) => {
+  const handleValidate = () => {
     setSubmitErrs({});
-
-    let hasErrors = false;
 
     const keys = Object.keys(formData).filter(
       (key) => key !== "type" && key !== "description",
     );
 
-    keys.forEach((key) => {
-      if (formData[key] === "" || !formData[key]) {
-        let errMsg = "Cannot be empty";
-        if (key === "image" || key === "video") {
-          errMsg = "File not uploaded";
+    const { type, description, ...neededValidateFields } = formData;
+
+    const errors = Object.entries(neededValidateFields).reduce(
+      (acc, [key, value]) => {
+        if (!value) {
+          acc[key] =
+            key === "image" || key === "video"
+              ? "File not uploaded"
+              : "Cannot be empty";
         }
-        setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
-        hasErrors = true;
-      }
-    });
-
-    if (hasErrors) {
-      return true;
-    }
-  };
-
-  const handleValidateUpdate = (formData) => {
-    if (Object.keys(submitErrs).length > 0) {
-      setSubmitErrs({});
-    }
-    let hasErrors = false;
-
-    const keys = Object.keys(formData).filter(
-      (key) =>
-        key !== "type" &&
-        key !== "image" &&
-        key !== "video" &&
-        key !== "description",
+        return acc;
+      },
+      {},
     );
 
-    for (const key of keys) {
-      if (formData[key] === "" || !formData[key]) {
-        let errMsg = "Cannot be empty";
-        setSubmitErrs((prev) => ({ ...prev, [key]: errMsg }));
-        hasErrors = true;
-      }
+    if (!isObjectEmpty(errors)) {
+      setSubmitErrs(errors);
+      return false;
     }
 
-    if (hasErrors) {
-      return true;
-    }
+    return true;
   };
 
-  const create = async (formData) => {
-    const error = handleValidate(formData);
+  const handleValidateUpdate = () => {
+    setSubmitErrs({});
 
-    if (error) {
-      return;
+    const { type, image, video, description, ...neededValidateFields } =
+      formData;
+
+    const errors = Object.entries(neededValidateFields).reduce(
+      (acc, [key, value]) => {
+        if (!value) {
+          acc[key] = "Cannot be empty";
+        }
+        return acc;
+      },
+      {},
+    );
+
+    if (!isObjectEmpty(errors)) {
+      setSubmitErrs(errors);
+      return false;
     }
 
-    let data = new FormData();
+    return true;
+  };
+
+  const create = async () => {
+    const isValidate = handleValidate(formData);
+
+    if (!isValidate) return;
+
+    const data = new FormData();
     for (const key in formData) {
       data.append(key, formData[key]);
     }
@@ -269,14 +271,12 @@ const VideoUpsertModal = ({ title, id }) => {
     );
   };
 
-  const update = async (formData, videoData) => {
-    const error = handleValidateUpdate(formData);
+  const update = async () => {
+    const isValidate = handleValidateUpdate(formData);
 
-    if (error) {
-      return;
-    }
+    if (!isValidate) return;
 
-    let finalData = {
+    const finalData = {
       title: formData.title,
       type: formData.type,
       description: formData.description,
@@ -291,15 +291,15 @@ const VideoUpsertModal = ({ title, id }) => {
       }
     }
 
-    if (formData.tag.length === defaultTagRef.current.length) {
-      let test = formData.tag.filter((id) =>
+    if (formData.tags.length === defaultTagRef.current.length) {
+      let test = formData.tags.filter((id) =>
         defaultTagRef.current.includes(id),
       );
       if (test.length !== defaultTagRef.current.length) {
-        finalData.tag = formData.tag;
+        finalData.tags = formData.tags;
       }
     } else {
-      finalData.tag = formData.tag;
+      finalData.tags = formData.tags;
     }
     if (formData.image) {
       finalData.image = formData.image;
@@ -313,7 +313,7 @@ const VideoUpsertModal = ({ title, id }) => {
     let data = new FormData();
 
     for (const key in finalData) {
-      if (key === "tag") {
+      if (key === "tags") {
         // Chuyển mảng thành json để dữ nguyên giá trị trong FormData
         data.append(key, JSON.stringify(finalData[key]));
       } else {
@@ -340,9 +340,9 @@ const VideoUpsertModal = ({ title, id }) => {
     setSubmitLoading(true);
 
     if (id) {
-      await update(formData, videoData);
+      await update();
     } else {
-      await create(formData);
+      await create();
     }
 
     setSubmitLoading(false);
@@ -360,7 +360,7 @@ const VideoUpsertModal = ({ title, id }) => {
 
       if (videoData?.data?.tag_info) {
         const tagIdList = videoData?.data?.tag_info.map((tag) => tag._id);
-        dataForm.tag = tagIdList;
+        dataForm.tags = tagIdList;
         defaultTagRef.current = tagIdList;
       }
 
@@ -462,11 +462,10 @@ const VideoUpsertModal = ({ title, id }) => {
             onSubmit={handleSubmit}
             className='my-[20px] p-[0_8px_8px] sm:p-[0_16px_16px]'
           >
-            <div className='flex items-center justify-center flex-wrap'>
+            <div className='flex items-center justify-center flex-wrap gap-x-[16px]'>
               {/* thumbnail */}
               <div
-                className='basis-[100%] 2md:basis-[50%] 
-               p-0 pl 2md:p-[0px_8px_0px_0px]'
+                className='basis-[100%] 2md:basis-[calc(50%-8px)]'
               >
                 <label
                   htmlFor='thumbnail'
@@ -526,8 +525,7 @@ const VideoUpsertModal = ({ title, id }) => {
 
               {/* Video */}
               <div
-                className='basis-[100%] 2md:basis-[50%] 
-                p-[8px_0_0] 2md:p-[0px_0px_0px_8px] '
+                className='basis-[100%] 2md:basis-[calc(50%-8px)]'
               >
                 <label
                   htmlFor='video'
@@ -587,8 +585,8 @@ const VideoUpsertModal = ({ title, id }) => {
               </div>
             </div>
 
-            <div className='flex flex-wrap mt-[8px]'>
-              <div className=' basis-[100%]  2md:basis-[50%]  p-[0_0_8px] pl 2md:p-[0px_8px_0px_0px] overflow-hidden'>
+            <div className='flex flex-wrap mt-[8px] gap-x-[16px]'>
+              <div className=' basis-[100%]  2md:basis-[calc(50%-8px)]  overflow-hidden'>
                 <TextArea
                   title={"Title"}
                   name={"title"}
@@ -603,7 +601,7 @@ const VideoUpsertModal = ({ title, id }) => {
                   placeholder={"Enter video title"}
                 />
               </div>
-              <div className='basis-[100%]  2md:basis-[50%]  p-[8px_0_0] pl 2md:p-[0px_0px_0px_8px]  overflow-hidden'>
+              <div className='basis-[100%]  2md:basis-[calc(50%-8px)]  overflow-hidden'>
                 <TextArea
                   title={"Description"}
                   name={"description"}
@@ -616,43 +614,38 @@ const VideoUpsertModal = ({ title, id }) => {
                   placeholder={"Enter video description"}
                 />
               </div>
-              <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] mt-[32px] '>
+              <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%]'>
                 <InfiniteDropDownWithCheck
                   title={"Tag"}
-                  valueList={formData.tag}
+                  valueList={formData.tags}
                   setIsOpened={setOpenedTags}
                   list={tagList?.data}
                   displayValue={"title"}
                   isLoading={tagIsLoading}
                   isError={tagIsErr}
-                  errorMsg={tagErr?.response?.data?.msg}
+                  fetchingError={tagErr?.response?.data?.msg}
                   setData={(value) => {
-                    setFormData((prev) => ({ ...prev, tag: value }));
+                    setFormData((prev) => ({ ...prev, tags: value }));
                   }}
-                  handleSetParams={(value, pageInc) => {
+                  handleSetQueriese={(value, pageInc) => {
                     setTagParams((prev) => {
-                      let finalobj = {
+                      const prevClone = {
                         ...prev,
                       };
 
                       if (value !== undefined) {
-                        finalobj.title = value;
-                        finalobj.page = 1;
+                        prevClone.search["title"] = value;
+                        prevClone.page = 1;
                       }
 
                       if (pageInc !== undefined) {
-                        finalobj.page = finalobj.page + pageInc;
+                        prevClone.page = prevClone.page + pageInc;
                       }
 
-                      return finalobj;
+                      return prevClone;
                     });
                   }}
                 />
-                <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-                  <span>
-                    {submitErrs["videoIdList"] ? submitErrs["videoIdList"] : ""}
-                  </span>
-                </div>
               </div>
             </div>
 

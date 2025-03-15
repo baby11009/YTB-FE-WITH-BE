@@ -99,3 +99,11 @@ export const handleCopyVideoLink = (videoId, type) => {
 
   return navigator.clipboard.writeText(url);
 };
+
+export const isObjectEmpty = (obj) => {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) return false;
+  }
+
+  return true;
+};

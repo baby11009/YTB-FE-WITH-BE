@@ -13,7 +13,7 @@ const TextArea = ({
   preventCharactersList,
   title,
   name,
-  value = "",
+  value,
   defaultValue,
   handleOnChange,
   handleSetRealTimeErr,
@@ -159,53 +159,54 @@ const TextArea = ({
   return (
     // Remember to add the parrents element  overflow hidden
     // to make sure the content will collapse when it overflows or else the width of this textarea will be exceeded
-    <div
-      className={`w-full overflow-hidden border-[1px] rounded-[8px]  ${
-        isErr
-          ? "border-red-400"
-          : isFocused
-          ? "border-white-F1 "
-          : "hover:border-white-F1 border-[#6b6767]"
-      } transition-all ease-in px-[12px] relative`}
-      onClick={() => {
-        textAreaRef.current.focus();
-      }}
-    >
-      <div className='mt-[8px] mb-[4px]'>
-        <span className='text-[12px] leading-[16px] font-[500]'>{title}</span>
-      </div>
+    <div>
       <div
-        contentEditable={true}
-        ref={textAreaRef}
-        key={name}
-        aria-label={placeholder}
-        onInput={handleOnInput}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        onPaste={hanldeOnPaste}
-        onKeyDown={handleOnKeyDown}
-        className='text-[15px]
+        className={`overflow-hidden border-[1px] rounded-[8px]  ${
+          isErr
+            ? "border-red-400"
+            : isFocused
+            ? "border-white-F1 "
+            : "hover:border-white-F1 border-[#6b6767]"
+        } transition-all ease-in px-[12px] relative`}
+        onClick={() => {
+          textAreaRef.current.focus();
+        }}
+      >
+        <div className='mt-[8px] mb-[4px]'>
+          <span className='text-[12px] leading-[16px] font-[500]'>{title}</span>
+        </div>
+        <div
+          contentEditable={true}
+          ref={textAreaRef}
+          key={name}
+          aria-label={placeholder}
+          onInput={handleOnInput}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          onPaste={hanldeOnPaste}
+          onKeyDown={handleOnKeyDown}
+          className='text-[15px]
        leading-[24px] min-h-[120px] overflow-hidden outline-none'
-      ></div>
-      {totalCharacters < 1 && (
-        <div className='absolute top-[36px] text-[15px] leading-[24px] text-gray-71'>
-          {placeholder}
-        </div>
-      )}
-      <div className='flex justify-between'>
+        ></div>
+        {totalCharacters < 1 && (
+          <div className='absolute top-[36px] text-[15px] leading-[24px] text-gray-71'>
+            {placeholder}
+          </div>
+        )}
+
         <div
-          className='text-[12px] font-[500] leading-[16px] h-[16px]
-         text-red-FF line-clamp-1 text-ellipsis break-all'
-        >
-          <span>{errMsg}</span>
-        </div>
-        <div
-          className={`self-end text-[14px]  ${
+          className={`text-right text-[14px]  ${
             totalCharacters > maxLength ? "text-red-FF" : "text-gray-A"
           }`}
         >
           {totalCharacters}/{maxLength}
         </div>
+      </div>
+      <div
+        className='text-[12px] font-[500] leading-[16px] h-[16px] m-[8px]
+         text-red-FF line-clamp-1 text-ellipsis break-all'
+      >
+        <span>{errMsg}</span>
       </div>
     </div>
   );

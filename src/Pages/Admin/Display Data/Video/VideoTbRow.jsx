@@ -95,7 +95,6 @@ const VideoTbRow = ({ data, handleChecked, checked, handleDelete }) => {
               import.meta.env.VITE_VIEW_AVA_API
             }${data.user_info.avatar}`}
             alt={`${data.user_info.email}-avatar`}
-            loading='lazy'
             className='size-[60px] rounded-[50%]'
           />
           <div className='h-full ml-[12px]'>
