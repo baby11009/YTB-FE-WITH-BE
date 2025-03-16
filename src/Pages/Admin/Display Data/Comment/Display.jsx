@@ -3,58 +3,54 @@ import CommentTbRow from "./CommentTbRow";
 
 const Display = ({
   dataList = [],
-  refetch,
-  mockArr = [],
-  limit,
   checkedList = [],
-  page,
   handleChecked,
   handleCheckedAll,
+  handleDelete,
 }) => {
   return (
-    <div className='mt-[8px]'>
-      <table className='w-full text-left'>
-        <thead>
-          <tr className='border-b-[1px]'>
-            <th>
-              <div className='flex items-center gap-[16px]'>
-                <CheckBox2
-                  checked={
-                    checkedList.length === dataList.length &&
-                    dataList.length > 0
-                  }
-                  setChecked={handleCheckedAll}
-                />
-
-                <button onClick={handleCheckedAll}>STT</button>
-              </div>
-            </th>
-            <th>Người viết</th>
-            <th className='hidden 2md:table-cell'>Video</th>
-            <th>Nội dung</th>
-            <th className='hidden lg:table-cell'>Tương tác</th>
-            <th className='hidden 2lg:table-cell'>Ngày tạo</th>
-            <th>Chức năng</th>
-          </tr>
-        </thead>
-        <tbody className=''>
-          {dataList.map((data, id) => (
+    <div className='min-w-full w-fit'>
+      <div
+        className='sticky left-0 top-[92px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
+         text-gray-A items-center border-y-[1px] border-gray-A flex'
+      >
+        <div className='h-[48px] px-[20px] flex items-center justify-center gap-[12px] z-[10]'>
+          <CheckBox2
+            checked={
+              checkedList.length === dataList.length && dataList.length > 0
+            }
+            setChecked={handleCheckedAll}
+          />
+        </div>
+        <div className='pl-[12px] flex-[2_0_280px] min-w-[280px] '>Comment</div>
+        <div className='pl-[12px] flex-[1_0_400px] min-w-[400px] border-x-[1px] border-gray-A'>
+          Video
+        </div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Date</div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Type</div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] text-end'>
+          Reply count
+        </div>
+        <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] text-end'>
+          Like
+        </div>
+        <div className='flex-[1_0_60px] min-w-[60px] mx-[12px] text-end'>
+          Dislike
+        </div>
+      </div>
+      <div className='flex flex-col z-[2] relative'>
+        {dataList &&
+          dataList.length > 0 &&
+          dataList.map((data, id) => (
             <CommentTbRow
               key={id}
-              limit={limit}
               data={data}
-              od={id}
-              length={dataList?.length}
-              page={page}
-              refetch={refetch}
+              handleDelete={handleDelete}
               handleChecked={handleChecked}
-              checkedList={checkedList}
+              checked={checkedList.includes(data?._id)}
             />
           ))}
-          {mockArr.length > 0 &&
-            mockArr.map((id) => <tr key={id} className='h-[56px]'></tr>)}
-        </tbody>
-      </table>
+      </div>
     </div>
   );
 };

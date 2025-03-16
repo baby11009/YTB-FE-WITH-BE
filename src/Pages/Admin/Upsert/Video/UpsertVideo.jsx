@@ -19,11 +19,12 @@ import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { isObjectEmpty } from "../../../../util/func";
+import { isEmpty } from "../../../../util/validateFunc";
 
 const init = {
   userId: "",
   title: "",
-  image: undefined,
+  thumbnail: undefined,
   video: undefined,
   type: "video",
   tags: [],
@@ -132,12 +133,18 @@ const UpsertVideo = ({ type }) => {
     const file = e.files[0];
 
     if (!file) {
-      setSubmitErrs((prev) => ({ ...prev, image: "Failed to upload file" }));
+      setSubmitErrs((prev) => ({
+        ...prev,
+        thumbnail: "Failed to upload file",
+      }));
       return;
     }
 
     if (!file.type.startsWith("image/")) {
-      setSubmitErrs((prev) => ({ ...prev, image: "Just accepted image file" }));
+      setSubmitErrs((prev) => ({
+        ...prev,
+        thumbnail: "Just accepted image file",
+      }));
       e.value = "";
       return;
     }
@@ -147,7 +154,7 @@ const UpsertVideo = ({ type }) => {
     if (file.size > maxSize) {
       setSubmitErrs((prev) => ({
         ...prev,
-        image: "File size exceeds 2MB",
+        thumbnail: "File size exceeds 2MB",
       }));
       e.value = "";
       return;
@@ -161,21 +168,29 @@ const UpsertVideo = ({ type }) => {
 
       imageElement.addEventListener("load", (e) => {
         const { naturalWidth, naturalHeight } = e.currentTarget;
-        // if (
-        //   naturalWidth < 640 ||
-        //   Number((naturalWidth / naturalHeight).toFixed(2)) !== 16 / 9
-        // ) {
-        //   setSubmitErrs((prev) => ({
-        //     ...prev,
-        //     image:
-        //       "Image must be at least 640 width and having 16:9 aspect ratio",
-        //   }));
-        //   return;
-        // }
+        let minWidth = 640;
+        let aspect = 16 / 9;
+        if (type === "short") {
+          minWidth = 404;
+          aspect = 9 / 16;
+        }
+
+        if (
+          naturalWidth < minWidth ||
+          Number((naturalWidth / naturalHeight).toFixed(2)) !== aspect
+        ) {
+          setSubmitErrs((prev) => ({
+            ...prev,
+            thumbnail: `Thumbnail must be at least ${minWidth} width and having ${
+              type === "video" ? "16:9" : "9:16"
+            } aspect ratio`,
+          }));
+          return;
+        }
 
         setFormData((prev) => ({
           ...prev,
-          image: file,
+          thumbnail: file,
         }));
         setPreviewThumb(URL.createObjectURL(file));
       });
@@ -184,7 +199,7 @@ const UpsertVideo = ({ type }) => {
     reader.readAsDataURL(file);
   };
 
-  const handleUploadVideo = (e) => {
+  const handleUploadVideo = async (e) => {
     setSubmitErrs({});
 
     const file = e.files[0];
@@ -205,75 +220,136 @@ const UpsertVideo = ({ type }) => {
       return;
     }
 
+    let videoUrl = URL.createObjectURL(file);
+
+    if (type === "short") {
+      await new Promise((resolve, reject) => {
+        const video = document.createElement("video");
+        video.preload = "metadata";
+
+        video.onloadedmetadata = () => {
+          if (video.duration > 60) {
+            reject("Short file can't be longer than 60 seconds");
+          } else if (video.duration < 15) {
+            reject("Short file can't be shorter than 15 seconds");
+          }
+          resolve();
+        };
+
+        video.onerror = () => {
+          reject("Failed to upload video");
+        };
+
+        video.src = videoUrl;
+      }).catch((err) => {
+        setSubmitErrs((prev) => ({
+          ...prev,
+          video: err,
+        }));
+        URL.revokeObjectURL(videoUrl);
+        videoUrl = undefined;
+      });
+    }
+
     if (previewVideo) {
       URL.revokeObjectURL(previewVideo);
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      video: file,
-    }));
+    if (videoUrl) {
+      setFormData((prev) => ({
+        ...prev,
+        video: file,
+      }));
 
-    setPreviewVideo(URL.createObjectURL(file));
+      setPreviewVideo(videoUrl);
+    }
   };
 
   const handleValidate = () => {
-    setSubmitErrs({});
+    const {
+      type,
+      view,
+      like,
+      dislike,
+      description,
+      tags,
+      ...neededValidateFields
+    } = formData;
 
-    const { type, view, like, dislike, description, ...neededValidateFields } =
-      formData;
+    const fieldEntries = Object.entries(neededValidateFields);
 
-    const errors = Object.entries(neededValidateFields).reduce(
-      (acc, [key, value]) => {
-        if (!value) {
-          acc[key] =
-            key === "image" || key === "video"
-              ? "File not uploaded"
-              : "Cannot be empty";
-        }
-        return acc;
+    const validateFormValueFuncs = {
+      userId: (userId) => {
+        return isEmpty("userId", userId, "User not picked yet");
       },
-      {},
-    );
+      title: (title) => {
+        return isEmpty("title", title, "Video title cannot be empty");
+      },
+      thumbnail: (thumbnail) => {
+        return isEmpty("thumbnail", thumbnail, "Thumbnail not uploaded");
+      },
+      video: (video) => {
+        return isEmpty("video", video, "Video not uploaded");
+      },
+    };
 
-    if (!isObjectEmpty(errors)) {
+    const errors = fieldEntries.reduce((acc, [key, value]) => {
+      const err = validateFormValueFuncs[key](value) || undefined;
+
+      if (err) {
+        acc = { ...acc, ...err };
+      }
+
+      return acc;
+    }, {});
+
+    const isValid = isObjectEmpty(errors);
+
+    if (!isValid) {
       setSubmitErrs(errors);
-      return false;
     }
 
-    return true;
+    return isValid;
   };
 
   const handleValidateUpdate = () => {
-    setSubmitErrs({});
-
     const {
       type,
-      image,
+      thumbnail,
       video,
       description,
       like,
       dislike,
       view,
+      userId,
+      tags,
       ...neededValidateFields
     } = formData;
 
-    const errors = Object.entries(neededValidateFields).reduce(
-      (acc, [key, value]) => {
-        if (!value) {
-          acc[key] = "Cannot be empty";
-        }
-        return acc;
-      },
-      {},
-    );
+    const fieldEntries = Object.entries(neededValidateFields);
 
-    if (!isObjectEmpty(errors)) {
+    const validateFormValueFuncs = {
+      title: (title) => {
+        return isEmpty("title", title, "Video title cannot be empty");
+      },
+    };
+
+    const errors = fieldEntries.reduce((acc, [key, value]) => {
+      const err = validateFormValueFuncs[key](value) || undefined;
+      if (err) {
+        acc = { ...acc, ...err };
+      }
+
+      return acc;
+    }, {});
+
+    const isValid = isObjectEmpty(errors);
+
+    if (!isValid) {
       setSubmitErrs(errors);
-      return false;
     }
 
-    return true;
+    return isValid;
   };
 
   const create = async () => {
@@ -311,7 +387,7 @@ const UpsertVideo = ({ type }) => {
       return;
     }
 
-    const { userId, video, image, ...finalData } = formData;
+    const { userId, video, thumbnail, ...finalData } = formData;
 
     for (const key in finalData) {
       if (videoData?.data?.hasOwnProperty(key)) {
@@ -325,8 +401,8 @@ const UpsertVideo = ({ type }) => {
       }
     }
 
-    if (formData.image) {
-      finalData.image = formData.image;
+    if (formData.thumbnail) {
+      finalData.thumbnail = formData.thumbnail;
     }
 
     if (isObjectEmpty(finalData)) {
@@ -373,7 +449,7 @@ const UpsertVideo = ({ type }) => {
       const dataForm = {
         userId: videoData.data.user_info._id,
         title: videoData.data.title,
-        image: undefined,
+        thumbnail: undefined,
         video: undefined,
         type: videoData.data.type,
         view: videoData.data.view,
@@ -528,7 +604,9 @@ const UpsertVideo = ({ type }) => {
               className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] m-[8px]
                 line-clamp-1 text-ellipsis break-all'
             >
-              <span>{submitErrs["image"] ? submitErrs["image"] : ""}</span>
+              <span>
+                {submitErrs["thumbnail"] ? submitErrs["thumbnail"] : ""}
+              </span>
             </div>
           </div>
 
@@ -639,17 +717,17 @@ const UpsertVideo = ({ type }) => {
               disabled={videoData ? true : false}
               title={"User"}
               dataType={"user"}
-              value={currUser.email || "Not picked yet"}
+              value={currUser.email || "Not chosen"}
               setIsOpened={setOpenedUsers}
               list={userData?.data}
-              isLoading={isLoading}
               displayData={"email"}
+              isLoading={isLoading}
               fetchingError={userError?.response?.data?.msg}
               validateError={submitErrs["userId"]}
               handleSetQueriese={(value, pageInc) => {
                 setUserQueriese((prev) => {
                   const prevClone = { ...prev };
-                  if (value !== undefined) {
+                  if (value === "" || value) {
                     prevClone.search["email"] = value;
                     prevClone.page = 1;
                   }
@@ -690,7 +768,7 @@ const UpsertVideo = ({ type }) => {
                     ...prev,
                   };
 
-                  if (value !== undefined) {
+                  if (value === "" || value) {
                     prevClone.search["title"] = value;
                     prevClone.page = 1;
                   }

@@ -306,11 +306,13 @@ const TagPage = () => {
                 <CreateIcon />
               </div>
             </button>
-            <button onClick={handleDeleteMany}>
-              <div className='p-[8px] hover:text-red-600'>
-                <TrashBinIcon />
-              </div>
-            </button>
+            {checkedList.length > 0 && (
+              <button onClick={handleDeleteMany}>
+                <div className='p-[8px] hover:text-red-600'>
+                  <TrashBinIcon />
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>

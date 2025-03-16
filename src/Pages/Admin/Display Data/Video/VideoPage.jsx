@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CreateIcon, SortIcon2, TrashBinIcon } from "../../../../Assets/Icons";
-import { getDataWithAuth } from "../../../../Api/getData";
+import { getData } from "../../../../Api/getData";
 import { dltManyData, dltData } from "../../../../Api/controller";
 import {
   getDisplayUsingValue,
@@ -45,12 +45,7 @@ const VideoPage = ({ type }) => {
 
   const containerRef = useRef();
 
-  const { data: videosData, refetch } = getDataWithAuth(
-    "video",
-    queriese,
-    !!queriese,
-    false,
-  );
+  const { data: videosData, refetch } = getData("video", queriese, true, false);
 
   const handleOnClick = (queryData) => {
     setQueryOptions((prev) => [...prev, queryData]);
@@ -289,10 +284,10 @@ const VideoPage = ({ type }) => {
     >
       <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
         <h2 className='text-[28px] leading-[44px] font-[500]'>
-          {upperCaseFirstChar(type)}
+          {upperCaseFirstChar(type)}s
         </h2>
       </div>
-      <div className='sticky left-0 top-[52px] z-[2000] min-w-[1348px]'>
+      <div className='sticky left-0 top-[52px] z-[2000] min-w-[1224px]'>
         <div className='flex gap-[24px] bg-black'>
           <div className='relative flex-shrink-0'>
             <button
@@ -355,11 +350,13 @@ const VideoPage = ({ type }) => {
                 <CreateIcon />
               </div>
             </Link>
-            <button onClick={handleDeleteMany}>
-              <div className='p-[8px] hover:text-red-600'>
-                <TrashBinIcon />
-              </div>
-            </button>
+            {checkedList.length > 0 && (
+              <button onClick={handleDeleteMany}>
+                <div className='p-[8px] hover:text-red-600'>
+                  <TrashBinIcon />
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>

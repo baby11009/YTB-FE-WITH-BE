@@ -1,25 +1,59 @@
-import { useRef, useState, useEffect, useLayoutEffect } from "react";
+import {
+  useRef,
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import {
   Input,
   InfiniteDropDown,
   HovVideorCard,
   HovCommentCard,
   HovUserCard,
+  TextArea,
 } from "../../../../Component";
 import { createData, updateData } from "../../../../Api/controller";
 import { getDataWithAuth } from "../../../../Api/getData";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
+import { isObjectEmpty } from "../../../../util/func";
+import { isEmpty } from "../../../../util/validateFunc";
 
 const initForm = {
-  userId: "",
+  userId: undefined,
   email: "",
   videoId: undefined,
+  videoTitle: "",
   replyId: "",
+  replyContent: "",
   cmtText: "",
   like: 0,
   dislike: 0,
+};
+
+const initUserQueriese = {
+  search: {},
+  select: ["_id", "email"],
+  limit: 10,
+  page: 1,
+  clearCache: "user",
+};
+
+const intiVideoQueriese = {
+  search: {},
+  limit: 10,
+  page: 1,
+  clearCache: "video",
+};
+
+const initReplyCmtQueriese = {
+  search: {},
+  limit: 10,
+  page: 1,
+  videoId: undefined,
+  clearCache: "reply",
 };
 
 const UpsertComment = () => {
@@ -30,72 +64,49 @@ const UpsertComment = () => {
   const queryClient = useQueryClient();
 
   const [userOpened, setUserOpened] = useState(false);
+
   const [videoOpened, setVideoOpened] = useState(false);
+
   const [cmtOpened, setCmtOpened] = useState(false);
 
   const [formData, setFormData] = useState(initForm);
 
-  const [error, setError] = useState({
-    inputName: [],
-    message: [],
-  });
+  const [realTimeErrs, setRealTimeErrs] = useState({});
 
-  const textAreaRef = useRef();
+  const [submitErrs, setSubmitErrs] = useState({});
 
-  const [userPrs, setUserPrs] = useState({
-    email: "",
-    select: ["_id", "email"],
-    limit: 10,
-    page: 1,
-    clearCache: "user",
-  });
+  const [userQueriese, setUserQueriese] = useState(initUserQueriese);
 
-  const [videoPrs, setVideoPrs] = useState({
-    id: "",
-    title: "",
-    limit: 10,
-    page: 1,
-    clearCache: "video",
-  });
+  const [videoQuerese, setVideoQueriese] = useState(intiVideoQueriese);
 
-  const [replyPrs, setReplyPrs] = useState({
-    id: "",
-    limit: 10,
-    page: 1,
-    videoId: formData.videoId ? formData.videoId : undefined,
-    clearCache: "reply",
-  });
+  const [replyCmtQueriese, setReplyCmtQueriese] =
+    useState(initReplyCmtQueriese);
 
   const {
     data: commentData,
     refetch,
     error: queryError,
-    isLoading,
-    isError,
   } = getDataWithAuth(`comment/${id}`, {}, id !== undefined, false);
 
   const {
     data: usersData,
     isLoading: userIsLoading,
-    isError: userIsError,
     error: userError,
-  } = getDataWithAuth("user", userPrs, userOpened, false);
+  } = getDataWithAuth("user", userQueriese, userOpened, false);
 
   const {
     data: videosData,
     isLoading: videoIsLoading,
-    isError: videoIsError,
     error: videoError,
-  } = getDataWithAuth("video", videoPrs, videoOpened, false);
+  } = getDataWithAuth("video", videoQuerese, videoOpened, false);
 
   const {
     data: replyCmtsData,
     isLoading: replyCmtsIsLoading,
-    isError: replyCmtsIsError,
     error: replyCmtsError,
   } = getDataWithAuth(
     `/comment`,
-    replyPrs,
+    replyCmtQueriese,
     cmtOpened && formData.videoId ? true : false,
     false,
   );
@@ -107,75 +118,111 @@ const UpsertComment = () => {
     }));
   };
 
-  const handleTextArea = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      cmtText: e.target.value,
-    }));
-  };
+  const handleSetRealTimeErr = useCallback((errName, errMessage) => {
+    setRealTimeErrs((prev) => ({ ...prev, [errName]: errMessage }));
+  }, []);
+
+  const handleRemoveRealTimeErr = useCallback(
+    (errName) => {
+      if (!Object.keys(realTimeErrs).includes(errName)) return;
+
+      setRealTimeErrs((prev) => {
+        const errs = structuredClone(prev);
+        delete errs[errName];
+        return errs;
+      });
+    },
+    [realTimeErrs],
+  );
 
   const handleValidate = () => {
-    if (error.inputName.length > 0) {
-      setError({ inputName: [], message: [] });
-    }
+    const {
+      email,
+      like,
+      dislike,
+      replyId,
+      replyContent,
+      videoTitle,
+      ...neededValidateFields
+    } = formData;
 
-    let hasErrors = false;
+    const fieldEntries = Object.entries(neededValidateFields);
 
-    const keys = Object.keys(formData).filter(
-      (key) =>
-        key !== "email" &&
-        key !== "like" &&
-        key !== "dislike" &&
-        key !== "replyId",
-    );
+    const validateFormValueFuncs = {
+      userId: (userId) => {
+        return isEmpty("userId", userId, "User not picked yet");
+      },
+      videoId: (videoId) => {
+        return isEmpty("videoId", videoId, "Video not picked yet");
+      },
+      cmtText: (cmtText) => {
+        return isEmpty("cmtText", cmtText, "Comment content cannot be empty");
+      },
+    };
 
-    keys.forEach((key) => {
-      if (!formData[key]) {
-        let errMsg = "Không được để trống";
-        setError((prev) => ({
-          inputName: [...prev.inputName, key],
-          message: [...prev.message, errMsg],
-        }));
-        hasErrors = true;
+    const errors = fieldEntries.reduce((acc, [key, value]) => {
+      const err = validateFormValueFuncs[key](value) || undefined;
+
+      if (err) {
+        acc = { ...acc, ...err };
       }
-    });
 
-    if (hasErrors) {
-      return true;
+      return acc;
+    }, {});
+
+    const isValid = isObjectEmpty(errors);
+
+    if (!isValid) {
+      setSubmitErrs(errors);
     }
+
+    return isValid;
   };
 
   const handleValidateUpdate = () => {
-    if (error.inputName.length > 0) {
-      setError({ inputName: [], message: [] });
-    }
-    let hasErrors = false;
-    const keys = Object.keys(formData).filter(
-      (key) =>
-        key !== "email" &&
-        key !== "like" &&
-        key !== "dislike" &&
-        key !== "replyId",
-    );
-    keys.forEach((key) => {
-      if (formData[key] === "" || !formData[key]) {
-        let errMsg = "Không được để trống";
-        setError((prev) => ({
-          inputName: [...prev.inputName, key],
-          message: [...prev.message, errMsg],
-        }));
-        hasErrors = true;
+    const {
+      email,
+      like,
+      dislike,
+      replyId,
+      userId,
+      videoId,
+      replyContent,
+      videoTitle,
+      ...neededValidateFields
+    } = formData;
+
+    const fieldEntries = Object.entries(neededValidateFields);
+
+    const validateFormValueFuncs = {
+      cmtText: (cmtText) => {
+        return isEmpty("cmtText", cmtText, "Comment content cannot be empty");
+      },
+    };
+
+    const errors = fieldEntries.reduce((acc, [key, value]) => {
+      const err = validateFormValueFuncs[key](value) || undefined;
+
+      if (err) {
+        acc = { ...acc, ...err };
       }
-    });
-    if (hasErrors) {
-      return true;
+
+      return acc;
+    }, {});
+
+    const isValid = isObjectEmpty(errors);
+
+    if (!isValid) {
+      setSubmitErrs(errors);
     }
+
+    return isValid;
   };
 
   const create = async () => {
-    const error = handleValidate();
+    const isValid = handleValidate();
 
-    if (error) {
+    if (!isValid) {
       return;
     }
 
@@ -200,9 +247,9 @@ const UpsertComment = () => {
   };
 
   const update = async () => {
-    const error = handleValidateUpdate();
+    const isValid = handleValidateUpdate();
 
-    if (error) {
+    if (!isValid) {
       return;
     }
 
@@ -250,16 +297,18 @@ const UpsertComment = () => {
 
   useLayoutEffect(() => {
     if (commentData) {
+      console.log(commentData);
       setFormData({
-        userId: commentData?.data?.user_info?._id,
-        email: commentData?.data?.user_info?.email,
-        videoId: commentData?.data?.video_info._id,
-        replyId: commentData?.data?.replied_cmt_id,
-        cmtText: commentData?.data?.cmtText,
-        like: commentData?.data?.like,
-        dislike: commentData?.data?.dislike,
+        userId: commentData.data.user_info._id,
+        email: commentData.data.user_info.email,
+        videoId: commentData.data.video_info._id,
+        videoTitle: commentData.data.video_info.title,
+        replyId: commentData.data.replied_cmt_id,
+        replyContent: commentData.data.replied_cmt_info?.cmtText || "",
+        cmtText: commentData.data.cmtText,
+        like: commentData.data.like,
+        dislike: commentData.data.dislike,
       });
-      textAreaRef.current.value = commentData?.data?.cmtText;
     }
 
     return () => {
@@ -269,39 +318,42 @@ const UpsertComment = () => {
 
   useEffect(() => {
     if (!userOpened) {
-      queryClient.removeQueries({ queryKey: Object.values(userPrs) });
+      queryClient.removeQueries({ queryKey: Object.values(userQueriese) });
     }
-  }, [userOpened]);
+  }, [userOpened, userQueriese]);
+
   useEffect(() => {
     if (!videoOpened) {
-      queryClient.removeQueries({ queryKey: Object.values(videoPrs) });
+      queryClient.removeQueries({ queryKey: Object.values(videoQuerese) });
     }
-  }, [videoOpened]);
+  }, [videoOpened, videoQuerese]);
+
   useEffect(() => {
     if (!cmtOpened) {
-      queryClient.removeQueries({ queryKey: Object.values(replyPrs) });
+      queryClient.removeQueries({ queryKey: Object.values(replyCmtQueriese) });
     }
-  }, [cmtOpened]);
+  }, [cmtOpened, replyCmtQueriese]);
 
   useEffect(() => {
     let timeOut;
-    if (error.inputName.length > 0) {
+
+    if (!isObjectEmpty(submitErrs)) {
       timeOut = setTimeout(() => {
-        setError({
-          inputName: [],
-          message: [],
-        });
+        setSubmitErrs({});
       }, 2500);
     }
 
     return () => {
       clearTimeout(timeOut);
     };
-  }, [error]);
+  }, [submitErrs]);
 
   useEffect(() => {
     if (formData.videoId) {
-      setReplyPrs((prev) => ({ ...prev, videoId: formData.videoId }));
+      setReplyCmtQueriese((prev) => ({
+        ...prev,
+        search: { videoId: formData.videoId },
+      }));
     }
   }, [formData.videoId]);
 
@@ -311,224 +363,175 @@ const UpsertComment = () => {
     };
   }, []);
 
-  if (isError) {
-    return queryError.message;
-  }
-
   return (
-    <div>
+    <div className='px-[16px] max-w-[1500px] mx-auto'>
       <header className='pt-[16px] pb-[32px]'>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Comment</h2>
       </header>
 
-      <form
-        noValidate
-        onSubmit={handleSubmit}
-        className='flex items-center flex-wrap gap-[24px] mb-[36px]'
-      >
-        <div className='flex-1 flex flex-wrap gap-[16px]'>
+      <form noValidate onSubmit={handleSubmit} className='mb-[36px]'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[16px]'>
           {/* User */}
-          <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[100]'>
-            <InfiniteDropDown
-              disabled={commentData ? true : false}
-              prsRemoveValue={userPrs.clearCache}
-              title={"User"}
-              value={formData.email || "Chưa chọn"}
-              setIsOpened={setUserOpened}
-              list={usersData?.data}
-              isLoading={userIsLoading}
-              isError={userIsError}
-              errorMsg={userError?.response?.data?.msg}
-              displayData={"email"}
-              handleSetParams={(value, pageInc) => {
-                setUserPrs((prev) => {
-                  let finalobj = {
-                    ...prev,
-                  };
 
-                  if (value !== undefined) {
-                    finalobj.email = value;
-                    finalobj.page = 1;
-                  }
-
-                  if (pageInc !== undefined) {
-                    finalobj.page = finalobj.page + pageInc;
-                  }
-
-                  return finalobj;
-                });
-              }}
-              params={userPrs}
-              handleSetCurr={(data) => {
-                setFormData((prev) => ({
+          <InfiniteDropDown
+            disabled={id ? true : false}
+            title={"User"}
+            value={formData.email || "Not picked yet"}
+            setIsOpened={setUserOpened}
+            list={usersData?.data}
+            displayData={"email"}
+            isLoading={userIsLoading}
+            fetchingError={userError?.response?.data?.msg}
+            validateError={submitErrs["userId"]}
+            handleSetQueriese={(value, pageInc) => {
+              setUserQueriese((prev) => {
+                const prevClone = {
                   ...prev,
-                  userId: data?._id,
-                  email: data?.email,
-                }));
-              }}
-              HoverCard={HovUserCard}
-            />
-            <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-              <span>
-                {error.inputName.includes("userId")
-                  ? error.message[error.inputName.indexOf("userId")]
-                  : ""}
-              </span>
-            </div>
-          </div>
+                };
+
+                if (value === "" || value) {
+                  prevClone.search["email"] = value;
+                  prevClone.page = 1;
+                }
+
+                if (pageInc !== undefined) {
+                  prevClone.page = prevClone.page + pageInc;
+                }
+
+                return prevClone;
+              });
+            }}
+            handleSetCurr={(data) => {
+              setFormData((prev) => ({
+                ...prev,
+                userId: data?._id,
+                email: data?.email,
+              }));
+            }}
+            HoverCard={HovUserCard}
+          />
 
           {/* Video */}
-          <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[90]'>
-            <InfiniteDropDown
-              disabled={commentData ? true : false}
-              prsRemoveValue={videoPrs.clearCache}
-              title={"Video"}
-              dataType={"video"}
-              value={formData.videoId || "Chưa chọn"}
-              setIsOpened={setVideoOpened}
-              list={videosData?.data}
-              isLoading={videoIsLoading}
-              isError={videoIsError}
-              displayData={"title"}
-              errorMsg={videoError?.response?.data?.msg}
-              handleSetParams={(value, pageInc) => {
-                setVideoPrs((prev) => {
-                  let finalobj = {
-                    ...prev,
-                  };
 
-                  if (value || value === "") {
-                    finalobj.title = value;
-                    finalobj.page = 1;
-                  }
-
-                  if (pageInc) {
-                    finalobj.page = finalobj.page + pageInc;
-                  }
-
-                  return finalobj;
-                });
-              }}
-              handleSetCurr={(data) => {
-                setFormData((prev) => ({
+          <InfiniteDropDown
+            disabled={id ? true : false}
+            title={"Video"}
+            dataType={"video"}
+            value={formData.videoTitle || "Not picked yet"}
+            setIsOpened={setVideoOpened}
+            list={videosData?.data}
+            isLoading={videoIsLoading}
+            displayData={"title"}
+            fetchingError={videoError?.response?.data?.msg}
+            validateError={submitErrs["videoId"]}
+            handleSetQueriese={(value, pageInc) => {
+              console.log(value);
+              setVideoQueriese((prev) => {
+                const prevClone = {
                   ...prev,
-                  videoId: data._id,
-                }));
-              }}
-              HoverCard={HovVideorCard}
-            />
-            <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-              <span>
-                {error.inputName.includes("videoId")
-                  ? error.message[error.inputName.indexOf("videoId")]
-                  : ""}
-              </span>
-            </div>
-          </div>
+                };
+
+                if (value === "" || value) {
+                  prevClone.search["title"] = value;
+                  prevClone.page = 1;
+                }
+
+                if (pageInc) {
+                  prevClone.page = prevClone.page + pageInc;
+                }
+
+                return prevClone;
+              });
+            }}
+            handleSetCurr={(data) => {
+              setFormData((prev) => ({
+                ...prev,
+                videoId: data._id,
+                videoTitle: data.title,
+              }));
+            }}
+            HoverCard={HovVideorCard}
+          />
 
           {/* Comment */}
-          <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[80]'>
-            <InfiniteDropDown
-              disabled={commentData || !formData.videoId ? true : false}
-              title={"Reply to"}
-              dataType={"comment"}
-              prsRemoveValue={replyPrs.clearCache}
-              value={formData.replyId || "Chưa chọn"}
-              setIsOpened={setCmtOpened}
-              list={replyCmtsData?.data}
-              isLoading={replyCmtsIsLoading}
-              isError={replyCmtsIsError}
-              displayData={"_id"}
-              errorMsg={replyCmtsError?.response?.data?.msg}
-              handleSetParams={(value, pageInc) => {
-                setReplyPrs((prev) => {
-                  let finalobj = {
-                    ...prev,
-                  };
 
-                  if (value || value === "") {
-                    finalobj.id = value;
-                    finalobj.page = 1;
-                  }
-
-                  if (pageInc) {
-                    finalobj.page = finalobj.page + pageInc;
-                  }
-
-                  return finalobj;
-                });
-              }}
-              handleSetCurr={(data) => {
-                setFormData((prev) => ({
+          <InfiniteDropDown
+            disabled={id || !formData.videoId ? true : false}
+            title={"Reply to"}
+            dataType={"comment"}
+            prsRemoveValue={replyCmtQueriese.clearCache}
+            value={formData.replyContent || "Not picked yet"}
+            setIsOpened={setCmtOpened}
+            list={replyCmtsData?.data}
+            isLoading={replyCmtsIsLoading}
+            displayData={"cmtText"}
+            fetchingError={replyCmtsError?.response?.data?.msg}
+            handleSetQueriese={(value, pageInc) => {
+              console.log(value);
+              setReplyCmtQueriese((prev) => {
+                const prevClone = {
                   ...prev,
-                  replyId: data._id,
-                }));
-              }}
-              HoverCard={HovCommentCard}
-            />
-            <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-              <span>
-                {error.inputName.includes("videoId")
-                  ? error.message[error.inputName.indexOf("videoId")]
-                  : ""}
-              </span>
-            </div>
-          </div>
+                };
+
+                if (value === "" || value) {
+                  prevClone.search["content"] = value;
+                  prevClone.page = 1;
+                }
+
+                if (pageInc) {
+                  prevClone.page = prevClone.page + pageInc;
+                }
+
+                return prevClone;
+              });
+            }}
+            handleSetCurr={(data) => {
+              setFormData((prev) => ({
+                ...prev,
+                replyId: data._id,
+                replyContent: data.cmtText,
+              }));
+            }}
+            HoverCard={HovCommentCard}
+          />
 
           {/* Like */}
-          <div className={`basis-[100%]  2md:basis-[32%] mt-[24px]`}>
-            <Input
-              maxWidth={"lg:max-w-[360px]"}
-              id={"like"}
-              type={"number"}
-              label={"Like"}
-              value={formData.like || 0}
-              defaultValue={commentData?.data?.like}
-              handleOnChange={handleOnChange}
-              error={
-                error.inputName.includes("like")
-                  ? `${error.message[error.inputName.indexOf("like")]}`
-                  : ""
-              }
-            />
-          </div>
+          <Input
+            maxWidth={"lg:max-w-[360px]"}
+            id={"like"}
+            type={"number"}
+            label={"Like"}
+            value={formData.like || 0}
+            defaultValue={commentData?.data?.like}
+            handleOnChange={handleOnChange}
+          />
 
           {/* Dislike */}
-          <div className={`basis-[100%]  2md:basis-[32%] mt-[24px]`}>
-            <Input
-              maxWidth={"lg:max-w-[360px]"}
-              id={"dislike"}
-              type={"number"}
-              label={"Dislike"}
-              value={formData.dislike || 0}
-              defaultValue={commentData?.data?.dislike}
-              handleOnChange={handleOnChange}
-              error={
-                error.inputName.includes("dislike")
-                  ? `${error.message[error.inputName.indexOf("dislike")]}`
-                  : ""
-              }
-            />
-          </div>
 
-          <div className='basis-[100%]'>
-            <label htmlFor='text area'>Comment text</label>
-            <textarea
-              className='w-full bg-transparent outline-none border-[1px] rounded-[5px] p-[8px] resize-none'
-              name=''
-              id='text area'
-              ref={textAreaRef}
-              onChange={handleTextArea}
-              rows={3}
-            ></textarea>
-            <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-              <span>
-                {error.inputName.includes("cmtText")
-                  ? error.message[error.inputName.indexOf("cmtText")]
-                  : ""}
-              </span>
-            </div>
-          </div>
+          <Input
+            maxWidth={"lg:max-w-[360px]"}
+            id={"dislike"}
+            type={"number"}
+            label={"Dislike"}
+            value={formData.dislike || 0}
+            defaultValue={commentData?.data?.dislike}
+            handleOnChange={handleOnChange}
+          />
+        </div>
+
+        <div>
+          <TextArea
+            title={"Comment content"}
+            name={"cmtText"}
+            preventCharactersList={new Set(["Enter"])}
+            value={formData.cmtText}
+            defaultValue={commentData?.data.cmtText}
+            handleOnChange={handleOnChange}
+            handleSetRealTimeErr={handleSetRealTimeErr}
+            handleRemoveRealTimeErr={handleRemoveRealTimeErr}
+            errMsg={submitErrs["cmtText"] ? submitErrs["cmtText"] : ""}
+            placeholder={"Enter comment content"}
+          />
         </div>
 
         <div className='basis-[100%] order-7 flex items-center justify-center mt-[50px]'>

@@ -1,18 +1,31 @@
-export const isEmpty = (dataName, dataValue, setSubmitErrs) => {
-  const emtpy = dataValue.trim() === "";
+export const isEmpty = (dataName, dataValue, message) => {
+  const emtpy =
+    typeof dataValue === "string" ? dataValue.trim() === "" : !dataValue;
   if (emtpy) {
-    setSubmitErrs((prev) => ({ ...prev, [dataName]: "Cannot be empty" }));
-    return true;
+    return { [dataName]: message };
   }
 };
 
-export const notmatchTheRegex = (dataName, dataValue, regex, setSubmitErrs) => {
-  const match = regex.test(dataValue);
- 
-  if (!match) {
-    setSubmitErrs((prev) => ({ ...prev, [dataName]: "Not valid" }));
+export const minMaxLength = (dataName, dataValue, min, max) => {
+  const length = dataValue.length;
+  if (min && length < min) {
+    return {
+      [dataName]: `${dataName} must be at least ${min} characters long`,
+    };
+  }
 
-    return true;
+  if (max && length > max) {
+    return {
+      [dataName]: `${dataName} cannot exceed ${max} characters`,
+    };
+  }
+};
+
+export const notmatchTheRegex = (dataName, dataValue, regex, message) => {
+  const match = regex.test(dataValue);
+
+  if (!match) {
+    return { [dataName]: message };
   }
 };
 

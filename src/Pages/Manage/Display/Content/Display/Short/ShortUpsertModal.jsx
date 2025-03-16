@@ -96,7 +96,7 @@ const ShortUpsertModal = ({ title, id }) => {
     const file = e.files[0];
 
     if (!file) {
-      setSubmitErrs((prev) => ({ ...prev, image: "Không thể tải file" }));
+      setSubmitErrs((prev) => ({ ...prev, image: "Failed to upload file" }));
       return;
     }
     if (!file.type.startsWith("image/")) {

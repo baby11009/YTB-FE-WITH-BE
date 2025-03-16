@@ -30,6 +30,8 @@ const InfiniteDropDown = ({
 
   const timeOutRef = useRef();
 
+  const inputRef = useRef();
+
   const refscroll = (e) => {
     if (e) {
       e.addEventListener("scroll", (e) => {
@@ -67,9 +69,12 @@ const InfiniteDropDown = ({
 
     return () => {
       window.removeEventListener("mousedown", handleClickOutScope);
-      handleSetQueriese("");
-      setDataList([]);
-      setAddNewValue(false);
+      if (!opened) {
+        handleSetQueriese("");
+        setDataList([]);
+        inputRef.current && (inputRef.current.value = "");
+        setAddNewValue(false);
+      }
     };
   }, [opened]);
 
@@ -107,10 +112,12 @@ const InfiniteDropDown = ({
             }}
           >
             <div className='flex-1 text-left'>
-              <div className='text-[12px] leading-[24px] text-gray-A'>
+              <div className='text-[12px] leading-[20px] text-gray-A'>
                 {title}
               </div>
-              <div className='text-[15px]'>{value}</div>
+              <div className='text-[14px] leading-[24px] h-[24px] line-clamp-1'>
+                {value}
+              </div>
             </div>
             {!disabled && (
               <div
@@ -141,6 +148,7 @@ const InfiniteDropDown = ({
                   type='text'
                   className='flex-1 bg-transparent outline-none'
                   onChange={handleSearch}
+                  ref={inputRef}
                 />
                 <div>
                   <SearchIcon />

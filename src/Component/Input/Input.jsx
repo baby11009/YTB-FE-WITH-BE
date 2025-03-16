@@ -17,7 +17,6 @@ const Input = ({
   error,
   readOnly = false,
 }) => {
-  const [isFocused, setIsFocused] = useState(false);
 
   const [actived, setActived] = useState(value !== "" ? true : undefined);
 
@@ -90,58 +89,58 @@ const Input = ({
   };
 
   return (
-    <>
+    <div>
       <div
         className={`relative border-[1px] rounded-[8px]
     border-[#6b6767] transition-all ease-in hover:border-[white]`}
         ref={containerRef}
       >
-        <div className='flex flex-col justify-center  w-full h-[56px] z-[100] pl-[12px] '>
+        <div className='flex flex-col justify-center  w-full h-[56px] z-[100] px-[12px] '>
           <label
             htmlFor={id}
             className='text-[12px] leading-[24px] text-gray-A'
           >
             {label}
           </label>
-
-          <input
-            type={type || "text"}
-            name={id}
-            id={id}
-            className='bg-transparent outline-none'
-            value={value}
-            onChange={handleChangeValue}
-            onFocus={() => {
-              setActived(true);
-              setIsFocused(true);
-            }}
-            aria-autocomplete='none'
-            ref={inputRef}
-            readOnly={readOnly}
-          />
-
-          {type === "password" && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleTogglePw();
+          <div className="flex w-full">
+            <input
+              type={type || "text"}
+              name={id}
+              id={id}
+              className='bg-transparent outline-none flex-1'
+              value={value}
+              onChange={handleChangeValue}
+              onFocus={() => {
+                setActived(true);
               }}
-              type='button'
-              className={`size-[24px] flex items-center justify-center ${
-                actived && value ? "visible" : "invisible"
-              }`}
-            >
-              <div>
-                {hiddenPass ? <HidePasswordIcon /> : <ShowPasswordIcon />}
-              </div>
-            </button>
-          )}
+              aria-autocomplete='none'
+              ref={inputRef}
+              readOnly={readOnly}
+            />  
+
+            {type === "password" && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleTogglePw();
+                }}
+                type='button'
+                className={`shrink-0 size-[24px] flex items-center justify-center ${
+                  actived && value ? "visible" : "invisible"
+                }`}
+              >
+                <div>
+                  {hiddenPass ? <HidePasswordIcon /> : <ShowPasswordIcon />}
+                </div>
+              </button>
+            )}
+          </div>
         </div>
       </div>
-      <div className='text-[12px] text-red-FF  leading-[16px] h-[16px] my-[6px] px-[8px]'>
+      <div className='text-[12px] text-red-FF  leading-[16px] h-[16px] m-[8px]'>
         <span>{error}</span>
       </div>
-    </>
+    </div>
   );
 };
 export default Input;

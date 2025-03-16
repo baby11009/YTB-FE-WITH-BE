@@ -48,15 +48,20 @@ const VideoTbRow = ({ data, handleChecked, checked, handleDelete }) => {
             <div className='absolute left-0 top-0 size-full bg-[rgba(0,0,0,.4)] z-[5] backdrop-blur '></div>
           </div>
           <div className='flex-1 ml-[16px] pr-[12px] overflow-hidden'>
-            <div className=' overflow-hidden'>
-              <div className=' h-[24px] line-clamp-1 text-ellipsis break-all text-[13px] leading-[24px]'>
-                {data?.title}
-              </div>
-            </div>
             <div
-              className='h-[16px] line-clamp-1 text-ellipsis break-all
-           text-[12px] leading-[16px] text-gray-A group-hover:hidden'
-              dangerouslySetInnerHTML={{ __html: data?.description }}
+              className=' h-[24px] line-clamp-1 text-ellipsis break-words text-[13px] leading-[24px]'
+              style={{ overflowWrap: "anywhere" }}
+            >
+              {data?.title}
+            </div>
+
+            <div
+              className='h-[32px] line-clamp-2 text-ellipsis break-all
+              text-[12px] leading-[16px] text-gray-A group-hover:hidden'
+              style={{ overflowWrap: "anywhere" }}
+              dangerouslySetInnerHTML={{
+                __html: data?.description,
+              }}
             ></div>
             <div className='hidden group-hover:flex'>
               <Link
@@ -106,9 +111,6 @@ const VideoTbRow = ({ data, handleChecked, checked, handleDelete }) => {
             </div>
           </div>
         </div>
-      </div>
-      <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-[13px] leading-[24px]'>
-        {data.type}
       </div>
       <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] my-[8px] text-[13px] leading-[24px]'>
         {timeFormat3(data.createdAt)}

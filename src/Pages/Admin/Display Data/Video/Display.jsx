@@ -27,7 +27,6 @@ const Display = ({
         <div className='pl-[12px] flex-[1_0_224px] min-w-[224px] border-x-[1px] border-gray-A'>
           Channel
         </div>
-        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Type</div>
         <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Date</div>
         <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] text-end'>
           View

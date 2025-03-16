@@ -8,6 +8,7 @@ import {
 import {
   PlusIcon,
   LongArrowIcon,
+  UploadImageIcon,
 } from "../../../../Assets/Icons";
 import { Input, DropDown, ImageCropper, TextArea } from "../../../../Component";
 import { createData, updateData } from "../../../../Api/controller";
@@ -15,7 +16,12 @@ import { getDataWithAuth } from "../../../../Api/getData";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
-import { isEmpty, notmatchTheRegex } from "../../../../util/validateFunc";
+import {
+  isEmpty,
+  notmatchTheRegex,
+  minMaxLength,
+} from "../../../../util/validateFunc";
+import { isObjectEmpty } from "../../../../util/func";
 
 const initForm = {
   name: "",
@@ -91,97 +97,67 @@ const UpsertUser = () => {
   );
 
   const handleValidate = () => {
-    const notValidatedValues = [];
+    setSubmitErrs({});
 
-    const keys = Object.keys(formData).filter(
-      (key) =>
-        key !== "role" &&
-        key !== "confirmed" &&
-        key !== "image" &&
-        key !== "banner",
-    );
+    const { role, confirmed, avatar, banner, ...neededVaildateFields } =
+      formData;
+
+    const fieldEntries = Object.entries(neededVaildateFields);
 
     const validateFormValueFuncs = {
       name: (name) => {
-        let err = isEmpty("name", name, setSubmitErrs);
-        return err;
+        let error = isEmpty("name", name, "User name cannot be empty");
+        if (!error) {
+          error = minMaxLength("name", name, _, 20);
+        }
+        return error;
       },
       email: (email) => {
-        let err = isEmpty("email", email, setSubmitErrs);
+        let error = isEmpty("email", email, "User email cannot be empty");
 
-        if (!err) {
+        if (!error) {
           const emailRegex = new RegExp(
             "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
           );
-          err = notmatchTheRegex("email", email, emailRegex, setSubmitErrs);
+          error = notmatchTheRegex(
+            "email",
+            email,
+            emailRegex,
+            "Email is invalid",
+          );
         }
 
-        return err;
+        return error;
       },
       password: (password) => {
-        let err = isEmpty("password", password, setSubmitErrs);
+        const error = isEmpty("password", password, "Password cannot be empty");
 
-        return err;
+        return error;
       },
     };
 
-    keys.forEach((key) => {
-      if (
-        validateFormValueFuncs[key] &&
-        validateFormValueFuncs[key](formData[key])
-      ) {
-        notValidatedValues.push(key);
+    const errors = fieldEntries.reduce((acc, [key, value]) => {
+      const err = validateFormValueFuncs[key](value) || undefined;
+      if (err) {
+        acc = { ...acc, ...err };
       }
-    });
 
-    return notValidatedValues.length > 0;
-  };
+      return acc;
+    }, {});
 
-  const handleValidateUpdate = () => {
-    const notValidatedValues = [];
+    const isValid = isObjectEmpty(errors);
 
-    const keys = Object.keys(formData).filter(
-      (key) =>
-        key !== "role" &&
-        key !== "confirmed" &&
-        key !== "avatar" &&
-        key !== "password" &&
-        key !== "banner",
-    );
+    if (!isValid) {
+      setSubmitErrs(errors);
+    }
 
-    const validateFormValueFuncs = {
-      name: (name) => {
-        let err = isEmpty("name", name, setSubmitErrs);
-        return err;
-      },
-      email: (email) => {
-        let err = isEmpty("email", email, setSubmitErrs);
-
-        if (!err) {
-          const emailRegex = new RegExp(
-            "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
-          );
-          err = notmatchTheRegex("email", email, emailRegex, setSubmitErrs);
-        }
-        return err;
-      },
-    };
-    keys.forEach((key) => {
-      if (
-        validateFormValueFuncs[key] &&
-        validateFormValueFuncs[key](formData[key])
-      ) {
-        notValidatedValues.push(key);
-      }
-    });
-
-    return notValidatedValues.length > 0;
+    return isValid;
   };
 
   const create = async () => {
-    const error = handleValidate();
+    const isValid = handleValidate();
 
-    if (error) {
+    if (!isValid) {
       return;
     }
 
@@ -214,12 +190,6 @@ const UpsertUser = () => {
   };
 
   const update = async () => {
-    const error = handleValidateUpdate();
-
-    if (error) {
-      return;
-    }
-
     let finalData = {
       name: formData.name,
       password: formData.password,
@@ -240,8 +210,8 @@ const UpsertUser = () => {
       delete finalData.password;
     }
 
-    if (formData.image) {
-      finalData.image = formData.image;
+    if (formData.avatar) {
+      finalData.avatar = formData.avatar;
     }
 
     if (formData.banner) {
@@ -256,13 +226,7 @@ const UpsertUser = () => {
     const data = new FormData();
 
     for (const key in finalData) {
-      if (key === "image") {
-        data.append(key, finalData[key], avaName);
-      } else if (key === "banner") {
-        data.append(key, finalData[key], bannerName);
-      } else {
-        data.append(key, finalData[key]);
-      }
+      data.append(key, finalData[key]);
     }
 
     await updateData(
@@ -363,20 +327,21 @@ const UpsertUser = () => {
         className='flex items-center flex-wrap mb-[36px] relative z-[2] flex-1 overflow-auto scrollbar-3'
       >
         <div
-          className={` pt-[16.12%] w-full h-0 relative rounded-[12px] overflow-hidden
-             ${!previewBanner && "border-[2px] border-dashed cursor-pointer"}`}
+          className={`aspect-[2560/423] w-full min-h-[75px] relative rounded-[8px] overflow-hidden
+          bg-cover bg-center bg-no-repeat cursor-pointer mb-[32px]
+          ${
+            !previewBanner &&
+            "border-[2px] border-gray-A hover:border-white transition-[border] ease-in duration-150 group"
+          }`}
           style={{
             backgroundImage: `url('${previewBanner}')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
           }}
           onClick={() => {
             setIsShowing(
               <ImageCropper
                 minWidth={2560}
-                minHeight={1440}
-                aspectRatio={16 / 9}
+                minHeight={423}
+                aspectRatio={2560 / 423}
                 setPreview={(url) => {
                   setPreviewBanner(url);
                 }}
@@ -394,14 +359,25 @@ const UpsertUser = () => {
           }}
         >
           {!previewBanner && (
-            <div className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[18px] xsm:w-[24px] sm:w-[36px] lg:w-[48px]'>
-              <PlusIcon />
+            <div
+              className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[36px] lg:w-[48px]
+               text-gray-A group-hover:text-white transition-[color] ease-in duration-150'
+            >
+              <UploadImageIcon />
             </div>
           )}
         </div>
-        <div className='w-full flex flex-col sm:flex-row gap-[32px] xl:gap-[48px] mt-[16px]'>
+        <div className='w-full flex flex-col sm:flex-row gap-x-[32px]'>
           <div
-            className='size-[72px] 2xsm:size-[120px] 2md:size-[160px] cursor-pointer flex-shrink-0'
+            className={`size-[80px] md:size-[120px] lg:size-[160px] cursor-pointer flex-shrink-0 rounded-[50%] 
+            flex items-center justify-center bg-cover bg-center bg-no-repeat mb-[32px]
+            ${
+              !previewAva &&
+              "border-[2px] border-gray-A hover:border-white transition-[border] ease-in duration-150 group"
+            }`}
+            style={{
+              backgroundImage: `url('${previewAva}')`,
+            }}
             onClick={() => {
               setIsShowing(
                 <ImageCropper
@@ -416,29 +392,25 @@ const UpsertUser = () => {
                   setData={(file) => {
                     setFormData((prev) => ({
                       ...prev,
-                      image: file,
+                      avatar: file,
                     }));
                   }}
                 />,
               );
             }}
           >
-            {previewAva ? (
-              <img src={previewAva} alt='avatar' className='rounded-[50%]' />
-            ) : (
+            {!previewAva && (
               <div
-                className='size-full rounded-[50%]
-            overflow-hidden border-[2px] border-dashed flex items-center justify-center'
+                className='w-[36px] lg:w-[48px] text-gray-A group-hover:text-white
+                transition-[color] ease-in duration-150'
               >
-                <div className='w-[18px] xsm:w-[24px] sm:w-[36px] lg:w-[48px]'>
-                  <PlusIcon size={48} />
-                </div>
+                <UploadImageIcon />
               </div>
             )}
           </div>
-          <div className='flex-1 flex flex-wrap gap-[16px] mt-[28px]'>
+          <div className='flex-1 flex flex-wrap gap-x-[16px]'>
             {/* name */}
-            <div className='flex-[1_0_200px] min-w-[200px] mr-[16px]'>
+            <div className='flex-[1_0_200px] min-w-[200px]'>
               <Input
                 id={"name"}
                 type={"text"}
@@ -450,7 +422,7 @@ const UpsertUser = () => {
               />
             </div>
 
-            <div className='flex-[1_0_200px] min-w-[200px] mr-[16px] '>
+            <div className='flex-[1_0_200px] min-w-[200px] '>
               <Input
                 id={"email"}
                 type={"email"}
@@ -463,7 +435,7 @@ const UpsertUser = () => {
               />
             </div>
 
-            <div className='flex-[1_0_200px] min-w-[200px] mr-[16px] '>
+            <div className='flex-[1_0_200px] min-w-[200px] '>
               <Input
                 id={"password"}
                 type={"password"}
@@ -477,7 +449,7 @@ const UpsertUser = () => {
           </div>
         </div>
 
-        <div className='w-full mt-[16px] flex gap-[16px] flex-wrap'>
+        <div className='w-full flex gap-x-[16px] flex-wrap'>
           <div className='flex-[1_1_500px] '>
             <TextArea
               title={"Description"}
@@ -491,9 +463,9 @@ const UpsertUser = () => {
               placeholder={"Enter video description"}
             />
           </div>
-          <div className='flex-[1_0_30%] lg:flex-[1_0_0%] xl:max-w-[360px]  flex flex-wrap gap-[16px] '>
+          <div className='flex-[1_0_30%] lg:flex-[1_0_0%] xl:max-w-[360px]  flex flex-wrap gap-[32px] '>
             {/* Role */}
-            <div className='flex-[1_1_250px] '>
+            <div className='flex-[1_1_250px] h-fit'>
               <DropDown
                 list={roles.current}
                 title={"Role"}
@@ -504,7 +476,7 @@ const UpsertUser = () => {
               />
             </div>
             {/* Confirm */}
-            <div className='flex-[1_1_250px]'>
+            <div className='flex-[1_1_250px] h-fit'>
               <DropDown
                 list={confirms.current}
                 title={"Confirm"}
