@@ -2,31 +2,33 @@ import { useParams } from "react-router-dom";
 import { getDataWithAuth } from "../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Input,
+  DropDown,
   InfiniteDropDown,
   InfiniteDropDownWithCheck,
+  TextArea
 } from "../../../../Component";
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import { CloseIcon } from "../../../../Assets/Icons";
 import { createData, updateData } from "../../../../Api/controller";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const initForm = {
   userId: "",
+  email: "",
   videoIdList: [],
   title: "",
-  email: "",
+  privacy: "public",
 };
 
-const userPrsInit = {
-  email: "",
+const userQuerieseInit = {
+  search: {},
   limit: 10,
   page: 1,
   clearCache: "user",
 };
 
-const videoPrsInit = {
-  id: "",
+const videoQuerieseInit = {
+  search: {},
   limit: 10,
   page: 1,
   clearCache: "video",
@@ -39,42 +41,45 @@ const UpsertPlaylist = () => {
 
   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState(initForm);
+  const [userQueriese, setUserQueriese] = useState(userQuerieseInit);
 
-  const [userPrs, setUserPrs] = useState(userPrsInit);
-
-  const [videoPrs, setVideoPrs] = useState(videoPrsInit);
+  const [videoQueriese, setVideoQueriese] = useState(videoQuerieseInit);
 
   const [userOpened, setUserOpened] = useState(false);
 
   const [videoOpened, setVideoOpened] = useState(false);
+
+  const [formData, setFormData] = useState(initForm);
+
+  const [realTimeErrs, setRealTimeErrs] = useState({});
+
+  const [submitErrs, setSubmitErrs] = useState({});
 
   const [error, setError] = useState({
     inputName: [],
     message: [],
   });
 
-  const {
-    data: playlistData,
-    refetch,
-    error: queryError,
-    isLoading,
-    isError,
-  } = getDataWithAuth(`playlist/${id}`, {}, id !== undefined, false);
+  const { data: playlistData, refetch } = getDataWithAuth(
+    `playlist/${id}`,
+    {},
+    id !== undefined,
+    false,
+  );
 
   const {
     data: usersData,
     isLoading: userIsLoading,
     isError: userIsError,
     error: userError,
-  } = getDataWithAuth("user", userPrs, userOpened, false);
+  } = getDataWithAuth("user", userQueriese, userOpened, false);
 
   const {
     data: videosData,
     isLoading: videoIsLoading,
     isError: videoIsError,
     error: videoError,
-  } = getDataWithAuth("video", videoPrs, videoOpened, false);
+  } = getDataWithAuth("video", videoQueriese, videoOpened, false);
 
   const handleOnChange = (name, value) => {
     setFormData((prev) => ({
@@ -82,6 +87,23 @@ const UpsertPlaylist = () => {
       [name]: value,
     }));
   };
+
+  const handleSetRealTimeErr = useCallback((errName, errMessage) => {
+    setRealTimeErrs((prev) => ({ ...prev, [errName]: errMessage }));
+  }, []);
+
+  const handleRemoveRealTimeErr = useCallback(
+    (errName) => {
+      if (!Object.keys(realTimeErrs).includes(errName)) return;
+
+      setRealTimeErrs((prev) => {
+        const errs = structuredClone(prev);
+        delete errs[errName];
+        return errs;
+      });
+    },
+    [realTimeErrs],
+  );
 
   const handleRemove = (value) => {
     if (formData.videoIdList.includes(value)) {
@@ -100,49 +122,72 @@ const UpsertPlaylist = () => {
   };
 
   const handleValidate = () => {
-    if (error.inputName.length > 0) {
-      setError({ inputName: [], message: [] });
+    const { email, videoIdList, privacy, ...neededValidateFields } = formData;
+
+    const fieldEntries = Object.entries(neededValidateFields);
+
+    const validateFormValueFuncs = {
+      userId: (userId) => {
+        return isEmpty("userId", userId, "User not picked yet");
+      },
+      title: (title) => {
+        return isEmpty("title", title, "Video title cannot be empty");
+      },
+    };
+
+    const errors = fieldEntries.reduce((acc, [key, value]) => {
+      const err = validateFormValueFuncs[key](value) || undefined;
+
+      if (err) {
+        acc = { ...acc, ...err };
+      }
+
+      return acc;
+    }, {});
+
+    const isValid = isObjectEmpty(errors);
+
+    if (!isValid) {
+      setSubmitErrs(errors);
     }
 
-    let hasErrors = false;
-
-    const keys = Object.keys(formData).filter((key) => key !== "videoIdList");
-
-    keys.forEach((key) => {
-      if (!formData[key]) {
-        let errMsg = "Không được để trống";
-        setError((prev) => ({
-          inputName: [...prev.inputName, key],
-          message: [...prev.message, errMsg],
-        }));
-        hasErrors = true;
-      }
-    });
-
-    return hasErrors;
+    return isValid;
   };
 
-  const handleUpdateValidate = () => {
-    if (handleValidate()) {
-      return true;
-    }
+  const handleValidateUpdate = () => {
+    const { userId, email, privacy, videoIdList, ...neededValidateFields } =
+      formData;
 
-    if (formData.videoIdList.length === playlistData?.data?.itemList?.length) {
-      const sameArray = formData.videoIdList.every((item) => {
-        console.log(playlistData?.data?.itemList?.includes(item));
-        return playlistData?.data?.itemList?.includes(item);
-      });
+    const fieldEntries = Object.entries(neededValidateFields);
 
-      if (sameArray && formData.title === playlistData?.data?.title) {
-        alert("Nothing changed");
-        return true;
+    const validateFormValueFuncs = {
+      title: (title) => {
+        return isEmpty("title", title, "Video title cannot be empty");
+      },
+    };
+
+    const errors = fieldEntries.reduce((acc, [key, value]) => {
+      const err = validateFormValueFuncs[key](value) || undefined;
+      if (err) {
+        acc = { ...acc, ...err };
       }
+
+      return acc;
+    }, {});
+
+    const isValid = isObjectEmpty(errors);
+
+    if (!isValid) {
+      setSubmitErrs(errors);
     }
+
+    return isValid;
   };
 
   const create = async () => {
-    const isError = handleValidate();
-    if (isError) {
+    const isValid = handleValidate();
+
+    if (!isValid) {
       return;
     }
 
@@ -165,9 +210,9 @@ const UpsertPlaylist = () => {
   };
 
   const update = async () => {
-    const isError = handleUpdateValidate();
+    const isValid = handleValidateUpdate();
 
-    if (isError) {
+    if (!isValid) {
       return;
     }
 
@@ -200,7 +245,6 @@ const UpsertPlaylist = () => {
       }
     });
 
-    console.log("🚀 ~ uniqueIdList:", uniqueIdList);
     if (uniqueIdList.length > 0) {
       finalFormData.videoIdList = uniqueIdList;
     }
@@ -277,10 +321,6 @@ const UpsertPlaylist = () => {
     };
   }, []);
 
-  if (isError) {
-    return queryError.message;
-  }
-
   return (
     <div>
       <header className='pt-[16px] pb-[40px]'>
@@ -295,18 +335,18 @@ const UpsertPlaylist = () => {
         <div className='flex-1 flex flex-wrap gap-[16px]'>
           {/* Title */}
           <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[100]'>
-            <Input
-              id={"title"}
-              type={"text"}
-              label={"Playlist title"}
+            <TextArea
+              title={"Title"}
+              name={"title"}
+              preventCharactersList={new Set(["Enter"])}
               value={formData.title}
-              defaultValue={""}
+              defaultValue={playlistData?.data.title}
               handleOnChange={handleOnChange}
-              error={
-                error.inputName.includes("title")
-                  ? `${error.message[error.inputName.indexOf("title")]}`
-                  : ""
-              }
+              maxLength={155}
+              handleSetRealTimeErr={handleSetRealTimeErr}
+              handleRemoveRealTimeErr={handleRemoveRealTimeErr}
+              errMsg={submitErrs["title"] ? submitErrs["title"] : ""}
+              placeholder={"Enter playlist title"}
             />
           </div>
 
@@ -314,17 +354,17 @@ const UpsertPlaylist = () => {
           <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[100]'>
             <InfiniteDropDown
               disabled={id ? true : false}
-              prsRemoveValue={userPrsInit.clearCache}
+              prsRemoveValue={userQuerieseInit.clearCache}
               title={"User"}
-              value={formData.email || "Chưa chọn"}
+              value={formData.email || "Not picked"}
               setIsOpened={setUserOpened}
               list={usersData?.data}
               isLoading={userIsLoading}
               isError={userIsError}
               errorMsg={userError?.response?.data?.msg}
               displayData={"email"}
-              handleSetParams={(value, pageInc) => {
-                setUserPrs((prev) => {
+              handleSetQueriese={(value, pageInc) => {
+                setUserQueriese((prev) => {
                   let finalobj = {
                     ...prev,
                   };
@@ -363,7 +403,7 @@ const UpsertPlaylist = () => {
           <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[90]'>
             <InfiniteDropDownWithCheck
               title={"Video"}
-              prsRemoveValue={videoPrsInit.clearCache}
+              prsRemoveValue={videoQuerieseInit.clearCache}
               valueList={formData.videoIdList}
               setIsOpened={setVideoOpened}
               list={videosData?.data}
@@ -373,8 +413,8 @@ const UpsertPlaylist = () => {
               setData={(value) => {
                 setFormData((prev) => ({ ...prev, videoIdList: value }));
               }}
-              handleSetParams={(value, pageInc) => {
-                setVideoPrs((prev) => {
+              handleSetQueriese={(value, pageInc) => {
+                setVideoQueriese((prev) => {
                   let finalobj = {
                     ...prev,
                   };

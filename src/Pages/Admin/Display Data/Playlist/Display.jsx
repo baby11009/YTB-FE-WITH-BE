@@ -1,59 +1,56 @@
 import { CheckBox2 } from "../../../../Component";
 import PlaylistTbRow from "./PlaylistTbRow";
 const Display = ({
-  dataList,
-  refetch,
-  mockArr,
-  limit,
-  checkedList,
-  page,
+  dataList = [],
+  checkedList = [],
   handleChecked,
   handleCheckedAll,
+  handleDelete,
+  tableHeader,
 }) => {
   return (
-    <div className='mt-[8px]'>
-      <table className='w-full text-left'>
-        <thead>
-          <tr className='border-b-[1px]'>
-            <th>
-              <div className='flex items-center gap-[16px]'>
-                <CheckBox2
-                  checked={
-                    checkedList.length === dataList.length &&
-                    dataList.length > 0
-                  }
-                  setChecked={handleCheckedAll}
-                />
-
-                <button onClick={handleCheckedAll}>STT</button>
-              </div>
-            </th>
-            <th>Created user</th>
-            <th>Name</th>
-            <th className='hidden 2md:table-cell'>Type</th>
-            <th className='hidden 2md:table-cell'>Size</th>
-            <th className='hidden 2lg:table-cell'>Created date</th>
-            <th>Function</th>
-          </tr>
-        </thead>
-        <tbody className=''>
-          {dataList.map((data, id) => (
+    <div className='min-w-full w-fit'>
+      <div
+        className='sticky left-0 top-[96px] z-[10] bg-black text-[12px] font-[500] leading-[48px]
+       text-gray-A items-center border-y-[1px] border-gray-A flex'
+        ref={tableHeader}
+      >
+        <div className='h-[48px] px-[20px] flex items-center justify-center gap-[12px] z-[10]'>
+          <CheckBox2
+            checked={
+              checkedList.length === dataList.length && dataList.length > 0
+            }
+            setChecked={handleCheckedAll}
+          />
+        </div>
+        <div className='pl-[12px] flex-[2_0_400px] min-w-[400px] '>
+          Playlist
+        </div>
+        <div className='pl-[12px] flex-[1_0_224px] min-w-[224px] border-x-[1px] border-gray-A'>
+          Channel
+        </div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Privacy</div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Date</div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>
+          Modified date
+        </div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px] text-end'>
+          Size
+        </div>
+      </div>
+      <div className='flex flex-col z-[2] relative'>
+        {dataList &&
+          dataList.length > 0 &&
+          dataList.map((data, id) => (
             <PlaylistTbRow
               key={id}
-              limit={limit}
               data={data}
-              od={id}
-              length={dataList?.length}
-              page={page}
-              refetch={refetch}
-              checkedList={checkedList}
+              handleDelete={handleDelete}
               handleChecked={handleChecked}
+              checked={checkedList.includes(data?._id)}
             />
           ))}
-          {mockArr.length > 0 &&
-            mockArr.map((id) => <tr key={id} className='h-[56px]'></tr>)}
-        </tbody>
-      </table>
+      </div>
     </div>
   );
 };

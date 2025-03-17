@@ -40,6 +40,10 @@ const CommentPage = ({ openedMenu }) => {
 
   const containerRef = useRef();
 
+  const funcContainerRef = useRef();
+
+  const tableHeader = useRef();
+
   const { data: cmtsData, refetch } = getData("comment", queriese, true, false);
 
   const handleOnClick = (queryData) => {
@@ -275,7 +279,14 @@ const CommentPage = ({ openedMenu }) => {
   }, [cmtsData]);
 
   useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      tableHeader.current.style.top =
+        funcContainerRef.current.clientHeight + 52 - 0.4 + "px";
+    });
+
+    observer.observe(funcContainerRef.current);
     return () => {
+      observer.disconnect();
       queryClient.clear();
     };
   }, []);
@@ -288,8 +299,11 @@ const CommentPage = ({ openedMenu }) => {
       <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Comments</h2>
       </div>
-      <div className='sticky left-0 top-[52px] z-[2000] min-w-[1280px]'>
-        <div className='flex gap-[24px] bg-black'>
+      <div
+        className='sticky left-0 top-[52px] z-[2000] min-w-[1280px] pb-[4px] bg-black'
+        ref={funcContainerRef}
+      >
+        <div className='flex gap-[24px]'>
           <div className='relative flex-shrink-0'>
             <button
               className='size-[40px] p-[8px]'
@@ -368,6 +382,7 @@ const CommentPage = ({ openedMenu }) => {
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}
         handleDelete={handleDelete}
+        tableHeader={tableHeader}
       />
 
       <div className='w-full bg-black fixed bottom-[0] right-0 py-[6px]'>

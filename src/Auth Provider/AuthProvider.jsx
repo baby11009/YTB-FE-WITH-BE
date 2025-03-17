@@ -10,7 +10,6 @@ import { getCookie } from "../util/tokenHelpers";
 import request from "../util/axios-base-url";
 
 const AuthProvider = ({ children }) => {
-  
   const [user, setUser] = useState(undefined);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +42,7 @@ const AuthProvider = ({ children }) => {
 
   const modalContainerRef = useRef();
 
-  const showCurrentToaster = useCallback(() => {
+  const showCurrentToaster = () => {
     if (toasterQueue.current.length > 0) {
       const toaster = toasterQueue.current.shift();
       setCurrentToaster(toaster);
@@ -54,7 +53,7 @@ const AuthProvider = ({ children }) => {
         currentToasterRef.current = null;
       }, 5000);
     }
-  }, []);
+  };
 
   const addToaster = (message) => {
     toasterQueue.current.push(message);
@@ -63,7 +62,7 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const getUserInfo = useCallback(async (token) => {
+  const getUserInfo = async (token) => {
     await request
       .get("/client/user/me", {
         headers: {
@@ -80,14 +79,12 @@ const AuthProvider = ({ children }) => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  };
 
   const handleCursorPositon = async (e) => {
-    let child;
-    await new Promise((resolve) => {
+    const child = await new Promise((resolve) => {
       requestAnimationFrame(() => {
-        child = hoverContainerRef.current.children[0];
-        return resolve();
+        return resolve(hoverContainerRef.current.children[0]);
       });
     });
 

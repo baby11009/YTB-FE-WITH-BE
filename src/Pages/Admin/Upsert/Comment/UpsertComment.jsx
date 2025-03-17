@@ -20,6 +20,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { isObjectEmpty } from "../../../../util/func";
 import { isEmpty } from "../../../../util/validateFunc";
+import { useNavigate } from "react-router-dom";
+import { LongArrowIcon } from "../../../../Assets/Icons";
 
 const initForm = {
   userId: undefined,
@@ -58,6 +60,8 @@ const initReplyCmtQueriese = {
 
 const UpsertComment = () => {
   const { id } = useParams();
+
+  const navigate = useNavigate();
 
   const { addToaster } = useAuthContext();
 
@@ -297,7 +301,6 @@ const UpsertComment = () => {
 
   useLayoutEffect(() => {
     if (commentData) {
-      console.log(commentData);
       setFormData({
         userId: commentData.data.user_info._id,
         email: commentData.data.user_info.email,
@@ -364,136 +367,151 @@ const UpsertComment = () => {
   }, []);
 
   return (
-    <div className='px-[16px] max-w-[1500px] mx-auto'>
-      <header className='pt-[16px] pb-[32px]'>
-        <h2 className='text-[28px] leading-[44px] font-[500]'>Comment</h2>
-      </header>
+    <div className='max-w-[1500px] mx-auto md:px-[16px]'>
+      <div className=' sticky top-[56px]  py-[8px] bg-black z-[10] flex items-center'>
+        <h1 className='text-[28px] leading-[44px] font-[500] flex-1'>
+          Comments
+        </h1>
+        <button
+          className='flex-shrink-0 size-[40px] rounded-[50%] hover:bg-black-0.1 p-[8px]'
+          onClick={() => {
+            navigate(-1);
+          }}
+        >
+          <div className='w-[24px]'>
+            <LongArrowIcon />
+          </div>
+        </button>
+      </div>
 
       <form noValidate onSubmit={handleSubmit} className='mb-[36px]'>
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[16px]'>
           {/* User */}
+          <div className='z-[100]'>
+            <InfiniteDropDown
+              disabled={id ? true : false}
+              title={"User"}
+              value={formData.email || "Not picked yet"}
+              setIsOpened={setUserOpened}
+              list={usersData?.data}
+              displayData={"email"}
+              isLoading={userIsLoading}
+              fetchingError={userError?.response?.data?.msg}
+              validateError={submitErrs["userId"]}
+              handleSetQueriese={(value, pageInc) => {
+                setUserQueriese((prev) => {
+                  const prevClone = {
+                    ...prev,
+                  };
 
-          <InfiniteDropDown
-            disabled={id ? true : false}
-            title={"User"}
-            value={formData.email || "Not picked yet"}
-            setIsOpened={setUserOpened}
-            list={usersData?.data}
-            displayData={"email"}
-            isLoading={userIsLoading}
-            fetchingError={userError?.response?.data?.msg}
-            validateError={submitErrs["userId"]}
-            handleSetQueriese={(value, pageInc) => {
-              setUserQueriese((prev) => {
-                const prevClone = {
+                  if (value === "" || value) {
+                    prevClone.search["email"] = value;
+                    prevClone.page = 1;
+                  }
+
+                  if (pageInc !== undefined) {
+                    prevClone.page = prevClone.page + pageInc;
+                  }
+
+                  return prevClone;
+                });
+              }}
+              handleSetCurr={(data) => {
+                setFormData((prev) => ({
                   ...prev,
-                };
-
-                if (value === "" || value) {
-                  prevClone.search["email"] = value;
-                  prevClone.page = 1;
-                }
-
-                if (pageInc !== undefined) {
-                  prevClone.page = prevClone.page + pageInc;
-                }
-
-                return prevClone;
-              });
-            }}
-            handleSetCurr={(data) => {
-              setFormData((prev) => ({
-                ...prev,
-                userId: data?._id,
-                email: data?.email,
-              }));
-            }}
-            HoverCard={HovUserCard}
-          />
+                  userId: data?._id,
+                  email: data?.email,
+                }));
+              }}
+              HoverCard={HovUserCard}
+            />
+          </div>
 
           {/* Video */}
+          <div className='z-[90]'>
+            <InfiniteDropDown
+              disabled={id ? true : false}
+              title={"Video"}
+              dataType={"video"}
+              value={formData.videoTitle || "Not picked yet"}
+              setIsOpened={setVideoOpened}
+              list={videosData?.data}
+              isLoading={videoIsLoading}
+              displayData={"title"}
+              fetchingError={videoError?.response?.data?.msg}
+              validateError={submitErrs["videoId"]}
+              handleSetQueriese={(value, pageInc) => {
+                console.log(value);
+                setVideoQueriese((prev) => {
+                  const prevClone = {
+                    ...prev,
+                  };
 
-          <InfiniteDropDown
-            disabled={id ? true : false}
-            title={"Video"}
-            dataType={"video"}
-            value={formData.videoTitle || "Not picked yet"}
-            setIsOpened={setVideoOpened}
-            list={videosData?.data}
-            isLoading={videoIsLoading}
-            displayData={"title"}
-            fetchingError={videoError?.response?.data?.msg}
-            validateError={submitErrs["videoId"]}
-            handleSetQueriese={(value, pageInc) => {
-              console.log(value);
-              setVideoQueriese((prev) => {
-                const prevClone = {
+                  if (value === "" || value) {
+                    prevClone.search["title"] = value;
+                    prevClone.page = 1;
+                  }
+
+                  if (pageInc) {
+                    prevClone.page = prevClone.page + pageInc;
+                  }
+
+                  return prevClone;
+                });
+              }}
+              handleSetCurr={(data) => {
+                setFormData((prev) => ({
                   ...prev,
-                };
-
-                if (value === "" || value) {
-                  prevClone.search["title"] = value;
-                  prevClone.page = 1;
-                }
-
-                if (pageInc) {
-                  prevClone.page = prevClone.page + pageInc;
-                }
-
-                return prevClone;
-              });
-            }}
-            handleSetCurr={(data) => {
-              setFormData((prev) => ({
-                ...prev,
-                videoId: data._id,
-                videoTitle: data.title,
-              }));
-            }}
-            HoverCard={HovVideorCard}
-          />
+                  videoId: data._id,
+                  videoTitle: data.title,
+                }));
+              }}
+              HoverCard={HovVideorCard}
+            />
+          </div>
 
           {/* Comment */}
+          <div className='z-[80]'>
+            <InfiniteDropDown
+              disabled={id || !formData.videoId ? true : false}
+              title={"Reply to"}
+              dataType={"comment"}
+              prsRemoveValue={replyCmtQueriese.clearCache}
+              value={formData.replyContent || "Not picked yet"}
+              setIsOpened={setCmtOpened}
+              list={replyCmtsData?.data}
+              isLoading={replyCmtsIsLoading}
+              displayData={"cmtText"}
+              fetchingError={replyCmtsError?.response?.data?.msg}
+              handleSetQueriese={(value, pageInc) => {
+                console.log(value);
+                setReplyCmtQueriese((prev) => {
+                  const prevClone = {
+                    ...prev,
+                  };
 
-          <InfiniteDropDown
-            disabled={id || !formData.videoId ? true : false}
-            title={"Reply to"}
-            dataType={"comment"}
-            prsRemoveValue={replyCmtQueriese.clearCache}
-            value={formData.replyContent || "Not picked yet"}
-            setIsOpened={setCmtOpened}
-            list={replyCmtsData?.data}
-            isLoading={replyCmtsIsLoading}
-            displayData={"cmtText"}
-            fetchingError={replyCmtsError?.response?.data?.msg}
-            handleSetQueriese={(value, pageInc) => {
-              console.log(value);
-              setReplyCmtQueriese((prev) => {
-                const prevClone = {
+                  if (value === "" || value) {
+                    prevClone.search["content"] = value;
+                    prevClone.page = 1;
+                  }
+
+                  if (pageInc) {
+                    prevClone.page = prevClone.page + pageInc;
+                  }
+
+                  return prevClone;
+                });
+              }}
+              handleSetCurr={(data) => {
+                setFormData((prev) => ({
                   ...prev,
-                };
-
-                if (value === "" || value) {
-                  prevClone.search["content"] = value;
-                  prevClone.page = 1;
-                }
-
-                if (pageInc) {
-                  prevClone.page = prevClone.page + pageInc;
-                }
-
-                return prevClone;
-              });
-            }}
-            handleSetCurr={(data) => {
-              setFormData((prev) => ({
-                ...prev,
-                replyId: data._id,
-                replyContent: data.cmtText,
-              }));
-            }}
-            HoverCard={HovCommentCard}
-          />
+                  replyId: data._id,
+                  replyContent: data.cmtText,
+                }));
+              }}
+              HoverCard={HovCommentCard}
+            />
+          </div>
 
           {/* Like */}
           <Input
@@ -534,7 +552,7 @@ const UpsertComment = () => {
           />
         </div>
 
-        <div className='basis-[100%] order-7 flex items-center justify-center mt-[50px]'>
+        <div className='flex items-center justify-center mt-[50px]'>
           <button type='submit' className='w-full max-w-[160px] btn1 relative'>
             <span className='z-[50] relative'>Submit</span>
           </button>

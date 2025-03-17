@@ -45,6 +45,10 @@ const VideoPage = ({ type }) => {
 
   const containerRef = useRef();
 
+  const funcContainerRef = useRef();
+
+  const tableHeader = useRef();
+
   const { data: videosData, refetch } = getData("video", queriese, true, false);
 
   const handleOnClick = (queryData) => {
@@ -272,7 +276,14 @@ const VideoPage = ({ type }) => {
   }, [videosData]);
 
   useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      tableHeader.current.style.top =
+        funcContainerRef.current.clientHeight + 52 - 0.4 + "px";
+    });
+
+    observer.observe(funcContainerRef.current);
     return () => {
+      observer.disconnect();
       queryClient.clear();
     };
   }, []);
@@ -287,7 +298,10 @@ const VideoPage = ({ type }) => {
           {upperCaseFirstChar(type)}s
         </h2>
       </div>
-      <div className='sticky left-0 top-[52px] z-[2000] min-w-[1224px]'>
+      <div
+        className='sticky left-0 top-[52px] z-[2000] min-w-[1224px] pb-[4px] bg-black'
+        ref={funcContainerRef}
+      >
         <div className='flex gap-[24px] bg-black'>
           <div className='relative flex-shrink-0'>
             <button
@@ -367,6 +381,7 @@ const VideoPage = ({ type }) => {
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}
         handleDelete={handleDelete}
+        tableHeader={tableHeader}
       />
 
       <div className='w-full bg-black fixed bottom-[0] right-0 py-[6px]'>

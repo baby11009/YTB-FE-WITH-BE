@@ -39,6 +39,10 @@ const DisplayUser = () => {
 
   const containerRef = useRef();
 
+  const funcContainerRef = useRef();
+
+  const tableHeader = useRef();
+
   const { data: usersData, refetch } = getData(
     "user",
     queriese,
@@ -229,12 +233,6 @@ const DisplayUser = () => {
   };
 
   useEffect(() => {
-    return () => {
-      queryClient.clear();
-    };
-  }, []);
-
-  useEffect(() => {
     if (usersData && containerRef.current) {
       containerRef.current.scrollTop = 0;
     }
@@ -243,6 +241,19 @@ const DisplayUser = () => {
       setCheckedList([]);
     };
   }, [usersData]);
+
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      tableHeader.current.style.top =
+        funcContainerRef.current.clientHeight + 52 - 0.4 + "px";
+    });
+
+    observer.observe(funcContainerRef.current);
+    return () => {
+      observer.disconnect();
+      queryClient.clear();
+    };
+  }, []);
 
   return (
     <div
@@ -253,8 +264,11 @@ const DisplayUser = () => {
         <h2 className='text-[28px] leading-[44px] font-[500]'>Users</h2>
       </div>
 
-      <div className='sticky h-[40px] top-[52px] z-[2000] min-w-[738px]'>
-        <div className='flex gap-[24px] bg-black'>
+      <div
+        className='sticky top-[52px] z-[2000] min-w-[782px] pb-[4px] bg-black'
+        ref={funcContainerRef}
+      >
+        <div className='flex gap-[24px]'>
           <div className='relative flex-shrink-0'>
             <button
               className='size-[40px] p-[8px]'
@@ -276,7 +290,7 @@ const DisplayUser = () => {
             )}
           </div>
 
-          <div className='flex-1 flex flex-wrap gap-[16px] py-[4px]'>
+          <div className='flex-1 flex flex-wrap gap-[16px]'>
             {queryOptions.length > 0 &&
               queryOptions.map((query) => {
                 if (query.type === "input:text") {
@@ -333,6 +347,7 @@ const DisplayUser = () => {
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}
         handleDelete={handleDelete}
+        tableHeader={tableHeader}
       />
 
       <div className='w-full bg-black fixed bottom-[0] right-0 py-[6px]'>

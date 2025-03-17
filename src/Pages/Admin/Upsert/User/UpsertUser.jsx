@@ -306,7 +306,7 @@ const UpsertUser = () => {
   }, []);
 
   return (
-    <div className='max-w-[1284px] mx-auto relative'>
+    <div className='max-w-[1500px] mx-auto md:px-[16px]'>
       <div className=' sticky top-[56px]  py-[8px] bg-black z-[10] flex items-center'>
         <h1 className='text-[28px] leading-[44px] font-[500] flex-1'>Users</h1>
         <button

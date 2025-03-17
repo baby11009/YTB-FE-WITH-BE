@@ -1,24 +1,28 @@
 import { Link } from "react-router-dom";
-import { CreateIcon, DeleteAllIcon } from "../../../../Assets/Icons";
+import { CreateIcon, SortIcon2, TrashBinIcon } from "../../../../Assets/Icons";
 import { getData } from "../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useLayoutEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { dltManyData } from "../../../../Api/controller";
-import Search from "./Search";
 import Display from "./Display";
-import { Pagination } from "../../../../Component";
-import Filter from "./Filter";
+import {
+  Pagination,
+  CustomeFuncBox,
+  QueryTextInput,
+  QuerySelection,
+} from "../../../../Component";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
+import { getDisplayUsingValue } from "../../../../util/func";
 
-const limit = 8;
+const limit = 10;
 
-const initPrs = {
+const initQueriese = {
   limit,
   page: 1,
-  email: "",
   sort: {
     createdAt: -1,
   },
+  search: {},
 };
 
 const PlaylistPage = ({ openedMenu }) => {
@@ -26,25 +30,184 @@ const PlaylistPage = ({ openedMenu }) => {
 
   const queryClient = useQueryClient();
 
-  const [totalPage, setTotalPage] = useState(1);
+  const [queriese, setQueriese] = useState(initQueriese);
 
-  const [params, setParams] = useState(initPrs);
+  const [isQueryBoxOpened, setIsQueryBoxOpened] = useState(false);
 
-  const [searchValue, setSearchValue] = useState("");
-
-  const { data: playlistsData, refetch } = getData(
-    "playlist",
-    params,
-    true,
-    false,
-  );
-  console.log("🚀 ~ playlistsData:", playlistsData);
-
-  const [mockArr, setMockArr] = useState([]);
+  const [queryOptions, setQueryOptions] = useState([]);
 
   const [checkedList, setCheckedList] = useState([]);
 
-  const handleChecked = useCallback((id) => {
+  const containerRef = useRef();
+
+  const funcContainerRef = useRef();
+
+  const tableHeader = useRef();
+
+  const { data: playlistsData, refetch } = getData(
+    "playlist",
+    queriese,
+    true,
+    false,
+  );
+
+  const handleOnClick = (queryData) => {
+    setQueryOptions((prev) => [...prev, queryData]);
+
+    queryOptionBtns.current = queryOptionBtns.current.map((query) => {
+      if (query.id === queryData.id) {
+        query.renderCondition = false;
+      }
+      return query;
+    });
+  };
+
+  const handleClose = (queryData) => {
+    setQueryOptions((prev) =>
+      prev.filter((search) => search.id !== queryData.id),
+    );
+
+    setQueriese((prev) => {
+      const { search, sort } = prev;
+
+      if (queryData.buttonType === "sort") {
+        const { [queryData.id]: _, ...rest } = sort;
+        // Check if is there any sort query in the queirese
+        // If not, set default sort is createdAt = -1
+        if (Object.keys(rest).length > 0) {
+          prev.sort = rest;
+        } else {
+          prev.sort = { createdAt: -1 };
+        }
+      } else {
+        const { [queryData.id]: _, ...rest } = search;
+        prev.search = rest;
+      }
+
+      return prev;
+    });
+
+    queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
+      if (queryOption.id === queryData.id) {
+        queryOption.renderCondition = true;
+      }
+      return queryOption;
+    });
+  };
+
+  const handleSearch = (searchKey, searchValue) => {
+    if (queriese.search[searchKey] === searchValue) return;
+    setQueriese((prev) => ({
+      ...prev,
+      search: { ...prev.search, [searchKey]: searchValue },
+      page: 1,
+    }));
+  };
+
+  const handleSort = (sortKey, sortValue) => {
+    if (queriese.sort[sortKey] === sortValue) return;
+
+    const sortOptionIds = queryOptions.map((query) => {
+      if (query.buttonType === "sort") {
+        return query.id;
+      }
+    });
+
+    const sortObj = {};
+
+    sortOptionIds.forEach((sortOptionId) => {
+      let value;
+      if (sortOptionId === sortKey) {
+        value = sortValue;
+      } else if (queriese.sort[sortOptionId]) {
+        value = queriese.sort[sortOptionId];
+      }
+      sortObj[sortOptionId] = value;
+    });
+
+    setQueriese((prev) => ({
+      ...prev,
+      sort: sortObj,
+      page: 1,
+    }));
+  };
+
+  const queryOptionBtns = useRef([
+    {
+      id: "title",
+      text: "Title",
+      type: "input:text",
+      buttonType: "search",
+      renderCondition: true,
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "email",
+      text: "Email",
+      type: "input:text",
+      buttonType: "search",
+      renderCondition: true,
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "name",
+      text: "Name",
+      type: "input:text",
+      buttonType: "search",
+      renderCondition: true,
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "privacy",
+      text: "Privacy",
+      type: "select",
+      buttonType: "search",
+      renderCondition: true,
+      options: [
+        { id: "public", display: "Public" },
+        { id: "private", display: "Private" },
+      ],
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "createdAt",
+      text: "Date",
+      type: "select",
+      buttonType: "sort",
+      renderCondition: true,
+      options: [
+        { id: -1, display: "Newest" },
+        { id: 1, display: "Oldest" },
+      ],
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "updatedAt",
+      text: "Modified date",
+      type: "select",
+      buttonType: "sort",
+      renderCondition: true,
+      options: [
+        { id: -1, display: "Latest update" },
+        { id: 1, display: "Oldest update" },
+      ],
+      handleOnClick: handleOnClick,
+    },
+    {
+      id: "size",
+      text: "Playlist size",
+      type: "select",
+      buttonType: "sort",
+      renderCondition: true,
+      options: [
+        { id: -1, display: "Biggest" },
+        { id: 1, display: "Smallest" },
+      ],
+      handleOnClick: handleOnClick,
+    },
+  ]);
+
+  const handleChecked = (id) => {
     setCheckedList((prev) => {
       if (prev.includes(id)) {
         return [...prev.filter((data) => data !== id)];
@@ -52,22 +215,22 @@ const PlaylistPage = ({ openedMenu }) => {
 
       return [...prev, id];
     });
-  }, []);
+  };
 
-  const handleCheckedAll = useCallback(() => {
-    if (checkedList.length === playlistsData?.data?.length) {
+  const handleCheckedAll = () => {
+    if (checkedList.length === usersData?.data?.length) {
       setCheckedList([]);
     } else {
-      const idList = playlistsData?.data?.map((item) => item?._id);
+      const idList = usersData?.data?.map((item) => item?._id);
       setCheckedList(idList);
     }
-  }, [checkedList]);
+  };
 
   const handleDeleteMany = async () => {
     await dltManyData(
-      "playlist/delete-many",
+      "user/delete-many",
       checkedList,
-      "playlist",
+      "user",
       () => {
         setCheckedList([]);
         refetch();
@@ -77,16 +240,22 @@ const PlaylistPage = ({ openedMenu }) => {
     );
   };
 
-  useLayoutEffect(() => {
-    if (playlistsData) {
-      setTotalPage(playlistsData?.totalPages);
-      if (limit - playlistsData.qtt > 0) {
-        setMockArr(
-          Array.from({ length: limit - playlistsData.qtt }, (_, i) => i),
-        );
-      } else {
-        setMockArr([]);
-      }
+  const handleDelete = async (id) => {
+    await dltData(
+      "user/",
+      id,
+      "User",
+      undefined,
+      () => {
+        refetch();
+      },
+      addToaster,
+    );
+  };
+
+  useEffect(() => {
+    if (playlistsData && containerRef.current) {
+      containerRef.current.scrollTop = 0;
     }
 
     return () => {
@@ -95,88 +264,178 @@ const PlaylistPage = ({ openedMenu }) => {
   }, [playlistsData]);
 
   useEffect(() => {
-    let timeOut = setTimeout(() => {
-      setParams((prev) => {
-        return {
-          ...prev,
-          email: searchValue,
-          page: 1,
-        };
-      });
-    }, 600);
+    const observer = new ResizeObserver(() => {
+      tableHeader.current.style.top =
+        funcContainerRef.current.clientHeight + 52 - 0.4 + "px";
+    });
 
+    observer.observe(funcContainerRef.current);
     return () => {
-      clearTimeout(timeOut);
-    };
-  }, [searchValue]);
-
-  useEffect(() => {
-    return () => {
+      observer.disconnect();
       queryClient.clear();
     };
   }, []);
 
-  if (!playlistsData) return;
-
   return (
-    <>
-      <div
-        className={`flex items-center justify-between py-[16px] ${
-          openedMenu ? "xl:py-[8px]" : ""
-        }`}
-      >
+    <div
+      className='overflow-auto h-[calc(100%-44px)] relative scrollbar-3'
+      ref={containerRef}
+    >
+      <div className='sticky left-0 top-0 pt-[8px]  bg-black z-[100]'>
         <h2 className='text-[28px] leading-[44px] font-[500]'>Playlists</h2>
-        <div className='flex flex-col sm:flex-row sm:items-center gap-[12px]'>
-          <div className='flex items-center justify-end sm:justify-start gap-[12px]'>
-            {/* Search */}
-            <Search searchValue={searchValue} setSearchValue={setSearchValue} />
+      </div>
 
-            {/* Create */}
-            <Link
-              className='size-[32px] rounded-[5px] flex items-center justify-center 
-       group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-green-400 transition-all duration-[0.2s] ease-in
-      '
-              to={"upsert"}
+      <div
+        className='sticky top-[52px] z-[2000] min-w-[1180px] pb-[4px] bg-black'
+        ref={funcContainerRef}
+      >
+        <div className='flex gap-[24px]'>
+          <div className='relative flex-shrink-0'>
+            <button
+              className='size-[40px] p-[8px]'
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                setIsQueryBoxOpened((prev) => !prev);
+              }}
             >
-              <div className='text-[rgba(255,255,255,0.4)] group-hover:text-green-400  transition-all duration-[0.2s]'>
+              <SortIcon2 />
+            </button>
+            {isQueryBoxOpened && (
+              <CustomeFuncBox
+                style={"left-[100%] top-[100%] min-w-[200px]"}
+                opened={isQueryBoxOpened}
+                setOpened={setIsQueryBoxOpened}
+                funcList1={queryOptionBtns.current}
+              />
+            )}
+          </div>
+
+          <div className='flex-1 flex flex-wrap gap-[16px]'>
+            {queryOptions.length > 0 &&
+              queryOptions.map((query) => {
+                if (query.type === "input:text") {
+                  return (
+                    <QueryTextInput
+                      key={query.id}
+                      queryData={query}
+                      currValue={queriese.search[query.id]}
+                      handleExecuteQuery={handleSearch}
+                      handleClose={handleClose}
+                    />
+                  );
+                } else if (query.type === "select") {
+                  return (
+                    <QuerySelection
+                      key={query.id}
+                      queryData={query}
+                      currValue={getDisplayUsingValue(
+                        query.options,
+                        query?.buttonType === "sort"
+                          ? queriese.sort[query.id]
+                          : queriese.search[query.id],
+                      )}
+                      handleExecuteQuery={
+                        query?.buttonType === "sort" ? handleSort : handleSearch
+                      }
+                      handleClose={handleClose}
+                    />
+                  );
+                }
+              })}
+          </div>
+
+          <div className=' self-end flex items-center justify-center gap-[8px]'>
+            <Link to={"./upsert"}>
+              <div className='p-[8px] hover:text-green-500'>
                 <CreateIcon />
               </div>
             </Link>
-          </div>
-          <div className='flex items-center gap-[12px]'>
-            {/* Delete many */}
-            <button
-              className='size-[32px] rounded-[5px] flex items-center justify-center 
-         group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
-        '
-              onClick={handleDeleteMany}
-            >
-              <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
-                <DeleteAllIcon />
-              </div>
-            </button>
-
-            {/* Filter */}
-            <Filter params={params} setParams={setParams} />
+            {checkedList.length > 0 && (
+              <button onClick={handleDeleteMany}>
+                <div className='p-[8px] hover:text-red-600'>
+                  <TrashBinIcon />
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
+
       <Display
-        dataList={playlistsData.data}
-        page={params.page}
-        mockArr={mockArr}
-        limit={limit}
+        dataList={playlistsData?.data}
         checkedList={checkedList}
-        refetch={refetch}
         handleChecked={handleChecked}
         handleCheckedAll={handleCheckedAll}
+        handleDelete={handleDelete}
+        tableHeader={tableHeader}
       />
-      <Pagination
-        setParams={setParams}
-        currPage={params.page}
-        totalPage={totalPage}
-      />
-    </>
+
+      <div className='w-full bg-black fixed bottom-[0] right-0 py-[6px]'>
+        <Pagination
+          setQueriese={setQueriese}
+          currPage={queriese.page}
+          totalPage={playlistsData?.totalPages || 1}
+        />
+      </div>
+    </div>
   );
 };
 export default PlaylistPage;
+
+// <div
+// className={`flex items-center justify-between py-[16px] ${
+//   openedMenu ? "xl:py-[8px]" : ""
+// }`}
+// >
+// <h2 className='text-[28px] leading-[44px] font-[500]'>Playlists</h2>
+// <div className='flex flex-col sm:flex-row sm:items-center gap-[12px]'>
+//   <div className='flex items-center justify-end sm:justify-start gap-[12px]'>
+//     {/* Search */}
+//     <Search searchValue={searchValue} setSearchValue={setSearchValue} />
+
+//     {/* Create */}
+//     <Link
+//       className='size-[32px] rounded-[5px] flex items-center justify-center
+// group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-green-400 transition-all duration-[0.2s] ease-in
+// '
+//       to={"upsert"}
+//     >
+//       <div className='text-[rgba(255,255,255,0.4)] group-hover:text-green-400  transition-all duration-[0.2s]'>
+//         <CreateIcon />
+//       </div>
+//     </Link>
+//   </div>
+//   <div className='flex items-center gap-[12px]'>
+//     {/* Delete many */}
+//     <button
+//       className='size-[32px] rounded-[5px] flex items-center justify-center
+//  group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
+// '
+//       onClick={handleDeleteMany}
+//     >
+//       <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
+//         <DeleteAllIcon />
+//       </div>
+//     </button>
+
+//     {/* Filter */}
+//     <Filter queriese={queriese} setQueriese={setQueriese} />
+//   </div>
+// </div>
+// </div>
+// <Display
+// dataList={playlistsData.data}
+// page={queriese.page}
+// mockArr={mockArr}
+// limit={limit}
+// checkedList={checkedList}
+// refetch={refetch}
+// handleChecked={handleChecked}
+// handleCheckedAll={handleCheckedAll}
+// />
+// <Pagination
+// setQueriese={setQueriese}
+// currPage={queriese.page}
+// totalPage={totalPage}
+// />

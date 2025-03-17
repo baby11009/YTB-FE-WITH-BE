@@ -64,7 +64,7 @@ const UserTbRow = ({ data, handleChecked, checked, handleDelete }) => {
           </div>
         </div>
       </div>
-      <div className='flex-[1_0_150px] min-w-[100px] mx-[12px] py-[8px]'>
+      <div className='flex-[1_0_150px] min-w-[150px] mx-[12px] py-[8px]'>
         <span>{timeFormat3(data?.createdAt)}</span>
       </div>
       <div

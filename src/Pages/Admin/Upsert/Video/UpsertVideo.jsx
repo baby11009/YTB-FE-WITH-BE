@@ -5,7 +5,11 @@ import {
   useLayoutEffect,
   useCallback,
 } from "react";
-import { UploadImageIcon, YoutubeBlankIcon } from "../../../../Assets/Icons";
+import {
+  UploadImageIcon,
+  YoutubeBlankIcon,
+  LongArrowIcon,
+} from "../../../../Assets/Icons";
 import {
   Input,
   InfiniteDropDown,
@@ -20,9 +24,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { isObjectEmpty } from "../../../../util/func";
 import { isEmpty } from "../../../../util/validateFunc";
+import { upperCaseFirstChar } from "../../../../util/func";
+import { useNavigate } from "react-router-dom";
 
 const init = {
   userId: "",
+  email: "",
   title: "",
   thumbnail: undefined,
   video: undefined,
@@ -48,13 +55,10 @@ const initTagQueriese = {
   clearCache: "tag",
 };
 
-const currUserInit = {
-  userId: "",
-  email: "",
-};
-
 const UpsertVideo = ({ type }) => {
   const { id } = useParams();
+
+  const navigate = useNavigate();
 
   const { addToaster } = useAuthContext();
 
@@ -73,8 +77,6 @@ const UpsertVideo = ({ type }) => {
   const [previewThumb, setPreviewThumb] = useState("");
 
   const [previewVideo, setPreviewVideo] = useState("");
-
-  const [currUser, setCurrUser] = useState(currUserInit);
 
   const [realTimeErrs, setRealTimeErrs] = useState({});
 
@@ -273,6 +275,7 @@ const UpsertVideo = ({ type }) => {
       dislike,
       description,
       tags,
+      email,
       ...neededValidateFields
     } = formData;
 
@@ -323,6 +326,7 @@ const UpsertVideo = ({ type }) => {
       view,
       userId,
       tags,
+      email,
       ...neededValidateFields
     } = formData;
 
@@ -373,7 +377,6 @@ const UpsertVideo = ({ type }) => {
         setFormData(init);
         setPreviewVideo(undefined);
         setPreviewThumb(undefined);
-        setCurrUser(currUserInit);
       },
       undefined,
       addToaster,
@@ -468,11 +471,6 @@ const UpsertVideo = ({ type }) => {
 
       setFormData(dataForm);
 
-      setCurrUser({
-        userId: videoData.data.user_info?._id,
-        email: videoData.data.user_info?.email,
-      });
-
       setPreviewThumb(
         `${import.meta.env.VITE_BASE_API_URI}${
           import.meta.env.VITE_VIEW_THUMB_API
@@ -489,7 +487,6 @@ const UpsertVideo = ({ type }) => {
     return () => {
       setPreviewVideo(undefined);
       setPreviewThumb(undefined);
-      setCurrUser(currUserInit);
     };
   }, [videoData]);
 
@@ -524,31 +521,30 @@ const UpsertVideo = ({ type }) => {
   }, [submitErrs]);
 
   useEffect(() => {
-    if (currUser.userId) {
-      setFormData((prev) => ({
-        ...prev,
-        userId: currUser.userId,
-      }));
-    }
-  }, [currUser]);
-
-  useEffect(() => {
     return () => {
       queryClient.clear();
     };
   }, []);
 
   return (
-    <div className='max-w-[1500px] overflow-auto scrollbar-3'>
-      <header className='pt-[16px]'>
-        <h2 className='text-[28px] leading-[44px] font-[500]'>Videos</h2>
-      </header>
+    <div className='max-w-[1500px] mx-auto md:px-[16px]'>
+      <div className=' sticky top-[56px]  py-[8px] bg-black z-[10] flex items-center'>
+        <h1 className='text-[28px] leading-[44px] font-[500] flex-1'>
+          {upperCaseFirstChar(type)}s
+        </h1>
+        <button
+          className='flex-shrink-0 size-[40px] rounded-[50%] hover:bg-black-0.1 p-[8px]'
+          onClick={() => {
+            navigate(-1);
+          }}
+        >
+          <div className='w-[24px]'>
+            <LongArrowIcon />
+          </div>
+        </button>
+      </div>
 
-      <form
-        noValidate
-        onSubmit={handleSubmit}
-        className='mb-[100px] min-w-[400px] '
-      >
+      <form noValidate onSubmit={handleSubmit} className='mb-[36px]'>
         <div className='flex items-center justify-center flex-wrap gap-x-[16px]'>
           {/* thumbnail */}
           <div className='basis-[100%] 2md:basis-[calc(50%-8px)]'>
@@ -712,42 +708,42 @@ const UpsertVideo = ({ type }) => {
 
         <div className='grid gap-x-[16px] grid-cols-1 md:grid-cols-2 xl:grid-cols-3'>
           {/* User */}
-          <div className='z-[100]'>
-            <InfiniteDropDown
-              disabled={videoData ? true : false}
-              title={"User"}
-              dataType={"user"}
-              value={currUser.email || "Not chosen"}
-              setIsOpened={setOpenedUsers}
-              list={userData?.data}
-              displayData={"email"}
-              isLoading={isLoading}
-              fetchingError={userError?.response?.data?.msg}
-              validateError={submitErrs["userId"]}
-              handleSetQueriese={(value, pageInc) => {
-                setUserQueriese((prev) => {
-                  const prevClone = { ...prev };
-                  if (value === "" || value) {
-                    prevClone.search["email"] = value;
-                    prevClone.page = 1;
-                  }
 
-                  if (pageInc !== undefined) {
-                    prevClone.page = prevClone.page + pageInc;
-                  }
+          <InfiniteDropDown
+            disabled={id ? true : false}
+            title={"User"}
+            dataType={"user"}
+            value={formData.email || "Not picked yet"}
+            setIsOpened={setOpenedUsers}
+            list={userData?.data}
+            displayData={"email"}
+            isLoading={isLoading}
+            fetchingError={userError?.response?.data?.msg}
+            validateError={submitErrs["userId"]}
+            handleSetQueriese={(value, pageInc) => {
+              setUserQueriese((prev) => {
+                const prevClone = { ...prev };
+                if (value === "" || value) {
+                  prevClone.search["email"] = value;
+                  prevClone.page = 1;
+                }
 
-                  return prevClone;
-                });
-              }}
-              handleSetCurr={(data) => {
-                setCurrUser({
-                  userId: data?._id,
-                  email: data?.email,
-                });
-              }}
-              HoverCard={HovUserCard}
-            />
-          </div>
+                if (pageInc !== undefined) {
+                  prevClone.page = prevClone.page + pageInc;
+                }
+
+                return prevClone;
+              });
+            }}
+            handleSetCurr={(data) => {
+              setFormData((prev) => ({
+                ...prev,
+                userId: data?._id,
+                email: data?.email,
+              }));
+            }}
+            HoverCard={HovUserCard}
+          />
 
           {/* Tag */}
           <div className='mb-[32px]'>
@@ -784,39 +780,37 @@ const UpsertVideo = ({ type }) => {
           </div>
 
           {/* View */}
-          <div className=''>
-            <Input
-              id={"view"}
-              type={"number"}
-              label={"View"}
-              value={formData.view || 0}
-              defaultValue={videoData?.data?.view}
-              handleOnChange={handleOnChange}
-            />
-          </div>
+
+          <Input
+            id={"view"}
+            type={"number"}
+            label={"View"}
+            value={formData.view || 0}
+            defaultValue={videoData?.data?.view}
+            handleOnChange={handleOnChange}
+          />
+
           {/* Like */}
-          <div className=''>
-            <Input
-              id={"like"}
-              type={"number"}
-              label={"Like"}
-              value={formData.like || 0}
-              defaultValue={videoData?.data?.like}
-              handleOnChange={handleOnChange}
-            />
-          </div>
+
+          <Input
+            id={"like"}
+            type={"number"}
+            label={"Like"}
+            value={formData.like || 0}
+            defaultValue={videoData?.data?.like}
+            handleOnChange={handleOnChange}
+          />
 
           {/* Dislike */}
-          <div className=''>
-            <Input
-              id={"dislike"}
-              type={"number"}
-              label={"Dislike"}
-              value={formData.dislike || 0}
-              defaultValue={videoData?.data?.dislike}
-              handleOnChange={handleOnChange}
-            />
-          </div>
+
+          <Input
+            id={"dislike"}
+            type={"number"}
+            label={"Dislike"}
+            value={formData.dislike || 0}
+            defaultValue={videoData?.data?.dislike}
+            handleOnChange={handleOnChange}
+          />
         </div>
 
         <div className='basis-[100%] order-7 flex items-center justify-center mt-[50px]'>

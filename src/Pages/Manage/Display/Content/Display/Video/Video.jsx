@@ -20,7 +20,6 @@ import { dltManyData, dltData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   getDisplayUsingValue,
-  upperCaseFirstChar,
 } from "../../../../../../util/func";
 
 const initQueriese = {

@@ -84,7 +84,7 @@ const AdminPage = () => {
         >
           <div
             className='w-full h-[calc(100vh-56px)]
-            mt-[56px] relative '
+            mt-[56px]'
           >
             {pageRender}
           </div>

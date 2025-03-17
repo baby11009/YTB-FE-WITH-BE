@@ -22,7 +22,10 @@ const InfiniteDropDown = ({
   const [opened, setOpened] = useState(undefined);
 
   const [dataList, setDataList] = useState([]);
+
   const [addNewValue, setAddNewValue] = useState(false);
+
+  const [render, setRender] = useState(undefined);
 
   const [isEnd, setIsEnd] = useState(false);
 
@@ -31,6 +34,8 @@ const InfiniteDropDown = ({
   const timeOutRef = useRef();
 
   const inputRef = useRef();
+
+  const hoverContainerRef = useRef();
 
   const refscroll = (e) => {
     if (e) {
@@ -47,6 +52,44 @@ const InfiniteDropDown = ({
       setAddNewValue(true);
       handleSetQueriese(e.target.value);
     }, 600);
+  };
+
+  const handleMouseMove = async (e) => {
+    const child = await new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        return resolve(hoverContainerRef.current.children[0]);
+      });
+    });
+
+    const position = {
+      x: e.pageX + 30,
+      y: e.pageY - 10,
+    };
+    
+    if (child) {
+      if (window.innerWidth - e.clientX < child.clientWidth + 50) {
+        position.x = e.pageX - child.clientWidth - 30;
+      }
+
+      if (window.innerHeight - e.clientY < child.clientHeight) {
+        position.y = e.pageY - child.clientHeight;
+      }
+
+      if (e.clientY - 56 < child.clientHeight.clientHeight) {
+        position.y = e.pageY + child.clientHeight;
+      }
+    }
+
+    hoverContainerRef.current.style.left = position.x + "px";
+    hoverContainerRef.current.style.top = position.y + "px";
+  };
+
+  const handleMouseOver = (data) => {
+    setRender(<HoverCard data={data} />);
+  };
+
+  const handleMouseOut = (e) => {
+    setRender(undefined);
   };
 
   useEffect(() => {
@@ -99,7 +142,7 @@ const InfiniteDropDown = ({
     <div>
       <div
         className='z-[150] border-[1px] rounded-[8px]
-    border-[#6b6767] transition-all ease-in hover:border-[white]'
+    border-[#6b6767] transition-all ease-in hover:border-[white] relative'
         ref={containerRef}
       >
         <div className='relative pl-[12px]'>
@@ -154,7 +197,12 @@ const InfiniteDropDown = ({
                   <SearchIcon />
                 </div>
               </div>
-              <div className='flex-1 w-full overflow-y-auto' ref={refscroll}>
+              <div
+                className='flex-1 w-full overflow-y-auto'
+                ref={refscroll}
+                onMouseMove={handleMouseMove}
+                onMouseOut={handleMouseOut}
+              >
                 {isLoading && dataList.length === 0 ? (
                   <div className='flex h-full items-center justify-center '>
                     <div
@@ -165,25 +213,19 @@ const InfiniteDropDown = ({
                 ) : fetchingError ? (
                   <div>{fetchingError}</div>
                 ) : dataList.length !== 0 ? (
-                  dataList.map((item, id) => (
+                  dataList.map((data, id) => (
                     <button
                       key={id}
                       type='button'
                       className='px-[12px] py-[4px] text-start w-full hover:bg-black-0.2 relative'
                       onClick={() => {
-                        handleSetCurr(item);
+                        handleSetCurr(data);
                       }}
-                      // onMouseMove={(e) => {
-                      //   handleCursorPositon(e);
-                      // }}
-                      // onMouseEnter={(e) => {
-                      //   setShowHover(<HoverCard data={item} />);
-                      // }}
-                      // onMouseLeave={() => {
-                      //   setShowHover(null);
-                      // }}
+                      onMouseOver={() => {
+                        handleMouseOver(data);
+                      }}
                     >
-                      <span> {item[displayData]}</span>
+                      <span> {data[displayData]}</span>
                     </button>
                   ))
                 ) : (
@@ -201,6 +243,9 @@ const InfiniteDropDown = ({
          text-red-FF line-clamp-1 text-ellipsis break-all'
       >
         <span>{validateError}</span>
+      </div>
+      <div className='absolute z-[200]' ref={hoverContainerRef}>
+        {render}
       </div>
     </div>
   );
