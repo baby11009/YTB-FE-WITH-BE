@@ -50,6 +50,8 @@ const TagPage = () => {
 
   const containerRef = useRef();
 
+  const totalPage = useRef();
+
   const handleOnClick = (queryData) => {
     setQueryOptions((prev) => [...prev, queryData]);
 
@@ -67,7 +69,8 @@ const TagPage = () => {
     );
 
     setQueriese((prev) => {
-      const { search, sort } = prev;
+      const prevClone = { ...prev };
+      const { search, sort } = prevClone;
 
       if (queryData.buttonType === "sort") {
         const { [queryData.id]: _, ...rest } = sort;
@@ -83,7 +86,9 @@ const TagPage = () => {
         prev.search = rest;
       }
 
-      return prev;
+      prevClone.page = 1;
+
+      return prevClone;
     });
 
     queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
@@ -216,6 +221,7 @@ const TagPage = () => {
       setTagList([...tagData.data]);
       containerRef.current.scrollTop = 0;
       setCurrMode(undefined);
+      totalPage.current = tagData.totalPages || 1;
     }
 
     return () => {
@@ -334,7 +340,7 @@ const TagPage = () => {
         <Pagination
           setQueriese={setQueriese}
           currPage={queriese.page}
-          totalPage={tagData?.totalPages || 1}
+          totalPage={totalPage.current}
         />
       </div>
     </div>

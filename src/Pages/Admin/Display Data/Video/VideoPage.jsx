@@ -43,6 +43,8 @@ const VideoPage = ({ type }) => {
 
   const [checkedList, setCheckedList] = useState([]);
 
+  const totalPage = useRef();
+
   const containerRef = useRef();
 
   const funcContainerRef = useRef();
@@ -68,7 +70,8 @@ const VideoPage = ({ type }) => {
     );
 
     setQueriese((prev) => {
-      const { search, sort } = prev;
+      const prevClone = { ...prev };
+      const { search, sort } = prevClone;
 
       if (queryData.buttonType === "sort") {
         const { [queryData.id]: _, ...rest } = sort;
@@ -84,7 +87,9 @@ const VideoPage = ({ type }) => {
         prev.search = rest;
       }
 
-      return prev;
+      prevClone.page = 1;
+
+      return prevClone;
     });
 
     queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
@@ -268,6 +273,7 @@ const VideoPage = ({ type }) => {
   useLayoutEffect(() => {
     if (videosData && containerRef.current) {
       containerRef.current.scrollTop = 0;
+      totalPage.current = videosData.totalPages || 1;
     }
 
     return () => {
@@ -388,7 +394,7 @@ const VideoPage = ({ type }) => {
         <Pagination
           setQueriese={setQueriese}
           currPage={queriese.page}
-          totalPage={videosData?.totalPages || 1}
+          totalPage={totalPage.current}
         />
       </div>
     </div>

@@ -108,7 +108,7 @@ const UpsertUser = () => {
       name: (name) => {
         let error = isEmpty("name", name, "User name cannot be empty");
         if (!error) {
-          error = minMaxLength("name", name, _, 20);
+          error = minMaxLength("name", name, 20);
         }
         return error;
       },

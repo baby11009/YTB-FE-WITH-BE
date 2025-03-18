@@ -37,6 +37,8 @@ const DisplayUser = () => {
 
   const [checkedList, setCheckedList] = useState([]);
 
+  const totalPage = useRef();
+
   const containerRef = useRef();
 
   const funcContainerRef = useRef();
@@ -67,7 +69,8 @@ const DisplayUser = () => {
     );
 
     setQueriese((prev) => {
-      const { search, sort } = prev;
+      const prevClone = { ...prev };
+      const { search, sort } = prevClone;
 
       if (queryData.buttonType === "sort") {
         const { [queryData.id]: _, ...rest } = sort;
@@ -83,7 +86,9 @@ const DisplayUser = () => {
         prev.search = rest;
       }
 
-      return prev;
+      prevClone.page = 1;
+
+      return prevClone;
     });
 
     queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
@@ -235,6 +240,7 @@ const DisplayUser = () => {
   useEffect(() => {
     if (usersData && containerRef.current) {
       containerRef.current.scrollTop = 0;
+      totalPage.current = usersData.totalPages || 1;
     }
 
     return () => {
@@ -354,7 +360,7 @@ const DisplayUser = () => {
         <Pagination
           setQueriese={setQueriese}
           currPage={queriese.page}
-          totalPage={usersData?.totalPages || 1}
+          totalPage={totalPage.current}
         />
       </div>
     </div>

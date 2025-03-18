@@ -3,7 +3,7 @@ import { CreateIcon, SortIcon2, TrashBinIcon } from "../../../../Assets/Icons";
 import { getData } from "../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
-import { dltManyData } from "../../../../Api/controller";
+import { dltManyData, dltData } from "../../../../Api/controller";
 import Display from "./Display";
 import {
   Pagination,
@@ -38,6 +38,8 @@ const PlaylistPage = ({ openedMenu }) => {
 
   const [checkedList, setCheckedList] = useState([]);
 
+  const totalPage = useRef();
+
   const containerRef = useRef();
 
   const funcContainerRef = useRef();
@@ -68,7 +70,8 @@ const PlaylistPage = ({ openedMenu }) => {
     );
 
     setQueriese((prev) => {
-      const { search, sort } = prev;
+      const prevClone = { ...prev };
+      const { search, sort } = prevClone;
 
       if (queryData.buttonType === "sort") {
         const { [queryData.id]: _, ...rest } = sort;
@@ -84,7 +87,9 @@ const PlaylistPage = ({ openedMenu }) => {
         prev.search = rest;
       }
 
-      return prev;
+      prevClone.page = 1;
+
+      return prevClone;
     });
 
     queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {
@@ -158,6 +163,20 @@ const PlaylistPage = ({ openedMenu }) => {
       handleOnClick: handleOnClick,
     },
     {
+      id: "type",
+      text: "Type",
+      type: "select",
+      buttonType: "search",
+      renderCondition: true,
+      options: [
+        { id: "liked", display: "Liked" },
+        { id: "watch_later", display: "Watch later" },
+        { id: "history", display: "History" },
+        { id: "playlist", display: "Playlist" },
+      ],
+      handleOnClick: handleOnClick,
+    },
+    {
       id: "privacy",
       text: "Privacy",
       type: "select",
@@ -218,10 +237,13 @@ const PlaylistPage = ({ openedMenu }) => {
   };
 
   const handleCheckedAll = () => {
-    if (checkedList.length === usersData?.data?.length) {
+    const playlistList = playlistsData?.data?.filter(
+      (item) => item.type === "Playlist",
+    );
+    if (checkedList.length === playlistList.length) {
       setCheckedList([]);
     } else {
-      const idList = usersData?.data?.map((item) => item?._id);
+      const idList = playlistList.map((item) => item?._id);
       setCheckedList(idList);
     }
   };
@@ -242,9 +264,9 @@ const PlaylistPage = ({ openedMenu }) => {
 
   const handleDelete = async (id) => {
     await dltData(
-      "user/",
+      "playlist/",
       id,
-      "User",
+      "Playlist",
       undefined,
       () => {
         refetch();
@@ -256,6 +278,7 @@ const PlaylistPage = ({ openedMenu }) => {
   useEffect(() => {
     if (playlistsData && containerRef.current) {
       containerRef.current.scrollTop = 0;
+      totalPage.current = playlistsData.totalPages || 1;
     }
 
     return () => {
@@ -286,7 +309,7 @@ const PlaylistPage = ({ openedMenu }) => {
       </div>
 
       <div
-        className='sticky top-[52px] z-[2000] min-w-[1180px] pb-[4px] bg-black'
+        className='sticky top-[52px] z-[2000] min-w-[1204px] pb-[4px] bg-black'
         ref={funcContainerRef}
       >
         <div className='flex gap-[24px]'>
@@ -375,67 +398,10 @@ const PlaylistPage = ({ openedMenu }) => {
         <Pagination
           setQueriese={setQueriese}
           currPage={queriese.page}
-          totalPage={playlistsData?.totalPages || 1}
+          totalPage={totalPage.current}
         />
       </div>
     </div>
   );
 };
 export default PlaylistPage;
-
-// <div
-// className={`flex items-center justify-between py-[16px] ${
-//   openedMenu ? "xl:py-[8px]" : ""
-// }`}
-// >
-// <h2 className='text-[28px] leading-[44px] font-[500]'>Playlists</h2>
-// <div className='flex flex-col sm:flex-row sm:items-center gap-[12px]'>
-//   <div className='flex items-center justify-end sm:justify-start gap-[12px]'>
-//     {/* Search */}
-//     <Search searchValue={searchValue} setSearchValue={setSearchValue} />
-
-//     {/* Create */}
-//     <Link
-//       className='size-[32px] rounded-[5px] flex items-center justify-center
-// group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-green-400 transition-all duration-[0.2s] ease-in
-// '
-//       to={"upsert"}
-//     >
-//       <div className='text-[rgba(255,255,255,0.4)] group-hover:text-green-400  transition-all duration-[0.2s]'>
-//         <CreateIcon />
-//       </div>
-//     </Link>
-//   </div>
-//   <div className='flex items-center gap-[12px]'>
-//     {/* Delete many */}
-//     <button
-//       className='size-[32px] rounded-[5px] flex items-center justify-center
-//  group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
-// '
-//       onClick={handleDeleteMany}
-//     >
-//       <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
-//         <DeleteAllIcon />
-//       </div>
-//     </button>
-
-//     {/* Filter */}
-//     <Filter queriese={queriese} setQueriese={setQueriese} />
-//   </div>
-// </div>
-// </div>
-// <Display
-// dataList={playlistsData.data}
-// page={queriese.page}
-// mockArr={mockArr}
-// limit={limit}
-// checkedList={checkedList}
-// refetch={refetch}
-// handleChecked={handleChecked}
-// handleCheckedAll={handleCheckedAll}
-// />
-// <Pagination
-// setQueriese={setQueriese}
-// currPage={queriese.page}
-// totalPage={totalPage}
-// />

@@ -63,7 +63,8 @@ const CommentPage = ({ openedMenu }) => {
     );
 
     setQueriese((prev) => {
-      const { search, sort } = prev;
+      const prevClone = { ...prev };
+      const { search, sort } = prevClone;
 
       if (queryData.buttonType === "sort") {
         const { [queryData.id]: _, ...rest } = sort;
@@ -79,7 +80,9 @@ const CommentPage = ({ openedMenu }) => {
         prev.search = rest;
       }
 
-      return prev;
+      prevClone.page = 1;
+
+      return prevClone;
     });
 
     queryOptionBtns.current = queryOptionBtns.current.map((queryOption) => {

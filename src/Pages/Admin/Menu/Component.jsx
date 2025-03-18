@@ -74,15 +74,11 @@ export const Button = ({ data, currPath, openedMenu }) => {
 
   const handleOnclick = () => {
     if (data.path) {
-      let path = data.param ? data.path + "/" + data.param : data.path;
+      let path = data.query ? data.path + "?" + data.query : data.path;
 
       navigate(path);
     }
   };
-
-  if (!data) {
-    throw new Error("Thiếu data");
-  }
 
   return (
     <button className='w-full' onClick={handleOnclick}>

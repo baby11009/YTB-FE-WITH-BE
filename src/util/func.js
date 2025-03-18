@@ -107,3 +107,7 @@ export const isObjectEmpty = (obj) => {
 
   return true;
 };
+
+export const isTwoArrayEqual = (arr1, arr2) => {
+  return JSON.stringify(arr1) === JSON.stringify(arr2);
+};

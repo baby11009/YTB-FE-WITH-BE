@@ -8,7 +8,6 @@ import {
 } from "react";
 
 const TextArea = ({
-  disabled,
   cannotEmpty = true,
   preventCharactersList,
   title,
@@ -173,7 +172,7 @@ const TextArea = ({
         }}
       >
         <div className='mt-[8px] mb-[4px]'>
-          <span className='text-[12px] leading-[16px] font-[500]'>{title}</span>
+          <span className='text-[12px] leading-[16px] text-gray-A'>{title}</span>
         </div>
         <div
           contentEditable={true}

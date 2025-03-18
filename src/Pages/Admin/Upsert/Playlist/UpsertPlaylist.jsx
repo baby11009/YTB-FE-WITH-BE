@@ -1,16 +1,27 @@
 import { useParams } from "react-router-dom";
-import { getDataWithAuth } from "../../../../Api/getData";
+import { getData } from "../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   DropDown,
+  DisableTextArea,
   InfiniteDropDown,
   InfiniteDropDownWithCheck,
-  TextArea
+  TextArea,
 } from "../../../../Component";
-import { useState, useEffect, useLayoutEffect, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useRef,
+} from "react";
 import { CloseIcon } from "../../../../Assets/Icons";
 import { createData, updateData } from "../../../../Api/controller";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
+import { isEmpty } from "../../../../util/validateFunc";
+import { isObjectEmpty } from "../../../../util/func";
+import { HovUserCard, HovVideorCard } from "../../../../Component";
+import { isTwoArrayEqual } from "../../../../util/func";
 
 const initForm = {
   userId: "",
@@ -18,6 +29,13 @@ const initForm = {
   videoIdList: [],
   title: "",
   privacy: "public",
+};
+
+const intiQueriese = {
+  videoPage: 1,
+  videoLimit: 10,
+  search: {},
+  sort: {},
 };
 
 const userQuerieseInit = {
@@ -41,6 +59,8 @@ const UpsertPlaylist = () => {
 
   const queryClient = useQueryClient();
 
+  const [queriese, setQueriese] = useState(intiQueriese);
+
   const [userQueriese, setUserQueriese] = useState(userQuerieseInit);
 
   const [videoQueriese, setVideoQueriese] = useState(videoQuerieseInit);
@@ -55,14 +75,19 @@ const UpsertPlaylist = () => {
 
   const [submitErrs, setSubmitErrs] = useState({});
 
+  const privacy = useRef([
+    { id: "public", label: "Public" },
+    { id: "private", label: "Private" },
+  ]);
+
   const [error, setError] = useState({
     inputName: [],
     message: [],
   });
 
-  const { data: playlistData, refetch } = getDataWithAuth(
+  const { data: playlistData, refetch } = getData(
     `playlist/${id}`,
-    {},
+    queriese,
     id !== undefined,
     false,
   );
@@ -70,16 +95,15 @@ const UpsertPlaylist = () => {
   const {
     data: usersData,
     isLoading: userIsLoading,
-    isError: userIsError,
     error: userError,
-  } = getDataWithAuth("user", userQueriese, userOpened, false);
+  } = getData("user", userQueriese, userOpened, false);
 
   const {
     data: videosData,
     isLoading: videoIsLoading,
     isError: videoIsError,
     error: videoError,
-  } = getDataWithAuth("video", videoQueriese, videoOpened, false);
+  } = getData("video", videoQueriese, videoOpened, false);
 
   const handleOnChange = (name, value) => {
     setFormData((prev) => ({
@@ -191,11 +215,7 @@ const UpsertPlaylist = () => {
       return;
     }
 
-    const finalFormData = {
-      title: formData.title,
-      videoIdList: formData.videoIdList,
-      userId: formData.userId,
-    };
+    const { email, ...finalFormData } = formData;
 
     await createData(
       "playlist",
@@ -216,50 +236,56 @@ const UpsertPlaylist = () => {
       return;
     }
 
-    const finalFormData = {};
-
-    if (formData.title !== playlistData?.data?.title) {
-      finalFormData.title = formData.title;
-    }
+    const { email, userId, videoIdList, ...finalFormData } = formData;
 
     // Lấy ra các phần tử chỉ có ở 1 trong 2 mảng để xóa và thêm
     // Xóa đối với các phần tử chỉ có trong mảng của data fetch về
     // Thêm đối với các phẩn tử chỉ có trong mảng đang điều chỉnh dữ liệu
     // Có trong cả 2 tức là k thay đổi các phần tử
 
-    const setFormData = new Set(formData.videoIdList);
-
-    const setData = new Set(playlistData?.data?.itemList);
-
-    const uniqueIdList = [];
-
-    playlistData?.data?.itemList?.forEach((item) => {
-      if (!formData.videoIdList.includes(item)) {
-        uniqueIdList.push(item);
+    for (const key in finalFormData) {
+      if (finalFormData[key] === playlistData.data[key]) {
+        delete finalFormData[key];
       }
-    });
-
-    formData.videoIdList.filter((item) => {
-      if (!playlistData?.data?.itemList.includes(item)) {
-        uniqueIdList.push(item);
-      }
-    });
-
-    if (uniqueIdList.length > 0) {
-      finalFormData.videoIdList = uniqueIdList;
     }
 
-    await updateData(
-      "playlist",
-      id,
-      finalFormData,
-      "playlist",
-      () => {
-        refetch();
-      },
-      undefined,
-      addToaster,
-    );
+    if(isTwoArrayEqual(videoIdList,playlistData.data)){
+      
+    }
+
+    // const setFormData = new Set(videoIdList);
+
+    // const setData = new Set(playlistData?.data?.itemList);
+
+    // const uniqueIdList = [];
+
+    // playlistData?.data?.itemList?.forEach((item) => {
+    //   if (!formData.videoIdList.includes(item)) {
+    //     uniqueIdList.push(item);
+    //   }
+    // });
+
+    // formData.videoIdList.filter((item) => {
+    //   if (!playlistData?.data?.itemList.includes(item)) {
+    //     uniqueIdList.push(item);
+    //   }
+    // });
+
+    // if (uniqueIdList.length > 0) {
+    //   finalFormData.videoIdList = uniqueIdList;
+    // }
+
+    // await updateData(
+    //   "playlist",
+    //   id,
+    //   finalFormData,
+    //   "playlist",
+    //   () => {
+    //     refetch();
+    //   },
+    //   undefined,
+    //   addToaster,
+    // );
   };
 
   const handleSubmit = async (e) => {
@@ -272,14 +298,32 @@ const UpsertPlaylist = () => {
     }
   };
 
+  useEffect(() => {
+    let timeOut;
+    if (submitErrs) {
+      timeOut = setTimeout(() => {
+        setSubmitErrs({});
+      }, 2500);
+    }
+
+    return () => {
+      clearTimeout(timeOut);
+    };
+  }, [submitErrs]);
+
   useLayoutEffect(() => {
     if (playlistData) {
-      setFormData({
+      const data = {
         userId: playlistData?.data?.user_info?._id,
         email: playlistData?.data?.user_info?.email,
         videoIdList: playlistData?.data?.itemList,
         title: playlistData?.data?.title,
-      });
+      };
+
+      if (playlistData.data.type === "playlist") {
+        data.privacy = playlistData.data.privacy;
+      }
+      setFormData(data);
     }
 
     return () => {
@@ -289,15 +333,15 @@ const UpsertPlaylist = () => {
 
   useEffect(() => {
     if (!userOpened) {
-      queryClient.removeQueries("user");
+      queryClient.removeQueries({ queryKey: Object.values(userQueriese) });
     }
-  }, [userOpened]);
+  }, [userOpened, userQueriese]);
 
   useEffect(() => {
     if (!videoOpened) {
-      queryClient.removeQueries("video");
+      queryClient.removeQueries({ queryKey: Object.values(videoQueriese) });
     }
-  }, [videoOpened]);
+  }, [videoOpened, videoQueriese]);
 
   useEffect(() => {
     let timeOut;
@@ -321,6 +365,8 @@ const UpsertPlaylist = () => {
     };
   }, []);
 
+  if (id && !playlistData) return;
+
   return (
     <div>
       <header className='pt-[16px] pb-[40px]'>
@@ -332,22 +378,26 @@ const UpsertPlaylist = () => {
         onSubmit={handleSubmit}
         className='flex items-center flex-wrap gap-[24px] mb-[36px]'
       >
-        <div className='flex-1 flex flex-wrap gap-[16px]'>
+        <div className='flex-1 flex flex-wrap gap-x-[16px]'>
           {/* Title */}
           <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[100]'>
-            <TextArea
-              title={"Title"}
-              name={"title"}
-              preventCharactersList={new Set(["Enter"])}
-              value={formData.title}
-              defaultValue={playlistData?.data.title}
-              handleOnChange={handleOnChange}
-              maxLength={155}
-              handleSetRealTimeErr={handleSetRealTimeErr}
-              handleRemoveRealTimeErr={handleRemoveRealTimeErr}
-              errMsg={submitErrs["title"] ? submitErrs["title"] : ""}
-              placeholder={"Enter playlist title"}
-            />
+            {!id || playlistData?.data.type === "playlist" ? (
+              <TextArea
+                title={"Title"}
+                name={"title"}
+                preventCharactersList={new Set(["Enter"])}
+                value={formData.title}
+                defaultValue={playlistData?.data.title}
+                handleOnChange={handleOnChange}
+                maxLength={155}
+                handleSetRealTimeErr={handleSetRealTimeErr}
+                handleRemoveRealTimeErr={handleRemoveRealTimeErr}
+                errMsg={submitErrs["title"] ? submitErrs["title"] : ""}
+                placeholder={"Enter playlist title"}
+              />
+            ) : (
+              <DisableTextArea title={"Title"} value={formData.title} />
+            )}
           </div>
 
           {/* User */}
@@ -360,25 +410,25 @@ const UpsertPlaylist = () => {
               setIsOpened={setUserOpened}
               list={usersData?.data}
               isLoading={userIsLoading}
-              isError={userIsError}
-              errorMsg={userError?.response?.data?.msg}
+              fetchingError={userError?.response?.data?.msg}
+              validateError={submitErrs["userId"] ? submitErrs["userId"] : ""}
               displayData={"email"}
               handleSetQueriese={(value, pageInc) => {
                 setUserQueriese((prev) => {
-                  let finalobj = {
+                  const prevClone = {
                     ...prev,
                   };
 
                   if (value !== undefined) {
-                    finalobj.email = value;
-                    finalobj.page = 1;
+                    prevClone.search["email"] = value;
+                    prevClone.page = 1;
                   }
 
                   if (pageInc !== undefined) {
-                    finalobj.page = finalobj.page + pageInc;
+                    prevClone.page = prevClone.page + pageInc;
                   }
 
-                  return finalobj;
+                  return prevClone;
                 });
               }}
               handleSetCurr={(data) => {
@@ -388,14 +438,8 @@ const UpsertPlaylist = () => {
                   email: data?.email,
                 }));
               }}
+              HoverCard={HovUserCard}
             />
-            <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-              <span>
-                {error.inputName.includes("userId")
-                  ? error.message[error.inputName.indexOf("userId")]
-                  : ""}
-              </span>
-            </div>
           </div>
 
           {/* Video */}
@@ -409,37 +453,42 @@ const UpsertPlaylist = () => {
               list={videosData?.data}
               isLoading={videoIsLoading}
               isError={videoIsError}
-              errorMsg={videoError?.response?.data?.msg}
+              fetchingError={videoError?.response?.data?.msg}
               setData={(value) => {
                 setFormData((prev) => ({ ...prev, videoIdList: value }));
               }}
               handleSetQueriese={(value, pageInc) => {
                 setVideoQueriese((prev) => {
-                  let finalobj = {
+                  const prevClone = {
                     ...prev,
                   };
 
                   if (value !== undefined) {
-                    finalobj.id = value;
-                    finalobj.page = 1;
+                    prevClone.search["title"] = value;
+                    prevClone.page = 1;
                   }
 
                   if (pageInc !== undefined) {
-                    finalobj.page = finalobj.page + pageInc;
+                    prevClone.page = prevClone.page + pageInc;
                   }
 
-                  return finalobj;
+                  return prevClone;
                 });
               }}
             />
-            <div className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] mt-[12px] px-[8px]'>
-              <span>
-                {error.inputName.includes("videoIdList")
-                  ? error.message[error.inputName.indexOf("videoIdList")]
-                  : ""}
-              </span>
-            </div>
           </div>
+          {(!id || playlistData?.data.type === "playlist") && (
+            <div className='basis-[100%] sm:basis-[48%] 2md:basis-[32%] z-[90]'>
+              <DropDown
+                list={privacy.current}
+                title={"Privacy"}
+                value={formData.privacy || ""}
+                handleOnClick={(privacy) => {
+                  setFormData((prev) => ({ ...prev, privacy }));
+                }}
+              />
+            </div>
+          )}
         </div>
 
         <div

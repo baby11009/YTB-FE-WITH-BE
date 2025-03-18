@@ -1,5 +1,6 @@
 import { CheckBox2 } from "../../../../Component";
 import PlaylistTbRow from "./PlaylistTbRow";
+import { useRef, useEffect } from "react";
 const Display = ({
   dataList = [],
   checkedList = [],
@@ -8,6 +9,15 @@ const Display = ({
   handleDelete,
   tableHeader,
 }) => {
+  const playlistList = useRef([]);
+
+  useEffect(() => {
+    if (dataList) {
+      playlistList.current = dataList.filter(
+        (item) => item.type === "Playlist",
+      );
+    }
+  }, [dataList]);
   return (
     <div className='min-w-full w-fit'>
       <div
@@ -18,17 +28,19 @@ const Display = ({
         <div className='h-[48px] px-[20px] flex items-center justify-center gap-[12px] z-[10]'>
           <CheckBox2
             checked={
-              checkedList.length === dataList.length && dataList.length > 0
+              checkedList.length === playlistList.current.length &&
+              playlistList.current.length > 0
             }
             setChecked={handleCheckedAll}
           />
         </div>
-        <div className='pl-[12px] flex-[2_0_400px] min-w-[400px] '>
+        <div className='pl-[12px] flex-[2_0_300px] min-w-[300px] '>
           Playlist
         </div>
         <div className='pl-[12px] flex-[1_0_224px] min-w-[224px] border-x-[1px] border-gray-A'>
           Channel
         </div>
+        <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Type</div>
         <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Privacy</div>
         <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>Date</div>
         <div className='flex-[1_0_100px] min-w-[100px] mx-[12px]'>

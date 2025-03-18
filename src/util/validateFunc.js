@@ -6,7 +6,7 @@ export const isEmpty = (dataName, dataValue, message) => {
   }
 };
 
-export const minMaxLength = (dataName, dataValue, min, max) => {
+export const minMaxLength = (dataName, dataValue, max, min) => {
   const length = dataValue.length;
   if (min && length < min) {
     return {
