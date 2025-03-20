@@ -41,7 +41,7 @@ const VideoPage = ({ type }) => {
 
   const [queryOptions, setQueryOptions] = useState([]);
 
-  const [checkedList, setCheckedList] = useState([]);
+  const [checkedList, setCheckedList] = useState(new Set());
 
   const totalPage = useRef();
 
@@ -226,30 +226,33 @@ const VideoPage = ({ type }) => {
 
   const handleChecked = (id) => {
     setCheckedList((prev) => {
-      if (prev.includes(id)) {
-        return [...prev.filter((data) => data !== id)];
+      const prevClone = structuredClone(prev);
+      if (prevClone.has(id)) {
+        prevClone.delete(id);
+      } else {
+        prevClone.add(id);
       }
 
-      return [...prev, id];
+      return new Set([...prevClone]);
     });
   };
 
   const handleCheckedAll = () => {
-    if (checkedList.length === videosData?.data?.length) {
-      setCheckedList([]);
+    let listSet;
+    if (checkedList.size === videosData?.data?.length) {
+      listSet = new Set();
     } else {
-      const idList = videosData?.data?.map((item) => item?._id);
-      setCheckedList(idList);
+      listSet = new Set(videosData?.data?.map((item) => item?._id));
     }
+    setCheckedList(listSet);
   };
-
   const handleDeleteMany = async () => {
     await dltManyData(
       "video/delete-many",
-      checkedList,
+      [...checkedList],
       "video",
       () => {
-        setCheckedList([]);
+        setCheckedList(new Set());
         refetch();
       },
       undefined,
@@ -277,7 +280,7 @@ const VideoPage = ({ type }) => {
     }
 
     return () => {
-      setCheckedList([]);
+      setCheckedList(new Set());
     };
   }, [videosData]);
 
@@ -370,7 +373,7 @@ const VideoPage = ({ type }) => {
                 <CreateIcon />
               </div>
             </Link>
-            {checkedList.length > 0 && (
+            {checkedList.size > 0 && (
               <button onClick={handleDeleteMany}>
                 <div className='p-[8px] hover:text-red-600'>
                   <TrashBinIcon />

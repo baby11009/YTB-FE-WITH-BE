@@ -3,7 +3,7 @@ import CommentTbRow from "./CommentTbRow";
 
 const Display = ({
   dataList = [],
-  checkedList = [],
+  checkedList,
   handleChecked,
   handleCheckedAll,
   handleDelete,
@@ -19,7 +19,7 @@ const Display = ({
         <div className='h-[48px] px-[20px] flex items-center justify-center gap-[12px] z-[10]'>
           <CheckBox2
             checked={
-              checkedList.length === dataList.length && dataList.length > 0
+              checkedList.size === dataList.length && dataList.length > 0
             }
             setChecked={handleCheckedAll}
           />
@@ -49,7 +49,7 @@ const Display = ({
               data={data}
               handleDelete={handleDelete}
               handleChecked={handleChecked}
-              checked={checkedList.includes(data?._id)}
+              checked={checkedList.has(data?._id)}
             />
           ))}
       </div>

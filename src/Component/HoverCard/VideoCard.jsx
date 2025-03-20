@@ -1,31 +1,36 @@
 const VideoCard = ({ data }) => {
   return (
-    <div className='px-[16px] py-[8px] rounded-[10px] bg-black-21 w-[250px] shadow-[0_0_8px_2px_rgba(255,255,255,1)]'>
-      <div className='w-full rounded-[5px] bg-black'>
+    <div className='flex gap-[16px] min-w-[300px]'>
+      <div className='shrink-0 w-[120px] aspect-video rounded-[5px] overflow-hidden bg-black'>
         <img
           src={`${import.meta.env.VITE_BASE_API_URI}${
             import.meta.env.VITE_VIEW_THUMB_API
           }${data?.thumb}`}
           alt='thumb'
-          className='w-full aspect-video object-center object-contain'
+          className='size-full object-center object-contain'
         />
       </div>
-      <span className='w-full line-clamp-2 text-ellipsis overflow-hidden text-[16px] font-bold mt-[4px]'>
-        {data?.title}
-      </span>
-      <div className='flex items-center gap-[8px]'>
-        <div className='size-[30px] rounded-[50%] overflow-hidden'>
-          <img
-            src={`${import.meta.env.VITE_BASE_API_URI}${
-              import.meta.env.VITE_VIEW_AVA_API
-            }${data?.user_info?.avatar}`}
-            alt='avatar'
-            className=' object-center object-cover'
-          />
-        </div>
-        <span className='flex-1 line-clamp-1 text-ellipsis overflow-hidden'>
-          {data?.user_info?.email}
+      <div className='flex flex-col justify-between'>
+        <span
+          className='w-full line-clamp-2 text-ellipsis break-words overflow-hidden text-[14px] font-bold mt-[4px]'
+          style={{ overflowWrap: "anywhere" }}
+        >
+          {data?.title}
         </span>
+        <div className='flex items-center gap-[8px]'>
+          <div className='size-[30px] rounded-[50%] overflow-hidden'>
+            <img
+              src={`${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_AVA_API
+              }${data?.user_info?.avatar}`}
+              alt='avatar'
+              className=' object-center object-cover'
+            />
+          </div>
+          <span className='flex-1 text-[13px] line-clamp-1 text-ellipsis overflow-hidden text-gray-A'>
+            {data?.user_info?.email}
+          </span>
+        </div>
       </div>
     </div>
   );

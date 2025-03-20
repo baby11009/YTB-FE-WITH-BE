@@ -4,7 +4,7 @@ import EditTagCard from "./EditTagCard";
 const Display = ({
   openedMenu,
   dataList = [],
-  checkedList = [],
+  checkedList,
   handleChecked,
   handleCheckedAll,
   handleDelete,
@@ -13,6 +13,7 @@ const Display = ({
   currMode,
   setCurrMode,
 }) => {
+  console.log("🚀 ~ checkedList:", checkedList)
   return (
     <div className='min-w-full w-fit'>
       <div
@@ -27,10 +28,10 @@ const Display = ({
           <InsertTagCard refetch={refetch} setCurrMode={setCurrMode} />
         )}
         {dataList.map((data) => {
-          if (currMode === data?._id) {
+          if (currMode === data._id) {
             return (
               <EditTagCard
-                key={data?._id}
+                key={data._id}
                 data={data}
                 setCurrMode={setCurrMode}
                 handleUpdate={handleUpdate}
@@ -39,10 +40,10 @@ const Display = ({
           } else {
             return (
               <TagCard
-                key={data?._id}
+                key={data._id}
                 data={data}
                 handleChecked={handleChecked}
-                checkedList={checkedList}
+                checked={checkedList.has(data._id)}
                 handleDelete={handleDelete}
                 startEditing={(id) => setCurrMode(id)}
               />

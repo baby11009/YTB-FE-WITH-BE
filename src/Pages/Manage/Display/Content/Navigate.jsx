@@ -66,18 +66,16 @@ const Navigate = ({ pathParam }) => {
 
   useLayoutEffect(() => {
     if (containerRef.current) {
-      const childrens = containerRef.current.children;
-      for (let i = 0; i < childrens.length - 1; i++) {
-        if (childrens[i]?.dataset?.path === pathParam) {
-          const childRect = childrens[i].getBoundingClientRect();
-          const parentRect = containerRef.current.getBoundingClientRect();
-          setUnderlineInfo({
-            width: childrens[i].offsetWidth,
-            left: childRect.left - parentRect.left,
-          });
-          break;
-        }
-      }
+      const currChild = containerRef.current.querySelector(
+        `[data-path="${pathParam}"]`,
+      );
+
+      const childRect = currChild.getBoundingClientRect();
+      const parentRect = containerRef.current.getBoundingClientRect();
+      setUnderlineInfo({
+        width: currChild.offsetWidth,
+        left: childRect.left - parentRect.left,
+      });
     }
   }, []);
 

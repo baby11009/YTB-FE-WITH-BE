@@ -17,7 +17,7 @@ import {
 import { getData } from "../../../../../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
 
-const initQueriese = {
+const initQueries = {
   videoLimit: 4,
   videoPage: 1,
 };
@@ -29,7 +29,7 @@ const Upsert = ({ playlistId, func, handleClose }) => {
 
   const [trackerInfo, setTrackerInfo] = useState({ width: 0, left: 0 });
 
-  const [queriese, setQueriese] = useState(initQueriese);
+  const [queries, setQueries] = useState(initQueries);
 
   const [playlistInfo, setPlaylistInfo] = useState(undefined);
 
@@ -54,7 +54,7 @@ const Upsert = ({ playlistId, func, handleClose }) => {
 
   const { data, refetch } = getData(
     `/client/playlist/${playlistId}`,
-    queriese,
+    queries,
     !!playlistId,
     false,
   );
@@ -65,10 +65,10 @@ const Upsert = ({ playlistId, func, handleClose }) => {
       <VideoList
         playlistId={playlistInfo?._id}
         videoList={videoList}
-        currPage={queriese?.videoPage}
+        currPage={queries?.videoPage}
         totalPage={data?.totalPages}
         setPage={(page) => {
-          setQueriese((prev) => ({ ...prev, videoPage: page }));
+          setQueries((prev) => ({ ...prev, videoPage: page }));
         }}
         refetch={refetch}
       />

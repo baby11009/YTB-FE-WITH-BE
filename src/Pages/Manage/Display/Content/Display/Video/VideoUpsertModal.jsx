@@ -26,11 +26,11 @@ const init = {
   image: undefined,
   video: undefined,
   type: "video",
-  tags: [],
+  tags: new Set(),
   description: "",
 };
 
-const initTagQueriese = {
+const initTagQueries = {
   search: {},
   page: 1,
   limit: 10,
@@ -54,7 +54,7 @@ const VideoUpsertModal = ({ title, id }) => {
 
   const [openedTags, setOpenedTags] = useState(false);
 
-  const [tagParams, setTagParams] = useState(initTagQueriese);
+  const [tagParams, setTagParams] = useState(initTagQueries);
 
   const [formData, setFormData] = useState(init);
 
@@ -194,10 +194,6 @@ const VideoUpsertModal = ({ title, id }) => {
 
   const handleValidate = () => {
     setSubmitErrs({});
-
-    const keys = Object.keys(formData).filter(
-      (key) => key !== "type" && key !== "description",
-    );
 
     const { type, description, ...neededValidateFields } = formData;
 
@@ -464,9 +460,7 @@ const VideoUpsertModal = ({ title, id }) => {
           >
             <div className='flex items-center justify-center flex-wrap gap-x-[16px]'>
               {/* thumbnail */}
-              <div
-                className='basis-[100%] 2md:basis-[calc(50%-8px)]'
-              >
+              <div className='basis-[100%] 2md:basis-[calc(50%-8px)]'>
                 <label
                   htmlFor='thumbnail'
                   className={`inline-block  aspect-video max-h-[405px]  size-full relative cursor-pointer 
@@ -524,9 +518,7 @@ const VideoUpsertModal = ({ title, id }) => {
               </div>
 
               {/* Video */}
-              <div
-                className='basis-[100%] 2md:basis-[calc(50%-8px)]'
-              >
+              <div className='basis-[100%] 2md:basis-[calc(50%-8px)]'>
                 <label
                   htmlFor='video'
                   className={`inline-block w-full aspect-video max-h-[405px]  relative cursor-pointer 
@@ -627,7 +619,7 @@ const VideoUpsertModal = ({ title, id }) => {
                   setData={(value) => {
                     setFormData((prev) => ({ ...prev, tags: value }));
                   }}
-                  handleSetQueriese={(value, pageInc) => {
+                  handleSetQueries={(value, pageInc) => {
                     setTagParams((prev) => {
                       const prevClone = {
                         ...prev,

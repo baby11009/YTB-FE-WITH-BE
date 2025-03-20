@@ -45,6 +45,7 @@ export { default as Input2 } from "./Input/Input2.jsx";
 export { default as DropDown } from "./Dropdown/DropDown.jsx";
 export { default as InfiniteDropDown } from "./Dropdown/InfiniteDropDown.jsx";
 export { default as InfiniteDropDownWithCheck } from "./Dropdown/InfiniteDropDownWithCheck.jsx";
+export { default as DisableDropDown } from "./Dropdown/DisableDropDown.jsx";
 
 export { default as Pagination } from "./Pagination/Pagination.jsx";
 

@@ -16,7 +16,7 @@ import { getDisplayUsingValue } from "../../../../util/func";
 
 const limit = 10;
 
-const initQueriese = {
+const initQueries = {
   limit,
   page: 1,
   search: {},
@@ -30,13 +30,13 @@ const CommentPage = ({ openedMenu }) => {
 
   const queryClient = useQueryClient();
 
-  const [queriese, setQueriese] = useState(initQueriese);
+  const [queries, setQueries] = useState(initQueries);
 
   const [isQueryBoxOpened, setIsQueryBoxOpened] = useState(false);
 
   const [queryOptions, setQueryOptions] = useState([]);
 
-  const [checkedList, setCheckedList] = useState([]);
+  const [checkedList, setCheckedList] = useState(new Set());
 
   const containerRef = useRef();
 
@@ -44,7 +44,7 @@ const CommentPage = ({ openedMenu }) => {
 
   const tableHeader = useRef();
 
-  const { data: cmtsData, refetch } = getData("comment", queriese, true, false);
+  const { data: cmtsData, refetch } = getData("comment", queries, true, false);
 
   const handleOnClick = (queryData) => {
     setQueryOptions((prev) => [...prev, queryData]);
@@ -62,7 +62,7 @@ const CommentPage = ({ openedMenu }) => {
       prev.filter((search) => search.id !== queryData.id),
     );
 
-    setQueriese((prev) => {
+    setQueries((prev) => {
       const prevClone = { ...prev };
       const { search, sort } = prevClone;
 
@@ -94,8 +94,8 @@ const CommentPage = ({ openedMenu }) => {
   };
 
   const handleSearch = (searchKey, searchValue) => {
-    if (queriese.search[searchKey] === searchValue) return;
-    setQueriese((prev) => ({
+    if (queries.search[searchKey] === searchValue) return;
+    setQueries((prev) => ({
       ...prev,
       search: { ...prev.search, [searchKey]: searchValue },
       page: 1,
@@ -103,7 +103,7 @@ const CommentPage = ({ openedMenu }) => {
   };
 
   const handleSort = (sortKey, sortValue) => {
-    if (queriese.sort[sortKey] === sortValue) return;
+    if (queries.sort[sortKey] === sortValue) return;
 
     const sortOptionIds = queryOptions.map((query) => {
       if (query.buttonType === "sort") {
@@ -117,13 +117,13 @@ const CommentPage = ({ openedMenu }) => {
       let value;
       if (sortOptionId === sortKey) {
         value = sortValue;
-      } else if (queriese.sort[sortOptionId]) {
-        value = queriese.sort[sortOptionId];
+      } else if (queries.sort[sortOptionId]) {
+        value = queries.sort[sortOptionId];
       }
       sortObj[sortOptionId] = value;
     });
 
-    setQueriese((prev) => ({
+    setQueries((prev) => ({
       ...prev,
       sort: sortObj,
       page: 1,
@@ -227,30 +227,34 @@ const CommentPage = ({ openedMenu }) => {
 
   const handleChecked = (id) => {
     setCheckedList((prev) => {
-      if (prev.includes(id)) {
-        return [...prev.filter((data) => data !== id)];
+      const prevClone = structuredClone(prev);
+      if (prevClone.has(id)) {
+        prevClone.delete(id);
+      } else {
+        prevClone.add(id);
       }
 
-      return [...prev, id];
+      return new Set([...prevClone]);
     });
   };
 
   const handleCheckedAll = () => {
-    if (checkedList.length === cmtsData?.data?.length) {
-      setCheckedList([]);
+    let list;
+    if (checkedList.size === cmtsData?.data?.length) {
+      list = new Set();
     } else {
-      const idList = cmtsData?.data?.map((item) => item?._id);
-      setCheckedList(idList);
+      list = new Set(cmtsData?.data?.map((item) => item?._id));
     }
+    setCheckedList(list);
   };
 
   const handleDeleteMany = async () => {
     await dltManyData(
       "comment/delete-many",
-      checkedList,
+      [...checkedList],
       "Comment",
       () => {
-        setCheckedList([]);
+        setCheckedList(new Set());
         refetch();
       },
       undefined,
@@ -277,7 +281,7 @@ const CommentPage = ({ openedMenu }) => {
     }
 
     return () => {
-      setCheckedList([]);
+      setCheckedList(new Set());
     };
   }, [cmtsData]);
 
@@ -336,7 +340,7 @@ const CommentPage = ({ openedMenu }) => {
                     <QueryTextInput
                       key={query.id}
                       queryData={query}
-                      currValue={queriese.search[query.id]}
+                      currValue={queries.search[query.id]}
                       handleExecuteQuery={handleSearch}
                       handleClose={handleClose}
                     />
@@ -349,8 +353,8 @@ const CommentPage = ({ openedMenu }) => {
                       currValue={getDisplayUsingValue(
                         query.options,
                         query?.buttonType === "sort"
-                          ? queriese.sort[query.id]
-                          : queriese.search[query.id],
+                          ? queries.sort[query.id]
+                          : queries.search[query.id],
                       )}
                       handleExecuteQuery={
                         query?.buttonType === "sort" ? handleSort : handleSearch
@@ -368,7 +372,7 @@ const CommentPage = ({ openedMenu }) => {
                 <CreateIcon />
               </div>
             </Link>
-            {checkedList.length > 0 && (
+            {checkedList.size > 0 && (
               <button onClick={handleDeleteMany}>
                 <div className='p-[8px] hover:text-red-600'>
                   <TrashBinIcon />
@@ -390,8 +394,8 @@ const CommentPage = ({ openedMenu }) => {
 
       <div className='w-full bg-black fixed bottom-[0] right-0 py-[6px]'>
         <Pagination
-          setQueriese={setQueriese}
-          currPage={queriese.page}
+          setQueries={setQueries}
+          currPage={queries.page}
           totalPage={cmtsData?.totalPages || 1}
         />
       </div>
@@ -399,62 +403,3 @@ const CommentPage = ({ openedMenu }) => {
   );
 };
 export default CommentPage;
-
-{
-  /* <div
-className={`flex items-center justify-between py-[16px] ${
-  openedMenu ? "xl:py-[8px]" : ""
-}`}
->
-<h2 className='text-[28px] leading-[44px] font-[500]'>Comments</h2>
-<div className='flex flex-col sm:flex-row sm:items-center gap-[12px]'>
-  <div className='flex items-center justify-end sm:justify-start gap-[12px]'>
-
-    <Search searchValue={searchValue} setSearchValue={setSearchValue} />
-
- 
-    <Link
-      className='size-[32px] rounded-[5px] flex items-center justify-center 
-   group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-green-400 transition-all duration-[0.2s] ease-in
-  '
-      to={"upsert"}
-    >
-      <div className='text-[rgba(255,255,255,0.4)] group-hover:text-green-400  transition-all duration-[0.2s]'>
-        <CreateIcon />
-      </div>
-    </Link>
-  </div>
-  <div className='flex items-center gap-[12px]'>
- 
-    <button
-      className='size-[32px] rounded-[5px] flex items-center justify-center 
-     group border-[2px] border-[rgba(255,255,255,0.4)] hover:border-red-600 transition-all duration-[0.2s] ease-in
-    '
-      onClick={handleDeleteMany}
-    >
-      <div className='text-[rgba(255,255,255,0.4)] group-hover:text-red-600  transition-all duration-[0.2s]'>
-        <DeleteAllIcon />
-      </div>
-    </button>
-
-  
-    <Filter queriese={queriese} setQueriese={setQueriese} />
-  </div>
-</div>
-</div>
-<Display
-dataList={cmtsData?.data || []}
-page={queriese.page}
-mockArr={mockArr}
-limit={limit}
-checkedList={checkedList}
-refetch={refetch}
-handleChecked={handleChecked}
-handleCheckedAll={handleCheckedAll}
-/>
-<Pagination
-setQueriese={setQueriese}
-currPage={queriese.page}
-totalPage={totalPage}
-/> */
-}

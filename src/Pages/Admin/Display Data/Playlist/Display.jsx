@@ -3,7 +3,7 @@ import PlaylistTbRow from "./PlaylistTbRow";
 import { useRef, useEffect } from "react";
 const Display = ({
   dataList = [],
-  checkedList = [],
+  checkedList,
   handleChecked,
   handleCheckedAll,
   handleDelete,
@@ -28,7 +28,7 @@ const Display = ({
         <div className='h-[48px] px-[20px] flex items-center justify-center gap-[12px] z-[10]'>
           <CheckBox2
             checked={
-              checkedList.length === playlistList.current.length &&
+              checkedList.size === playlistList.current.length &&
               playlistList.current.length > 0
             }
             setChecked={handleCheckedAll}
@@ -59,7 +59,7 @@ const Display = ({
               data={data}
               handleDelete={handleDelete}
               handleChecked={handleChecked}
-              checked={checkedList.includes(data?._id)}
+              checked={checkedList.has(data._id)}
             />
           ))}
       </div>

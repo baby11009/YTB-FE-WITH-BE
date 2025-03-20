@@ -41,13 +41,13 @@ const init = {
   description: "",
 };
 
-const initUserQueriese = {
+const initUserQueries = {
   search: {},
   limit: 10,
   page: 1,
 };
 
-const initTagQueriese = {
+const initTagQueries = {
   search: {},
   page: 1,
   limit: 10,
@@ -68,9 +68,9 @@ const UpsertVideo = ({ type }) => {
 
   const [openedTags, setOpenedTags] = useState(false);
 
-  const [userQueriese, setUserQueriese] = useState(initUserQueriese);
+  const [userQueries, setUserQueries] = useState(initUserQueries);
 
-  const [tagQueriese, setTagQueriese] = useState(initTagQueriese);
+  const [tagQueries, setTagQueries] = useState(initTagQueries);
 
   const [formData, setFormData] = useState({ ...init, type: type });
 
@@ -97,13 +97,13 @@ const UpsertVideo = ({ type }) => {
     data: userData,
     error: userError,
     isLoading,
-  } = getData("user", userQueriese, openedUsers, false);
+  } = getData("user", userQueries, openedUsers, false);
 
   const {
     data: tagData,
     error: tagErr,
     isLoading: tagIsLoading,
-  } = getData("tag", tagQueriese, openedTags, false);
+  } = getData("tag", tagQueries, openedTags, false);
 
   const handleOnChange = (name, value) => {
     setFormData((prev) => ({
@@ -463,7 +463,7 @@ const UpsertVideo = ({ type }) => {
 
       if (videoData.data.tags_info) {
         dataForm.tags = videoData.data.tags;
-        setTagQueriese((prev) => ({
+        setTagQueries((prev) => ({
           ...prev,
           priorityList: videoData.data.tags,
         }));
@@ -493,18 +493,18 @@ const UpsertVideo = ({ type }) => {
   useEffect(() => {
     if (!openedUsers) {
       queryClient.removeQueries({
-        queryKey: Object.values(userQueriese),
+        queryKey: Object.values(userQueries),
       });
     }
-  }, [openedUsers, userQueriese]);
+  }, [openedUsers, userQueries]);
 
   useEffect(() => {
     if (!openedTags) {
       queryClient.removeQueries({
-        queryKey: Object.values(tagQueriese),
+        queryKey: Object.values(tagQueries),
       });
     }
-  }, [openedTags, tagQueriese]);
+  }, [openedTags, tagQueries]);
 
   useEffect(() => {
     let timeOut;
@@ -720,8 +720,8 @@ const UpsertVideo = ({ type }) => {
             isLoading={isLoading}
             fetchingError={userError?.response?.data?.msg}
             validateError={submitErrs["userId"]}
-            handleSetQueriese={(value, pageInc) => {
-              setUserQueriese((prev) => {
+            handleSetQueries={(value, pageInc) => {
+              setUserQueries((prev) => {
                 const prevClone = { ...prev };
                 if (value === "" || value) {
                   prevClone.search["email"] = value;
@@ -758,8 +758,8 @@ const UpsertVideo = ({ type }) => {
               setData={(value) => {
                 setFormData((prev) => ({ ...prev, tags: value }));
               }}
-              handleSetQueriese={(value, pageInc) => {
-                setTagQueriese((prev) => {
+              handleSetQueries={(value, pageInc) => {
+                setTagQueries((prev) => {
                   const prevClone = {
                     ...prev,
                   };

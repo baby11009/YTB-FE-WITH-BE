@@ -36,7 +36,7 @@ const PlaylistPage = ({ openedMenu }) => {
 
   const [queryOptions, setQueryOptions] = useState([]);
 
-  const [checkedList, setCheckedList] = useState([]);
+  const [checkedList, setCheckedList] = useState(new Set());
 
   const totalPage = useRef();
 
@@ -228,11 +228,14 @@ const PlaylistPage = ({ openedMenu }) => {
 
   const handleChecked = (id) => {
     setCheckedList((prev) => {
-      if (prev.includes(id)) {
-        return [...prev.filter((data) => data !== id)];
+      const prevClone = structuredClone(prev);
+      if (prevClone.has(id)) {
+        prevClone.delete(id);
+      } else {
+        prevClone.add(id);
       }
 
-      return [...prev, id];
+      return new Set([...prevClone]);
     });
   };
 
@@ -240,21 +243,25 @@ const PlaylistPage = ({ openedMenu }) => {
     const playlistList = playlistsData?.data?.filter(
       (item) => item.type === "Playlist",
     );
-    if (checkedList.length === playlistList.length) {
-      setCheckedList([]);
+
+    let list;
+    if (checkedList.size === playlistList.length) {
+      list = new Set();
     } else {
-      const idList = playlistList.map((item) => item?._id);
-      setCheckedList(idList);
+      list = new Set(playlistList.map((item) => item?._id));
     }
+    setCheckedList(list);
   };
 
   const handleDeleteMany = async () => {
+    console.log([...checkedList]);
+
     await dltManyData(
-      "user/delete-many",
-      checkedList,
-      "user",
+      "playlist/delete-many",
+      [...checkedList],
+      "Playlist",
       () => {
-        setCheckedList([]);
+        setCheckedList(new Set());
         refetch();
       },
       undefined,
@@ -282,7 +289,7 @@ const PlaylistPage = ({ openedMenu }) => {
     }
 
     return () => {
-      setCheckedList([]);
+      setCheckedList(new Set());
     };
   }, [playlistsData]);
 
@@ -374,7 +381,7 @@ const PlaylistPage = ({ openedMenu }) => {
                 <CreateIcon />
               </div>
             </Link>
-            {checkedList.length > 0 && (
+            {checkedList.size > 0 && (
               <button onClick={handleDeleteMany}>
                 <div className='p-[8px] hover:text-red-600'>
                   <TrashBinIcon />

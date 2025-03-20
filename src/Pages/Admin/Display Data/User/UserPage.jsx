@@ -29,13 +29,13 @@ const DisplayUser = () => {
 
   const queryClient = useQueryClient();
 
-  const [queriese, setQueriese] = useState(initPrs);
+  const [queries, setQueries] = useState(initPrs);
 
   const [isQueryBoxOpened, setIsQueryBoxOpened] = useState(false);
 
   const [queryOptions, setQueryOptions] = useState([]);
 
-  const [checkedList, setCheckedList] = useState([]);
+  const [checkedList, setCheckedList] = useState(new Set());
 
   const totalPage = useRef();
 
@@ -47,8 +47,8 @@ const DisplayUser = () => {
 
   const { data: usersData, refetch } = getData(
     "user",
-    queriese,
-    queriese ? true : false,
+    queries,
+    queries ? true : false,
     false,
   );
 
@@ -68,7 +68,7 @@ const DisplayUser = () => {
       prev.filter((search) => search.id !== queryData.id),
     );
 
-    setQueriese((prev) => {
+    setQueries((prev) => {
       const prevClone = { ...prev };
       const { search, sort } = prevClone;
 
@@ -100,8 +100,8 @@ const DisplayUser = () => {
   };
 
   const handleSearch = (searchKey, searchValue) => {
-    if (queriese.search[searchKey] === searchValue) return;
-    setQueriese((prev) => ({
+    if (queries.search[searchKey] === searchValue) return;
+    setQueries((prev) => ({
       ...prev,
       search: { ...prev.search, [searchKey]: searchValue },
       page: 1,
@@ -109,7 +109,7 @@ const DisplayUser = () => {
   };
 
   const handleSort = (sortKey, sortValue) => {
-    if (queriese.sort[sortKey] === sortValue) return;
+    if (queries.sort[sortKey] === sortValue) return;
 
     const sortOptionIds = queryOptions.map((query) => {
       if (query.buttonType === "sort") {
@@ -123,13 +123,13 @@ const DisplayUser = () => {
       let value;
       if (sortOptionId === sortKey) {
         value = sortValue;
-      } else if (queriese.sort[sortOptionId]) {
-        value = queriese.sort[sortOptionId];
+      } else if (queries.sort[sortOptionId]) {
+        value = queries.sort[sortOptionId];
       }
       sortObj[sortOptionId] = value;
     });
 
-    setQueriese((prev) => ({
+    setQueries((prev) => ({
       ...prev,
       sort: sortObj,
       page: 1,
@@ -193,30 +193,34 @@ const DisplayUser = () => {
 
   const handleChecked = (id) => {
     setCheckedList((prev) => {
-      if (prev.includes(id)) {
-        return [...prev.filter((data) => data !== id)];
+      const prevClone = structuredClone(prev);
+      if (prevClone.has(id)) {
+        prevClone.delete(id);
+      } else {
+        prevClone.add(id);
       }
 
-      return [...prev, id];
+      return new Set([...prevClone]);
     });
   };
 
-  const handleCheckedAll = () => {
-    if (checkedList.length === usersData?.data?.length) {
-      setCheckedList([]);
+  const handleCheckedAll = () => {  
+    let list;
+    if (checkedList.size === usersData?.data?.length) {
+      list = new Set();
     } else {
-      const idList = usersData?.data?.map((item) => item?._id);
-      setCheckedList(idList);
+      list = new Set(usersData?.data?.map((item) => item?._id));
     }
+    setCheckedList(list);
   };
 
   const handleDeleteMany = async () => {
     await dltManyData(
       "user/delete-many",
-      checkedList,
+      [...checkedList],
       "user",
       () => {
-        setCheckedList([]);
+        setCheckedList(new Set());
         refetch();
       },
       undefined,
@@ -244,7 +248,7 @@ const DisplayUser = () => {
     }
 
     return () => {
-      setCheckedList([]);
+      setCheckedList(new Set());
     };
   }, [usersData]);
 
@@ -304,7 +308,7 @@ const DisplayUser = () => {
                     <QueryTextInput
                       key={query.id}
                       queryData={query}
-                      currValue={queriese.search[query.id]}
+                      currValue={queries.search[query.id]}
                       handleExecuteQuery={handleSearch}
                       handleClose={handleClose}
                     />
@@ -317,8 +321,8 @@ const DisplayUser = () => {
                       currValue={getDisplayUsingValue(
                         query.options,
                         query?.buttonType === "sort"
-                          ? queriese.sort[query.id]
-                          : queriese.search[query.id],
+                          ? queries.sort[query.id]
+                          : queries.search[query.id],
                       )}
                       handleExecuteQuery={
                         query?.buttonType === "sort" ? handleSort : handleSearch
@@ -336,7 +340,7 @@ const DisplayUser = () => {
                 <CreateIcon />
               </div>
             </Link>
-            {checkedList.length > 0 && (
+            {checkedList.size > 0 && (
               <button onClick={handleDeleteMany}>
                 <div className='p-[8px] hover:text-red-600'>
                   <TrashBinIcon />
@@ -358,8 +362,8 @@ const DisplayUser = () => {
 
       <div className='w-full bg-black fixed bottom-[0] right-0 py-[6px]'>
         <Pagination
-          setQueriese={setQueriese}
-          currPage={queriese.page}
+          setQueries={setQueries}
+          currPage={queries.page}
           totalPage={totalPage.current}
         />
       </div>

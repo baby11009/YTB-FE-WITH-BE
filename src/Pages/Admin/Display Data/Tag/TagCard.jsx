@@ -5,7 +5,7 @@ import { timeFormat3 } from "../../../../util/timeforMat";
 const TagCard = ({
   data,
   handleChecked,
-  checkedList = [],
+  checked,
   handleDelete,
   startEditing,
 }) => {
@@ -34,7 +34,7 @@ const TagCard = ({
         <div className='m-[1px]'>
           <CheckBox2
             noAnimation={true}
-            checked={checkedList.includes(data?._id)}
+            checked={checked}
             setChecked={() => {
               handleChecked(data?._id);
             }}

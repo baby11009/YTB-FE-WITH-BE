@@ -44,7 +44,7 @@ const TagPage = () => {
 
   const [tagList, setTagList] = useState([]);
 
-  const [checkedList, setCheckedList] = useState([]);
+  const [checkedList, setCheckedList] = useState(new Set());
 
   const [currMode, setCurrMode] = useState(undefined);
 
@@ -161,31 +161,35 @@ const TagPage = () => {
 
   const handleChecked = (id) => {
     setCheckedList((prev) => {
-      if (prev.includes(id)) {
-        return [...prev.filter((data) => data !== id)];
+      const prevClone = structuredClone(prev);
+      if (prevClone.has(id)) {
+        prevClone.delete(id);
+      } else {
+        prevClone.add(id);
       }
 
-      return [...prev, id];
+      return new Set([...prevClone]);
     });
   };
 
   const handleCheckedAll = () => {
-    if (checkedList.length === tagData?.data?.length) {
-      setCheckedList([]);
+    let list;
+    if (checkedList.size === tagData?.data?.length) {
+      list = new Set();
     } else {
-      const idList = tagData?.data?.map((item) => item?._id);
-      setCheckedList(idList);
+      list = new Set(tagData?.data?.map((item) => item?._id));
     }
+    setCheckedList(list);
   };
 
   const handleDeleteMany = async () => {
     await dltManyData(
       "tag/delete-many",
-      checkedList,
+      [...checkedList],
       "tag",
       () => {
         refetch();
-        setCheckedList([]);
+        setCheckedList(new Set());
       },
       undefined,
       addToaster,
@@ -225,7 +229,7 @@ const TagPage = () => {
     }
 
     return () => {
-      setCheckedList([]);
+      setCheckedList(new Set());
     };
   }, [tagData]);
 
@@ -312,7 +316,7 @@ const TagPage = () => {
                 <CreateIcon />
               </div>
             </button>
-            {checkedList.length > 0 && (
+            {checkedList.size > 0 && !currMode && (
               <button onClick={handleDeleteMany}>
                 <div className='p-[8px] hover:text-red-600'>
                   <TrashBinIcon />

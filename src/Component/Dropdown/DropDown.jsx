@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { ThinArrowIcon } from "../../Assets/Icons";
 import { upperCaseFirstChar } from "../../util/func";
 
-const DropDown = ({ disabled, title, list = [], handleOnClick, value }) => {
+const DropDown = ({ title, list = [], handleOnClick, value }) => {
   const [opened, setOpened] = useState(undefined);
 
   const [displayValue, setDisplayValue] = useState(undefined);
@@ -34,12 +34,11 @@ const DropDown = ({ disabled, title, list = [], handleOnClick, value }) => {
   return (
     <div
       className='z-[150]  border-[1px] rounded-[8px]
-       border-[#6b6767] transition-all ease-in hover:border-[white]'
+       border-[#6b6767] transition-all ease-in hover:border-[white] h-fit'
       ref={containerRef}
     >
       <div className='relative pl-[12px]'>
         <button
-          disabled={disabled}
           className='flex items-center justify-between w-full  h-[56px] z-[100]'
           type='button'
           onClick={() => {

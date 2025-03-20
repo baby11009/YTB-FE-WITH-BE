@@ -1,6 +1,6 @@
 const UserCard = ({ data }) => {
   return (
-    <div className=' bg-black-28 px-[16px] py-[8px] rounded-[5px] flex items-center gap-[8px] shadow-[0_0_8px_2px_rgba(255,255,255,1)]'>
+    <div className='rounded-[5px] flex items-center gap-[8px]'>
       <div className='size-[60px] rounded-[50%] overflow-hidden'>
         <img
           src={`${import.meta.env.VITE_BASE_API_URI}${

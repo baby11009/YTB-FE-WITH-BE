@@ -1,11 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ThinArrowIcon, SearchIcon } from "../../Assets/Icons";
-import { useQueryClient } from "@tanstack/react-query";
+
 import { IsElementEnd } from "../../util/scrollPosition";
-import { useAuthContext } from "../../Auth Provider/authContext";
 
 const InfiniteDropDown = ({
-  disabled,
   title,
   dataType,
   list,
@@ -15,7 +13,7 @@ const InfiniteDropDown = ({
   value,
   validateError,
   setIsOpened,
-  handleSetQueriese,
+  handleSetQueries,
   handleSetCurr,
   HoverCard,
 }) => {
@@ -25,8 +23,6 @@ const InfiniteDropDown = ({
 
   const [addNewValue, setAddNewValue] = useState(false);
 
-  const [render, setRender] = useState(undefined);
-
   const [isEnd, setIsEnd] = useState(false);
 
   const containerRef = useRef();
@@ -35,61 +31,16 @@ const InfiniteDropDown = ({
 
   const inputRef = useRef();
 
-  const hoverContainerRef = useRef();
-
-  const refscroll = (e) => {
-    if (e) {
-      e.addEventListener("scroll", (e) => {
-        IsElementEnd(setIsEnd, e);
-      });
-    }
-  };
+  const scrollContainerRef = useRef();
 
   const handleSearch = (e) => {
     clearTimeout(timeOutRef.current);
 
     timeOutRef.current = setTimeout(() => {
       setAddNewValue(true);
-      handleSetQueriese(e.target.value);
+      handleSetQueries(e.target.value);
+      scrollContainerRef.current.scrollTop = 0;
     }, 600);
-  };
-
-  const handleMouseMove = async (e) => {
-    const child = await new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        return resolve(hoverContainerRef.current.children[0]);
-      });
-    });
-
-    const position = {
-      x: e.pageX + 30,
-      y: e.pageY - 10,
-    };
-    
-    if (child) {
-      if (window.innerWidth - e.clientX < child.clientWidth + 50) {
-        position.x = e.pageX - child.clientWidth - 30;
-      }
-
-      if (window.innerHeight - e.clientY < child.clientHeight) {
-        position.y = e.pageY - child.clientHeight;
-      }
-
-      if (e.clientY - 56 < child.clientHeight.clientHeight) {
-        position.y = e.pageY + child.clientHeight;
-      }
-    }
-
-    hoverContainerRef.current.style.left = position.x + "px";
-    hoverContainerRef.current.style.top = position.y + "px";
-  };
-
-  const handleMouseOver = (data) => {
-    setRender(<HoverCard data={data} />);
-  };
-
-  const handleMouseOut = (e) => {
-    setRender(undefined);
   };
 
   useEffect(() => {
@@ -113,7 +64,7 @@ const InfiniteDropDown = ({
     return () => {
       window.removeEventListener("mousedown", handleClickOutScope);
       if (!opened) {
-        handleSetQueriese("");
+        handleSetQueries("");
         setDataList([]);
         inputRef.current && (inputRef.current.value = "");
         setAddNewValue(false);
@@ -134,20 +85,32 @@ const InfiniteDropDown = ({
 
   useEffect(() => {
     if (isEnd) {
-      handleSetQueriese(undefined, 1);
+      handleSetQueries(undefined, 1);
     }
   }, [isEnd]);
+
+  useEffect(() => {
+    const handleScroll = (e) => {
+      IsElementEnd(setIsEnd, e);
+    };
+    scrollContainerRef.current.addEventListener("scroll", handleScroll);
+
+    return () => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
 
   return (
     <div>
       <div
         className='z-[150] border-[1px] rounded-[8px]
-    border-[#6b6767] transition-all ease-in hover:border-[white] relative'
+      border-[#6b6767] transition-all ease-in hover:border-[white] relative'
         ref={containerRef}
       >
         <div className='relative pl-[12px]'>
           <button
-            disabled={disabled}
             className='flex items-center justify-between w-full  h-[56px] z-[100]'
             type='button'
             onClick={() => {
@@ -162,15 +125,14 @@ const InfiniteDropDown = ({
                 {value}
               </div>
             </div>
-            {!disabled && (
-              <div
-                className={`${
-                  opened ? "rotate-[-90deg]" : "rotate-90"
-                } transition-transform duration-[0.3s] w-[20px] ml-[16px] mr-[12px]`}
-              >
-                <ThinArrowIcon />
-              </div>
-            )}
+
+            <div
+              className={`${
+                opened ? "rotate-[-90deg]" : "rotate-90"
+              } transition-transform duration-[0.3s] w-[20px] ml-[16px] mr-[12px]`}
+            >
+              <ThinArrowIcon />
+            </div>
           </button>
 
           <div
@@ -199,9 +161,7 @@ const InfiniteDropDown = ({
               </div>
               <div
                 className='flex-1 w-full overflow-y-auto'
-                ref={refscroll}
-                onMouseMove={handleMouseMove}
-                onMouseOut={handleMouseOut}
+                ref={scrollContainerRef}
               >
                 {isLoading && dataList.length === 0 ? (
                   <div className='flex h-full items-center justify-center '>
@@ -221,11 +181,12 @@ const InfiniteDropDown = ({
                       onClick={() => {
                         handleSetCurr(data);
                       }}
-                      onMouseOver={() => {
-                        handleMouseOver(data);
-                      }}
                     >
-                      <span> {data[displayData]}</span>
+                      {HoverCard ? (
+                        <HoverCard data={data} />
+                      ) : (
+                        <span> {data[displayData]}</span>
+                      )}
                     </button>
                   ))
                 ) : (
@@ -243,9 +204,6 @@ const InfiniteDropDown = ({
          text-red-FF line-clamp-1 text-ellipsis break-all'
       >
         <span>{validateError}</span>
-      </div>
-      <div className='absolute z-[200]' ref={hoverContainerRef}>
-        {render}
       </div>
     </div>
   );

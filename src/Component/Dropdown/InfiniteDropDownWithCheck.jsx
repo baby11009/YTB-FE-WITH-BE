@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { ThinArrowIcon, SearchIcon } from "../../Assets/Icons";
 
 const InfiniteDropDownWithCheck = ({
@@ -7,17 +7,19 @@ const InfiniteDropDownWithCheck = ({
   setIsOpened,
   list,
   displayValue,
+  HoverCard,
   isLoading,
   fetchingError,
-  handleSetQueriese,
+  handleSetQueries,
   setData,
 }) => {
-
   const [opened, setOpened] = useState(undefined);
 
   const [dataList, setDataList] = useState([]);
 
   const [addNewValue, setAddNewValue] = useState(false);
+
+  const [valueListSet, setValueListSet] = useState();
 
   const containerRef = useRef();
 
@@ -32,21 +34,21 @@ const InfiniteDropDownWithCheck = ({
 
     timeOutRef.current = setTimeout(() => {
       setAddNewValue(true);
-      handleSetQueriese(e.target.value);
+      handleSetQueries(e.target.value);
     }, 600);
   };
 
-  const handleOnChange = (value) => {
+  const handleOnChange = (dataId) => {
     let finalList;
 
-    if (valueList?.includes(value)) {
-      const list = [...valueList];
-      finalList = list.filter((item) => item !== value);
+    if (valueListSet.has(dataId)) {
+      valueListSet.delete(dataId);
+      finalList = [...valueListSet];
     } else {
-      finalList = [...valueList, value];
+      finalList = [...valueList, dataId];
     }
 
-    setData(finalList);
+    setData(finalList, dataId);
   };
 
   useEffect(() => {
@@ -72,7 +74,7 @@ const InfiniteDropDownWithCheck = ({
 
     return () => {
       window.removeEventListener("mousedown", handleClickOutScope);
-      handleSetQueriese("");
+      handleSetQueries("");
       setDataList([]);
       setAddNewValue(true);
       if (inputRef.current) {
@@ -90,7 +92,7 @@ const InfiniteDropDownWithCheck = ({
         const { scrollTop, scrollHeight, clientHeight } = element;
 
         if (Math.ceil(scrollTop) + clientHeight >= scrollHeight) {
-          handleSetQueriese(undefined, 1);
+          handleSetQueries(undefined, 1);
         }
       }
     };
@@ -116,6 +118,10 @@ const InfiniteDropDownWithCheck = ({
       }
     }
   }, [list]);
+
+  useLayoutEffect(() => {
+    setValueListSet(new Set(valueList));
+  }, [valueList]);
 
   return (
     <div>
@@ -182,27 +188,31 @@ const InfiniteDropDownWithCheck = ({
                 ) : fetchingError ? (
                   <div>{fetchingError}</div>
                 ) : dataList.length !== 0 ? (
-                  dataList.map((item, id) => (
+                  dataList.map((data, id) => (
                     <div
-                      className='flex items-center gap-[8px] px-[12px] py-[4px] hover:bg-black-0.2'
+                      className='flex items-center gap-[8px] px-[12px] py-[4px] hover:bg-black-0.2 min-w-fit '
                       key={id}
                     >
                       <input
                         type='checkbox'
                         name=''
-                        className='cursor-pointer'
-                        id={`item-${id}`}
-                        onChange={(e) => handleOnChange(item._id)}
-                        checked={valueList?.includes(item._id)}
+                        className='cursor-pointer size-[16px]'
+                        id={`${title}-${id}`}
+                        onChange={(e) => handleOnChange(data._id)}
+                        checked={valueListSet.has(data._id)}
                       />
                       <label
-                        htmlFor={`item-${id}`}
+                        htmlFor={`${title}-${id}`}
                         className='flex-1 cursor-pointer '
                         onClick={() => {}}
                       >
-                        {displayValue === "title"
-                          ? item?.title
-                          : item?.email || item?._id}
+                        {HoverCard ? (
+                          <HoverCard data={data} />
+                        ) : displayValue ? (
+                          data[displayValue]
+                        ) : (
+                          data?._id
+                        )}
                       </label>
                     </div>
                   ))

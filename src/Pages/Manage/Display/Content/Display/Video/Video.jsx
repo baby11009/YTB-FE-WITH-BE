@@ -22,7 +22,7 @@ import {
   getDisplayUsingValue,
 } from "../../../../../../util/func";
 
-const initQueriese = {
+const initQueries = {
   limit: 10,
   page: 1,
   search: {
@@ -36,7 +36,7 @@ const Video = () => {
 
   const { setIsShowing, addToaster } = useAuthContext();
 
-  const [queriese, setQueriese] = useState(initQueriese);
+  const [queries, setQueries] = useState(initQueries);
 
   const [dataList, setDataList] = useState([]);
 
@@ -54,7 +54,7 @@ const Video = () => {
 
   const { data, refetch } = getDataWithAuth(
     "/client/video",
-    queriese,
+    queries,
     true,
     false,
   );
@@ -98,7 +98,7 @@ const Video = () => {
       prev.filter((search) => search.id !== queryData.id),
     );
 
-    setQueriese((prev) => {
+    setQueries((prev) => {
       const { search, sort } = prev;
 
       if (queryData.buttonType === "sort") {
@@ -127,8 +127,8 @@ const Video = () => {
   };
 
   const handleSearch = (searchKey, searchValue) => {
-    if (queriese.search[searchKey] === searchValue) return;
-    setQueriese((prev) => ({
+    if (queries.search[searchKey] === searchValue) return;
+    setQueries((prev) => ({
       ...prev,
       search: { ...prev.search, [searchKey]: searchValue },
       page: 1,
@@ -136,7 +136,7 @@ const Video = () => {
   };
 
   const handleSort = (sortKey, sortValue) => {
-    if (queriese.sort[sortKey] === sortValue) return;
+    if (queries.sort[sortKey] === sortValue) return;
 
     const sortOptionIds = queryOptions.map((query) => {
       if (query.buttonType === "sort") {
@@ -150,13 +150,13 @@ const Video = () => {
       let value;
       if (sortOptionId === sortKey) {
         value = sortValue;
-      } else if (queriese.sort[sortOptionId]) {
-        value = queriese.sort[sortOptionId];
+      } else if (queries.sort[sortOptionId]) {
+        value = queries.sort[sortOptionId];
       }
       sortObj[sortOptionId] = value;
     });
 
-    setQueriese((prev) => ({
+    setQueries((prev) => ({
       ...prev,
       sort: sortObj,
       page: 1,
@@ -305,7 +305,7 @@ const Video = () => {
 
   useEffect(() => {
     setCheckedList([]);
-  }, [queriese.page]);
+  }, [queries.page]);
 
   return (
     <div
@@ -346,7 +346,7 @@ const Video = () => {
                     <QueryTextInput
                       key={query.id}
                       queryData={query}
-                      currValue={queriese.search[query.id]}
+                      currValue={queries.search[query.id]}
                       handleExecuteQuery={handleSearch}
                       handleClose={handleClose}
                     />
@@ -359,8 +359,8 @@ const Video = () => {
                       currValue={getDisplayUsingValue(
                         query.options,
                         query?.buttonType === "sort"
-                          ? queriese.sort[query.id]
-                          : queriese.search[query.id],
+                          ? queries.sort[query.id]
+                          : queries.search[query.id],
                       )}
                       handleExecuteQuery={
                         query?.buttonType === "sort" ? handleSort : handleSearch
@@ -443,8 +443,8 @@ const Video = () => {
 
       <div className='w-full bg-black fixed bottom-[0] right-0 mr-[12px] py-[6px]'>
         <Pagination
-          setQueriese={setQueriese}
-          currPage={queriese?.page}
+          setQueries={setQueries}
+          currPage={queries?.page}
           totalPage={data?.totalPages}
         />
       </div>

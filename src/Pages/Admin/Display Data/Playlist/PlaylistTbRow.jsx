@@ -61,21 +61,26 @@ const PlaylistTbRow = ({ data, handleChecked, checked, handleDelete }) => {
             <div className='hidden group-hover:flex'>
               <Link
                 className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-                to={`./upsert/${data._id}`}
+                to={`./upsert/${data._id}/${
+                  data.type === "Playlist" ? "details" : "list"
+                }`}
               >
                 <div className='text-white size-[24px]'>
                   <EditIcon />
                 </div>
               </Link>
-              <a
-                className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
-                href={`http://localhost:5173/video?id=${data.itemList[0]}&list=${data._id}`}
-                target='_blank'
-              >
-                <div className='text-white size-[24px]'>
-                  <YoutubeBlankIcon />
-                </div>
-              </a>
+              {data.size > 0 && data.type === "Playlist" && (
+                <a
+                  className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
+                  href={`http://localhost:5173/video?id=${data.itemList[0]}&list=${data._id}`}
+                  target='_blank'
+                >
+                  <div className='text-white size-[24px]'>
+                    <YoutubeBlankIcon />
+                  </div>
+                </a>
+              )}
+
               {data.type === "Playlist" && (
                 <button
                   className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
