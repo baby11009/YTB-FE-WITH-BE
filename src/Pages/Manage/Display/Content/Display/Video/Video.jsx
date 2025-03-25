@@ -53,7 +53,7 @@ const Video = () => {
   const tableHeader = useRef();
 
   const { data, refetch } = getDataWithAuth(
-    "/client/video",
+    "/user/video",
     queries,
     true,
     false,
@@ -238,7 +238,7 @@ const Video = () => {
   const showDeleteConfirm = (id) => {
     const handleDelete = async () => {
       await dltData(
-        "/client/comment",
+        "/user/comment",
         id,
         "comment",
         () => {
@@ -257,7 +257,7 @@ const Video = () => {
   const showDeleteManyConfirm = () => {
     const handleDeleteMany = async () => {
       await dltManyData(
-        "/client/video/delete-many",
+        "/user/video/delete-many",
         checkedList,
         "video",
         () => {

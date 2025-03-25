@@ -87,7 +87,7 @@ const UpsertVideo = ({ type }) => {
   const videoInputRef = useRef();
 
   const { data: videoData, refetch } = getData(
-    `video/${id}`,
+    `/admin/video/${id}`,
     { type },
     id !== undefined,
     false,
@@ -97,13 +97,13 @@ const UpsertVideo = ({ type }) => {
     data: userData,
     error: userError,
     isLoading,
-  } = getData("user", userQueries, openedUsers, false);
+  } = getData("/admin/user", userQueries, openedUsers, false);
 
   const {
     data: tagData,
     error: tagErr,
     isLoading: tagIsLoading,
-  } = getData("tag", tagQueries, openedTags, false);
+  } = getData("/admin/tag", tagQueries, openedTags, false);
 
   const handleOnChange = (name, value) => {
     setFormData((prev) => ({
@@ -370,7 +370,7 @@ const UpsertVideo = ({ type }) => {
     }
 
     await createData(
-      "video/upload",
+      "/admin/video/upload",
       data,
       "video",
       () => {
@@ -425,7 +425,7 @@ const UpsertVideo = ({ type }) => {
     }
 
     await updateData(
-      "video",
+      "/admin/video",
       id,
       data,
       "video",

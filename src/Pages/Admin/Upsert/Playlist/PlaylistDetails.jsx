@@ -54,7 +54,7 @@ const PlaylistDetails = ({ id, playlistData, setQueries, addToaster }) => {
     data: usersData,
     isLoading: userIsLoading,
     error: userError,
-  } = getData("user", userQueries, userOpened, false);
+  } = getData("/admin/user", userQueries, userOpened, false);
 
   const handleOnChange = (name, value) => {
     setFormData((prev) => ({
@@ -153,7 +153,7 @@ const PlaylistDetails = ({ id, playlistData, setQueries, addToaster }) => {
     const { email, ...finalFormData } = formData;
 
     await createData(
-      "playlist",
+      "/admin/playlist",
       finalFormData,
       "playlist",
       () => {
@@ -185,7 +185,7 @@ const PlaylistDetails = ({ id, playlistData, setQueries, addToaster }) => {
     }
 
     await updateData(
-      "playlist",
+      "/admin/playlist",
       id,
       finalFormData,
       "playlist",

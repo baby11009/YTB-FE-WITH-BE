@@ -218,7 +218,7 @@ const LargeShortVid = ({
       return;
     }
     await request
-      .post("/client/react", { videoId: shortData._id, type: type })
+      .post("/user/react", { videoId: shortData._id, type: type })
       .then((rsp) => {
         setRefetch(true);
       });
@@ -230,7 +230,7 @@ const LargeShortVid = ({
       return;
     }
     await request
-      .post("/client/subscribe", {
+      .post("/user/subcription", {
         userId: user?._id,
         channelId: shortData?.channel_info?._id,
       })

@@ -45,7 +45,7 @@ const CreatePlaylist = ({ videoId }) => {
       e.preventDefault();
 
       await request
-        .post("/client/playlist", { ...data, videoIdList: [videoId] })
+        .post("/user/playlist", { ...data, videoIdList: [videoId] })
         .then((rsp) => {
           setIsShowing(undefined);
         })

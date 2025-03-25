@@ -70,7 +70,7 @@ const ShortUpsertModal = ({ title, id }) => {
   });
 
   const { data: shortData, refetch } = getDataWithAuth(
-    `/client/video/${id}`,
+    `/user/video/${id}`,
     {},
     id !== undefined,
     false,
@@ -251,7 +251,7 @@ const ShortUpsertModal = ({ title, id }) => {
     }
 
     await createData(
-      "/client/video/upload",
+      "/user/video/upload",
       data,
       "short",
       () => {
@@ -317,7 +317,7 @@ const ShortUpsertModal = ({ title, id }) => {
     }
 
     await updateData(
-      "/client/video",
+      "/user/video",
       id,
       data,
       "short",

@@ -19,7 +19,7 @@ const PlaylistCard = ({ data, videoId, addToaster }) => {
   const handleAddToPlaylist = useCallback(async (data) => {
     try {
       await request
-        .patch(`/client/playlist/${data?._id}`, {
+        .patch(`/user/playlist/${data?._id}`, {
           videoIdList: [videoId],
         })
         .then((rsp) => {

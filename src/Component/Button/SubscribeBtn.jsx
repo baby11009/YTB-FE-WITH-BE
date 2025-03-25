@@ -26,7 +26,7 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
     setIsLoading(true);
     await request
       .post(
-        "/client/subscribe",
+        "/user/subscription",
         {
           userId: user?._id,
           channelId: channelId,

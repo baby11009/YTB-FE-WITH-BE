@@ -13,6 +13,7 @@ import {
 } from "../../../Assets/Icons";
 import { IsEnd } from "../../../util/scrollPosition";
 import { PlaylistModal } from "../../../Component";
+import { getData } from "../../../Api/getData";
 
 const WatchLater = () => {
   const { setFetchingState, addToaster, setIsShowing } = useAuthContext();
@@ -20,9 +21,9 @@ const WatchLater = () => {
   const queryClient = useQueryClient();
 
   const [queriese, setQueriese] = useState({
-    page: 1,
-    limit: 12,
-    type: "all",
+    videoPage: 1,
+    videoLimit: 12,
+    videoSearch: {},
   });
 
   const videoIdsset = useRef(new Set());
@@ -40,85 +41,73 @@ const WatchLater = () => {
     isLoading,
     isSuccess,
     isError,
-  } = useQuery({
-    queryKey: [...Object.values(queriese), "watchlater"],
-    queryFn: async () => {
-      try {
-        const rsp = await request.get("/client/user/watchlater", {
-          params: queriese,
-        });
+  } = getData("/user/playlist/watch_later", queriese, true, false);
 
-        return rsp.data;
-      } catch (error) {
-        alert("Failed to get channel list");
-        console.error(error);
-      }
-    },
-    suspense: false,
-    cacheTime: 5 * 60 * 1000,
-  });
-
-  useEffect(() => {
-    if (watchLaterData) {
-      setPlaylistInfo((prev) =>
-        prev ? { ...prev, ...watchLaterData?.data } : watchLaterData?.data,
-      );
-      if (addNew) {
-        videoIdsset.current.clear();
-        setVideoList(watchLaterData?.data?.video_list);
-        watchLaterData?.data?.video_list?.forEach((video) => {
-          if (!videoIdsset.current.has(video?._id)) {
-            videoIdsset.current.add(video?._id);
-          }
-        });
-        setAddNew(false);
-      } else {
-        const finalData = [];
-        watchLaterData?.data?.video_list?.forEach((video) => {
-          if (!videoIdsset.current.has(video?._id)) {
-            videoIdsset.current.add(video?._id);
-            finalData.push(video);
-          }
-        });
-        setVideoList((prev) => [...prev, ...finalData]);
-      }
+  const handleSort = (type) => {
+    if (queriese.videoSearch?.type == type) {
+      return;
     }
-  }, [watchLaterData]);
 
-  const handleChangePosition = useCallback(
-    async (from, to) => {
-      try {
-        await request
-          .patch(`/client/playlist/${playlistInfo?._id}`, {
-            move: {
-              from,
-              to,
-            },
-          })
-          .then((rsp) => {
-            setVideoList((prev) => {
-              const videos = [...prev];
-              const temp = videos[from];
-              videos[from] = videos[to];
-              videos[to] = temp;
+    queryClient.removeQueries();
 
-              return videos;
-            });
+    let videoSearch = { type };
+    if (!type) {
+      videoSearch = {};
+    }
+    setQueriese((prev) => ({ ...prev, videoPage: 1, videoSearch }));
+    setAddNew(true);
+  };
+
+  const handleChangePosition = async (from, to) => {
+    try {
+      await request
+        .patch(`/user/playlist/${playlistInfo?._id}`, {
+          move: {
+            from: from._id,
+            to: to._id,
+          },
+        })
+        .then((rsp) => {
+          setVideoList((prev) => {
+            const videos = [...prev];
+            const temp = videos[from.index];
+            videos[from.index] = videos[to.index];
+            videos[to.index] = temp;
+
+            return videos;
           });
-      } catch (error) {
-        alert("Failed to move position");
-        throw error;
-      }
-    },
-    [playlistInfo?._id],
-  );
+        });
+    } catch (error) {
+      alert("Failed to move position");
+      throw error;
+    }
+  };
 
-  const movePosition = useCallback(
-    async (data, productId, index) => {
-      await handleChangePosition(index, index + data.value);
-    },
-    [playlistInfo?._id],
-  );
+  const movePosition = async (buttonData, productData, index) => {
+    if (buttonData.id === 2) {
+      await handleChangePosition(
+        {
+          _id: productData._id,
+          index: index,
+        },
+        {
+          _id: productData.nextVideoId,
+          index: index + 1,
+        },
+      );
+    } else {
+      await handleChangePosition(
+        {
+          _id: productData._id,
+          index: index,
+        },
+        {
+          _id: productData.prevVideoId,
+          index: index - 1,
+        },
+      );
+    }
+  };
 
   const funcList1 = [
     {
@@ -140,7 +129,7 @@ const WatchLater = () => {
       icon: <TrashBinIcon />,
       handleOnClick: async (_, productData) => {
         await request
-          .patch("/client/playlist/wl", {
+          .patch("/user/playlist/wl", {
             videoIdList: [productData?._id],
           })
           .then(() => {
@@ -177,7 +166,7 @@ const WatchLater = () => {
       ),
       value: -1,
       handleOnClick: movePosition,
-      renderCondition: (id, size) => {
+      renderCondition: (id) => {
         return id === 0;
       },
     },
@@ -192,6 +181,33 @@ const WatchLater = () => {
       },
     },
   ];
+
+  useEffect(() => {
+    if (watchLaterData) {
+      setPlaylistInfo((prev) =>
+        prev ? { ...prev, ...watchLaterData?.data } : watchLaterData?.data,
+      );
+      if (addNew) {
+        videoIdsset.current.clear();
+        setVideoList(watchLaterData?.data?.video_list);
+        watchLaterData?.data?.video_list?.forEach((video) => {
+          if (!videoIdsset.current.has(video?._id)) {
+            videoIdsset.current.add(video?._id);
+          }
+        });
+        setAddNew(false);
+      } else {
+        const finalData = [];
+        watchLaterData?.data?.video_list?.forEach((video) => {
+          if (!videoIdsset.current.has(video?._id)) {
+            videoIdsset.current.add(video?._id);
+            finalData.push(video);
+          }
+        });
+        setVideoList((prev) => [...prev, ...finalData]);
+      }
+    }
+  }, [watchLaterData]);
 
   useEffect(() => {
     setFetchingState(() => {
@@ -231,17 +247,8 @@ const WatchLater = () => {
       updatedAt={playlistInfo?.updatedAt}
       size={playlistInfo?.size}
       videoList={videoList}
-      handleSort={(type) => {
-        if (queriese.type !== type) {
-          queryClient.removeQueries({
-            queryKey: [...Object.values(queriese), "watchlater"],
-            exact: true,
-          });
-          setQueriese((prev) => ({ ...prev, page: 1, type }));
-          setAddNew(true);
-        }
-      }}
-      currSort={queriese.type}
+      handleSort={handleSort}
+      currSort={queriese.videoSearch?.type}
       changePostion={handleChangePosition}
       funcList1={funcList1}
       funcList2={funcList2}

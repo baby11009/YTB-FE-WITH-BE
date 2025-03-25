@@ -1,6 +1,6 @@
 import { CustomeFuncBox2, PlaylistCard } from "../../../Component";
 import { useState, useEffect, useLayoutEffect } from "react";
-import { getDataWithAuth } from "../../../Api/getData";
+import { getData } from "../../../Api/getData";
 import { IsEnd } from "../../../util/scrollPosition";
 
 const PlaylistsPart = ({ openedMenu }) => {
@@ -18,8 +18,8 @@ const PlaylistsPart = ({ openedMenu }) => {
     sort: { createdAt: -1 },
   });
 
-  const { data: playlists } = getDataWithAuth(
-    "/client/playlist",
+  const { data: playlists } = getData(
+    "/user/playlist",
     queriese,
     true,
     false,

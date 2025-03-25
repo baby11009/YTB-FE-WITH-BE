@@ -14,7 +14,7 @@ import {
   TextArea,
 } from "../../../../Component";
 import { createData, updateData } from "../../../../Api/controller";
-import { getDataWithAuth } from "../../../../Api/getData";
+import { getData } from "../../../../Api/getData";
 import { useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
@@ -90,26 +90,26 @@ const UpsertComment = () => {
     data: commentData,
     refetch,
     error: queryError,
-  } = getDataWithAuth(`comment/${id}`, {}, id !== undefined, false);
+  } = getData(`/admin/comment/${id}`, {}, id !== undefined, false);
 
   const {
     data: usersData,
     isLoading: userIsLoading,
     error: userError,
-  } = getDataWithAuth("user", userQueriese, userOpened, false);
+  } = getData("/admin/user", userQueriese, userOpened, false);
 
   const {
     data: videosData,
     isLoading: videoIsLoading,
     error: videoError,
-  } = getDataWithAuth("video", videoQuerese, videoOpened, false);
+  } = getDataWithAuth("/admin/video", videoQuerese, videoOpened, false);
 
   const {
     data: replyCmtsData,
     isLoading: replyCmtsIsLoading,
     error: replyCmtsError,
   } = getDataWithAuth(
-    `/comment`,
+    `/admin/comment`,
     replyCmtQueriese,
     cmtOpened && formData.videoId ? true : false,
     false,
@@ -239,7 +239,7 @@ const UpsertComment = () => {
     });
 
     await createData(
-      "comment",
+      "/admin/comment",
       finalData,
       "comment",
       () => {
@@ -277,7 +277,7 @@ const UpsertComment = () => {
     }
 
     await updateData(
-      "comment",
+      "/admin/comment",
       id,
       finalData,
       "comment",

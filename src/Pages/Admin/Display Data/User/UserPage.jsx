@@ -46,7 +46,7 @@ const DisplayUser = () => {
   const tableHeader = useRef();
 
   const { data: usersData, refetch } = getData(
-    "user",
+    "/admin/user",
     queries,
     queries ? true : false,
     false,
@@ -204,7 +204,7 @@ const DisplayUser = () => {
     });
   };
 
-  const handleCheckedAll = () => {  
+  const handleCheckedAll = () => {
     let list;
     if (checkedList.size === usersData?.data?.length) {
       list = new Set();
@@ -216,7 +216,7 @@ const DisplayUser = () => {
 
   const handleDeleteMany = async () => {
     await dltManyData(
-      "user/delete-many",
+      "/admin/user/delete-many",
       [...checkedList],
       "user",
       () => {
@@ -230,7 +230,7 @@ const DisplayUser = () => {
 
   const handleDelete = async (id) => {
     await dltData(
-      "user/",
+      "/admin/user",
       id,
       "User",
       undefined,

@@ -43,7 +43,7 @@ const Comment = () => {
 
   const tableHeader = useRef();
 
-  const { data, refetch } = getData("/client/comment", queries, true, false);
+  const { data, refetch } = getData("/user/comment", queries, true, false);
 
   const handleCheckedAll = useCallback(() => {
     setCheckedList((prev) => {
@@ -207,7 +207,7 @@ const Comment = () => {
   const showDeleteConfirm = (id) => {
     const handleDelete = async () => {
       await dltData(
-        "/client/comment",
+        "/user/comment",
         id,
         "comment",
         () => {
@@ -226,7 +226,7 @@ const Comment = () => {
   const showDeleteManyConfirm = () => {
     const handleDeleteMany = async () => {
       await dltManyData(
-        "/client/comment/delete-many",
+        "/user/comment/delete-many",
         checkedList,
         "comment",
         () => {

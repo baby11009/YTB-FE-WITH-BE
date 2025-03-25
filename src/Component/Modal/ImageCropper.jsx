@@ -25,7 +25,7 @@ const ImageCropper = ({
   const [crop, setCrop] = useState();
   const [error, setError] = useState("");
   const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
-  console.log(imgRef?.current?.offsetWidth, imgSize.width);
+
 
   const onSelectFile = (e) => {
     const file = e.files?.[0];

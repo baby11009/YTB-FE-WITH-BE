@@ -15,7 +15,7 @@ const LikeAndDislikeCmt = ({ cmtId, like, type }) => {
 
     await request
       .post(
-        "/client/cmt-react",
+        "/user/comment-react",
         { cmtId, type },
         {
           headers: {

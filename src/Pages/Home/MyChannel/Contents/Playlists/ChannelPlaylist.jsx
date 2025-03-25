@@ -16,7 +16,7 @@ const ChannelPlaylist = () => {
   });
 
   const { data: playlistData, isLoading } = getDataWithAuth(
-    "/client/playlist",
+    "/user/playlist",
     params,
     true,
     false,

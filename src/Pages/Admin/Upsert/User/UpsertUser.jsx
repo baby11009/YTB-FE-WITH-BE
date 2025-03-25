@@ -42,7 +42,7 @@ const UpsertUser = () => {
   const queryClient = useQueryClient();
 
   const { data: userData, refetch } = getDataWithAuth(
-    `user/${id}`,
+    `/admin/user/${id}`,
     {},
     id !== undefined,
     false,
@@ -97,8 +97,6 @@ const UpsertUser = () => {
   );
 
   const handleValidate = () => {
-    setSubmitErrs({});
-
     const { role, confirmed, avatar, banner, ...neededVaildateFields } =
       formData;
 
@@ -164,17 +162,11 @@ const UpsertUser = () => {
     let data = new FormData();
 
     for (const key in formData) {
-      if (key === "image") {
-        data.append(key, formData[key], avaName);
-      } else if (key === "banner") {
-        data.append(key, formData[key], bannerName);
-      } else {
-        data.append(key, formData[key]);
-      }
+      data.append(key, formData[key]);
     }
 
     await createData(
-      "user",
+      "/admin/user",
       data,
       "user",
       () => {
@@ -230,7 +222,7 @@ const UpsertUser = () => {
     }
 
     await updateData(
-      "user",
+      "/admin/user",
       id,
       data,
       "user",

@@ -69,7 +69,7 @@ const VideoUpsertModal = ({ title, id }) => {
   const [submitErrs, setSubmitErrs] = useState({});
 
   const { data: videoData, refetch } = getDataWithAuth(
-    `/client/video/${id}`,
+    `/user/video/${id}`,
     {},
     id !== undefined,
     false,
@@ -253,7 +253,7 @@ const VideoUpsertModal = ({ title, id }) => {
     }
 
     await createData(
-      "/client/video/upload",
+      "/user/video/upload",
       data,
       "video",
       () => {
@@ -318,7 +318,7 @@ const VideoUpsertModal = ({ title, id }) => {
     }
 
     await updateData(
-      "/client/video",
+      "/user/video",
       id,
       data,
       "video",

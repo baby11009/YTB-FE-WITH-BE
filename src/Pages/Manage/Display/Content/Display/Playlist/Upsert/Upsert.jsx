@@ -53,7 +53,7 @@ const Upsert = ({ playlistId, func, handleClose }) => {
   ]);
 
   const { data, refetch } = getData(
-    `/client/playlist/${playlistId}`,
+    `/user/playlist/${playlistId}`,
     queries,
     !!playlistId,
     false,

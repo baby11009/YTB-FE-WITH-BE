@@ -28,7 +28,7 @@ const CustomVideoCard = ({ data, index, size }) => {
       renderCondition: !!user,
       handleOnClick: async () => {
         await request
-          .patch("/client/playlist/watchlater", {
+          .patch("/user/playlist/watchlater", {
             videoIdList: [data?._id],
           })
           .then((rsp) => {

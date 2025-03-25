@@ -5,7 +5,6 @@ import { useAuthContext } from "../../Auth Provider/authContext";
 import { getCookie } from "../../util/tokenHelpers";
 
 const LikeAndDislike = ({ totalLike, videoId, reactState, refetch }) => {
-  
   const { user } = useAuthContext();
 
   const handleToggleReact = async (type) => {
@@ -16,15 +15,15 @@ const LikeAndDislike = ({ totalLike, videoId, reactState, refetch }) => {
 
     await request
       .post(
-        "/client/react",
+        "/user/video-react",
         { type, videoId },
         {
           headers: {
             Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-              import.meta.env.VITE_AUTH_TOKEN
+              import.meta.env.VITE_AUTH_TOKEN,
             )}`,
           },
-        }
+        },
       )
       .then((rsp) => {
         refetch();

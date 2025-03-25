@@ -17,6 +17,7 @@ const VideoCard2 = ({
   playlistId,
   containerStyle,
 }) => {
+
   const bgColor = useRef(getRandomHexColor());
 
   const { setShowHover, handleCursorPositon } = useAuthContext();
@@ -31,7 +32,6 @@ const VideoCard2 = ({
           ? `/video?id=${data?._id}&list=${playlistId}`
           : `/video?id=${data?._id}`
       }
-      
     >
       <div
         className='h-full aspect-video rounded-[12px] overflow-hidden mr-[8px] relative'

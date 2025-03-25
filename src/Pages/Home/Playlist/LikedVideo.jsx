@@ -1,7 +1,8 @@
 import Display from "./Display";
 import request from "../../../util/axios-base-url";
 import { useEffect, useState, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+
+import { getData } from "../../../Api/getData";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import { IsEnd } from "../../../util/scrollPosition";
@@ -21,9 +22,9 @@ const LikedVideo = () => {
   const queryClient = useQueryClient();
 
   const [queriese, setQueriese] = useState({
-    page: 1,
-    limit: 8,
-    type: "all",
+    videoPage: 1,
+    videoLimit: 12,
+    videoSearch: {},
   });
 
   const videoIdsset = useRef(new Set());
@@ -41,28 +42,12 @@ const LikedVideo = () => {
     isLoading,
     isSuccess,
     isError,
-  } = useQuery({
-    queryKey: [...Object.values(queriese), "likedvideos"],
-    queryFn: async () => {
-      try {
-        const rsp = await request.get("/client/user/likedvideos", {
-          params: queriese,
-        });
-
-        return rsp.data;
-      } catch (error) {
-        alert("Failed to get channel list");
-        console.error(error);
-      }
-    },
-    suspense: false,
-    cacheTime: 0,
-  });
+  } = getData("/user/playlist/liked", queriese, true, false);
 
   const remvoveFromList = async (_, productData) => {
     try {
       await request
-        .post("/client/react", {
+        .post("/user/video-react", {
           videoId: productData?._id,
           type: "like",
         })
@@ -79,6 +64,21 @@ const LikedVideo = () => {
     }
   };
 
+  const handleSort = (type) => {
+    if (queriese.videoSearch?.type == type) {
+      return;
+    }
+
+    queryClient.removeQueries();
+
+    let videoSearch = { type };
+    if (!type) {
+      videoSearch = {};
+    }
+    setQueriese((prev) => ({ ...prev, videoPage: 1, videoSearch }));
+    setAddNew(true);
+  };
+
   const funcList1 = [
     {
       id: 1,
@@ -91,7 +91,7 @@ const LikedVideo = () => {
       icon: <WatchedIcon />,
       handleOnClick: async (_, productData) => {
         await request
-          .patch("/client/playlist/watchlater", {
+          .patch("/user/playlist/watchlater", {
             videoIdList: [productData?._id],
           })
           .then((rsp) => {
@@ -203,17 +203,8 @@ const LikedVideo = () => {
       size={playlistInfo?.size}
       videoList={videoList}
       isLoading={isLoading}
-      handleSort={(type) => {
-        if (queriese.type !== type) {
-          queryClient.removeQueries({
-            queryKey: [...Object.values(queriese), "likedvideos"],
-            exact: true,
-          });
-          setQueriese((prev) => ({ ...prev, page: 1, type }));
-          setAddNew(true);
-        }
-      }}
-      currSort={queriese.type}
+      handleSort={handleSort}
+      currSort={queriese.videoSearch?.type}
       noDrag={true}
       funcList1={funcList1}
       funcList2={funcList2}

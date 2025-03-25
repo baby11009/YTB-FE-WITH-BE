@@ -97,7 +97,7 @@ const Details = ({ playlistData, refetch }) => {
     }
 
     await updateData(
-      "/client/playlist",
+      "/user/playlist",
       playlistData?._id,
       finalData,
       "playlist",

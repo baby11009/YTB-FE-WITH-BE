@@ -144,7 +144,7 @@ const ChannelSetting = () => {
     }
     console.log(finalData);
     await updateData(
-      "/client/user/me",
+      "/user/user/me",
       undefined,
       data,
       "user",

@@ -37,7 +37,7 @@ const funcList = [
 
 const btnList = [
   {
-    id: "all",
+    id: undefined,
     title: "All",
   },
   {
@@ -257,7 +257,7 @@ const Display = ({
               </button>
             </div>
             <div className='flex items-center text-[14px] leading-[32px] font-[500]'>
-              {btnList.map((item) => (
+              {btnList.map((item, index) => (
                 <button
                   className={`my-[12px] mr-[12px] px-[12px] rounded-[8px]  transition-colors ease-out duration-300
                       ${
@@ -266,7 +266,7 @@ const Display = ({
                           : "bg-black-0.1 hover:bg-black-0.2"
                       }
                     `}
-                  key={item.id}
+                  key={index}
                   onClick={() => {
                     handleSort(item.id);
                   }}
@@ -280,17 +280,23 @@ const Display = ({
             {videoList?.map((item, index) => (
               <div
                 className='flex items-center hover:bg-black-0.1 rounded-[12px] cursor-grabbing'
-                key={index}
+                key={item._id}
                 draggable={!noDrag}
                 onDragStart={(e) => {
                   if (noDrag) return;
                   e.target.style.opacity = "0";
-                  dragItem.current = index;
+                  dragItem.current = {
+                    _id: item._id,
+                    index: index,
+                  };
                 }}
                 onDragEnd={handleChangePosition}
                 onDragOver={(e) => {
                   if (noDrag) return;
-                  dragOverItem.current = index;
+                  dragOverItem.current = {
+                    _id: item._id,
+                    index: index,
+                  };
                   e.preventDefault();
                 }}
               >
@@ -304,8 +310,13 @@ const Display = ({
                 </div>
                 <VideoCard2
                   playlistId={playlistId}
+                  prevVideoId={videoList[index - 1]?._id}
                   index={index}
-                  data={item}
+                  data={{
+                    ...item,
+                    prevVideoId: videoList[index - 1]?._id,
+                    nextVideoId: videoList[index + 1]?._id,
+                  }}
                   funcList1={funcList1}
                   funcList2={funcList2}
                   size={videoList?.length}

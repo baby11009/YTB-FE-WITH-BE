@@ -44,7 +44,7 @@ const CommentPage = ({ openedMenu }) => {
 
   const tableHeader = useRef();
 
-  const { data: cmtsData, refetch } = getData("comment", queries, true, false);
+  const { data: cmtsData, refetch } = getData("/admin/comment", queries, true, false);
 
   const handleOnClick = (queryData) => {
     setQueryOptions((prev) => [...prev, queryData]);
@@ -250,7 +250,7 @@ const CommentPage = ({ openedMenu }) => {
 
   const handleDeleteMany = async () => {
     await dltManyData(
-      "comment/delete-many",
+      "/admin/comment/delete-many",
       [...checkedList],
       "Comment",
       () => {
@@ -264,7 +264,7 @@ const CommentPage = ({ openedMenu }) => {
 
   const handleDelete = async (id) => {
     await dltData(
-      "comment/",
+      "/admin/comment",
       id,
       "Comment",
       undefined,

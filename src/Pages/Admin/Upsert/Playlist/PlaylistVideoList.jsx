@@ -34,11 +34,11 @@ const PlaylistVideoList = ({
     data: videosData,
     isLoading: isLoadingVideosData,
     error: videosDataError,
-  } = getData("/video", videoQueries, openedVideoBox, false);
+  } = getData("/admin/video", videoQueries, openedVideoBox, false);
 
   const handleUpdateList = async (videoIdList) => {
     await updateData(
-      "playlist",
+      "/admin/playlist",
       id,
       { videoIdList: videoIdList },
       "playlist",
@@ -62,7 +62,6 @@ const PlaylistVideoList = ({
   };
 
   useEffect(() => {
-    console.log(playlistData);
     totalPage.current = playlistData.videoList.totalPages;
   }, [playlistData]);
 

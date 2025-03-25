@@ -37,7 +37,7 @@ const InputBox = ({
       data.replyId = replyId;
     }
     await createData(
-      "/client/comment",
+      "/user/comment",
       data,
       "comment",
       () => {

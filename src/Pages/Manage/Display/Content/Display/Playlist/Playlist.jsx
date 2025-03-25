@@ -35,7 +35,7 @@ const Playlist = () => {
 
   const [horizonScrollVisible, setHorizonScrollVisible] = useState();
 
-  const { data, refetch } = getData("/client/playlist", queriese);
+  const { data, refetch } = getData("/user/playlist", queriese);
 
   const [dataList, setDataList] = useState([]);
 
@@ -192,7 +192,7 @@ const Playlist = () => {
   const showDeleteConfirm = (id) => {
     const handleDelete = async () => {
       await dltData(
-        "/client/comment",
+        "/user/comment",
         id,
         "comment",
         () => {
@@ -211,7 +211,7 @@ const Playlist = () => {
   const showDeleteManyConfirm = () => {
     const handleDeleteMany = async () => {
       await dltManyData(
-        "/client/playlist/delete-many",
+        "/user/playlist/delete-many",
         checkedList,
         "playlist",
         () => {

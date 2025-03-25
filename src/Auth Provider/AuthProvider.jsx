@@ -64,7 +64,7 @@ const AuthProvider = ({ children }) => {
 
   const getUserInfo = async (token) => {
     await request
-      .get("/client/user/me", {
+      .get("/user/user/me", {
         headers: {
           Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${token}`,
         },

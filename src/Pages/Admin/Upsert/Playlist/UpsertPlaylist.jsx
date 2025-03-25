@@ -29,7 +29,7 @@ const UpsertPlaylist = () => {
     data: playlistData,
     refetch,
     isLoading,
-  } = getData(`playlist/${id}`, queries, !!id, false);
+  } = getData(`/admin/playlist/${id}`, queries, !!id, false);
 
   useEffect(() => {
     return () => {

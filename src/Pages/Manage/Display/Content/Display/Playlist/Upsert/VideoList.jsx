@@ -39,7 +39,7 @@ const VideoList = ({
 
   const handleRemoveVideo = async (videoId) => {
     await updateData(
-      "/client/playlist",
+      "/user/playlist",
       playlistId,
       { videoIdList: [videoId] },
       "playlist",

@@ -47,7 +47,7 @@ const PlaylistPage = ({ openedMenu }) => {
   const tableHeader = useRef();
 
   const { data: playlistsData, refetch } = getData(
-    "playlist",
+    "/admin/playlist",
     queriese,
     true,
     false,
@@ -257,7 +257,7 @@ const PlaylistPage = ({ openedMenu }) => {
     console.log([...checkedList]);
 
     await dltManyData(
-      "playlist/delete-many",
+      "/admin/playlist/delete-many",
       [...checkedList],
       "Playlist",
       () => {
@@ -271,7 +271,7 @@ const PlaylistPage = ({ openedMenu }) => {
 
   const handleDelete = async (id) => {
     await dltData(
-      "playlist/",
+      "/admin/playlist/",
       id,
       "Playlist",
       undefined,

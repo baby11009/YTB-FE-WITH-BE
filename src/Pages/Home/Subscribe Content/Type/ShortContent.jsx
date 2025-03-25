@@ -22,7 +22,7 @@ const ShortContent = () => {
     queryFn: async () => {
       try {
         const rsp = await request.get(
-          "/client/user/subscribed-channels-videos",
+          "/user/user/subscribed-channels-videos",
           {
             headers: {
               Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(

@@ -51,7 +51,12 @@ const VideoPage = ({ type }) => {
 
   const tableHeader = useRef();
 
-  const { data: videosData, refetch } = getData("video", queriese, true, false);
+  const { data: videosData, refetch } = getData(
+    "/admin/video",
+    queriese,
+    true,
+    false,
+  );
 
   const handleOnClick = (queryData) => {
     setQueryOptions((prev) => [...prev, queryData]);
@@ -248,7 +253,7 @@ const VideoPage = ({ type }) => {
   };
   const handleDeleteMany = async () => {
     await dltManyData(
-      "video/delete-many",
+      "/admin/video/delete-many",
       [...checkedList],
       "video",
       () => {
@@ -262,7 +267,7 @@ const VideoPage = ({ type }) => {
 
   const handleDelete = async (id) => {
     await dltData(
-      "video/",
+      "/admin/video",
       id,
       "Video",
       undefined,

@@ -14,7 +14,6 @@ import { timeFormat2 } from "../../util/timeforMat";
 import { useAuthContext } from "../../Auth Provider/authContext";
 
 const PlaylistCard2 = ({ data, containerStyle, l3Color, l2Color }) => {
-  console.log("🚀 ~ data:", data);
   const { setShowHover, handleCursorPositon } = useAuthContext();
   const bgColorRef = useRef(getRandomHexColor());
   return (

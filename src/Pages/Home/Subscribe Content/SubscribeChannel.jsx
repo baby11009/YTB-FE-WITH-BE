@@ -26,7 +26,7 @@ const SubscribeChannel = ({ openedMenu }) => {
     queryKey: [...Object.values(queries)],
     queryFn: async () => {
       try {
-        const rsp = await request.get("/client/user/subscribed-channels", {
+        const rsp = await request.get("/user/user/subscribed-channels", {
           headers: {
             Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
               import.meta.env.VITE_AUTH_TOKEN,
