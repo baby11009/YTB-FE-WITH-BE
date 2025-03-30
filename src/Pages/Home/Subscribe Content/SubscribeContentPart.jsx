@@ -3,7 +3,7 @@ import AllContent from "./Type/AllContent";
 import ShortContent from "./Type/ShortContent";
 import { useParams } from "react-router-dom";
 const SubscribeContentPart = ({ openedMenu }) => {
-  const { id, path } = useParams();
+  const { id } = useParams();
 
   const [Renderer, setRenderer] = useState(undefined);
 

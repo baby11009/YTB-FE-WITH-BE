@@ -1,10 +1,8 @@
-import { ChannelCard, CustomeFuncBox, PlaylistCard } from "../../../Component";
-import { useQuery } from "@tanstack/react-query";
-import request from "../../../util/axios-base-url";
-import { getCookie } from "../../../util/tokenHelpers";
+import { ChannelCard, CustomeFuncBox } from "../../../Component";
 import { useState, useEffect, useRef } from "react";
 import { IsEnd } from "../../../util/scrollPosition";
 import { ThinArrowIcon } from "../../../Assets/Icons";
+import { getData } from "../../../Api/getData";
 const SubscribeChannel = ({ openedMenu }) => {
   const [queries, SetQueries] = useState({
     page: 1,
@@ -22,27 +20,11 @@ const SubscribeChannel = ({ openedMenu }) => {
 
   const [isEnd, setIsEnd] = useState(false);
 
-  const { data, isSuccess, isLoading } = useQuery({
-    queryKey: [...Object.values(queries)],
-    queryFn: async () => {
-      try {
-        const rsp = await request.get("/user/user/subscribed-channels", {
-          headers: {
-            Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-              import.meta.env.VITE_AUTH_TOKEN,
-            )}`,
-          },
-          params: queries,
-        });
-
-        return rsp.data;
-      } catch (error) {
-        alert("Failed to get channel list");
-        console.error(error);
-      }
-    },
-    cacheTime: 0,
-  });
+  const { data, isSuccess } = getData(
+    "/user/user/subscribed-channels",
+    queries,
+    true,
+  );
 
   const handleSort = (data) => {
     if (!queries.sort[data.id]) {
@@ -63,7 +45,7 @@ const SubscribeChannel = ({ openedMenu }) => {
       handleOnClick: handleSort,
     },
     {
-      id: "newAct",
+      id: "channel_updatedAt",
       text: "New activity",
       value: -1,
       handleOnClick: handleSort,

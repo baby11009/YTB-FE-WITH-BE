@@ -4,7 +4,6 @@ import { Setting2Icon, FeedBackIcon } from "../../Assets/Icons";
 import { motion } from "framer-motion";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
 import { useState, useEffect, useRef } from "react";
-import { getRandomHexColor } from "../../util/func";
 
 const funcList1 = [
   {
@@ -18,8 +17,6 @@ const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle, noDesc }) => {
   const [opened, setOpened] = useState(false);
 
   const containRef = useRef();
-
-  const bgColorRef = useRef(getRandomHexColor());
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -43,17 +40,24 @@ const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle, noDesc }) => {
       }`}
     >
       <div
-        className={`rounded-[12px] overflow-hidden w-full ${
+        className={`rounded-[12px] overflow-hidden w-full relative ${
           imgStyle ? imgStyle : "h-[387.55px]"
         }`}
-        style={{ backgroundColor: bgColorRef.current }}
       >
+        <div
+          className='absolute inset-0 z-[1] blur-sm'
+          style={{
+            backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
+              import.meta.env.VITE_VIEW_THUMB_API
+            }${data?.thumb}')`,
+          }}
+        ></div>
         <img
           src={`${import.meta.env.VITE_BASE_API_URI}${
             import.meta.env.VITE_VIEW_THUMB_API
           }${data?.thumb}`}
           alt='short'
-          className='size-full object-contain'
+          className='size-full object-contain relative z-[2]'
         />
       </div>
       {!noDesc && (

@@ -1,5 +1,5 @@
 import { CheckIcon } from "../../Assets/Icons";
-import { useEffect, useRef } from "react";
+
 const CustomeFuncBtn = ({
   data,
   useCheckIcon,
@@ -55,28 +55,11 @@ const CustomeFuncBox = ({
   productIndex,
   size,
 }) => {
-  const containerRef = useRef();
-
-  useEffect(() => {
-    const handleClickOutSide = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setOpened(false);
-      }
-    };
-
-    window.addEventListener("mousedown", handleClickOutSide);
-
-    return () => {
-      window.removeEventListener("mousedown", handleClickOutSide);
-    };
-  }, []);
-
   return (
     <div
       className={`absolute bg-[#282828] rounded-[12px] z-[2000] py-[8px]
         ${style}
     `}
-      ref={containerRef}
     >
       <div className='flex flex-col overflow-hidden'>
         {funcList1 &&

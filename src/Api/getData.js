@@ -44,10 +44,15 @@ export const getData = (
         });
         return res.data;
       } catch (error) {
-        console.error(error);
-        addToaster(
-          error.response?.data?.msg || error.response?.data || error.message,
-        );
+        console.error(error.response.data);
+
+        if (addToaster) {
+          addToaster(
+            error.response.data?.message ||
+              error.response?.data ||
+              error.message,
+          );
+        }
         throw error;
       }
     },

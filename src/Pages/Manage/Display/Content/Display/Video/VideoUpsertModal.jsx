@@ -15,15 +15,16 @@ import {
   useLayoutEffect,
   useCallback,
 } from "react";
-import { getDataWithAuth } from "../../../../../../Api/getData";
+import { getData } from "../../../../../../Api/getData";
 import { createData, updateData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
 import Hls from "hls.js";
+import { isEmpty } from "../../../../../../util/validateFunc";
 import { isObjectEmpty } from "../../../../../../util/func";
 
 const init = {
   title: "",
-  image: undefined,
+  thumbnail: undefined,
   video: undefined,
   type: "video",
   tags: new Set(),
@@ -32,6 +33,7 @@ const init = {
 
 const initTagQueries = {
   search: {},
+  priorityList: [],
   page: 1,
   limit: 10,
   clearCache: "tag",
@@ -54,7 +56,7 @@ const VideoUpsertModal = ({ title, id }) => {
 
   const [openedTags, setOpenedTags] = useState(false);
 
-  const [tagParams, setTagParams] = useState(initTagQueries);
+  const [tagQueries, setTagQueries] = useState(initTagQueries);
 
   const [formData, setFormData] = useState(init);
 
@@ -68,7 +70,7 @@ const VideoUpsertModal = ({ title, id }) => {
 
   const [submitErrs, setSubmitErrs] = useState({});
 
-  const { data: videoData, refetch } = getDataWithAuth(
+  const { data: videoData, refetch } = getData(
     `/user/video/${id}`,
     {},
     id !== undefined,
@@ -76,11 +78,10 @@ const VideoUpsertModal = ({ title, id }) => {
   );
 
   const {
-    data: tagList,
+    data: tagData,
     error: tagErr,
     isLoading: tagIsLoading,
-    isError: tagIsErr,
-  } = getDataWithAuth("tag", tagParams, openedTags, false);
+  } = getData("/data/tags", tagQueries, openedTags, false);
 
   const handleOnChange = useCallback((name, value) => {
     setFormData((prev) => ({
@@ -95,12 +96,18 @@ const VideoUpsertModal = ({ title, id }) => {
     const file = e.files[0];
 
     if (!file) {
-      setSubmitErrs((prev) => ({ ...prev, image: "Failed to upload file" }));
+      setSubmitErrs((prev) => ({
+        ...prev,
+        thumbnail: "Failed to upload file",
+      }));
       return;
     }
 
     if (!file.type.startsWith("image/")) {
-      setSubmitErrs((prev) => ({ ...prev, image: "Just accepted image file" }));
+      setSubmitErrs((prev) => ({
+        ...prev,
+        thumbnail: "Just accepted image file",
+      }));
       e.value = "";
       return;
     }
@@ -110,7 +117,7 @@ const VideoUpsertModal = ({ title, id }) => {
     if (file.size > maxSize) {
       setSubmitErrs((prev) => ({
         ...prev,
-        image: "File size exceeds 2MB",
+        thumbnail: "File size exceeds 2MB",
       }));
       e.value = "";
       return;
@@ -131,7 +138,7 @@ const VideoUpsertModal = ({ title, id }) => {
         ) {
           setSubmitErrs((prev) => ({
             ...prev,
-            image:
+            thumbnail:
               "Image must be at least 720 width and having 16:9 aspect ratio",
           }));
           return;
@@ -139,7 +146,7 @@ const VideoUpsertModal = ({ title, id }) => {
 
         setFormData((prev) => ({
           ...prev,
-          image: file,
+          thumbnail: file,
         }));
         setPreviewThumb(URL.createObjectURL(file));
       });
@@ -193,53 +200,75 @@ const VideoUpsertModal = ({ title, id }) => {
   );
 
   const handleValidate = () => {
-    setSubmitErrs({});
+    const { type, description, tags, ...neededValidateFields } = formData;
 
-    const { type, description, ...neededValidateFields } = formData;
+    const fieldEntries = Object.entries(neededValidateFields);
 
-    const errors = Object.entries(neededValidateFields).reduce(
-      (acc, [key, value]) => {
-        if (!value) {
-          acc[key] =
-            key === "image" || key === "video"
-              ? "File not uploaded"
-              : "Cannot be empty";
-        }
-        return acc;
+    const validateFormValueFuncs = {
+      title: (title) => {
+        return isEmpty("title", title, "Video title cannot be empty");
       },
-      {},
-    );
+      thumbnail: (thumbnail) => {
+        return isEmpty("thumbnail", thumbnail, "Thumbnail not uploaded");
+      },
+      video: (video) => {
+        return isEmpty("video", video, "Video not uploaded");
+      },
+    };
 
-    if (!isObjectEmpty(errors)) {
+    const errors = fieldEntries.reduce((acc, [key, value]) => {
+      const err = validateFormValueFuncs[key](value) || undefined;
+
+      if (err) {
+        acc = { ...acc, ...err };
+      }
+
+      return acc;
+    }, {});
+
+    const isValid = isObjectEmpty(errors);
+
+    if (!isValid) {
       setSubmitErrs(errors);
-      return false;
     }
 
-    return true;
+    return isValid;
   };
 
   const handleValidateUpdate = () => {
-    setSubmitErrs({});
+    const {
+      type,
+      thumbnail,
+      video,
+      description,
+      tags,
+      ...neededValidateFields
+    } = formData;
 
-    const { type, image, video, description, ...neededValidateFields } =
-      formData;
+    const fieldEntries = Object.entries(neededValidateFields);
 
-    const errors = Object.entries(neededValidateFields).reduce(
-      (acc, [key, value]) => {
-        if (!value) {
-          acc[key] = "Cannot be empty";
-        }
-        return acc;
+    const validateFormValueFuncs = {
+      title: (title) => {
+        return isEmpty("title", title, "Video title cannot be empty");
       },
-      {},
-    );
+    };
 
-    if (!isObjectEmpty(errors)) {
+    const errors = fieldEntries.reduce((acc, [key, value]) => {
+      const err = validateFormValueFuncs[key](value) || undefined;
+      if (err) {
+        acc = { ...acc, ...err };
+      }
+
+      return acc;
+    }, {});
+
+    const isValid = isObjectEmpty(errors);
+
+    if (!isValid) {
       setSubmitErrs(errors);
-      return false;
     }
 
-    return true;
+    return isValid;
   };
 
   const create = async () => {
@@ -272,41 +301,30 @@ const VideoUpsertModal = ({ title, id }) => {
 
     if (!isValidate) return;
 
-    const finalData = {
-      title: formData.title,
-      type: formData.type,
-      description: formData.description,
-    };
+    const { userId, video, thumbnail, ...finalData } = formData;
 
     for (const key in finalData) {
-      if (
-        videoData?.data?.hasOwnProperty(key) &&
-        videoData?.data[key] === finalData[key]
-      ) {
-        delete finalData[key];
+      if (videoData?.data?.hasOwnProperty(key)) {
+        if (
+          (typeof finalData[key] === "string" &&
+            videoData.data[key] === finalData[key]) ||
+          JSON.stringify(finalData[key]) === JSON.stringify(videoData.data[key])
+        ) {
+          delete finalData[key];
+        }
       }
     }
 
-    if (formData.tags.length === defaultTagRef.current.length) {
-      let test = formData.tags.filter((id) =>
-        defaultTagRef.current.includes(id),
-      );
-      if (test.length !== defaultTagRef.current.length) {
-        finalData.tags = formData.tags;
-      }
-    } else {
-      finalData.tags = formData.tags;
-    }
-    if (formData.image) {
-      finalData.image = formData.image;
+    if (formData.thumbnail) {
+      finalData.thumbnail = formData.thumbnail;
     }
 
-    if (Object.keys(finalData).length === 0) {
-      alert("Nothing changed!");
+    if (isObjectEmpty(finalData)) {
+      alert("Nothing changed");
       return;
     }
 
-    let data = new FormData();
+    const data = new FormData();
 
     for (const key in finalData) {
       if (key === "tags") {
@@ -348,16 +366,24 @@ const VideoUpsertModal = ({ title, id }) => {
     if (videoData) {
       const dataForm = {
         title: videoData?.data?.title,
-        image: undefined,
+        thumbnail: undefined,
         video: undefined,
         type: videoData?.data?.type,
         description: videoData?.data?.description,
       };
 
-      if (videoData?.data?.tag_info) {
-        const tagIdList = videoData?.data?.tag_info.map((tag) => tag._id);
+      if (videoData?.data?.tags_info) {
+        const tagIdList = videoData?.data?.tags_info.map((tag) => tag._id);
         dataForm.tags = tagIdList;
         defaultTagRef.current = tagIdList;
+
+        if (videoData.data.tags_info) {
+          dataForm.tags = videoData.data.tags;
+          setTagQueries((prev) => ({
+            ...prev,
+            priorityList: videoData.data.tags,
+          }));
+        }
       }
 
       setFormData(dataForm);
@@ -408,9 +434,11 @@ const VideoUpsertModal = ({ title, id }) => {
 
   useEffect(() => {
     if (!openedTags) {
-      queryClient.removeQueries("tag");
+      queryClient.removeQueries({
+        queryKey: Object.values(tagQueries),
+      });
     }
-  }, [openedTags]);
+  }, [openedTags, tagQueries]);
 
   useEffect(() => {
     let timeOut;
@@ -513,7 +541,9 @@ const VideoUpsertModal = ({ title, id }) => {
                   className='text-[12px] text-red-FF font-[500] leading-[16px] h-[16px] px-[8px] 
                 line-clamp-1 text-ellipsis break-all'
                 >
-                  <span>{submitErrs["image"] ? submitErrs["image"] : ""}</span>
+                  <span>
+                    {submitErrs["thumbnail"] ? submitErrs["thumbnail"] : ""}
+                  </span>
                 </div>
               </div>
 
@@ -611,22 +641,24 @@ const VideoUpsertModal = ({ title, id }) => {
                   title={"Tag"}
                   valueList={formData.tags}
                   setIsOpened={setOpenedTags}
-                  list={tagList?.data}
+                  list={tagData?.data}
                   displayValue={"title"}
                   isLoading={tagIsLoading}
-                  isError={tagIsErr}
                   fetchingError={tagErr?.response?.data?.msg}
                   setData={(value) => {
                     setFormData((prev) => ({ ...prev, tags: value }));
                   }}
                   handleSetQueries={(value, pageInc) => {
-                    setTagParams((prev) => {
+                    setTagQueries((prev) => {
                       const prevClone = {
                         ...prev,
                       };
 
-                      if (value !== undefined) {
+                      if (value) {
                         prevClone.search["title"] = value;
+                        prevClone.page = 1;
+                      } else if (!value && !pageInc) {
+                        prevClone.search = {};
                         prevClone.page = 1;
                       }
 

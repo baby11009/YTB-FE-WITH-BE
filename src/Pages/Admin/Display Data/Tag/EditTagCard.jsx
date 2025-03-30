@@ -128,7 +128,7 @@ const EditTagCard = ({ data, setCurrMode, handleUpdate }) => {
     }
 
     await updateData(
-      "tag",
+      "admin/tag",
       data?._id,
       finalData,
       "Tag",

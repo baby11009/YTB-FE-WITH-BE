@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { formatNumber } from "../../util/numberFormat";
-import CustomeFuncBox from "../Box/CustomeFuncBox";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import SubscribeBtn from "../Button/SubscribeBtn";
 
 const ChannelCard = ({ data }) => {
@@ -16,8 +15,11 @@ const ChannelCard = ({ data }) => {
   }, [rspData]);
 
   return (
-    <div className='w-full flex flex-col sm:gap-0 sm:flex-row items-center mt-[24px]'>
-      <Link className='flex justify-center mr-[16px]'>
+    <Link
+      className='w-full flex flex-col sm:gap-0 sm:flex-row items-center mt-[24px]'
+      to={`/channel/${channelData.email}/home`}
+    >
+      <div className='flex justify-center mr-[16px]'>
         <img
           src={`${import.meta.env.VITE_BASE_API_URI}${
             import.meta.env.VITE_VIEW_AVA_API
@@ -25,7 +27,7 @@ const ChannelCard = ({ data }) => {
           alt={`avatar-${channelData?.email}`}
           className='size-[136px] rounded-[50%]'
         />
-      </Link>
+      </div>
       <div className='flex-1  overflow-hidden  flex justify-between items-center '>
         <div className='w-full flex flex-col items-center sm:items-start text-[12px] leading-[18px] text-gray-A pr-0  sm:pr-[16px]'>
           <h3 className='text-[18px] leading-[26px] text-white-F1 t-ellipsis mb-[8px]'>
@@ -57,7 +59,7 @@ const ChannelCard = ({ data }) => {
           setRspData(data);
         }}
       />
-    </div>
+    </Link>
   );
 };
 export default ChannelCard;

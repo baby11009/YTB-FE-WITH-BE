@@ -1,27 +1,9 @@
 import VideoCard from "./VideoCard";
 import PlayListCard from "../Playlist/PlayListCard";
-import { useLayoutEffect } from "react";
 
-const CardRow = ({ vidList, handleResize, showQtt, openedMenu, showBtn }) => {
-  useLayoutEffect(() => {
-    // Function to update state with current window width
-    handleResize();
-    window.addEventListener("resize", () => {
-      handleResize();
-    });
-
-    return () => {
-      window.removeEventListener("resize", () => {
-        handleResize();
-      });
-    };
-  }, [openedMenu]);
-
+const CardRow = ({ vidList, showBtn }) => {
   return (
-    <div
-      className='grid'
-      style={{ gridTemplateColumns: `repeat(${showQtt}, minmax(0, 1fr)` }}
-    >
+    <>
       {vidList?.map((item, index) => {
         if (item?.video_list) {
           return (
@@ -41,7 +23,7 @@ const CardRow = ({ vidList, handleResize, showQtt, openedMenu, showBtn }) => {
           />
         );
       })}
-    </div>
+    </>
   );
 };
 export default CardRow;

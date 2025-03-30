@@ -186,7 +186,11 @@ const InfiniteDropDownWithCheck = ({
                     ></div>
                   </div>
                 ) : fetchingError ? (
-                  <div>{fetchingError}</div>
+                  <div className='px-[12px] py-[4px]'>
+                    {typeof fetchingError === "string"
+                      ? fetchingError
+                      : `Failed to fetch ${title}`}
+                  </div>
                 ) : dataList.length !== 0 ? (
                   dataList.map((data, id) => (
                     <div

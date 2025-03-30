@@ -1,126 +1,86 @@
-import { useState, useRef, useEffect, Fragment } from "react";
+import { useState, useEffect, useMemo, Fragment } from "react";
 import ShortVids from "../Short/ShortVids";
 import CardRow from "../Video/CardRow";
 import { chunkArray } from "../../util/func";
 
 const GridLayout = ({ openedMenu, vidList, shortList }) => {
-  const [showQtt, setShowQtt] = useState(1);
+  const [showShortQtt, setShowShortQtt] = useState(1);
 
-  const [showCard, setShowCard] = useState(1);
+  const [showCardQtt, setShowCardQtt] = useState(1);
 
   const [renderRows, setRenderRows] = useState([]);
 
-  const [videoRows, setVideoRows] = useState([]);
+  const shortBreakpoints = [
+    { max: 426, value: 1 },
+    { max: 640, value: 2 },
+    { max: 1024, value: 3 },
+    { max: 1168, value: 4 },
+    { max: 1436, value: 5 },
+    { max: 1760, value: openedMenu ? 5 : 6 },
+    { max: 2086, value: openedMenu ? 6 : 7 },
+    { max: 2256, value: openedMenu ? 7 : 9 },
+  ];
 
-  const [shortRows, setShortRows] = useState([]);
+  const cardBreakpoints = [
+    { max: 640, value: 1 },
+    { max: 1024, value: 2 },
+    { max: 1280, value: 3 },
+    { max: 1536, value: openedMenu ? 3 : 4 },
+    { max: 1760, value: 4 },
+    { max: 2086, value: openedMenu ? 4 : 5 },
+    { max: 2256, value: openedMenu ? 5 : 6 },
+  ];
 
-  const vidsRowsArr = useRef(Array.from({ length: 2 }, (_, i) => i));
+  const handleResize = () => {
+    const width = window.innerWidth;
 
-  const handleResizeShort = () => {
-    if (window.innerWidth < 426) {
-      setShowQtt(1);
-    } else if (window.innerWidth < 640) {
-      setShowQtt(2);
-    } else if (window.innerWidth < 1024) {
-      setShowQtt(3);
-    } else if (window.innerWidth < 1168) {
-      setShowQtt(4);
-    } else if (window.innerWidth < 1436) {
-      setShowQtt(5);
-    } else if (window.innerWidth < 1760) {
-      if (openedMenu) {
-        setShowQtt(5);
-      } else setShowQtt(6);
-    } else if (window.innerWidth < 2086) {
-      if (openedMenu) {
-        setShowQtt(6);
-      } else setShowQtt(7);
-    } else if (window.innerWidth < 2256) {
-      if (openedMenu) {
-        setShowQtt(7);
-      } else setShowQtt(9);
-    } else setShowQtt(9);
-  };
-
-  const handleResizeCard = () => {
-    if (window.innerWidth < 640) {
-      setShowCard(1);
-    } else if (window.innerWidth < 1024) {
-      setShowCard(2);
-    } else if (window.innerWidth < 1280) {
-      setShowCard(3);
-    } else if (window.innerWidth < 1536) {
-      if (openedMenu) {
-        setShowCard(3);
-      } else {
-        setShowCard(4);
-      }
-    } else if (window.innerWidth < 1760) {
-      setShowCard(4);
-    } else if (window.innerWidth < 2086) {
-      if (openedMenu) {
-        setShowCard(4);
-      } else {
-        setShowCard(5);
-      }
-    } else if (window.innerWidth < 2256) {
-      if (openedMenu) {
-        setShowCard(5);
-      } else {
-        setShowCard(6);
-      }
-    } else setShowCard(6);
+    setShowShortQtt(shortBreakpoints.find((bp) => width < bp.max)?.value || 9);
+    setShowCardQtt(cardBreakpoints.find((bp) => width < bp.max)?.value || 6);
   };
 
   useEffect(() => {
-    setVideoRows(chunkArray(vidList, showCard * 2));
-  }, [showCard, vidList]);
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, [openedMenu]);
+
+  const videoRows = useMemo(
+    () => chunkArray(vidList, showCardQtt * 2),
+    [showCardQtt, vidList],
+  );
+  const shortRows = useMemo(
+    () => chunkArray(shortList, showShortQtt * 2),
+    [showShortQtt, shortList],
+  );
 
   useEffect(() => {
-    setShortRows(chunkArray(shortList, showQtt * 2));
-  }, [showQtt, shortList]);
-
-  useEffect(() => {
-    setRenderRows(() => {
-      const rowLength =
-        shortRows.length > videoRows.length
-          ? shortRows.length
-          : videoRows.length;
-
-      return Array.from({ length: rowLength }, (_, i) => i);
-    });
-  }, [videoRows, shortRows]);
+    setRenderRows(
+      Array.from(
+        { length: Math.max(videoRows.length, shortRows.length) },
+        (_, i) => i,
+      ),
+    );
+  }, [videoRows.length, shortRows.length]);
 
   return (
-    <>
-      {renderRows.map((row, index) => (
+    <div className='grid'>
+      {renderRows.map((row) => (
         <Fragment key={row}>
-          <div className='flex flex-col'>
-            {vidsRowsArr.current &&
-              vidsRowsArr.current.map((item, id) => (
-                <CardRow
-                  key={id}
-                  handleResize={handleResizeCard}
-                  showQtt={showCard}
-                  openedMenu={openedMenu}
-                  vidList={videoRows[row]?.slice(
-                    item * showCard,
-                    item * showCard + showCard,
-                  )}
-                />
-              ))}
+          <div
+            className='grid'
+            style={{
+              gridTemplateColumns: `repeat(${showCardQtt}, minmax(0, 1fr)`,
+            }}
+          >
+            <CardRow vidList={videoRows[row]} />
           </div>
           {shortRows[row] && (
-            <ShortVids
-              openedMenu={openedMenu}
-              handleResize={handleResizeShort}
-              showQtt={showQtt}
-              shortList={shortRows[row]}
-            />
+            <ShortVids showQtt={showShortQtt} shortList={shortRows[row]} />
           )}
         </Fragment>
       ))}
-    </>
+    </div>
   );
 };
+
 export default GridLayout;

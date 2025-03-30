@@ -52,11 +52,7 @@ const UpsertUser = () => {
 
   const [previewAva, setPreviewAva] = useState("");
 
-  const [avaName, setAvaName] = useState("");
-
   const [previewBanner, setPreviewBanner] = useState("");
-
-  const [bannerName, setBannerName] = useState("");
 
   const [realTimeErrs, setRealTimeErrs] = useState({});
 
@@ -172,9 +168,7 @@ const UpsertUser = () => {
       () => {
         setFormData(initForm);
         setPreviewAva("");
-        setAvaName("");
         setPreviewBanner("");
-        setBannerName("");
       },
       undefined,
       addToaster,
@@ -198,7 +192,7 @@ const UpsertUser = () => {
       }
     }
 
-    if (id && finalData.password === "") {
+    if (finalData.password === "") {
       delete finalData.password;
     }
 
@@ -337,9 +331,6 @@ const UpsertUser = () => {
                 setPreview={(url) => {
                   setPreviewBanner(url);
                 }}
-                setFileName={(name) => {
-                  setBannerName(name);
-                }}
                 setData={(file) => {
                   setFormData((prev) => ({
                     ...prev,
@@ -378,9 +369,7 @@ const UpsertUser = () => {
                   setPreview={(url) => {
                     setPreviewAva(url);
                   }}
-                  setFileName={(name) => {
-                    setAvaName(name);
-                  }}
+
                   setData={(file) => {
                     setFormData((prev) => ({
                       ...prev,

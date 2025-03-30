@@ -1,14 +1,7 @@
 import { Short2Icon, CloseIcon, ThinArrowIcon } from "../../Assets/Icons";
-import { short1 } from "../../Assets/Images";
+
 import { useState, useLayoutEffect } from "react";
 import { ShortCard } from "..";
-
-const mockData = {
-  id: 1,
-  img: short1,
-  title:
-    "Why Stone Breathing users are so Rare? Demon Slayer Explained #demonslayer #shorts",
-};
 
 const ShortCardRow = ({ shortList, showQtt }) => {
   const [vrArr, setVrArr] = useState([]);
@@ -36,9 +29,7 @@ const ShortCardRow = ({ shortList, showQtt }) => {
 };
 
 const ShortVids = ({
-  openedMenu,
   shortList = [],
-  handleResize,
   showQtt,
   noBtn,
   container1Style,
@@ -48,27 +39,12 @@ const ShortVids = ({
   const [shortRows, setShortRows] = useState(1);
 
   const [shortRowsArr, setShortRowsArr] = useState(
-    Array.from({ length: shortRows }, (_, i) => i)
+    Array.from({ length: shortRows }, (_, i) => i),
   );
 
   useLayoutEffect(() => {
     setShortRowsArr(Array.from({ length: shortRows }, (_, i) => i));
   }, [shortRows]);
-
-  useLayoutEffect(() => {
-    // Function to update state with current window width
-    handleResize();
-
-    window.addEventListener("resize", () => {
-      handleResize();
-    });
-
-    return () => {
-      window.removeEventListener("resize", () => {
-        handleResize();
-      });
-    };
-  }, [openedMenu]);
 
   return (
     <>
@@ -87,15 +63,17 @@ const ShortVids = ({
               <div
                 className='w-[40px] h-[40px] rounded-[50%] hover:bg-[rgba(255,255,255,0.2)] 
                      flex items-center justify-center cursor-pointer'
-                title='Không quan tâm'
+                title="Don't care"
                 onClick={() => setShowShort(false)}
               >
-                <CloseIcon />
+                <div className='size-[24px]'>
+                  <CloseIcon />
+                </div>
               </div>
             ) : (
               <div className='px-[16px] rounded-[18px] hover:bg-[#263850] cursor-pointer'>
                 <span className=' text-nowrap text-[14px] leading-[36px] font-[500] text-blue-3E'>
-                  Xem tất cả
+                  Watch all
                 </span>
               </div>
             )}
@@ -106,7 +84,7 @@ const ShortVids = ({
                 key={item}
                 shortList={shortList?.slice(
                   item * showQtt,
-                  item * showQtt + showQtt
+                  item * showQtt + showQtt,
                 )}
                 showQtt={showQtt}
               />
@@ -140,14 +118,14 @@ const ShortVids = ({
       ) : (
         <div className='mb-[40px] text-[14px]'>
           <span className='mr-[12px]  leading-[20px] text-gray-A'>
-            Kệ sẽ bị ẩn trong 30 ngày
+            Desk will be hide in 30days
           </span>
           <button
             className='text-[14px] leading-[36px] text-blue-3E px-[16px] 
             rounded-[18px] hover:bg-[#263850] font-bold'
             onClick={() => setShowShort(true)}
           >
-            Hủy
+            Cancel
           </button>
         </div>
       )}

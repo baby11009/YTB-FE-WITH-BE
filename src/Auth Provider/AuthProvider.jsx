@@ -187,6 +187,7 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
+      console.log(e.target);
       if (
         modalContainerRef.current &&
         !modalContainerRef.current.contains(e.target)

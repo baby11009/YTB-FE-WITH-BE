@@ -39,15 +39,16 @@ const ChannelPart = ({ openedMenu }) => {
   }, [feature, displayList]);
 
   return (
-    <div className='flex flex-col items-center justify-center'>
+    <div className='flex flex-col items-center justify-center '>
       <div
-        className={`w-[214px] xsm:w-[428px] sm:w-[642px] 2md:w-[856px] 2lg:w-[1070px] 
+        className={`w-[214px] xsm:w-[428px] sm:w-[642px] 2md:w-[856px] 2lg:w-[1070px] relative
       ${
         openedMenu
           ? "1312:w-[856px] 1360:w-[1070px] 1573:w-[1284px]"
           : "1400:w-[1284px]"
       }`}
       >
+        {/* <div className='w-full sticky top-[56px] h-[50px] bg-white z-[50]'></div> */}
         <ChannelInfor
           channelEmail={id}
           openedMenu={openedMenu}

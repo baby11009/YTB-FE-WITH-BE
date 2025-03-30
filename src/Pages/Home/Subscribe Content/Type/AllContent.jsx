@@ -12,6 +12,7 @@ import { getCookie } from "../../../../util/tokenHelpers";
 import { IsEnd } from "../../../../util/scrollPosition";
 import { useSearchParams } from "react-router-dom";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
+import { getData } from "../../../../Api/getData";
 
 const AllContent = ({ openedMenu }) => {
   const { setFetchingState } = useAuthContext();
@@ -48,55 +49,17 @@ const AllContent = ({ openedMenu }) => {
     data: videoData,
     isLoading,
     isSuccess,
-  } = useQuery({
-    queryKey: [...Object.values(videoQueriese)],
-    queryFn: async () => {
-      try {
-        const rsp = await request.get(
-          "/user/user/subscribed-channels-videos",
-          {
-            headers: {
-              Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-                import.meta.env.VITE_AUTH_TOKEN,
-              )}`,
-            },
-            params: videoQueriese,
-          },
-        );
+  } = getData(
+    "/user/user/subscribed-channels-videos",
+    videoQueriese,
+    true,
+    false,
+  );
 
-        return rsp.data;
-      } catch (error) {
-        alert("Failed to get channel list");
-        console.error(error);
-      }
-    },
-    cacheTime: 0,
-  });
-
-  const { data: shortData } = useQuery({
-    queryKey: [...Object.values(shortQueriese)],
-    queryFn: async () => {
-      try {
-        const rsp = await request.get(
-          "/user/user/subscribed-channels-videos",
-          {
-            headers: {
-              Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-                import.meta.env.VITE_AUTH_TOKEN,
-              )}`,
-            },
-            params: shortQueriese,
-          },
-        );
-
-        return rsp.data;
-      } catch (error) {
-        alert("Failed to get channel list");
-        console.error(error);
-      }
-    },
-    cacheTime: 0,
-  });
+  const { data: shortData } = getData(
+    "/user/user/subscribed-channels-videos",
+    shortQueriese,
+  );
 
   useEffect(() => {
     if (videoData) {

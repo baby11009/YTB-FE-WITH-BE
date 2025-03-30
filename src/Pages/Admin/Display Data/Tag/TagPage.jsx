@@ -36,7 +36,7 @@ const TagPage = () => {
   const [queryOptions, setQueryOptions] = useState([]);
 
   const { data: tagData, refetch } = getData(
-    "tag",
+    "/admin/tag",
     queriese,
     queriese ? true : false,
     false,
@@ -184,7 +184,7 @@ const TagPage = () => {
 
   const handleDeleteMany = async () => {
     await dltManyData(
-      "tag/delete-many",
+      "/admin/tag/delete-many",
       [...checkedList],
       "tag",
       () => {
@@ -198,7 +198,7 @@ const TagPage = () => {
 
   const handleDelete = async (id) => {
     await dltData(
-      "tag/",
+      "/admin/tag/",
       id,
       "Tag",
       undefined,

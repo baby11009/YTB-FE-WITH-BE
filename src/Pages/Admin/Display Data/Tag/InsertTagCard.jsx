@@ -6,7 +6,7 @@ import { useAuthContext } from "../../../../Auth Provider/authContext";
 
 const initForm = {
   title: "",
-  image: undefined,
+  icon: undefined,
 };
 
 const InsertTagCard = ({ setCurrMode, refetch }) => {
@@ -20,7 +20,7 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
 
   const errorTimeout = useRef(undefined);
 
-  const imageInputRef = useRef();
+  const iconInputRef = useRef();
 
   const checkImage = (file) => {
     return new Promise((resolve, reject) => {
@@ -45,7 +45,7 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
     if (!file) {
       setSubmitErrs((prev) => ({
         ...prev,
-        image: "Failed to upload image",
+        icon: "Failed to upload image",
       }));
       return;
     }
@@ -53,9 +53,9 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
     if (!file.type.startsWith("image/")) {
       setSubmitErrs((prev) => ({
         ...prev,
-        image: "Just accepted image file",
+        icon: "Just accepted image file",
       }));
-      imageInputRef.current.value = "";
+      iconInputRef.current.value = "";
       return;
     }
     const maxSize = 3;
@@ -64,9 +64,9 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
     if (file.size > maxsizeByte) {
       setSubmitErrs((prev) => ({
         ...prev,
-        image: `File size > ${maxSize}MB`,
+        icon: `File size > ${maxSize}MB`,
       }));
-      imageInputRef.current.value = "";
+      iconInputRef.current.value = "";
       return;
     }
 
@@ -74,14 +74,14 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
       await checkImage(file);
       // remove image errors
       setSubmitErrs((prev) => {
-        const { image, ...rest } = prev;
+        const { icon, ...rest } = prev;
         return rest;
       });
 
-      setFormData((prev) => ({ ...prev, image: file }));
+      setFormData((prev) => ({ ...prev, icon: file }));
       setPreviewImage({ src: URL.createObjectURL(file), name: file.name });
     } catch (error) {
-      setSubmitErrs((prev) => ({ ...prev, image: error }));
+      setSubmitErrs((prev) => ({ ...prev, icon: error }));
     }
   };
 
@@ -93,9 +93,9 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
           errors.title = "Title is required";
         }
       },
-      image: (image) => {
-        if (!image) {
-          errors.image = "Image is required";
+      icon: (icon) => {
+        if (!icon) {
+          errors.icon = "Image is required";
         }
       },
     };
@@ -127,7 +127,7 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
     }
 
     createData(
-      "tag",
+      "admin/tag",
       finalData,
       "Tag",
       () => {
@@ -185,15 +185,15 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
         }}
       >
         <label
-          htmlFor='image'
+          htmlFor='icon'
           className='inline-block size-full sm:max-w-[360px] relative cursor-pointer'
           onDragOver={(e) => {
             e.preventDefault();
           }}
           onDrop={(e) => {
             e.preventDefault();
-            imageInputRef.current.files = e.dataTransfer.files;
-            handleUploadAvatar(imageInputRef.current);
+            iconInputRef.current.files = e.dataTransfer.files;
+            handleUploadAvatar(iconInputRef.current);
           }}
         >
           <div className='flex items-center justify-center size-full'>
@@ -207,10 +207,10 @@ const InsertTagCard = ({ setCurrMode, refetch }) => {
           </div>
           <input
             type='file'
-            name='image'
-            id='image'
+            name='icon'
+            id='icon'
             accept='image/*'
-            ref={imageInputRef}
+            ref={iconInputRef}
             onChange={(e) => handleUploadAvatar(e.target)}
             className='hidden'
             onProgress={(e) => console.log(e)}

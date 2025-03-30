@@ -14,7 +14,6 @@ const ImageCropper = ({
   minHeight = 160,
   aspectRatio = 1,
   setPreview,
-  setFileName,
   setData,
 }) => {
   const { setIsShowing } = useAuthContext();
@@ -30,7 +29,6 @@ const ImageCropper = ({
   const onSelectFile = (e) => {
     const file = e.files?.[0];
     if (!file) return;
-    setFileName(file.name);
     const reader = new FileReader();
     reader.addEventListener("load", () => {
       const imageElement = new Image();
@@ -135,7 +133,6 @@ const ImageCropper = ({
               className='text-white py-2 px-6 font-[500] rounded-[30px] bg-sky-500 hover:bg-sky-600'
               onClick={() => {
                 setImgSrc("");
-                setFileName("");
               }}
             >
               Cancel

@@ -1,47 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
-import request from "../../../../util/axios-base-url";
 import { useEffect, useState, useRef } from "react";
 import { IsEnd } from "../../../../util/scrollPosition";
-import { getCookie } from "../../../../util/tokenHelpers";
 import { ShortCard } from "../../../../Component";
+import { getData } from "../../../../Api/getData";
 
 const ShortContent = () => {
   const [shortQueriese, setShortQueriese] = useState({
     page: 1,
     limit: 12,
-    type: "short",
+    search: {
+      type: "short",
+    },
   });
 
   const [shortList, setShortList] = useState([]);
-  //   console.log("🚀 ~ shortList:", shortList);
 
   const [isEnd, setIsEnd] = useState(false);
 
-  const { data: shortData } = useQuery({
-    queryKey: [...Object.values(shortQueriese)],
-    queryFn: async () => {
-      try {
-        const rsp = await request.get(
-          "/user/user/subscribed-channels-videos",
-          {
-            headers: {
-              Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${getCookie(
-                import.meta.env.VITE_AUTH_TOKEN
-              )}`,
-            },
-            params: shortQueriese,
-          }
-        );
-
-        return rsp.data;
-      } catch (error) {
-        alert("Failed to get channel list");
-        console.error(error);
-      }
-    },
-    suspense: true,
-    cacheTime: 0,
-  });
+  const { data: shortData } = getData(
+    "/user/user/subscribed-channels-videos",
+    shortQueriese,
+  );
 
   const shortIdsSet = useRef(new Set());
 
