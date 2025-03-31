@@ -16,7 +16,7 @@ import {
   funcList5,
 } from "./Component";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 
 const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
@@ -29,6 +29,30 @@ const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
   const handleNav = (path) => {
     navigate(path);
   };
+
+  useEffect(() => {
+    const disabledScroll = (e) => {
+      console.log(openedMenu);
+
+      e.preventDefault();
+    };
+
+    if (openedMenu) {
+      document.addEventListener("scroll", disabledScroll, { passive: false });
+      document.addEventListener("wheel", disabledScroll, { passive: false });
+    }
+
+    return () => {
+      if (openedMenu) {
+        document.removeEventListener("scroll", disabledScroll, {
+          passive: false,
+        });
+        document.removeEventListener("wheel", disabledScroll, {
+          passive: false,
+        });
+      }
+    };
+  }, [openedMenu]);
 
   return (
     <nav

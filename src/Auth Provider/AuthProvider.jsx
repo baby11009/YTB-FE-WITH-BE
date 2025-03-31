@@ -145,6 +145,7 @@ const AuthProvider = ({ children }) => {
     const disabledScroll = (e) => {
       e.preventDefault();
     };
+
     if (showHover) {
       document.addEventListener("scroll", disabledScroll, { passive: false });
       document.addEventListener("wheel", disabledScroll, { passive: false });
@@ -168,8 +169,6 @@ const AuthProvider = ({ children }) => {
     if (isShowing) {
       setShowHover(undefined);
     }
-
-    return () => {};
   }, [isShowing]);
 
   useEffect(() => {
@@ -187,7 +186,6 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      console.log(e.target);
       if (
         modalContainerRef.current &&
         !modalContainerRef.current.contains(e.target)

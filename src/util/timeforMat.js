@@ -108,3 +108,33 @@ export const timeFormat3 = (time) => {
 
   return formattedDate;
 };
+
+// return date time in word format
+
+export const timeFormat4 = (time) => {
+  const date = new Date(time);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+
+  const monthShortenedForms = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  // Định dạng ngày theo định dạng DD/MM/YYYY
+  const formattedDate = `${monthShortenedForms[month - 1]} ${day
+    .toString()
+    .padStart(2, "0")}, ${year}`;
+
+  return formattedDate;
+};

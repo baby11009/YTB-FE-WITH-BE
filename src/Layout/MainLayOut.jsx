@@ -1,11 +1,11 @@
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect } from "react";
 import { scrollToTop } from "../util/scrollCustom";
 import { useAuthContext } from "../Auth Provider/authContext";
 
 //  Swiper css
 import "swiper/css";
 
-const MainLayOut = ({ children, style }) => {
+const MainLayOut = ({ children }) => {
   useEffect(() => {
     scrollToTop();
   }, []);
@@ -16,10 +16,8 @@ const MainLayOut = ({ children, style }) => {
     <div className='min-h-screen text-white-F1 relative'>
       {children}
       {isShowing && (
-        <div className=' fixed z-[9999] inset-0 bg-[rgba(0,0,0,0.3)]'>
-          <div className='w-screen h-screen flex items-center justify-center'>
-            <div ref={modalContainerRef}>{isShowing}</div>
-          </div>
+        <div className=' fixed z-[9999] inset-0 bg-[rgba(0,0,0,0.3)] flex items-center justify-center'>
+          <div ref={modalContainerRef}>{isShowing}</div>
         </div>
       )}
     </div>

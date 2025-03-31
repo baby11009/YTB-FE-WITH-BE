@@ -1,4 +1,4 @@
-export const formatNumber = function (number = 0) {
+export const formatNumber = (number = 0) => {
   if (number >= 1000000000) {
     return `${(number / 1000000000).toFixed(0)} T`;
   } else if (number >= 1000000) {
@@ -11,4 +11,8 @@ export const formatNumber = function (number = 0) {
   } else {
     return number.toString();
   }
+};
+
+export const formatNumber2 = (number) => {
+  return new Intl.NumberFormat("en-US").format(number);
 };

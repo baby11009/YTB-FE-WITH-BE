@@ -1,10 +1,11 @@
-import { Verification, SearchIcon, CloseIcon } from "../../../../Assets/Icons";
+import { Verification, SearchIcon } from "../../../../Assets/Icons";
 import { formatNumber } from "../../../../util/numberFormat";
 import { SubscribeBtn, Slider } from "../../../../Component";
 import { getData } from "../../../../Api/getData";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import { useLocation, useNavigate } from "react-router-dom";
+import InformationBox from "./InformationBox";
 
 const funcList = [
   {
@@ -70,50 +71,6 @@ const CustomeButton = ({ data, feature, handleOnClick }) => {
   );
 };
 
-const InformationBox = ({ data }) => {
-  return (
-    <div className='bg-black-21 mx-[40px] my-[24px] w-[80vw] md:w-[60vw] lg:w-[46vw] h-[80vh] xl:w-[37vw] rounded-[12px] overflow-auto scrollbar-3'>
-      <div className='min-w-[450px] relative'>
-        <div className='sticky top-[8px] p-[8px_8px_0px]  '>
-          <div className='w-full pl-[16px] py-[4px] pr-[2px] flex items-center justify-between'>
-            <h2 className='text-[20px] leading-[28px] font-bold m-[10px_8px_10px_0px]'>
-              About
-            </h2>
-            <button className='size-[40px] p-[8px] rounded-[50%] hover:bg-black-0.2'>
-              <div className='size-[24px]'>
-                <CloseIcon />
-              </div>
-            </button>
-          </div>
-        </div>
-        <div className='p-[0px_24px_24px] text-[14px] leading-[20px]'>
-          <span>{data.description}</span>
-          <div>
-            <div className='mt-[16px] mb-[8px] text-[20px] leading-[28px] font-bold'>
-              Links
-            </div>
-            <div></div>
-          </div>
-          <div>
-            <div className='mt-[16px] mb-[8px] text-[20px] leading-[28px] font-bold'>
-              Channel details
-            </div>
-            <div>
-              <a
-                target='_blank'
-                href={`https://www.facebook.com/sharer/sharer.php?u=http://localhost:5173/channel/${data.email}/home&hashtag=%23MyTube/${data.email}`}
-                class='fb-xfbml-parse-ignore'
-              >
-                Chia sẻ
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const ChannelInfor = ({ channelEmail, feature }) => {
   const { user, setIsShowing } = useAuthContext();
 
@@ -160,7 +117,14 @@ const ChannelInfor = ({ channelEmail, feature }) => {
   };
 
   const showingInformationBox = () => {
-    setIsShowing(<InformationBox data={channelData} />);
+    setIsShowing(
+      <InformationBox
+        data={channelData}
+        handleCloseBox={() => {
+          setIsShowing(undefined);
+        }}
+      />,
+    );
   };
 
   const handlePressEnter = (e) => {
@@ -195,20 +159,21 @@ const ChannelInfor = ({ channelEmail, feature }) => {
 
   useEffect(() => {
     if (navigateContainerRef.current) {
-      const currChild = navigateContainerRef.current.querySelector(
-        `[data-path="${feature}"]`,
+      const path = feature || "home";
+      let currChild = navigateContainerRef.current.querySelector(
+        `[data-path="${path}"]`,
       );
 
-      if (currChild) {
-        const childRect = currChild.getBoundingClientRect();
-        const parentRect = navigateContainerRef.current.getBoundingClientRect();
-        setUnderlineInfo({
-          width: currChild.offsetWidth,
-          left: childRect.left - parentRect.left,
-        });
-      } else {
-        setUnderlineInfo({ width: 0, left: 0 });
+      if (!currChild) {
+        currChild =
+          navigateContainerRef.current.querySelector(`[data-path="home"]`);
       }
+      const childRect = currChild.getBoundingClientRect();
+      const parentRect = navigateContainerRef.current.getBoundingClientRect();
+      setUnderlineInfo({
+        width: currChild.offsetWidth,
+        left: childRect.left - parentRect.left,
+      });
     }
   }, [feature]);
 
@@ -262,9 +227,10 @@ const ChannelInfor = ({ channelEmail, feature }) => {
               className='hidden 528:flex items-center mt-[12px] cursor-pointer'
               onClick={showingInformationBox}
             >
-              <span className='t-1-ellipsis flex-1 text-nowrap'>
-                {channelData?.description}
+              <span className='t-1-ellipsis text-nowrap'>
+                {channelData?.description.substring(0, 70)}
               </span>
+              <span className='text-white-F1 font-bold'>...more</span>
             </div>
 
             <div className='hidden 856:flex items-center gap-[8px]  mt-[12px] mb-[8px]'>
@@ -290,12 +256,13 @@ const ChannelInfor = ({ channelEmail, feature }) => {
           </div>
         </div>
         <div
-          className='flex 528:hidden items-center mt-[12px] cursor-pointer'
+          className='flex 528:hidden items-center mt-[12px] cursor-pointer text-[12px] leading-[16px]'
           onClick={showingInformationBox}
         >
-          <span className='t-1-ellipsis flex-1 text-nowrap'>
+          <span className='t-1-ellipsis text-nowrap text-gray-A'>
             {channelData?.description}
           </span>
+          <span className='text-white-F1 font-bold'>...more</span>
         </div>
         <div className='flex 856:hidden items-center gap-[8px] mt-[12px]'>
           <div className='flex-1'>
@@ -319,7 +286,7 @@ const ChannelInfor = ({ channelEmail, feature }) => {
         </div>
       </div>
 
-      <div className='w-full sticky top-[56px] z-[50] bg-black'>
+      <div className='w-full sticky top-[56px] z-[550] bg-black'>
         <Slider dragScroll={true} buttonType={2}>
           <div
             className='flex !mx-0 w-full text-[16px] leading-[48px] font-[500] gap-[24px] relative'
