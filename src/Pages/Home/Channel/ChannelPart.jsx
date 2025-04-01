@@ -48,7 +48,6 @@ const ChannelPart = ({ openedMenu }) => {
           : "1400:w-[1284px]"
       }`}
       >
-        {/* <div className='w-full sticky top-[56px] h-[50px] bg-white z-[50]'></div> */}
         <ChannelInfor
           channelEmail={id}
           openedMenu={openedMenu}

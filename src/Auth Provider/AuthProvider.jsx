@@ -64,11 +64,7 @@ const AuthProvider = ({ children }) => {
 
   const getUserInfo = async (token) => {
     await request
-      .get("/user/user/me", {
-        headers: {
-          Authorization: `${import.meta.env.VITE_AUTH_BEARER} ${token}`,
-        },
-      })
+      .get("/user/user/me")
       .then((rsp) => {
         setUser(rsp.data.data);
         setRefetch(false);

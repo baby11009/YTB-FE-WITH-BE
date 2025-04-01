@@ -150,10 +150,12 @@ const ChannelInfor = ({ channelEmail, feature }) => {
   }, [data]);
 
   useEffect(() => {
-    if (focused && inputRef.current) {
-      inputRef.current.focus();
-    } else {
-      inputRef.current.value = "";
+    if (focused) {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      } else {
+        inputRef.current.value = "";
+      }
     }
   }, [focused]);
 
@@ -194,96 +196,107 @@ const ChannelInfor = ({ channelEmail, feature }) => {
       {/* Infor */}
       <div className='pt-[16px] pb-[4px] '>
         <div className='flex items-center'>
-          <img
-            src={`${import.meta.env.VITE_BASE_API_URI}${
-              import.meta.env.VITE_VIEW_AVA_API
-            }${channelData?.avatar}`}
-            alt=''
-            className='size-[76px] 528:size-[124px] 856:size-[164px] p-[2px] rounded-[50%] mr-[24px] box-content'
-          />
+          <div className='size-[80px] 528:size-[128px] 856:size-[168px] rounded-[50%] mr-[24px] box-content overflow-hidden'>
+            {channelData && (
+              <img
+                src={`${import.meta.env.VITE_BASE_API_URI}${
+                  import.meta.env.VITE_VIEW_AVA_API
+                }${channelData?.avatar}`}
+                alt={`avatar-${channelData?.email}`}
+                className='bg-contain'
+              />
+            )}
+          </div>
 
           <div className='flex-1 text-[12px] leading-[16px] lg:text-[14px] lg:leading-[20px] text-gray-A '>
-            <div className=' break-all'>
-              <span className='text-[24px] leading-[32px] sm:text-[36px] sm:leading-[50px] font-bold text-white-F1'>
-                {channelData?.name}
-              </span>
-              <span>
-                <Verification size={"14"} />
-              </span>
-              {channelData?.subscriber > 100000 && <Verification size={"14"} />}
-            </div>
+            {channelData && (
+              <>
+                <div className=' break-all'>
+                  <span className='text-[24px] leading-[32px] sm:text-[36px] sm:leading-[50px] font-bold text-white-F1'>
+                    {channelData?.name}
+                  </span>
+                  <span>
+                    <Verification size={"14"} />
+                  </span>
+                  {channelData?.subscriber > 100000 && (
+                    <Verification size={"14"} />
+                  )}
+                </div>
+                <div className='flex items-center flex-wrap '>
+                  <span className=" after:content-['‧'] after:mx-[4px] text-white-F1 font-[500]">
+                    @{channelData?.email}
+                  </span>
+                  <span className=" after:content-['‧'] after:mx-[4px]">
+                    {formatNumber(channelData?.subscriber)} subscribers
+                  </span>
+                  <span>{formatNumber(channelData?.totalVids)} videos</span>
+                </div>
+                <div
+                  className='hidden 528:flex items-center mt-[12px] cursor-pointer'
+                  onClick={showingInformationBox}
+                >
+                  <span className='t-1-ellipsis text-nowrap'>
+                    {channelData?.description.substring(0, 70)}
+                  </span>
+                  <span className='text-white-F1 font-bold'>...more</span>
+                </div>
+                <div className='hidden 856:flex items-center gap-[8px]  mt-[12px] mb-[8px]'>
+                  <div className='w-fit h-[40px]'>
+                    <SubscribeBtn
+                      sub={
+                        channelData?.subscription_info?.notify ? true : false
+                      }
+                      notify={channelData?.subscription_info?.notify}
+                      id={channelData?.subscription_info?._id}
+                      channelId={channelData?._id}
+                      refetch={refetchChannelData}
+                    />
+                  </div>
 
-            <div className='flex items-center flex-wrap '>
-              <span className=" after:content-['‧'] after:mx-[4px] text-white-F1 font-[500]">
-                @{channelData?.email}
-              </span>
-              <span className=" after:content-['‧'] after:mx-[4px]">
-                {formatNumber(channelData?.subscriber)} subscribers
-              </span>
-              <span>{formatNumber(channelData?.totalVids)} videos</span>
-            </div>
-
+                  <button
+                    className='leading-[36px] font-bold px-[15px] rounded-[18px]
+                    border-[1px] border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.2)] hover:border-[transparent]'
+                  >
+                    Join
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        {channelData && (
+          <>
             <div
-              className='hidden 528:flex items-center mt-[12px] cursor-pointer'
+              className='flex 528:hidden items-center mt-[12px] cursor-pointer text-[12px] leading-[16px]'
               onClick={showingInformationBox}
             >
-              <span className='t-1-ellipsis text-nowrap'>
-                {channelData?.description.substring(0, 70)}
+              <span className='t-1-ellipsis text-nowrap text-gray-A'>
+                {channelData?.description}
               </span>
               <span className='text-white-F1 font-bold'>...more</span>
             </div>
-
-            <div className='hidden 856:flex items-center gap-[8px]  mt-[12px] mb-[8px]'>
-              <div className='w-fit'>
+            <div className='flex 856:hidden items-center gap-[8px] mt-[12px]'>
+              <div className='flex-1'>
                 <SubscribeBtn
                   sub={channelData?.subscription_info?.notify ? true : false}
                   notify={channelData?.subscription_info?.notify}
                   id={channelData?.subscription_info?._id}
                   channelId={channelData?._id}
-                  refetch={(data) => {
-                    console.log(data);
-                  }}
+                  refetch={refetchChannelData}
                 />
               </div>
 
-              <button
-                className='leading-[36px] font-bold px-[15px] rounded-[18px]
+              <div className='flex-1'>
+                <button
+                  className='min-w-fit w-full leading-[36px] font-bold px-[15px] rounded-[18px]
               border-[1px] border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.2)] hover:border-[transparent]'
-              >
-                Join
-              </button>
+                >
+                  Join
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-        <div
-          className='flex 528:hidden items-center mt-[12px] cursor-pointer text-[12px] leading-[16px]'
-          onClick={showingInformationBox}
-        >
-          <span className='t-1-ellipsis text-nowrap text-gray-A'>
-            {channelData?.description}
-          </span>
-          <span className='text-white-F1 font-bold'>...more</span>
-        </div>
-        <div className='flex 856:hidden items-center gap-[8px] mt-[12px]'>
-          <div className='flex-1'>
-            <SubscribeBtn
-              sub={channelData?.subscription_info?.notify ? true : false}
-              notify={channelData?.subscription_info?.notify}
-              id={channelData?.subscription_info?._id}
-              channelId={channelData?._id}
-              refetch={refetchChannelData}
-            />
-          </div>
-
-          <div className='flex-1'>
-            <button
-              className='min-w-fit w-full leading-[36px] font-bold px-[15px] rounded-[18px]
-              border-[1px] border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.2)] hover:border-[transparent]'
-            >
-              Join
-            </button>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       <div className='w-full sticky top-[56px] z-[550] bg-black'>

@@ -128,6 +128,33 @@ export default {
             transform: "scale(1.4)",
           },
         },
+        subBtnChangeBgColor: {
+          "0%": {
+            backgroundColor: "#f1f1f1",
+          },
+          "50%": {
+            backgroundColor: "#FF2A70",
+          },
+          "100%": {
+            backgroundColor: "rgba(255, 255, 255,.1)",
+          },
+        },
+        subTextSlideIn: {
+          "0%": {
+            width: "10px",
+          },
+          "100%": {
+            width: "70px",
+          },
+        },
+        subBellRing: {
+          "0%": {
+            transform: "rotate(-15deg)",
+          },
+          "100%": {
+            transform: "rotate(15deg)",
+          },
+        },
       },
       animation: {
         slideIn: "slideIn 0.3s ease-out forwards",
@@ -136,6 +163,9 @@ export default {
         labelMoveDown: "labelMoveDown 0.25s ease-out forwards",
         buttonPing: "btnPing 0.4s ease-out forwards",
         centerSliderIn: "centerSlideIn 0.25s ease-out forwards",
+        subBtnChangeBgColor: "subBtnChangeBgColor 1s ease-in-out forwards",
+        subTextSlideIn: "subTextSlideIn 1s ease-in-out forwards",
+        subBellRing: "subBellRing 0.3s ease-in-out 4 alternate",
       },
     },
   },

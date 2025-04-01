@@ -21,13 +21,7 @@ import {
   ShortFullScreenExitIcon,
 } from "../../../Assets/Icons";
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  useLayoutEffect,
-  useCallback,
-} from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { formatNumber } from "../../../util/numberFormat";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import { CustomeFuncBox } from "../../../Component";
@@ -36,7 +30,7 @@ import { Link } from "react-router-dom";
 import Hls from "hls.js";
 
 const ConfirmUnsubscribe = ({
-  handleSubscribe,
+  handleUnsubscribe,
   channelEmail,
   handleCancel,
 }) => {
@@ -57,7 +51,7 @@ const ConfirmUnsubscribe = ({
           </button>
           <button
             onClick={async () => {
-              await handleSubscribe();
+              await handleUnsubscribe();
               handleCancel();
             }}
             className='px-[16px] leading-[36px] text-[14px] font-[500] rounded-[18px] text-blue-3E hover:bg-[#263850'
@@ -153,7 +147,6 @@ const LargeShortVid = ({
   handleToggleFullScreen,
   handleToggleSideMenu,
 }) => {
-  
   const { setIsShowing, modalContainerRef, user } = useAuthContext();
 
   const hlsRef = useRef();
@@ -176,7 +169,7 @@ const LargeShortVid = ({
 
   const [videoState, setVideoState] = useState({ paused: true });
 
-  const handleStreamingVideo = useCallback(() => {
+  const handleStreamingVideo = () => {
     if (Hls.isSupported() && shortData?.stream) {
       const hls = new Hls();
       hlsRef.current = hls;
@@ -195,9 +188,9 @@ const LargeShortVid = ({
         import.meta.env.VITE_VIEW_VIDEO_API
       }${shortData?.video}?type=video`;
     }
-  }, []);
+  };
 
-  const fetchData = useCallback(async () => {
+  const fetchData = async () => {
     await request
       .get(`/data/video/${shortData._id}`)
       .then(({ data }) => {
@@ -205,32 +198,31 @@ const LargeShortVid = ({
       })
       .catch((err) => {
         alert(err.response.data.msg);
-        console.error(err);
       })
       .finally(() => {
         setRefetch(false);
       });
-  }, []);
+  };
 
-  const handleToggleReact = useCallback(async (type) => {
+  const handleToggleReact = async (type) => {
     if (!user) {
       alert(`Signed in to ${type} the short`);
       return;
     }
     await request
-      .post("/user/react", { videoId: shortData._id, type: type })
-      .then((rsp) => {
+      .post("/user/video-react", { videoId: shortData._id, type: type })
+      .then(() => {
         setRefetch(true);
       });
-  }, []);
+  };
 
-  const handleSubscribe = useCallback(async () => {
+  const handleSubscribe = async () => {
     if (!user) {
       alert(`Please login to subscribe to ${shortData?.channel_info?.email}`);
       return;
     }
     await request
-      .post("/user/subcription", {
+      .post("/user/subscription", {
         userId: user?._id,
         channelId: shortData?.channel_info?._id,
       })
@@ -238,63 +230,75 @@ const LargeShortVid = ({
         setRefetch(true);
       })
       .catch((err) => console.log(err));
-  }, []);
+  };
 
-  const handleTogglePlayPause = useCallback(() => {
+  const handleUnsubscribe = async () => {
+    if (!user) {
+      alert("Please sign in to start subscription");
+      return;
+    }
+
+    await request
+      .delete(`/user/subscription/${shortData.channel_info._id}`)
+      .then(() => {
+        setRefetch(true);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const handleTogglePlayPause = () => {
     if (videoRef.current.paused) {
       videoRef.current.play();
     } else {
       videoRef.current.pause();
     }
-  }, []);
+  };
 
-  const handleVideoloaded = useCallback((e) => {
-    videoRef.current.play().catch((err) => {});
-  }, []);
-
-  const handleVideoPlay = useCallback((e) => {
+  const handleVideoPlay = (e) => {
     setVideoState((prev) => ({ ...prev, paused: false }));
-  }, []);
+  };
 
-  const handleVideoPause = useCallback((e) => {
+  const handleVideoPause = (e) => {
     setVideoState((prev) => ({ ...prev, paused: true }));
-  }, []);
+  };
 
-  const handleVideoEnd = useCallback((e) => {
+  const handleVideoEnd = (e) => {
     videoRef.current.play();
-  });
+  };
 
-  const handleVideoTimeUpdate = useCallback((e) => {
+  const handleVideoTimeUpdate = (e) => {
     const percent =
       videoRef.current.currentTime / videoRef.current.duration || 0;
     timelineRef.current.style.setProperty("--progress-position", percent);
-  }, []);
+  };
 
-  const handleTimelineContainerMouseOver = useCallback((e) => {
+  const handleTimelineContainerMouseOver = (e) => {
     // Show thumb indicator
     timelineRef.current.style.setProperty("--scale", 1);
-  }, []);
+  };
 
-  const handleTimelineContainerMouseOut = useCallback((e) => {
+  const handleTimelineContainerMouseOut = (e) => {
     // hidden thumb indicator
     timelineRef.current.style.setProperty("--scale", 0);
 
     timelineRef.current.style.setProperty("--preview-progress", 0);
-  }, []);
+  };
 
-  const handleTimelineContainerMouseMove = useCallback((e) => {
+  const handleTimelineContainerMouseMove = (e) => {
     const rect = timelineContainerRef.current.getBoundingClientRect();
     const percent =
       Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
 
     timelineRef.current.style.setProperty("--preview-progress", percent);
-  }, []);
+  };
 
-  const handleWindowDisableSelects = useCallback((event) => {
+  const handleWindowDisableSelects = (event) => {
     event.preventDefault();
-  }, []);
+  };
 
-  const handleTimelineMouseDown = useCallback((e) => {
+  const handleTimelineMouseDown = (e) => {
     // handle when user want to seek to timeline
     if (e.buttons !== 1) return;
     // add scrubbing event when user left click
@@ -308,9 +312,9 @@ const LargeShortVid = ({
     if (!videoRef.current.paused) {
       videoRef.current.pause();
     }
-  }, []);
+  };
 
-  const handleWindowMouseUp = useCallback(() => {
+  const handleWindowMouseUp = () => {
     // remove scrubbing if mouse is out of timeline position
     if (isScrubbing.current) {
       isScrubbing.current = false;
@@ -320,9 +324,9 @@ const LargeShortVid = ({
       }
       window.removeEventListener("selectstart", handleWindowDisableSelects);
     }
-  }, []);
+  };
 
-  const handleWindowMouseMove = useCallback((e) => {
+  const handleWindowMouseMove = (e) => {
     // seek to the timeline that user end scrubbing
     if (!isScrubbing.current) return;
 
@@ -334,9 +338,9 @@ const LargeShortVid = ({
     videoRef.current.currentTime = videoRef.current.duration * percent;
 
     timelineRef.current.style.setProperty("--progress-position", percent);
-  }, []);
+  };
 
-  const handleWindowMouseDown = useCallback((e) => {
+  const handleWindowMouseDown = (e) => {
     //update video timline  when user left click the timeline ref
 
     if (!(e.target === timelineRef.current)) return;
@@ -345,7 +349,7 @@ const LargeShortVid = ({
       Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
     videoRef.current.currentTime = videoRef.current.duration * percent;
     timelineRef.current.style.setProperty("--progress-position", percent);
-  }, []);
+  };
 
   const isElementInView = (element, threshold = 1) => {
     return new Promise((resolve) => {
@@ -364,7 +368,7 @@ const LargeShortVid = ({
     });
   };
 
-  const checkVisibility = useCallback(async () => {
+  const checkVisibility = async () => {
     if (containRef.current) {
       const isInView = await isElementInView(controlRef.current);
 
@@ -372,10 +376,10 @@ const LargeShortVid = ({
         videoRef.current.pause();
       } else if (isInView) {
         handleSetCurrentShort();
-        videoRef.current.play();
+        videoRef.current.play().catch((err) => {});
       }
     }
-  }, []);
+  };
 
   useLayoutEffect(() => {
     if (refetch) {
@@ -387,8 +391,6 @@ const LargeShortVid = ({
     handleStreamingVideo();
 
     timelineRef.current.style.setProperty("--scale", 0);
-
-    videoRef.current.addEventListener("loadedmetadata", handleVideoloaded);
 
     videoRef.current.addEventListener("play", handleVideoPlay);
 
@@ -421,14 +423,14 @@ const LargeShortVid = ({
 
     window.addEventListener("mousedown", handleWindowMouseDown);
 
+    checkVisibility();
+
     window.addEventListener("scroll", checkVisibility);
 
     return () => {
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
-
-      videoRef.current.removeEventListener("loadedmetadata", handleVideoloaded);
 
       videoRef.current.removeEventListener("play", handleVideoPlay);
 
@@ -604,7 +606,7 @@ const LargeShortVid = ({
                     onClick={() => {
                       setIsShowing(
                         <ConfirmUnsubscribe
-                          handleSubscribe={handleSubscribe}
+                          handleUnsubscribe={handleUnsubscribe}
                           channelEmail={shortData?.channel_info?.email}
                           handleCancel={() => {
                             setIsShowing(undefined);
@@ -619,7 +621,7 @@ const LargeShortVid = ({
                 ) : (
                   <button
                     className=' hover:bg-[#e6e6e6] text-black
-               bg-white text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
+                bg-white text-[12px] leading-[32px] font-[550] px-[12px] rounded-[16px]'
                     onClick={async () => {
                       await handleSubscribe();
                     }}
@@ -644,7 +646,7 @@ const LargeShortVid = ({
             <CustomeButton
               text={formatNumber(shortData?.like)}
               Icon={LikeIcon}
-              title='Tôi thích video này'
+              title='I like this video'
               buttonCss={
                 shortData?.react_info?.type === "like"
                   ? "bg-white-F1 hover:bg-white-D9"
@@ -662,7 +664,7 @@ const LargeShortVid = ({
             <CustomeButton
               text={formatNumber(shortData?.dislike)}
               Icon={DisLikeIcon}
-              title='Tôi không thích video này'
+              title="I don't like this video"
               buttonCss={
                 shortData?.react_info?.type === "dislike"
                   ? "bg-white-F1 hover:bg-white-D9"
@@ -680,16 +682,12 @@ const LargeShortVid = ({
             <CustomeButton
               text={formatNumber(shortData?.totalCmt)}
               Icon={CommentIcon}
-              title={"Bình luận"}
+              title={"Comment"}
               handleOnClick={() => {
                 handleToggleSideMenu("comment");
               }}
             />
-            <CustomeButton
-              text='Chia sẻ'
-              Icon={ThickShareIcon}
-              title={"Chia sẻ"}
-            />
+            <CustomeButton text='Share' Icon={ThickShareIcon} title={"Share"} />
             <div className='relative'>
               <CustomeButton
                 Icon={Setting2Icon}

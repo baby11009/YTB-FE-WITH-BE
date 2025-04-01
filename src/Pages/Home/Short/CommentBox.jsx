@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Comment, CommentInput, CustomeFuncBox } from "../../../Component";
 import { CloseIcon, SortIcon } from "../../../Assets/Icons";
 import { getData } from "../../../Api/getData";
@@ -236,7 +235,9 @@ const CommentBox = ({
                     flex items-center justify-center'
             onClick={() => handleClose()}
           >
-            <CloseIcon />
+            <div className='w-[24px]'>
+              <CloseIcon />
+            </div>
           </button>
         </div>
       </div>

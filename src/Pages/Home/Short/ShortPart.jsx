@@ -1,12 +1,6 @@
 import LargeShortVid from "./LargeShortVid";
 import { LongArrowIcon } from "../../../Assets/Icons";
-import {
-  useLayoutEffect,
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-} from "react";
+import { useLayoutEffect, useState, useRef, useEffect } from "react";
 import { IsEnd, IsTop } from "../../../util/scrollPosition";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import connectSocket from "../../../util/connectSocket";
@@ -21,8 +15,7 @@ const fetchingShortQtt = 2;
 const ShortPart = () => {
   const { id } = useParams();
 
-  const { setFetchingState, fetchingState, user, openedMenu } =
-    useAuthContext();
+  const { setFetchingState, user, openedMenu } = useAuthContext();
 
   const [refetchSingleShort, setRefetchSingleShort] = useState(false);
 
@@ -59,7 +52,7 @@ const ShortPart = () => {
 
   const outSideAreaRef = useRef();
 
-  const fetchRandomShort = useCallback(async () => {
+  const fetchRandomShort = async () => {
     if (user) {
       // set session-id is user _id if user already signed in
       sessionStorage.setItem("session-id", user._id);
@@ -89,9 +82,9 @@ const ShortPart = () => {
         alert("Failed to get short data");
         setFetchingState("false");
       });
-  }, [id]);
+  };
 
-  const removeRedisKey = useCallback(async () => {
+  const removeRedisKey = async () => {
     let sessionId = sessionStorage.getItem("session-id");
     if (!sessionId) return;
     await request
@@ -104,9 +97,9 @@ const ShortPart = () => {
       .catch((err) => {
         console.error(err);
       });
-  }, []);
+  };
 
-  const handleScrollPrev = useCallback(() => {
+  const handleScrollPrev = () => {
     if (isScrolling.current) {
       return;
     }
@@ -124,9 +117,9 @@ const ShortPart = () => {
     setTimeout(() => {
       isScrolling.current = false;
     }, 500);
-  }, [shortList]);
+  };
 
-  const handleScrollNext = useCallback(async () => {
+  const handleScrollNext = async () => {
     if (remainData.current > 0) {
       await fetchRandomShort();
     }
@@ -149,26 +142,23 @@ const ShortPart = () => {
     setTimeout(() => {
       isScrolling.current = false;
     }, 500);
-  }, [shortList]);
+  };
 
-  const handleScrollEvent = useCallback(() => {
+  const handleScrollEvent = () => {
     IsTop(setIsTop);
     IsEnd(setIsEnd, 24);
-  }, []);
+  };
 
-  const handleWheelScroll = useCallback(
-    (e) => {
-      e.preventDefault();
-      if (e.deltaY >= 100) {
-        handleScrollNext();
-      } else {
-        handleScrollPrev();
-      }
-    },
-    [shortList],
-  );
+  const handleWheelScroll = (e) => {
+    e.preventDefault();
+    if (e.deltaY >= 100) {
+      handleScrollNext();
+    } else {
+      handleScrollPrev();
+    }
+  };
 
-  const handleToggleFullScreen = useCallback(() => {
+  const handleToggleFullScreen = () => {
     setFullScreen((prev) => !prev);
     if (document.fullscreenElement === null) {
       if (containerRef.current.requestFullscreen) {
@@ -183,9 +173,9 @@ const ShortPart = () => {
     } else {
       document.exitFullscreen();
     }
-  }, []);
+  };
 
-  const handleResize = useCallback(() => {
+  const handleResize = () => {
     let width;
 
     if (window.innerWidth > 1156) {
@@ -196,11 +186,11 @@ const ShortPart = () => {
     }
 
     document.body.style.setProperty("--short-sideMenu-width", `${width}px`);
-  }, [sideMenu]);
+  };
 
-  const handleClickOutsideArea = useCallback((e) => {
+  const handleClickOutsideArea = (e) => {
     setOpenedSideMenu("");
-  }, []);
+  };
 
   useLayoutEffect(() => {
     window.addEventListener("beforeunload", removeRedisKey);
@@ -400,7 +390,7 @@ const ShortPart = () => {
             title='Previous video'
             onClick={handleScrollPrev}
           >
-            <div>
+            <div className='w-[24px] rotate-[-90deg]'>
               <LongArrowIcon />
             </div>
           </button>
@@ -420,7 +410,7 @@ const ShortPart = () => {
             title='Next video'
             onClick={handleScrollNext}
           >
-            <div>
+            <div className='w-[24px] rotate-[-90deg]'>
               <LongArrowIcon />
             </div>
           </button>

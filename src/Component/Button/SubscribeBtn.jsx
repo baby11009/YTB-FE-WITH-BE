@@ -15,6 +15,8 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
 
   const [opened, setOpened] = useState(false);
 
+  const [triggerAnimation, setTriggerAnimation] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubscribe = async () => {
@@ -30,11 +32,10 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
       })
       .then((rsp) => {
         refetch(rsp.data);
-
         setRefetch(true);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
         addToaster("Failed to subscribe to channel");
       })
       .finally(() => {
@@ -67,12 +68,14 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
 
     setIsLoading(true);
     await request
-      .delete(`/user/subscription/${channelId}`, {
-        channelId: channelId,
-      })
+      .delete(`/user/subscription/${channelId}`)
       .then((rsp) => {
         refetch(rsp.data);
         setRefetch(true);
+        setTriggerAnimation(true);
+        setTimeout(() => {
+          setTriggerAnimation(false);
+        }, 1500);
       })
       .catch((err) => {
         console.log(err);
@@ -142,37 +145,54 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
     <button
       disabled={isLoading}
       ref={containerRef}
-      className={`min-w-fit w-full px-[16px] rounded-[18px] flex items-center justify-center relative
-        ${
-          sub
-            ? "bg-hover-black hover:bg-[rgba(255,255,255,0.2)]"
-            : "bg-[#ffffff] text-black"
-        }
-        `}
+      className={`min-w-fit w-full h-[40px] relative`}
       onClick={handleOnClick}
     >
-      <div className=' shrink-0'>
-        {notify === 1 ? <BellIcon /> : notify === 2 && <SlashBellIcon />}
-      </div>
-
-      <div className="flex-1 line-clamp-1">
-      <span className='text-[14px] leading-[36px] font-[500] text-nowrap'>
-        {sub ? "Subscribed" : "Subscribe"}
-      </span>
-      </div>
-      {sub && (
-        <div className='rotate-90 ml-[6px] mr-[-6px] shrink-0'>
-          <ThinArrowIcon />
+      {sub ? (
+        <div
+          className={`${
+            triggerAnimation ? "animate-subBtnChangeBgColor" : ""
+          } bg-black-0.1  
+         hover:bg-black-0.2 px-[16px] rounded-[18px]  flex items-center justify-center`}
+        >
+          <div
+            className={`shrink-0 ml-[-6px] mr-[6px]  origin-[top_center]
+            ${triggerAnimation ? "animate-subBellRing" : ""}`}
+          >
+            {notify === 1 ? <BellIcon /> : notify === 2 && <SlashBellIcon />}
+          </div>
+          <div
+            className={`line-clamp-1 h-[36px]     ${
+              triggerAnimation ? "856:animate-subTextSlideIn" : ""
+            }`}
+          >
+            <span className='text-[14px] leading-[36px] font-[500] text-nowrap text-white-F1'>
+              Subscribed
+            </span>
+          </div>
+          <div className='rotate-90 ml-[6px] mr-[-6px] shrink-0'>
+            <ThinArrowIcon />
+          </div>
+        </div>
+      ) : (
+        <div className='bg-[#ffffff] text-black px-[16px] rounded-[18px] '>
+          <div className=' line-clamp-1 h-[36px]'>
+            <span className='text-[14px] leading-[36px] font-[500] text-nowrap '>
+              Subscribe
+            </span>
+          </div>
         </div>
       )}
-      {opened && (
-        <CustomeFuncBox
-          style={"left-0 top-[101%]"}
-          setOpened={setOpened}
-          funcList1={funcList2}
-          currentId={notify}
-        />
-      )}
+      <div className='text-white-F1'>
+        {opened && (
+          <CustomeFuncBox
+            style={"left-0 top-[101%]"}
+            setOpened={setOpened}
+            funcList1={funcList2}
+            currentId={notify}
+          />
+        )}
+      </div>
     </button>
   );
 };
