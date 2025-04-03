@@ -35,7 +35,7 @@ const CommentCard = ({
 
   const handleOnClick = () => {
     if (!user) {
-      alert("Đăng nhập để bình luận");
+      alert("Login to comment on this video");
     } else {
       setShowedInput((prev) => !prev);
     }
@@ -43,15 +43,15 @@ const CommentCard = ({
 
   const handleUpdatedCmt = async (value) => {
     if (value === data?.cmtText) {
-      alert("Không có gì thay đổi");
+      alert("Nothing changed");
       return;
     }
     await updateData(
-      "/client/comment",
+      "/user/comment",
       data?._id,
       { cmtText: value },
       "comment",
-      (rsp) => {
+      () => {
         setIsShowing(undefined);
       },
       undefined,
@@ -62,7 +62,7 @@ const CommentCard = ({
   const funcList = [
     {
       id: 1,
-      text: "Chỉnh sửa",
+      text: "Edit",
       handleOnClick: () => {
         setIsShowing(
           <EditCommentArea
@@ -74,13 +74,13 @@ const CommentCard = ({
     },
     {
       id: 2,
-      text: "Xóa",
+      text: "Delete",
       handleOnClick: async () => {
         await dltData(
-          "/client/comment",
+          "/user/comment",
           data?._id,
           "comment",
-          (rsp) => {
+          () => {
             refetchVideo();
           },
           undefined,

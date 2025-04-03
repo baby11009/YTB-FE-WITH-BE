@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import { getData } from "../../Api/getData";
 import { useAuthContext } from "../../Auth Provider/authContext";
 import { CurveArrowIcon } from "../../Assets/Icons";
-import { useCallback } from "react";
 
 const Comment = ({
   imgSize,
@@ -13,7 +12,6 @@ const Comment = ({
   refetchVideo,
   replyCmtModified,
 }) => {
-
   const { user } = useAuthContext();
 
   const [replyCmtsList, setReplyCmtList] = useState([]);
@@ -26,25 +24,26 @@ const Comment = ({
 
   const [firstOpened, setFirstOpened] = useState(true);
 
-  const [cmtReplyPrs, setCmtReplyPrs] = useState({
+  const [relyCmtQueries, setReplyCmtQueries] = useState({
     limit: 5,
     page: 1,
-    replyId: data?._id,
-    userId: user?._id,
+    search: {
+      replyId: data?._id,
+    },
   });
 
   const {
     data: replyCmtsData,
     isLoading,
     refetch,
-  } = getData(`/data/comment/video-cmt/${videoId}`, cmtReplyPrs, showReply);
+  } = getData(`/data/comment/video-cmt/${videoId}`, relyCmtQueries, showReply);
 
   useEffect(() => {
     if (replyCmtsData && showReply) {
       if (addNewReply) {
         setReplyCmtList(replyCmtsData?.data);
         replyCmtsData?.data.forEach((item) =>
-          replyIdsListSet.current.add(item?._id)
+          replyIdsListSet.current.add(item?._id),
         );
       } else {
         let addList = [];
@@ -63,11 +62,12 @@ const Comment = ({
     if (!showReply && !firstOpened) {
       setReplyCmtList([]);
       replyIdsListSet.current.clear();
-      setCmtReplyPrs({
+      setReplyCmtQueries({
         limit: 5,
         page: 1,
-        replyId: data?._id,
-        userId: user?._id,
+        search: {
+          replyId: data?._id,
+        },
       });
     } else {
       setFirstOpened(false);
@@ -75,11 +75,12 @@ const Comment = ({
   }, [showReply]);
 
   useEffect(() => {
-    if (replyCmtModified && showReply) {
+    if (replyCmtModified) {
       switch (replyCmtModified.action) {
         case "create":
           setReplyCmtList((prev) => [replyCmtModified.data, ...prev]);
           replyIdsListSet.current.add(replyCmtModified.data?._id);
+          setShowReply(true);
           break;
         case "update":
           setReplyCmtList((prev) => {
@@ -95,7 +96,7 @@ const Comment = ({
           break;
         case "delete":
           setReplyCmtList((prev) =>
-            prev.filter((item) => item?._id !== replyCmtModified.data?._id)
+            prev.filter((item) => item?._id !== replyCmtModified.data?._id),
           );
           break;
       }
@@ -105,24 +106,20 @@ const Comment = ({
   useEffect(() => {
     if (
       replyCmtsList.length < 4 &&
-      cmtReplyPrs.page < replyCmtsData?.totalPage
+      relyCmtQueries.page < replyCmtsData?.totalPage
     ) {
-      if (cmtReplyPrs.page > 1) {
-        setCmtReplyPrs((prev) => ({ ...prev, page: 1 }));
+      if (relyCmtQueries.page > 1) {
+        setReplyCmtQueries((prev) => ({ ...prev, page: 1 }));
       } else {
         refetch();
       }
     }
   }, [replyCmtsList]);
 
-  useEffect(() => {
-    return () => {};
-  }, []);
-
-  const handleShowMoreReplyCmt = useCallback(() => {
-    if (cmtReplyPrs.page < replyCmtsData?.totalPage)
-      setCmtReplyPrs((prev) => ({ ...prev, page: prev.page + 1 }));
-  });
+  const handleShowMoreReplyCmt = () => {
+    if (relyCmtQueries.page < replyCmtsData?.totalPage)
+      setReplyCmtQueries((prev) => ({ ...prev, page: prev.page + 1 }));
+  };
 
   return (
     <>
@@ -158,7 +155,7 @@ const Comment = ({
           border-r-[transparent] border-[#717171] animate-spin'
             ></div>
           )}
-          {cmtReplyPrs.page < replyCmtsData?.totalPage && (
+          {relyCmtQueries.page < replyCmtsData?.totalPage && (
             <button
               className='flex items-center justify-center rounded-[30px] text-blue-3E hover:bg-blue-26 px-[16px] mb-[8px]'
               onClick={() => {

@@ -24,7 +24,7 @@ const CommentBox = ({
 
   const queryClient = useQueryClient();
 
-  const [params, setParams] = useState({
+  const [queriese, setQueriese] = useState({
     limit: 8,
     page: 1,
     sort: {
@@ -48,16 +48,16 @@ const CommentBox = ({
 
   const { data } = getData(
     `/data/comment/video-cmt/${shortId}`,
-    params,
+    queriese,
     openedSideMenu ? true : false,
     false,
   );
 
   const handleChoseSort = (data) => {
-    if (!params.sort[data.id]) {
+    if (!queriese.sort[data.id]) {
       const boxCmt = document.getElementById("cmtBox");
       boxCmt.scrollTop = 0;
-      setParams((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
+      setQueriese((prev) => ({ ...prev, page: 1, sort: { [data.id]: -1 } }));
       setAddNew(true);
     }
   };
@@ -69,7 +69,7 @@ const CommentBox = ({
       handleOnClick: handleChoseSort,
     },
     {
-      id: "top",
+      id: "interact",
       text: "Top comments",
       handleOnClick: handleChoseSort,
     },
@@ -88,10 +88,11 @@ const CommentBox = ({
 
   useLayoutEffect(() => {
     queryClient.removeQueries({
-      queryKey: [Object.values(params)],
+      queryKey: [Object.values(queriese)],
       exact: true,
     });
-    setParams({
+
+    setQueriese({
       limit: 8,
       page: 1,
       sort: {
@@ -140,11 +141,29 @@ const CommentBox = ({
       }
     };
 
-    const addNewCmt = (data) => {
-      if (data) {
+    const addNewCmt = ({ type, data }) => {
+      if (type === "normal") {
         setCommentList((prev) => [data, ...prev]);
         idListSet.current.add(data?._id);
+
+        return;
       }
+
+      setCommentList((prev) => {
+        const dataList = [...prev];
+        for (const index in dataList) {
+          if (dataList[index]._id === data?.replied_parent_cmt_id) {
+            dataList[index] = {
+              ...dataList[index],
+              replied_cmt_total: dataList[index].replied_cmt_total + 1,
+            };
+          }
+        }
+
+        return dataList;
+      });
+
+      modifiedReply(data, "create");
     };
 
     const deleteCmt = (data) => {
@@ -156,6 +175,7 @@ const CommentBox = ({
     const modifiedReply = (data, action) => {
       setReplyCmtModified({ data: data, action });
     };
+
     if (socket) {
       socket.on(`update-parent-comment-${user?._id}`, updateComment);
       socket.on(`update-comment-${user?._id}`, updateComment);
@@ -171,6 +191,7 @@ const CommentBox = ({
         modifiedReply(data, "delete");
       });
     }
+
     return () => {
       if (socket) {
         socket.off(`update-parent-comment-${user?._id}`, updateComment);
@@ -192,8 +213,8 @@ const CommentBox = ({
   }, []);
 
   useEffect(() => {
-    if (isEnd && params.page < data?.totalPage) {
-      setParams((prev) => ({
+    if (isEnd && queriese.page < data?.totalPage) {
+      setQueriese((prev) => ({
         ...prev,
         page: Math.floor(commentList.length / prev.limit) + 1,
       }));
@@ -226,7 +247,7 @@ const CommentBox = ({
                 style={"w-[156px] right-0 top-[100%]"}
                 setOpened={setSortOpened}
                 funcList1={funcList}
-                currentId={Object.keys(params.sort)[0]}
+                currentId={Object.keys(queriese.sort)[0]}
               />
             )}
           </button>
@@ -264,7 +285,7 @@ const CommentBox = ({
         <CommentInput
           videoId={shortId}
           setAddNewCmt={setAddNew}
-          setCmtParams={setParams}
+          setCmtParams={setQueriese}
           refetchVideo={handleRefetch}
         />
       </div>
