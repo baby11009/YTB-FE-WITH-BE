@@ -40,7 +40,7 @@ export const createData = async (
 
     return newData;
   } catch (error) {
-    console.log("🚀 ~ error:", error);
+    console.error("🚀 ~ error:", error);
     alert(error.response.data.msg);
   }
 };

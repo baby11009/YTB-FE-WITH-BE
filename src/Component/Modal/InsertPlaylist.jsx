@@ -89,10 +89,10 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
   }, []);
 
   const { data, isLoading, isSuccess, isError } = useQuery({
-    queryKey: ["watchlater", "/client/playlist", ...Object.values(queries)],
+    queryKey: ["watchlater", "/user/playlist", ...Object.values(queries)],
     queryFn: async () => {
       try {
-        const rsp = await request.get("/client/playlist", {
+        const rsp = await request.get("/user/playlist", {
           params: queries,
         });
 
@@ -104,7 +104,6 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
     },
     cacheTime: 0,
   });
-  console.log("🚀 ~ data:", data);
 
   useEffect(() => {
     if (data && data?.qtt > 0) {
@@ -135,7 +134,7 @@ const InsertPlaylist = ({ videoId, setDisplay }) => {
           }}
           className='mr-[20px]'
         >
-          <div className="w-[24px]">
+          <div className='w-[24px]'>
             <CloseIcon />
           </div>
         </button>

@@ -84,21 +84,6 @@ const ShortPart = () => {
       });
   };
 
-  const removeRedisKey = async () => {
-    let sessionId = sessionStorage.getItem("session-id");
-    if (!sessionId) return;
-    await request
-      .delete("/redis/remove", {
-        headers: { "session-id": sessionId },
-      })
-      .then((rsp) => {
-        console.log(rsp.data);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  };
-
   const handleScrollPrev = () => {
     if (isScrolling.current) {
       return;
@@ -144,11 +129,6 @@ const ShortPart = () => {
     }, 500);
   };
 
-  const handleScrollEvent = () => {
-    IsTop(setIsTop);
-    IsEnd(setIsEnd, 24);
-  };
-
   const handleWheelScroll = (e) => {
     e.preventDefault();
     if (e.deltaY >= 100) {
@@ -188,11 +168,41 @@ const ShortPart = () => {
     document.body.style.setProperty("--short-sideMenu-width", `${width}px`);
   };
 
-  const handleClickOutsideArea = (e) => {
-    setOpenedSideMenu("");
+  const updateShortData = (index, data) => {
+    setShortList((prev) => {
+      const listClone = [...prev];
+
+      listClone[index] = { ...listClone[index], ...data };
+
+      return listClone;
+    });
   };
 
   useLayoutEffect(() => {
+    const removeRedisKey = async () => {
+      let sessionId = sessionStorage.getItem("session-id");
+      if (!sessionId) return;
+      await request
+        .delete("/redis/remove", {
+          headers: { "session-id": sessionId },
+        })
+        .then((rsp) => {
+          console.log(rsp.data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+
+    const handleScrollEvent = () => {
+      IsTop(setIsTop);
+      IsEnd(setIsEnd, 24);
+    };
+
+    const handleClickOutsideArea = (e) => {
+      setOpenedSideMenu("");
+    };
+
     window.addEventListener("beforeunload", removeRedisKey);
 
     document.addEventListener("scroll", handleScrollEvent);
@@ -279,17 +289,10 @@ const ShortPart = () => {
           <LargeShortVid
             key={index}
             shortData={item}
-            refetch={refetchSingleShort}
-            setRefetch={setRefetchSingleShort}
             volume={volume}
             setVolume={setVolume}
-            handleRefetchShortData={(newShortData) => {
-              setShortList((prev) => {
-                let list = [...prev];
-                list[index] = newShortData;
-
-                return list;
-              });
+            handleUpdateShortData={(newShortData) => {
+              updateShortData(index, newShortData);
             }}
             handleSetCurrentShort={() => {
               setCurrentShort(index);
@@ -353,11 +356,13 @@ const ShortPart = () => {
               handleClose={() => {
                 setOpenedSideMenu("");
               }}
-              shortId={shortList[currentShort]._id}
+              shortData={shortList[currentShort]}
               handleRefetch={() => {
                 setRefetchSingleShort(true);
               }}
-              totalCmt={formatNumber(shortList[currentShort]?.totalCmt)}
+              handleUpdateShortData={(newShortData) => {
+                updateShortData(currentShort, newShortData);
+              }}
               socket={socketRef.current}
             />
           ) : (

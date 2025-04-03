@@ -4,7 +4,6 @@ import { useAuthContext } from "../../Auth Provider/authContext";
 import { MyChannel } from "../../Assets/Images";
 
 const CommentInput = ({
-  refetchVideo,
   showEmoji,
   imgSize,
   videoId,
@@ -49,7 +48,7 @@ const CommentInput = ({
           </div>
           <div className='flex-1'>
             <div className='text-[14px] leading-[20px] text-gray-A border-b-[1px] border-[rgba(255,255,255,0.2)] pb-[4px]'>
-              Viết bình luận...
+              Writing comment...
             </div>
           </div>
         </div>
@@ -62,7 +61,6 @@ const CommentInput = ({
           showEmoji={showEmoji}
           videoId={videoId}
           userId={user?._id}
-          refetchVideo={refetchVideo}
           setAddNewCmt={setAddNewCmt}
           setCmtParams={setCmtParams}
           setShowedInput={setShowedInput}

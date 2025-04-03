@@ -9,10 +9,9 @@ const Comment = ({
   data,
   videoId,
   videoUserId,
-  refetchVideo,
+  handleUpdateVideo,
   replyCmtModified,
 }) => {
-  const { user } = useAuthContext();
 
   const [replyCmtsList, setReplyCmtList] = useState([]);
 
@@ -77,12 +76,12 @@ const Comment = ({
   useEffect(() => {
     if (replyCmtModified) {
       switch (replyCmtModified.action) {
-        case "create":
+        case "CREATE":
           setReplyCmtList((prev) => [replyCmtModified.data, ...prev]);
           replyIdsListSet.current.add(replyCmtModified.data?._id);
           setShowReply(true);
           break;
-        case "update":
+        case "UPDATE":
           setReplyCmtList((prev) => {
             const dataList = [...prev];
             dataList.forEach((item, id) => {
@@ -94,7 +93,7 @@ const Comment = ({
             return dataList;
           });
           break;
-        case "delete":
+        case "DELETE":
           setReplyCmtList((prev) =>
             prev.filter((item) => item?._id !== replyCmtModified.data?._id),
           );
@@ -130,7 +129,7 @@ const Comment = ({
         data={data}
         videoId={videoId}
         videoUserId={videoUserId}
-        refetchVideo={refetchVideo}
+        handleUpdateVideo={handleUpdateVideo}
       />
       {showReply && (
         <div className='pl-[36px]'>
@@ -145,7 +144,7 @@ const Comment = ({
                   data={item}
                   videoId={videoId}
                   videoUserId={videoUserId}
-                  refetchVideo={refetchVideo}
+                  handleUpdateVideo={handleUpdateVideo}
                 />
               ))}
           </div>

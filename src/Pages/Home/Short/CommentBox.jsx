@@ -13,11 +13,10 @@ import { IsElementEnd } from "../../../util/scrollPosition";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 
 const CommentBox = ({
+  shortData,
   openedSideMenu,
   handleClose,
-  shortId,
-  handleRefetch,
-  totalCmt,
+  handleUpdateShortData,
   socket,
 }) => {
   const { user } = useAuthContext();
@@ -30,7 +29,7 @@ const CommentBox = ({
     sort: {
       createdAt: -1,
     },
-    reset: shortId,
+    reset: shortData._id,
     clearCache: "comment",
   });
 
@@ -47,7 +46,7 @@ const CommentBox = ({
   const [replyCmtModified, setReplyCmtModified] = useState(null);
 
   const { data } = getData(
-    `/data/comment/video-cmt/${shortId}`,
+    `/data/comment/video-cmt/${shortData._id}`,
     queriese,
     openedSideMenu ? true : false,
     false,
@@ -87,22 +86,17 @@ const CommentBox = ({
   }, []);
 
   useLayoutEffect(() => {
-    queryClient.removeQueries({
-      queryKey: [Object.values(queriese)],
-      exact: true,
-    });
-
     setQueriese({
       limit: 8,
       page: 1,
       sort: {
         createdAt: -1,
       },
-      reset: shortId,
+      reset: shortData._id,
       clearCache: "comment",
     });
     setAddNew(true);
-  }, [shortId]);
+  }, [shortData._id]);
 
   useEffect(() => {
     if (data) {
@@ -126,23 +120,16 @@ const CommentBox = ({
   }, [data]);
 
   useEffect(() => {
-    const updateComment = (data) => {
-      if (data) {
-        setCommentList((prev) => {
-          const dataList = [...prev];
-          dataList.forEach((item, id) => {
-            if (item?._id === data?._id) {
-              dataList[id] = { ...dataList[id], ...data };
-            }
-          });
-
-          return dataList;
-        });
-      }
+    const modifiedReply = (data, action) => {
+      setReplyCmtModified({ data: data, action });
     };
 
     const addNewCmt = ({ type, data }) => {
-      if (type === "normal") {
+      handleUpdateShortData({
+        totalCmt: shortData.totalCmt + 1,
+      });
+
+      if (type === "NORMAL") {
         setCommentList((prev) => [data, ...prev]);
         idListSet.current.add(data?._id);
 
@@ -151,6 +138,7 @@ const CommentBox = ({
 
       setCommentList((prev) => {
         const dataList = [...prev];
+
         for (const index in dataList) {
           if (dataList[index]._id === data?.replied_parent_cmt_id) {
             dataList[index] = {
@@ -158,59 +146,88 @@ const CommentBox = ({
               replied_cmt_total: dataList[index].replied_cmt_total + 1,
             };
           }
+          break;
         }
 
         return dataList;
       });
-
-      modifiedReply(data, "create");
+      modifiedReply(data, "CREATE");
     };
 
-    const deleteCmt = (data) => {
-      if (data) {
+    const updateComment = ({ type, data }) => {
+      if (type === "NORMAL") {
+        setCommentList((prev) => {
+          const listClone = [...prev];
+
+          for (const index in listClone) {
+            if (listClone[index]._id === data._id) {
+              listClone[index] = { ...listClone[index], ...data };
+              break;
+            }
+          }
+
+          return listClone;
+        });
+
+        return;
+      }
+
+      modifiedReply(data, "UPDATE");
+    };
+
+    const deleteCmt = ({ type, data }) => {
+      handleUpdateShortData({
+        totalCmt: shortData.totalCmt - (1 + data.replied_cmt_total || 0),
+      });
+
+      if (type === "NORMAL") {
         setCommentList((prev) => prev.filter((item) => item?._id !== data._id));
         idListSet.current.delete(data?._id);
+        handleUpdateShortData({
+          totalCmt: shortData.totalCmt - (1 + data.replied_cmt_total || 0),
+        });
+
+        return;
       }
+      setCommentList((prev) => {
+        const listClone = [...prev];
+        for (const index in listClone) {
+          if (listClone[index]._id === data.replied_parent_cmt_id) {
+            listClone[index] = {
+              ...listClone[index],
+              replied_cmt_total: listClone[index].replied_cmt_total - 1,
+            };
+            break;
+          }
+        }
+        return listClone;
+      });
+      modifiedReply(data, "DELETE");
+      handleUpdateShortData({
+        totalCmt: shortData.totalCmt - 1,
+      });
     };
-    const modifiedReply = (data, action) => {
-      setReplyCmtModified({ data: data, action });
+
+    const socketEvents = {
+      [`create-comment-${user?._id}`]: addNewCmt,
+      [`update-comment-${user?._id}`]: updateComment,
+      [`delete-comment-${user?._id}`]: deleteCmt,
     };
 
     if (socket) {
-      socket.on(`update-parent-comment-${user?._id}`, updateComment);
-      socket.on(`update-comment-${user?._id}`, updateComment);
-      socket.on(`create-comment-${user?._id}`, addNewCmt);
-      socket.on(`delete-comment-${user?._id}`, deleteCmt);
-      socket.on(`create-reply-comment-${user?._id}`, (data) => {
-        modifiedReply(data, "create");
-      });
-      socket.on(`update-reply-comment-${user?._id}`, (data) => {
-        modifiedReply(data, "update");
-      });
-      socket.on(`delete-reply-comment-${user?._id}`, (data) => {
-        modifiedReply(data, "delete");
+      Object.entries(socketEvents).forEach(([key, value]) => {
+        socket.on(key, value);
       });
     }
 
     return () => {
       if (socket) {
-        socket.off(`update-parent-comment-${user?._id}`, updateComment);
-        socket.off(`update-comment-${user?._id}`, updateComment);
-        socket.off(`create-comment-${user?._id}`, addNewCmt);
-        socket.off(`delete-comment-${user?._id}`, deleteCmt);
-        socket.off(`create-reply-comment-${user?._id}`, (data) => {
-          modifiedReply(data, "create");
-        });
-        socket.off(`update-reply-comment-${user?._id}`, (data) => {
-          modifiedReply(data, "update");
-        });
-        socket.off(`delete-reply-comment-${user?._id}`, (data) => {
-          modifiedReply(data, "delete");
+        Object.entries(socketEvents).forEach(([key, value]) => {
+          socket.off(key, value);
         });
       }
-      queryClient.removeQueries("comment");
     };
-  }, []);
+  }, [shortData]);
 
   useEffect(() => {
     if (isEnd && queriese.page < data?.totalPage) {
@@ -221,6 +238,11 @@ const CommentBox = ({
     }
   }, [isEnd]);
 
+  useEffect(() => {
+    return () => {
+      queryClient.removeQueries("comment");
+    };
+  }, []);
   return (
     <div
       className='size-full flex flex-col cursor-auto bg-black-21 1156:bg-transparent 
@@ -229,7 +251,7 @@ const CommentBox = ({
       <div className='px-[16px] py-[4px] flex items-center justify-between '>
         <div className='my-[10px] flex items-center gap-[8px]'>
           <h4 className='text-[20px] leading-[28px] font-bold'>Comment</h4>
-          <span className=' text-gray-A'>{totalCmt}</span>
+          <span className=' text-gray-A'>{shortData.totalCmt}</span>
         </div>
         <div className='flex gap-[8px]'>
           <button
@@ -269,24 +291,28 @@ const CommentBox = ({
         ref={refscroll}
         id='cmtBox'
       >
-        {commentList.map((item, id) => (
+        {commentList.map((item) => (
           <Comment
+            key={item?._id}
             data={item}
-            videoId={shortId}
+            videoId={shortData._id}
             videoUserId={data?.channel_info?._id}
             setAddNewCmt={setAddNew}
-            refetchVideo={handleRefetch}
-            key={item?._id}
-            replyCmtModified={replyCmtModified}
+            handleUpdateVideo={(modifiedNumber) => {}}
+            replyCmtModified={
+              replyCmtModified &&
+              replyCmtModified.data.replied_parent_cmt_id === item._id
+                ? replyCmtModified
+                : undefined
+            }
           />
         ))}
       </div>
       <div className='p-[16px] border-t-[1px] border-[rgba(255,255,255,0.2)]'>
         <CommentInput
-          videoId={shortId}
+          videoId={shortData._id}
           setAddNewCmt={setAddNew}
           setCmtParams={setQueriese}
-          refetchVideo={handleRefetch}
         />
       </div>
     </div>

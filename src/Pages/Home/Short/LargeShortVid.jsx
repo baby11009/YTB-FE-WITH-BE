@@ -24,7 +24,7 @@ import {
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { formatNumber } from "../../../util/numberFormat";
 import { useAuthContext } from "../../../Auth Provider/authContext";
-import { CustomeFuncBox } from "../../../Component";
+import { CustomeFuncBox, PlaylistModal } from "../../../Component";
 import request from "../../../util/axios-base-url";
 import { Link } from "react-router-dom";
 import Hls from "hls.js";
@@ -79,7 +79,7 @@ const CustomeButton = ({
           ${
             buttonCss
               ? buttonCss
-              : "bg-hover-black hover:bg-[rgba(255,255,255,0.2)]"
+              : " bg-[rgba(0,0,0,0.3)] hover:bg-[rgba(40,40,40,0.6)] 610:bg-black-0.1 610:hover:bg-black-0.2"
           }
           `}
         title={title}
@@ -102,52 +102,18 @@ const CustomeButton = ({
   );
 };
 
-const funcList = [
-  {
-    id: 1,
-    text: "Thông tin mô tả",
-    icon: <DescriptionIcon />,
-  },
-  {
-    id: 2,
-    text: "Lưu vào danh sách phát",
-    icon: <AddPLIcon />,
-  },
-  {
-    id: 3,
-    text: "Phụ đề",
-    icon: <SubtitlesIcon />,
-  },
-  {
-    id: 4,
-    text: "Không đề xuất kênh này",
-    icon: <NoSuggetIcon />,
-  },
-  {
-    id: 5,
-    text: "Báo cáo vi phạm",
-    icon: <DiaryIcon />,
-  },
-  {
-    id: 6,
-    text: "Gửi ý kiến phản hồi",
-    icon: <FeedBackIcon />,
-  },
-];
-
 const LargeShortVid = ({
   shortData,
-  refetch,
-  setRefetch,
   volume,
   setVolume,
-  handleRefetchShortData,
+  handleUpdateShortData,
   handleSetCurrentShort,
   fullScreen,
   handleToggleFullScreen,
   handleToggleSideMenu,
 }) => {
-  const { setIsShowing, modalContainerRef, user } = useAuthContext();
+  const { setIsShowing, modalContainerRef, user, addToaster } =
+    useAuthContext();
 
   const hlsRef = useRef();
 
@@ -169,40 +135,48 @@ const LargeShortVid = ({
 
   const [videoState, setVideoState] = useState({ paused: true });
 
-  const handleStreamingVideo = () => {
-    if (Hls.isSupported() && shortData?.stream) {
-      const hls = new Hls();
-      hlsRef.current = hls;
-      hls.loadSource(
-        `${import.meta.env.VITE_BASE_API_URI}/file/videomaster/${
-          shortData?.stream
-        }`,
-      );
-      hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-        console.log("video resolution levels", data.levels.length);
-      });
-
-      hls.attachMedia(videoRef.current);
-    } else {
-      videoRef.current.src = `${import.meta.env.VITE_BASE_API_URI}${
-        import.meta.env.VITE_VIEW_VIDEO_API
-      }${shortData?.video}?type=video`;
-    }
-  };
-
-  const fetchData = async () => {
-    await request
-      .get(`/data/video/${shortData._id}`)
-      .then(({ data }) => {
-        handleRefetchShortData(data.data);
-      })
-      .catch((err) => {
-        alert(err.response.data.msg);
-      })
-      .finally(() => {
-        setRefetch(false);
-      });
-  };
+  const funcList = [
+    {
+      id: 1,
+      text: "Description",
+      icon: <DescriptionIcon />,
+      handleOnClick: () => {
+        handleToggleSideMenu("details");
+      },
+    },
+    {
+      id: 2,
+      text: "Save to playlist",
+      icon: <AddPLIcon />,
+      renderCondition: !!user,
+      handleOnClick: () => {
+        setIsShowing(<PlaylistModal videoId={shortData?._id} />);
+      },
+    },
+    {
+      id: 3,
+      text: "Captions",
+      icon: <SubtitlesIcon />,
+    },
+    {
+      id: 4,
+      text: "Don't recommend this channel",
+      icon: <NoSuggetIcon />,
+      renderCondition: !!user,
+    },
+    {
+      id: 5,
+      text: "Report",
+      icon: <DiaryIcon />,
+      renderCondition: !!user,
+    },
+    {
+      id: 6,
+      text: "Send feedback",
+      icon: <FeedBackIcon />,
+      renderCondition: !!user,
+    },
+  ];
 
   const handleToggleReact = async (type) => {
     if (!user) {
@@ -211,8 +185,42 @@ const LargeShortVid = ({
     }
     await request
       .post("/user/video-react", { videoId: shortData._id, type: type })
-      .then(() => {
-        setRefetch(true);
+      .then((rsp) => {
+        let updateData = {
+          react_info: rsp.data.data,
+        };
+        switch (rsp.data.type) {
+          case "CREATE":
+            if (rsp.data.data.type === "like") {
+              updateData.like = shortData.like + 1;
+            } else {
+              updateData.dislike = shortData.dislike + 1;
+            }
+            break;
+          case "UPDATE":
+            if (rsp.data.data.type === "like") {
+              updateData.like = shortData.like + 1;
+              updateData.dislike = shortData.dislike - 1;
+            } else {
+              updateData.like = shortData.like - 1;
+              updateData.dislike = shortData.dislike + 1;
+            }
+            break;
+          case "DELETE":
+            updateData.react_info = undefined;
+            if (rsp.data.data.type === "like") {
+              updateData.like = shortData.like - 1;
+            } else {
+              updateData.dislike = shortData.dislike - 1;
+            }
+            break;
+        }
+
+        handleUpdateShortData(updateData);
+      })
+      .catch((err) => {
+        console.error(err);
+        addToaster("Failed to react this short");
       });
   };
 
@@ -223,13 +231,15 @@ const LargeShortVid = ({
     }
     await request
       .post("/user/subscription", {
-        userId: user?._id,
         channelId: shortData?.channel_info?._id,
       })
-      .then(() => {
-        setRefetch(true);
+      .then((rsp) => {
+        handleUpdateShortData({ subscription_info: rsp.data.data });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.error(err);
+        addToaster("Failed to subscribe to this channel");
+      });
   };
 
   const handleUnsubscribe = async () => {
@@ -240,11 +250,12 @@ const LargeShortVid = ({
 
     await request
       .delete(`/user/subscription/${shortData.channel_info._id}`)
-      .then(() => {
-        setRefetch(true);
+      .then((rsp) => {
+        handleUpdateShortData({ subscription_info: rsp.data.data });
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
+        addToaster("Failed to unsubscribe to this channel");
       });
   };
 
@@ -256,138 +267,153 @@ const LargeShortVid = ({
     }
   };
 
-  const handleVideoPlay = (e) => {
-    setVideoState((prev) => ({ ...prev, paused: false }));
-  };
+  useLayoutEffect(() => {
+    const handleStreamingVideo = () => {
+      if (Hls.isSupported() && shortData?.stream) {
+        const hls = new Hls();
+        hlsRef.current = hls;
+        hls.loadSource(
+          `${import.meta.env.VITE_BASE_API_URI}/file/videomaster/${
+            shortData?.stream
+          }`,
+        );
+        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+          console.log("video resolution levels", data.levels.length);
+        });
 
-  const handleVideoPause = (e) => {
-    setVideoState((prev) => ({ ...prev, paused: true }));
-  };
-
-  const handleVideoEnd = (e) => {
-    videoRef.current.play();
-  };
-
-  const handleVideoTimeUpdate = (e) => {
-    const percent =
-      videoRef.current.currentTime / videoRef.current.duration || 0;
-    timelineRef.current.style.setProperty("--progress-position", percent);
-  };
-
-  const handleTimelineContainerMouseOver = (e) => {
-    // Show thumb indicator
-    timelineRef.current.style.setProperty("--scale", 1);
-  };
-
-  const handleTimelineContainerMouseOut = (e) => {
-    // hidden thumb indicator
-    timelineRef.current.style.setProperty("--scale", 0);
-
-    timelineRef.current.style.setProperty("--preview-progress", 0);
-  };
-
-  const handleTimelineContainerMouseMove = (e) => {
-    const rect = timelineContainerRef.current.getBoundingClientRect();
-    const percent =
-      Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
-
-    timelineRef.current.style.setProperty("--preview-progress", percent);
-  };
-
-  const handleWindowDisableSelects = (event) => {
-    event.preventDefault();
-  };
-
-  const handleTimelineMouseDown = (e) => {
-    // handle when user want to seek to timeline
-    if (e.buttons !== 1) return;
-    // add scrubbing event when user left click
-    isScrubbing.current = true;
-
-    if (isScrubbing.current) {
-      window.addEventListener("selectstart", handleWindowDisableSelects);
-    }
-
-    wasPaused.current = videoRef.current.paused;
-    if (!videoRef.current.paused) {
-      videoRef.current.pause();
-    }
-  };
-
-  const handleWindowMouseUp = () => {
-    // remove scrubbing if mouse is out of timeline position
-    if (isScrubbing.current) {
-      isScrubbing.current = false;
-
-      if (!wasPaused.current) {
-        videoRef.current.play();
+        hls.attachMedia(videoRef.current);
+      } else {
+        videoRef.current.src = `${import.meta.env.VITE_BASE_API_URI}${
+          import.meta.env.VITE_VIEW_VIDEO_API
+        }${shortData?.video}?type=video`;
       }
-      window.removeEventListener("selectstart", handleWindowDisableSelects);
-    }
-  };
+    };
 
-  const handleWindowMouseMove = (e) => {
-    // seek to the timeline that user end scrubbing
-    if (!isScrubbing.current) return;
+    const handleVideoPlay = (e) => {
+      setVideoState((prev) => ({ ...prev, paused: false }));
+    };
 
-    const rect = timelineContainerRef.current.getBoundingClientRect();
+    const handleVideoPause = (e) => {
+      setVideoState((prev) => ({ ...prev, paused: true }));
+    };
 
-    const percent =
-      Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+    const handleVideoEnd = (e) => {
+      videoRef.current.play();
+    };
 
-    videoRef.current.currentTime = videoRef.current.duration * percent;
+    const handleVideoTimeUpdate = (e) => {
+      const percent =
+        videoRef.current.currentTime / videoRef.current.duration || 0;
+      timelineRef.current.style.setProperty("--progress-position", percent);
+    };
 
-    timelineRef.current.style.setProperty("--progress-position", percent);
-  };
+    const handleTimelineContainerMouseOver = (e) => {
+      // Show thumb indicator
+      timelineRef.current.style.setProperty("--scale", 1);
+    };
 
-  const handleWindowMouseDown = (e) => {
-    //update video timline  when user left click the timeline ref
+    const handleTimelineContainerMouseOut = (e) => {
+      // hidden thumb indicator
+      timelineRef.current.style.setProperty("--scale", 0);
 
-    if (!(e.target === timelineRef.current)) return;
-    const rect = timelineContainerRef.current.getBoundingClientRect();
-    const percent =
-      Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
-    videoRef.current.currentTime = videoRef.current.duration * percent;
-    timelineRef.current.style.setProperty("--progress-position", percent);
-  };
+      timelineRef.current.style.setProperty("--preview-progress", 0);
+    };
 
-  const isElementInView = (element, threshold = 1) => {
-    return new Promise((resolve) => {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.intersectionRatio >= threshold) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-          observer.disconnect();
-        },
-        { threshold: [threshold] },
-      );
-      observer.observe(element);
-    });
-  };
+    const handleTimelineContainerMouseMove = (e) => {
+      const rect = timelineContainerRef.current.getBoundingClientRect();
+      const percent =
+        Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
 
-  const checkVisibility = async () => {
-    if (containRef.current) {
-      const isInView = await isElementInView(controlRef.current);
+      timelineRef.current.style.setProperty("--preview-progress", percent);
+    };
 
-      if (!isInView && !videoRef.current.paused) {
+    const handleWindowDisableSelects = (event) => {
+      event.preventDefault();
+    };
+
+    const handleTimelineMouseDown = (e) => {
+      // handle when user want to seek to timeline
+      if (e.buttons !== 1) return;
+      // add scrubbing event when user left click
+      isScrubbing.current = true;
+
+      if (isScrubbing.current) {
+        window.addEventListener("selectstart", handleWindowDisableSelects);
+      }
+
+      wasPaused.current = videoRef.current.paused;
+      if (!videoRef.current.paused) {
         videoRef.current.pause();
-      } else if (isInView) {
-        handleSetCurrentShort();
-        videoRef.current.play().catch((err) => {});
       }
-    }
-  };
+    };
 
-  useLayoutEffect(() => {
-    if (refetch) {
-      fetchData();
-    }
-  }, [refetch]);
+    const handleWindowMouseUp = () => {
+      // remove scrubbing if mouse is out of timeline position
+      if (isScrubbing.current) {
+        isScrubbing.current = false;
 
-  useLayoutEffect(() => {
+        if (wasPaused.current) {
+          videoRef.current.play();
+        }
+        window.removeEventListener("selectstart", handleWindowDisableSelects);
+      }
+    };
+
+    const handleWindowMouseMove = (e) => {
+      // seek to the timeline that user end scrubbing
+      if (!isScrubbing.current) return;
+
+      const rect = timelineContainerRef.current.getBoundingClientRect();
+
+      const percent =
+        Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+
+      videoRef.current.currentTime = videoRef.current.duration * percent;
+
+      timelineRef.current.style.setProperty("--progress-position", percent);
+    };
+
+    const handleWindowMouseDown = (e) => {
+      //update video timline  when user left click the timeline ref
+
+      if (!(e.target === timelineRef.current)) return;
+      const rect = timelineContainerRef.current.getBoundingClientRect();
+      const percent =
+        Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+      videoRef.current.currentTime = videoRef.current.duration * percent;
+      timelineRef.current.style.setProperty("--progress-position", percent);
+    };
+
+    const isElementInView = (element, threshold = 1) => {
+      return new Promise((resolve) => {
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.intersectionRatio >= threshold) {
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+            observer.disconnect();
+          },
+          { threshold: [threshold] },
+        );
+        observer.observe(element);
+      });
+    };
+
+    const checkVisibility = async () => {
+      if (containRef.current) {
+        const isInView = await isElementInView(controlRef.current);
+
+        if (!isInView && !videoRef.current.paused) {
+          videoRef.current.pause();
+        } else if (isInView) {
+          handleSetCurrentShort();
+          videoRef.current.play().catch((err) => {});
+        }
+      }
+    };
+
     handleStreamingVideo();
 
     timelineRef.current.style.setProperty("--scale", 0);
@@ -548,8 +574,8 @@ const LargeShortVid = ({
                     <div
                       key={"play"}
                       className={` animate-buttonPing
-                size-[60px] bg-[rgba(0,0,0,0.5)] rounded-[50%] origin-center 
-                flex items-center justify-center`}
+                        size-[60px] bg-[rgba(0,0,0,0.5)] rounded-[50%] origin-center 
+                        flex items-center justify-center`}
                     >
                       <div className='w-[36px]'>
                         <PlayIcon />
@@ -559,8 +585,8 @@ const LargeShortVid = ({
                     <div
                       key={"pause"}
                       className={`  animate-buttonPing
-                  size-[60px] bg-[rgba(0,0,0,0.5)] rounded-[50%]  origin-center 
-                  flex items-center justify-center  `}
+                          size-[60px] bg-[rgba(0,0,0,0.5)] rounded-[50%]  origin-center 
+                          flex items-center justify-center  `}
                     >
                       <div className='w-[36px]'>
                         <PauseIcon />
@@ -642,7 +668,7 @@ const LargeShortVid = ({
               </div>
             </div>
           </div>
-          <div className='flex flex-col justify-end items-center px-[12px] pt-[12px] w-fit gap-[16px]'>
+          <div className='absolute right-0 bottom-[24px] 610:relative flex flex-col justify-end items-center px-[12px] pt-[12px] w-fit gap-[16px]'>
             <CustomeButton
               text={formatNumber(shortData?.like)}
               Icon={LikeIcon}
@@ -697,13 +723,15 @@ const LargeShortVid = ({
               />
               {opened && (
                 <CustomeFuncBox
-                  style={"w-[241px] left-0 bottom-[100%]"}
+                  style={
+                    "translate-x-[calc(-100%+48px)] 1070:translate-x-0 left-0 bottom-[100%]"
+                  }
                   setOpened={setOpened}
                   funcList1={funcList}
                 />
               )}
             </div>
-            <div className='w-[40px] h-[40px] border-[1px] border-white rounded-[6px] flex items-center justify-center'>
+            <div className='w-[40px] h-[40px] border-[1px] border-white rounded-[6px] flex items-center justify-center '>
               <LoadShortImgIcon />
             </div>
           </div>

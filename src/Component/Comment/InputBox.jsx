@@ -13,7 +13,7 @@ const InputBox = ({
   videoId,
   userId,
   replyId,
-  refetchVideo,
+  handleUpdateVideo,
 }) => {
   const [focused, setFocused] = useState(false);
 
@@ -41,8 +41,8 @@ const InputBox = ({
       data,
       "comment",
       () => {
-        if (refetchVideo) {
-          refetchVideo();
+        if (handleUpdateVideo) {
+          handleUpdateVideo(1);
         }
         setCmtText("");
         setShowedInput(false);
