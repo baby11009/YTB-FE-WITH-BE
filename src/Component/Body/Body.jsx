@@ -19,7 +19,7 @@ const Body = ({
       <div
         className={`
            
-          ${!noLDMenu && "md:ml-[74px]"}
+          ${!noLDMenu && "800:ml-[74px]"}
           ${openedMenu && !noLDMenu && " xl:ml-[240px]"} 
           `}
       >

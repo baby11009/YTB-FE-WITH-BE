@@ -224,6 +224,10 @@ const VideoPart = () => {
     }));
   }, [comebineDataList]);
 
+  const updateVideoData = (data) => {
+    setVideoInfo((prev) => ({ ...prev, ...data }));
+  };
+
   useLayoutEffect(() => {
     if (videoDetails) {
       if (addNew) {
@@ -457,10 +461,12 @@ const VideoPart = () => {
           )}
 
           <CommentSection
-            videoId={id}
+            videoData={videoInfo}
             videoUserId={videoInfo?.channel_info?._id}
-            totalCmt={videoInfo?.totalCmt}
             refetch={refetch}
+            updateVideoData={(newVideoData) => {
+              updateVideoData(newVideoData);
+            }}
             isEnd={isEnd}
           />
         </div>

@@ -129,15 +129,6 @@ const ShortPart = () => {
     }, 500);
   };
 
-  const handleWheelScroll = (e) => {
-    e.preventDefault();
-    if (e.deltaY >= 100) {
-      handleScrollNext();
-    } else {
-      handleScrollPrev();
-    }
-  };
-
   const handleToggleFullScreen = () => {
     setFullScreen((prev) => !prev);
     if (document.fullscreenElement === null) {
@@ -179,6 +170,10 @@ const ShortPart = () => {
   };
 
   useLayoutEffect(() => {
+    if (!firtTimeRender.current) {
+      fetchRandomShort();
+    }
+
     const removeRedisKey = async () => {
       let sessionId = sessionStorage.getItem("session-id");
       if (!sessionId) return;
@@ -216,18 +211,18 @@ const ShortPart = () => {
     socketRef.current = connectSocket();
 
     return () => {
-      window.removeEventListener("beforeunload", removeRedisKey);
+      firtTimeRender.current = false;
 
       // Remove session-id key in redis to make watched data reset - should use this if doesn't have much data
 
-      if (!firtTimeRender.current) {
-        removeRedisKey();
-      }
+      window.removeEventListener("beforeunload", removeRedisKey);
 
-      // off and disconect socket when not using
+      // If not connected, remove listeners
       if (socketRef.current && !socketRef.current.connected) {
         socketRef.current.off();
       }
+
+      // If connected, disconnect
       if (socketRef.current && socketRef.current.connected) {
         socketRef.current.disconnect();
       }
@@ -253,34 +248,32 @@ const ShortPart = () => {
     };
   }, [sideMenu]);
 
-  useLayoutEffect(() => {
-    if (!firtTimeRender.current) {
-      fetchRandomShort();
-    }
-
-    return () => {
-      firtTimeRender.current = false;
-    };
-  }, []);
-
   useEffect(() => {
     if (deviceType !== "small" || !openedSideMenu) {
-      containerRef.current.addEventListener("wheel", handleWheelScroll, {
+      const handleWheelScroll = (e) => {
+        e.preventDefault();
+
+        if (e.deltaY === 100) {
+          handleScrollNext();
+        } else if (e.deltaY === -100) {
+          handleScrollPrev();
+        }
+      };
+
+      window.addEventListener("wheel", handleWheelScroll, {
         passive: false,
       });
-    }
 
-    return () => {
-      if ((deviceType !== "small" || !openedSideMenu) && containerRef.current) {
-        containerRef.current.removeEventListener("wheel", handleWheelScroll, {
+      return () => {
+        window.removeEventListener("wheel", handleWheelScroll, {
           passive: false,
         });
-      }
-    };
+      };
+    }
   }, [shortList, deviceType, openedSideMenu]);
 
   return (
-    <div className='relative mt-[8px] flex' ref={containerRef}>
+    <div className='relative mt-[8px] flex z-[300]' ref={containerRef}>
       <div
         className='mx-auto w-fit relative z-[1000] mb-[24px]'
         ref={listContainerRef}

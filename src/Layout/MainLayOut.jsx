@@ -2,9 +2,6 @@ import { useEffect } from "react";
 import { scrollToTop } from "../util/scrollCustom";
 import { useAuthContext } from "../Auth Provider/authContext";
 
-//  Swiper css
-import "swiper/css";
-
 const MainLayOut = ({ children }) => {
   useEffect(() => {
     scrollToTop();

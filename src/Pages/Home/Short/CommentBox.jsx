@@ -298,7 +298,6 @@ const CommentBox = ({
             videoId={shortData._id}
             videoUserId={data?.channel_info?._id}
             setAddNewCmt={setAddNew}
-            handleUpdateVideo={(modifiedNumber) => {}}
             replyCmtModified={
               replyCmtModified &&
               replyCmtModified.data.replied_parent_cmt_id === item._id

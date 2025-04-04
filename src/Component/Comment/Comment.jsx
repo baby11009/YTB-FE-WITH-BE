@@ -1,7 +1,6 @@
 import CommentCard from "./CommentCard";
 import { useState, useEffect, useRef } from "react";
 import { getData } from "../../Api/getData";
-import { useAuthContext } from "../../Auth Provider/authContext";
 import { CurveArrowIcon } from "../../Assets/Icons";
 
 const Comment = ({
@@ -9,7 +8,6 @@ const Comment = ({
   data,
   videoId,
   videoUserId,
-  handleUpdateVideo,
   replyCmtModified,
 }) => {
 
@@ -129,7 +127,6 @@ const Comment = ({
         data={data}
         videoId={videoId}
         videoUserId={videoUserId}
-        handleUpdateVideo={handleUpdateVideo}
       />
       {showReply && (
         <div className='pl-[36px]'>
@@ -144,7 +141,6 @@ const Comment = ({
                   data={item}
                   videoId={videoId}
                   videoUserId={videoUserId}
-                  handleUpdateVideo={handleUpdateVideo}
                 />
               ))}
           </div>

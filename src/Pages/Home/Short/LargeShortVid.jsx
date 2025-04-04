@@ -36,9 +36,9 @@ const ConfirmUnsubscribe = ({
 }) => {
   return (
     <div className=' max-w-[688px] bg-black-21 rounded-[10px]'>
-      <div className='mt-[24px]'>
+      <div className='pt-[24px]'>
         <div className='px-[24px] mt-[4px] mb-[24px] text-nowrap'>
-          Unsubscribe from {channelEmail} ?
+          <span className="text-[14px] leading-[20px] text-gray-A"> Unsubscribe from {channelEmail} ?</span>
         </div>
         <div className='flex justify-end items-center py-[8px]'>
           <button
@@ -341,10 +341,11 @@ const LargeShortVid = ({
         window.addEventListener("selectstart", handleWindowDisableSelects);
       }
 
-      wasPaused.current = videoRef.current.paused;
       if (!videoRef.current.paused) {
         videoRef.current.pause();
       }
+
+      wasPaused.current = videoRef.current.paused;
     };
 
     const handleWindowMouseUp = () => {
@@ -352,9 +353,11 @@ const LargeShortVid = ({
       if (isScrubbing.current) {
         isScrubbing.current = false;
 
+        // Start playing the video if it was paused before scrubbing
         if (wasPaused.current) {
           videoRef.current.play();
         }
+
         window.removeEventListener("selectstart", handleWindowDisableSelects);
       }
     };
@@ -416,73 +419,74 @@ const LargeShortVid = ({
 
     handleStreamingVideo();
 
+    const videoRefEvents = {
+      play: handleVideoPlay,
+      pause: handleVideoPause,
+      timeupdate: handleVideoTimeUpdate,
+      ended: handleVideoEnd,
+    };
+
+    const timelineContainerRefEvents = {
+      mouseover: handleTimelineContainerMouseOver,
+      mouseout: handleTimelineContainerMouseOut,
+      mousemove: handleTimelineContainerMouseMove,
+    };
+
+    const windowEvents = {
+      mouseup: handleWindowMouseUp,
+      mousemove: handleWindowMouseMove,
+      mousedown: handleWindowMouseDown,
+      scroll: checkVisibility,
+    };
+
+    // Video ref event listeners
+    Object.entries(videoRefEvents).forEach(([event, handler]) => {
+      videoRef.current.addEventListener(event, handler);
+    });
+
+    // timelineContainer ref event listeners
+    Object.entries(timelineContainerRefEvents).forEach(([event, handler]) => {
+      timelineContainerRef.current.addEventListener(event, handler);
+    });
+
     timelineRef.current.style.setProperty("--scale", 0);
-
-    videoRef.current.addEventListener("play", handleVideoPlay);
-
-    videoRef.current.addEventListener("pause", handleVideoPause);
-
-    videoRef.current.addEventListener("timeupdate", handleVideoTimeUpdate);
-
-    videoRef.current.addEventListener("ended", handleVideoEnd);
-
-    timelineContainerRef.current.addEventListener(
-      "mouseover",
-      handleTimelineContainerMouseOver,
-    );
-
-    timelineContainerRef.current.addEventListener(
-      "mouseout",
-      handleTimelineContainerMouseOut,
-    );
-
-    timelineContainerRef.current.addEventListener(
-      "mousemove",
-      handleTimelineContainerMouseMove,
-    );
 
     timelineRef.current.addEventListener("mousedown", handleTimelineMouseDown);
 
-    window.addEventListener("mouseup", handleWindowMouseUp);
-
-    window.addEventListener("mousemove", handleWindowMouseMove);
-
-    window.addEventListener("mousedown", handleWindowMouseDown);
-
     checkVisibility();
 
-    window.addEventListener("scroll", checkVisibility);
-
+    // window event listeners
+    Object.entries(windowEvents).forEach(([event, handler]) => {
+      window.addEventListener(event, handler);
+    });
     return () => {
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
 
-      videoRef.current.removeEventListener("play", handleVideoPlay);
+      // video ref event cleanup
+      Object.entries(videoRefEvents).forEach(([event, handler]) => {
+        videoRef.current.removeEventListener(event, handler);
+      });
 
-      videoRef.current.removeEventListener("pause", handleVideoPause);
+      //  timelineContainer ref event cleanup
 
-      videoRef.current.removeEventListener("timeupdate", handleVideoTimeUpdate);
-
-      timelineContainerRef.current.removeEventListener(
-        "mouseover",
-        handleTimelineContainerMouseOver,
-      );
-
-      timelineContainerRef.current.removeEventListener(
-        "mouseout",
-        handleTimelineContainerMouseOut,
-      );
+      Object.entries(timelineContainerRefEvents).forEach(([event, handler]) => {
+        timelineContainerRef.current.removeEventListener(event, handler);
+      });
 
       timelineRef.current.style.setProperty("--scale", 1);
 
-      window.removeEventListener("mouseup", handleWindowMouseUp);
+      timelineRef.current.removeEventListener(
+        "mousedown",
+        handleTimelineMouseDown,
+      );
 
-      window.removeEventListener("mousemove", handleWindowMouseMove);
+      // window event cleanup
 
-      window.removeEventListener("mousedown", handleWindowMouseDown);
-
-      window.removeEventListener("scroll", checkVisibility);
+      Object.entries(windowEvents).forEach(([event, handler]) => {
+        window.removeEventListener(event, handler);
+      });
     };
   }, []);
 

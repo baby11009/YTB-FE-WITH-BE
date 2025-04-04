@@ -7,7 +7,7 @@ import { getData } from "../../../../Api/getData";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
 import connectSocket from "../../../../util/connectSocket";
 
-const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
+const CommentSection = ({ videoData, videoUserId, updateVideoData, isEnd }) => {
   const [isInViewPort, SetIsInViewPort] = useState(false);
 
   const { user } = useAuthContext();
@@ -16,20 +16,16 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
 
   const [commentQuery, setCommentQuery] = useState(undefined);
 
-  const {
-    data: cmtData,
-    refetch: refetchCmt,
-    isLoading,
-  } = getData(
-    `/data/comment/video-cmt/${videoId}`,
+  const { data: cmtData, isLoading } = getData(
+    `/data/comment/video-cmt/${videoData._id}`,
     commentQuery,
-    videoId && isInViewPort && commentQuery ? true : false,
+    videoData && isInViewPort && commentQuery ? true : false,
     false,
   );
 
   const [replyCmtModified, setReplyCmtModified] = useState(null);
 
-  const [cmtList, setCmtList] = useState([]);
+  const [commentList, setCommentList] = useState([]);
 
   const [opened, setOpened] = useState(false);
 
@@ -39,6 +35,8 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
 
   const sortBtn = useRef();
 
+  const socketRef = useRef(null);
+
   const handleChoseSort = (data) => {
     if (!commentQuery.sort[data.id]) {
       setAddNew(true);
@@ -47,7 +45,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
         page: 1,
         sort: { [data.id]: -1 },
       }));
-      setCmtList([]);
+      setCommentList([]);
     }
   };
 
@@ -58,7 +56,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
       handleOnClick: handleChoseSort,
     },
     {
-      id: "top",
+      id: "interact",
       text: "Top comments",
       handleOnClick: handleChoseSort,
     },
@@ -68,7 +66,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
     if (cmtData) {
       if (addNew) {
         cmtIdListSet.current.clear();
-        setCmtList(cmtData?.data);
+        setCommentList(cmtData?.data);
         cmtData?.data.forEach((item) => cmtIdListSet.current.add(item._id));
         setAddNew(false);
       } else {
@@ -81,7 +79,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
           addlist.push(item);
           cmtIdListSet.current.add(item?._id);
         });
-        setCmtList((prev) => [...prev, ...addlist]);
+        setCommentList((prev) => [...prev, ...addlist]);
       }
     }
   }, [cmtData]);
@@ -96,7 +94,7 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
   }, [isEnd]);
 
   useEffect(() => {
-    if (videoId) {
+    if (videoData._id) {
       setCommentQuery({
         limit: 8,
         page: 1,
@@ -104,16 +102,18 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
           top: -1,
         },
         reset: user?._id,
-        clearCache: videoId,
+        clearCache: "comment",
       });
       setAddNew(true);
     }
-  }, [videoId]);
+  }, [videoData._id]);
 
   useEffect(() => {
+    socketRef.current = connectSocket();
+
     const handleScroll = () => {
       if (containerRef.current) {
-        const { top, bottom } = containerRef.current.getBoundingClientRect();
+        const { top } = containerRef.current.getBoundingClientRect();
         if (top < window.innerHeight) {
           SetIsInViewPort(true);
         } else {
@@ -125,94 +125,137 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
     window.addEventListener("scroll", handleScroll);
 
     return () => {
+      // If not connected, remove listeners
+      if (socketRef.current && !socketRef.current.connected) {
+        socketRef.current.off();
+      }
+
+      // If connected, disconnect
+      if (socketRef.current && socketRef.current.connected) {
+        socketRef.current.disconnect();
+      }
+
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   useEffect(() => {
-    const socket = connectSocket();
-
-    const updateComment = (data) => {
-      if (data) {
-        setCmtList((prev) => {
-          const dataList = [...prev];
-          dataList.forEach((item, id) => {
-            if (item?._id === data?._id) {
-              dataList[id] = { ...dataList[id], ...data };
-            }
-          });
-
-          return dataList;
-        });
-      }
-    };
-
-    const addNewCmt = (data) => {
-      if (data) {
-        setCmtList((prev) => [data, ...prev]);
-        cmtIdListSet.current.add(data._id);
-      }
-    };
-
-    const deleteCmt = (data) => {
-      if (data) {
-        setCmtList((prev) => prev.filter((item) => item?._id !== data._id));
-        cmtIdListSet.current.delete(data._id);
-      }
-    };
-
     const modifiedReply = (data, action) => {
       setReplyCmtModified({ data: data, action });
     };
 
-    if (socket) {
-      socket.on(`update-parent-comment-${user?._id}`, updateComment);
-      socket.on(`update-comment-${user?._id}`, updateComment);
-      socket.on(`create-comment-${user?._id}`, addNewCmt);
-      socket.on(`delete-comment-${user?._id}`, deleteCmt);
-      socket.on(`create-reply-comment-${user?._id}`, (data) => {
-        modifiedReply(data, "create");
+    const addNewCmt = ({ type, data }) => {
+      updateVideoData({
+        totalCmt: videoData.totalCmt + 1,
       });
-      socket.on(`update-reply-comment-${user?._id}`, (data) => {
-        modifiedReply(data, "update");
+
+      if (type === "NORMAL") {
+        setCommentList((prev) => [data, ...prev]);
+        cmtIdListSet.current.add(data?._id);
+
+        return;
+      }
+
+      setCommentList((prev) => {
+        const dataList = [...prev];
+
+        for (const index in dataList) {
+          if (dataList[index]._id === data?.replied_parent_cmt_id) {
+            dataList[index] = {
+              ...dataList[index],
+              replied_cmt_total: dataList[index].replied_cmt_total + 1,
+            };
+          }
+          break;
+        }
+
+        return dataList;
       });
-      socket.on(`delete-reply-comment-${user?._id}`, (data) => {
-        modifiedReply(data, "delete");
+      modifiedReply(data, "CREATE");
+    };
+
+    const updateComment = ({ type, data }) => {
+      if (type === "NORMAL") {
+        setCommentList((prev) => {
+          const listClone = [...prev];
+
+          for (const index in listClone) {
+            if (listClone[index]._id === data._id) {
+              listClone[index] = { ...listClone[index], ...data };
+              break;
+            }
+          }
+
+          return listClone;
+        });
+
+        return;
+      }
+
+      modifiedReply(data, "UPDATE");
+    };
+
+    const deleteCmt = ({ type, data }) => {
+      updateVideoData({
+        totalCmt: videoData.totalCmt - (1 + data.replied_cmt_total || 0),
+      });
+
+      if (type === "NORMAL") {
+        setCommentList((prev) => prev.filter((item) => item?._id !== data._id));
+        cmtIdListSet.current.delete(data?._id);
+        updateVideoData({
+          totalCmt: videoData.totalCmt - (1 + data.replied_cmt_total || 0),
+        });
+
+        return;
+      }
+
+      setCommentList((prev) => {
+        const listClone = [...prev];
+        for (const index in listClone) {
+          if (listClone[index]._id === data.replied_parent_cmt_id) {
+            listClone[index] = {
+              ...listClone[index],
+              replied_cmt_total: listClone[index].replied_cmt_total - 1,
+            };
+            break;
+          }
+        }
+        return listClone;
+      });
+      modifiedReply(data, "DELETE");
+      updateVideoData({
+        totalCmt: videoData.totalCmt - 1,
+      });
+    };
+
+    const socketEvents = {
+      [`create-comment-${user?._id}`]: addNewCmt,
+      [`update-comment-${user?._id}`]: updateComment,
+      [`delete-comment-${user?._id}`]: deleteCmt,
+    };
+
+    if (socketRef.current) {
+      Object.entries(socketEvents).forEach(([key, value]) => {
+        socketRef.current.on(key, value);
       });
     }
 
     return () => {
-      // Clear socket when unmount
-      if (socket && !socket?.connected) {
-        socket.off();
-      } else if (socket && socket?.connected) {
-        socket.disconnect();
-      }
-
-      if (socket) {
-        socket.off(`update-parent-comment-${user?._id}`, updateComment);
-        socket.off(`update-comment-${user?._id}`, updateComment);
-        socket.off(`create-comment-${user?._id}`, addNewCmt);
-        socket.off(`delete-comment-${user?._id}`, deleteCmt);
-        socket.off(`create-reply-comment-${user?._id}`, (data) => {
-          modifiedReply(data, "create");
-        });
-        socket.off(`update-reply-comment-${user?._id}`, (data) => {
-          modifiedReply(data, "update");
-        });
-        socket.off(`delete-reply-comment-${user?._id}`, (data) => {
-          modifiedReply(data, "delete");
+      if (socketRef.current) {
+        Object.entries(socketEvents).forEach(([key, value]) => {
+          socketRef.current.off(key, value);
         });
       }
     };
-  }, []);
+  }, [videoData]);
 
   return (
     <div ref={containerRef}>
       <div className='mt-[24px] mb-[32px]'>
         <div className='mb-[24px] flex items-center'>
           <strong className='text-[20px] leading-[28px] mr-[32px]'>
-            {formatNumber(totalCmt)} Comments
+            {formatNumber(videoData.totalCmt)} Comments
           </strong>
           <div className='relative'>
             <button
@@ -248,22 +291,24 @@ const CommentSection = ({ videoId, videoUserId, totalCmt, refetch, isEnd }) => {
         </div>
         <CommentInput
           imgSize={"size-[40px]"}
-          videoId={videoId}
+          videoId={videoData._id}
           setAddNewCmt={setAddNew}
           setCmtParams={setCommentQuery}
-          refetchVideo={refetch}
         />
       </div>
-      {cmtList.length > 0 &&
-        cmtList.map((item) => (
+      {commentList.length > 0 &&
+        commentList.map((item) => (
           <Comment
             key={item?._id}
-            refetchVideo={refetch}
             data={item}
             videoUserId={videoUserId}
-            videoId={videoId}
-            setCmtParams={setCommentQuery}
-            replyCmtModified={replyCmtModified}
+            videoId={videoData._id}
+            replyCmtModified={
+              replyCmtModified &&
+              replyCmtModified.data.replied_parent_cmt_id === item._id
+                ? replyCmtModified
+                : undefined
+            }
           />
         ))}
 

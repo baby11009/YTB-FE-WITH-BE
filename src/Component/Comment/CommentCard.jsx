@@ -23,7 +23,6 @@ const CommentCard = ({
   data,
   videoUserId,
   videoId,
-  handleUpdateVideo,
 }) => {
   const { user, setIsShowing, addToaster } = useAuthContext();
 
@@ -80,9 +79,7 @@ const CommentCard = ({
           "/user/comment",
           data?._id,
           "comment",
-          () => {
-            handleUpdateVideo(-data.replied_cmt_total + -1);
-          },
+          undefined,
           undefined,
           addToaster,
         );
@@ -194,7 +191,6 @@ const CommentCard = ({
             videoId={videoId}
             userId={user?._id}
             replyId={data?._id}
-            handleUpdateVideo={handleUpdateVideo}
           />
         )}
 

@@ -120,13 +120,15 @@ const Description = ({ data, refetch }) => {
               {formatNumber(data?.channel_info?.subscriber || 0)} subscribers
             </span>
           </div>
-          <SubscribeBtn
-            sub={data?.subscription_info !== null ? true : false}
-            notify={data?.subscription_info?.notify}
-            id={data?.subscription_info?._id}
-            channelId={data?.channel_info?._id}
-            refetch={refetch}
-          />
+          <div className='w-fit h-[40px]'>
+            <SubscribeBtn
+              sub={data?.subscription_info !== null ? true : false}
+              notify={data?.subscription_info?.notify}
+              id={data?.subscription_info?._id}
+              channelId={data?.channel_info?._id}
+              refetch={refetch}
+            />
+          </div>
         </div>
         <div className='flex-1  mt-[12px] flex 2xsm:justify-end'>
           <LikeAndDislikeBtn

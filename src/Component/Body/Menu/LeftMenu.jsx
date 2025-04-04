@@ -15,8 +15,8 @@ import {
   funcList4,
   funcList5,
 } from "./Component";
+import { useEffect, useRef, useState } from "react";
 
-import { useState } from "react";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 
 const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
@@ -26,9 +26,68 @@ const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
 
   const navigate = useNavigate();
 
+  const menuRef = useRef(null);
+
   const handleNav = (path) => {
     navigate(path);
   };
+
+  useEffect(() => {
+    if (openedMenu) {
+      const preventDefault = (e) => {
+        if (window.innerWidth > 1312 || menuRef.current?.contains(e.target))
+          return;
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      };
+      const options = { passive: false, capture: true };
+      const windowEvents = [
+        "wheel",
+        "touchmove",
+        "mousewheel",
+        "DOMMouseScroll",
+      ];
+      // Thêm các sự kiện với passive: false để có thể chặn mặc định
+
+      windowEvents.forEach((event) => {
+        window.addEventListener(event, preventDefault, options);
+      });
+
+      const handleKeydown = (e) => {
+        const keys = [
+          "ArrowUp",
+          "ArrowDown",
+          "Space",
+          "PageUp",
+          "PageDown",
+          "Home",
+          "End",
+        ];
+
+        if (
+          !keys.includes(e.key) ||
+          menuRef.current?.contains(e.target) ||
+          window.innerWidth >= 1312
+        )
+          return;
+
+        e.preventDefault();
+        return false;
+      };
+
+      // // Chặn phím tạo scroll
+      window.addEventListener(handleKeydown, { capture: true });
+
+      return () => {
+        windowEvents.forEach((event) => {
+          window.removeEventListener(event, preventDefault, options);
+        });
+
+        window.removeEventListener(handleKeydown, { capture: true });
+      };
+    }
+  }, [openedMenu]);
 
   return (
     <nav
@@ -44,6 +103,7 @@ const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
       {/* Big menu */}
 
       <div
+        ref={menuRef}
         className={`absolute w-[240px] bg-black h-full-minus-56 overflow-y-scroll overscroll-contain menu-scrollbar
          text-[14px] font-[500] leading-[20px] z-[2000]    ${
            openedMenu ? "translate-x-[0]" : "translate-x-[-100%]"
@@ -217,9 +277,10 @@ const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
         className={`fixed inset-0  ${
           openedMenu
             ? "visible bg-[rgba(0,0,0,0.5)] "
-            : "invisible bg-[transparent] transition-all delay-[250ms]"
+            : "invisible bg-[transparent] transition-all delay-[250ms] "
         }    ${path !== "/video" ? "1312:invisible" : ""}`}
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           setOpenedMenu(false);
         }}
       ></div>
