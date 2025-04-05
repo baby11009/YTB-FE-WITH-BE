@@ -20,7 +20,7 @@ const initError = {
 const Login = () => {
   const navigate = useNavigate();
 
-  const { setUser } = useAuthContext();
+  const { setUser, authTokenRef } = useAuthContext();
 
   const [formData, setFormData] = useState(initForm);
 
@@ -48,7 +48,7 @@ const Login = () => {
     });
 
     const emailRegex = new RegExp(
-      "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$"
+      "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
     );
 
     if (!emailRegex.test(formData.email)) {
@@ -76,12 +76,13 @@ const Login = () => {
       return;
     }
 
-    const login = await request
+    await request
       .post("/auth/login", { ...formData })
       .then((rsp) => {
         console.log(rsp.data);
         setCookie(import.meta.env.VITE_AUTH_TOKEN, rsp.data.token);
         setUser(rsp.data?.data);
+        authTokenRef.current = rsp.data.token;
         navigate("/", { replace: true });
       })
       .catch((err) => {

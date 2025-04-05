@@ -45,11 +45,10 @@ const LikeAndDislike = ({ totalLike, videoId, reactState, refetch }) => {
           handleToggleReact("like");
         }}
       >
-        {reactState === "like" ? <LikeIcon /> : <EmptyLikeIcon />}
+        <div className='w-[24px]'>
+          {reactState === "like" ? <LikeIcon /> : <EmptyLikeIcon />}
+        </div>
 
-        {/* <span className='text-[14px] leading-[36px]'>
-        {formatNumber(30000)}
-        </span> */}
         <span className='text-[14px] leading-[36px]'>
           {formatNumber(totalLike || 0)}
         </span>

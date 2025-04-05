@@ -5,12 +5,11 @@ import { getMousePosition } from "../../../../util/mouse";
 import { CustomeFuncBox, CommentInput, Comment } from "../../../../Component";
 import { getData } from "../../../../Api/getData";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
-import connectSocket from "../../../../util/connectSocket";
 
 const CommentSection = ({ videoData, videoUserId, updateVideoData, isEnd }) => {
   const [isInViewPort, SetIsInViewPort] = useState(false);
 
-  const { user } = useAuthContext();
+  const { user, socket } = useAuthContext();
 
   const [addNew, setAddNew] = useState(true);
 
@@ -34,8 +33,6 @@ const CommentSection = ({ videoData, videoUserId, updateVideoData, isEnd }) => {
   const cmtIdListSet = useRef(new Set());
 
   const sortBtn = useRef();
-
-  const socketRef = useRef(null);
 
   const handleChoseSort = (data) => {
     if (!commentQuery.sort[data.id]) {
@@ -109,8 +106,6 @@ const CommentSection = ({ videoData, videoUserId, updateVideoData, isEnd }) => {
   }, [videoData._id]);
 
   useEffect(() => {
-    socketRef.current = connectSocket();
-
     const handleScroll = () => {
       if (containerRef.current) {
         const { top } = containerRef.current.getBoundingClientRect();
@@ -125,16 +120,6 @@ const CommentSection = ({ videoData, videoUserId, updateVideoData, isEnd }) => {
     window.addEventListener("scroll", handleScroll);
 
     return () => {
-      // If not connected, remove listeners
-      if (socketRef.current && !socketRef.current.connected) {
-        socketRef.current.off();
-      }
-
-      // If connected, disconnect
-      if (socketRef.current && socketRef.current.connected) {
-        socketRef.current.disconnect();
-      }
-
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
@@ -235,16 +220,16 @@ const CommentSection = ({ videoData, videoUserId, updateVideoData, isEnd }) => {
       [`delete-comment-${user?._id}`]: deleteCmt,
     };
 
-    if (socketRef.current) {
+    if (socket) {
       Object.entries(socketEvents).forEach(([key, value]) => {
-        socketRef.current.on(key, value);
+        socket.on(key, value);
       });
     }
 
     return () => {
-      if (socketRef.current) {
+      if (socket) {
         Object.entries(socketEvents).forEach(([key, value]) => {
-          socketRef.current.off(key, value);
+          socket.off(key, value);
         });
       }
     };

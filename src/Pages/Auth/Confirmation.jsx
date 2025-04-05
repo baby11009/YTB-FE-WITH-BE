@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import request from "../../util/axios-base-url";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const length = 5;
 
 const Confirmation = () => {
+  const { state } = useLocation();
+
   const navigate = useNavigate();
 
   const [otp, setOtp] = useState(Array(length).fill(""));

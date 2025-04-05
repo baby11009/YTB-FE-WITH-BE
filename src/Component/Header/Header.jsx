@@ -14,7 +14,6 @@ import AccountSetting from "./AccountSetting";
 import NotificationBox from "./NotificationBox";
 import { Link } from "react-router-dom";
 
-
 const fakeHistory = [
   {
     id: 1,
@@ -59,7 +58,6 @@ const fakeHistory = [
 ];
 
 const Header = ({ setOpenedMenu }) => {
-
   const searchRef = useRef();
 
   const inputRef = useRef();
@@ -187,8 +185,8 @@ const Header = ({ setOpenedMenu }) => {
                     .slice(
                       Math.min(
                         Math.max(fakeHistory.length - 10, 0),
-                        fakeHistory.length
-                      )
+                        fakeHistory.length,
+                      ),
                     )
                     .map((item, index) => (
                       <li
@@ -266,7 +264,7 @@ const Header = ({ setOpenedMenu }) => {
         <button
           className='min-w-[40px] h-[40px] rounded-full flex items-center justify-center
           hover:bg-[#3d3d3d] transition-all duration-[0.1s]'
-          title='Tạo'
+          title='Create'
         >
           <CreateVideoIcon />
         </button>
@@ -279,7 +277,7 @@ const Header = ({ setOpenedMenu }) => {
             setOpened((prev) => (prev === "notify" ? "" : "notify"));
           }}
         >
-          <div title='Thông báo'>
+          <div title='Notification'>
             <BellIcon />
             <span
               className='absolute top-[5px] right-[-1px] bg-red-CC text-white text-[12px] px-[4px] 

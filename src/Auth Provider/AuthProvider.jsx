@@ -1,13 +1,8 @@
 import { AuthContext } from "./authContext";
-import {
-  useState,
-  useRef,
-  useLayoutEffect,
-  useEffect,
-  useCallback,
-} from "react";
+import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { getCookie } from "../util/tokenHelpers";
 import request from "../util/axios-base-url";
+import connectSocket from "../util/connectSocket";
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(undefined);
@@ -22,13 +17,7 @@ const AuthProvider = ({ children }) => {
 
   const [showHover, setShowHover] = useState(undefined);
 
-  const toasterQueue = useRef([]);
-
   const [currentToaster, setCurrentToaster] = useState(null);
-
-  const currentToasterRef = useRef();
-
-  const toasterContainer = useRef();
 
   const [displayModal, setDisplayModal] = useState(undefined);
 
@@ -36,11 +25,19 @@ const AuthProvider = ({ children }) => {
 
   const [openedMenu, setOpenedMenu] = useState(false);
 
+  const toasterQueue = useRef([]);
+
+  const currentToasterRef = useRef();
+
+  const toasterContainer = useRef();
+
   const authTokenRef = useRef(getCookie(import.meta.env.VITE_AUTH_TOKEN));
 
   const hoverContainerRef = useRef();
 
   const modalContainerRef = useRef();
+
+  const socketRef = useRef();
 
   const showCurrentToaster = () => {
     if (toasterQueue.current.length > 0) {
@@ -113,31 +110,6 @@ const AuthProvider = ({ children }) => {
   }, [refetch]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        hoverContainerRef.current &&
-        !hoverContainerRef.current.contains(event.target)
-      ) {
-        setShowHover((prev) => {
-          if (prev) {
-            return undefined;
-          }
-        });
-      }
-    };
-
-    document.addEventListener("mousedown", (e) => {
-      handleClickOutside(e);
-    });
-
-    return () => {
-      document.removeEventListener("mousedown", (e) => {
-        handleClickOutside(e);
-      });
-    };
-  }, []);
-
-  useEffect(() => {
     const disabledScroll = (e) => {
       e.preventDefault();
     };
@@ -181,8 +153,40 @@ const AuthProvider = ({ children }) => {
   }, [cursorPosition]);
 
   useEffect(() => {
+    if (authTokenRef.current) {
+      socketRef.current = connectSocket();
+      console.log(5);
+      const handleSocketNotification = (message) => {
+        console.log("Received notification:", message);
+      };
+      socketRef.current.on("notification", handleSocketNotification);
+    }
+
+    return () => {
+      // If not connected, remove listeners
+      if (socketRef.current && !socketRef.current.connected) {
+        socketRef.current.off();
+      }
+
+      // If connected, disconnect
+      if (socketRef.current && socketRef.current.connected) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [authTokenRef.current]);
+
+  useEffect(() => {
     const handleClickOutside = (e) => {
       if (
+        hoverContainerRef.current &&
+        !hoverContainerRef.current.contains(e.target)
+      ) {
+        setShowHover((prev) => {
+          if (prev) {
+            return undefined;
+          }
+        });
+      } else if (
         modalContainerRef.current &&
         !modalContainerRef.current.contains(e.target)
       ) {
@@ -192,25 +196,43 @@ const AuthProvider = ({ children }) => {
 
     window.addEventListener("mousedown", handleClickOutside);
 
-    if (toasterContainer.current) {
-      toasterContainer.current.appenChild;
-    }
-
     return () => {
       window.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // useEffect(() => {
+  //   const handleClickOutside = (e) => {
+  //     if (
+  //       modalContainerRef.current &&
+  //       !modalContainerRef.current.contains(e.target)
+  //     ) {
+  //       setIsShowing(undefined);
+  //     }
+  //   };
+
+  //   window.addEventListener("mousedown", handleClickOutside);
+
+  //   if (toasterContainer.current) {
+  //     toasterContainer.current.appenChild;
+  //   }
+
+  //   return () => {
+  //     window.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
 
   return (
     <AuthContext.Provider
       value={{
         user,
         setUser,
+        authTokenRef,
+        socket: socketRef.current,
         isShowing,
         setIsShowing,
         openedMenu,
         setOpenedMenu,
-        setRefetch,
         showHover,
         setShowHover,
         handleCursorPositon,

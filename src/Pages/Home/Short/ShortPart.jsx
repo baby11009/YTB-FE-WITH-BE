@@ -8,7 +8,6 @@ import { useParams } from "react-router-dom";
 import request from "../../../util/axios-base-url";
 import CommentBox from "./CommentBox";
 import DetailsBox from "./DetailsBox";
-import { formatNumber } from "../../../util/numberFormat";
 
 const fetchingShortQtt = 2;
 
@@ -16,8 +15,6 @@ const ShortPart = () => {
   const { id } = useParams();
 
   const { setFetchingState, user, openedMenu } = useAuthContext();
-
-  const [refetchSingleShort, setRefetchSingleShort] = useState(false);
 
   const [isTop, setIsTop] = useState(true);
 
@@ -47,8 +44,6 @@ const ShortPart = () => {
   const containerRef = useRef();
 
   const listContainerRef = useRef();
-
-  const socketRef = useRef(null);
 
   const outSideAreaRef = useRef();
 
@@ -208,24 +203,12 @@ const ShortPart = () => {
 
     outSideAreaRef.current.addEventListener("click", handleClickOutsideArea);
 
-    socketRef.current = connectSocket();
-
     return () => {
       firtTimeRender.current = false;
 
       // Remove session-id key in redis to make watched data reset - should use this if doesn't have much data
 
       window.removeEventListener("beforeunload", removeRedisKey);
-
-      // If not connected, remove listeners
-      if (socketRef.current && !socketRef.current.connected) {
-        socketRef.current.off();
-      }
-
-      // If connected, disconnect
-      if (socketRef.current && socketRef.current.connected) {
-        socketRef.current.disconnect();
-      }
 
       document.removeEventListener("scroll", handleScrollEvent);
 
@@ -350,13 +333,9 @@ const ShortPart = () => {
                 setOpenedSideMenu("");
               }}
               shortData={shortList[currentShort]}
-              handleRefetch={() => {
-                setRefetchSingleShort(true);
-              }}
               handleUpdateShortData={(newShortData) => {
                 updateShortData(currentShort, newShortData);
               }}
-              socket={socketRef.current}
             />
           ) : (
             shortList.length > 0 &&

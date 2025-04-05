@@ -48,7 +48,7 @@ const CustomButton = ({ data }) => {
 };
 
 const AccountSetting = ({ opened, setOpened, boxRef }) => {
-  const { user, setUser } = useAuthContext();
+  const { user, setUser, authTokenRef } = useAuthContext();
 
   const navigate = useNavigate();
 
@@ -70,7 +70,8 @@ const AccountSetting = ({ opened, setOpened, boxRef }) => {
       icon: <LogOutIcon />,
       handleOnClick: () => {
         removeCookie(import.meta.env.VITE_AUTH_TOKEN);
-        setUser(undefined);
+        setUser(null);
+        authTokenRef.current = null;
         if (window.location.href !== "/") {
           navigate("/", { replace: true });
         }

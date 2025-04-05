@@ -17,9 +17,8 @@ const CommentBox = ({
   openedSideMenu,
   handleClose,
   handleUpdateShortData,
-  socket,
 }) => {
-  const { user } = useAuthContext();
+  const { user, socket } = useAuthContext();
 
   const queryClient = useQueryClient();
 
