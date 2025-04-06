@@ -63,6 +63,7 @@ const AuthProvider = ({ children }) => {
     await request
       .get("/user/user/me")
       .then((rsp) => {
+        console.log(rsp.data);
         setUser(rsp.data.data);
         setRefetch(false);
       })
@@ -155,7 +156,7 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (authTokenRef.current) {
       socketRef.current = connectSocket();
-      console.log(5);
+
       const handleSocketNotification = (message) => {
         console.log("Received notification:", message);
       };

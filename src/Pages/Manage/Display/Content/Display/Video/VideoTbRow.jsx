@@ -89,7 +89,7 @@ const VideoTbRow = ({ checked, data, handleChecked, showDeleteConfirm }) => {
               <button
                 className='size-[40px] rounded-[50%] hover:bg-black-0.1 active:bg-black-0.2 flex items-center justify-center'
                 onClick={() => {
-                  showDeleteConfirm(data.id);
+                  showDeleteConfirm(data._id);
                 }}
               >
                 <div className='text-white size-[24px]'>

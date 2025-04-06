@@ -11,7 +11,7 @@ import { CustomeFuncBox } from "../../Component";
 import { useState, useEffect, useRef } from "react";
 
 const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
-  const { user, setRefetch, addToaster } = useAuthContext();
+  const { user, addToaster } = useAuthContext();
 
   const [opened, setOpened] = useState(false);
 
@@ -32,7 +32,6 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
       })
       .then((rsp) => {
         refetch(rsp.data);
-        setRefetch(true);
       })
       .catch((err) => {
         console.error(err);
@@ -71,7 +70,6 @@ const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
       .delete(`/user/subscription/${channelId}`)
       .then((rsp) => {
         refetch(rsp.data);
-        setRefetch(true);
         setTriggerAnimation(true);
         setTimeout(() => {
           setTriggerAnimation(false);

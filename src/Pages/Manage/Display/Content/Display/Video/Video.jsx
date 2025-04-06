@@ -18,9 +18,7 @@ import VideoUpsertModal from "./VideoUpsertModal";
 import { getDataWithAuth } from "../../../../../../Api/getData";
 import { dltManyData, dltData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  getDisplayUsingValue,
-} from "../../../../../../util/func";
+import { getDisplayUsingValue } from "../../../../../../util/func";
 
 const initQueries = {
   limit: 10,
@@ -238,9 +236,9 @@ const Video = () => {
   const showDeleteConfirm = (id) => {
     const handleDelete = async () => {
       await dltData(
-        "/user/comment",
+        "/user/video",
         id,
-        "comment",
+        "video",
         () => {
           refetch();
         },
@@ -250,11 +248,12 @@ const Video = () => {
     };
 
     setIsShowing(
-      <DeleteConfirm handleDelete={handleDelete} type={"Comment"} data={id} />,
+      <DeleteConfirm handleDelete={handleDelete} type={"video"} data={id} />,
     );
   };
 
   const showDeleteManyConfirm = () => {
+    console.log(checkedList);
     const handleDeleteMany = async () => {
       await dltManyData(
         "/user/video/delete-many",
