@@ -182,7 +182,7 @@ const CommentSection = ({ videoData, videoUserId, updateVideoData, isEnd }) => {
 
     const deleteCmt = ({ type, data }) => {
       updateVideoData({
-        totalCmt: videoData.totalCmt - (1 + data.replied_cmt_total || 0),
+        totalCmt: videoData.totalCmt - (1 + data?.replied_cmt_total || 0),
       });
 
       if (type === "NORMAL") {

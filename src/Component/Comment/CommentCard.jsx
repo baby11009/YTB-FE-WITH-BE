@@ -70,6 +70,7 @@ const CommentCard = ({
           />,
         );
       },
+      renderCondition: user?._id === data.user_info._id,
     },
     {
       id: 2,
@@ -214,28 +215,26 @@ const CommentCard = ({
         )}
       </div>
 
-      {user?._id === data?.user_info?._id && (
-        <motion.button
-          className='size-[40px] rounded-[50%] flex items-center justify-center relative'
-          whileTap={{
-            backgroundColor: "rgba(255,255,255,0.2)",
-          }}
-          onClick={(e) => {
-            setOpened((prev) => !prev);
-            e.stopPropagation();
-          }}
-          ref={containerRef}
-        >
-          <Setting2Icon />
-          {opened && (
-            <CustomeFuncBox
-              style={"w-[156px] right-0 top-[100%]"}
-              setOpened={setOpened}
-              funcList1={funcList}
-            />
-          )}
-        </motion.button>
-      )}
+      {user &&
+        (user?._id === data?.user_info?._id || user?._id === videoUserId) && (
+          <button
+            className='size-[40px] rounded-[50%] flex items-center justify-center relative active:bg-black-0.2'
+            onClick={(e) => {
+              setOpened((prev) => !prev);
+              e.stopPropagation();
+            }}
+            ref={containerRef}
+          >
+            <Setting2Icon />
+            {opened && (
+              <CustomeFuncBox
+                style={"w-[156px] right-0 top-[100%]"}
+                setOpened={setOpened}
+                funcList1={funcList}
+              />
+            )}
+          </button>
+        )}
     </div>
   );
 };
