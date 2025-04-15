@@ -7,12 +7,12 @@ import {
   BellIcon,
   BackIcon,
 } from "../../Assets/Icons";
-import { MyChannel } from "../../Assets/Images";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import AccountSetting from "./AccountSetting";
 import NotificationBox from "./NotificationBox";
 import { Link } from "react-router-dom";
+import { useAuthContext } from "../../Auth Provider/authContext";
 
 const fakeHistory = [
   {
@@ -58,6 +58,8 @@ const fakeHistory = [
 ];
 
 const Header = ({ setOpenedMenu }) => {
+  const { notReadNotiCount } = useAuthContext();
+
   const searchRef = useRef();
 
   const inputRef = useRef();
@@ -160,8 +162,9 @@ const Header = ({ setOpenedMenu }) => {
               <input
                 type='text'
                 className=' bg-transparent flex-1 outline-none text-white w-full'
-                placeholder='Tìm kiếm'
+                placeholder='Searching'
                 value={inputValue}
+                autoComplete='off'
                 onChange={(e) => setInputValue(e.target.value)}
               />
               <div
@@ -279,12 +282,14 @@ const Header = ({ setOpenedMenu }) => {
         >
           <div title='Notification'>
             <BellIcon />
-            <span
-              className='absolute top-[5px] right-[-1px] bg-red-CC text-white text-[12px] px-[4px] 
-                rounded-[22px] border-transparent'
-            >
-              9+
-            </span>
+            {notReadNotiCount > 0 && (
+              <span
+                className='absolute top-[5px] right-[-1px] bg-red-CC text-white text-[12px] px-[4px] 
+                  rounded-[22px] border-transparent'
+              >
+                {notReadNotiCount}+
+              </span>
+            )}
           </div>
           {opened === "notify" && (
             <NotificationBox opened={opened} setOpened={setOpened} />

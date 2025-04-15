@@ -7,6 +7,8 @@ import connectSocket from "../util/connectSocket";
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(undefined);
 
+  const [notReadNotiCount, setNotReadNotiCount] = useState(0);
+
   const [isLoading, setIsLoading] = useState(true);
 
   const [fetchingState, setFetchingState] = useState("none");
@@ -61,7 +63,7 @@ const AuthProvider = ({ children }) => {
 
   const getUserInfo = async (token) => {
     await request
-      .get("/user/user/me")
+      .get("/user/me")
       .then((rsp) => {
         console.log(rsp.data);
         setUser(rsp.data.data);
@@ -159,22 +161,31 @@ const AuthProvider = ({ children }) => {
 
       const handleSocketNotification = (message) => {
         console.log("Received notification:", message);
+        setNotReadNotiCount((prev) => prev + 1);
       };
       socketRef.current.on("notification", handleSocketNotification);
+
+      return () => {
+        // If not connected, remove listeners
+        if (!socketRef.current.connected) {
+          socketRef.current.off();
+        }
+
+        // If connected, disconnect
+        if (socketRef.current.connected) {
+          socketRef.current.disconnect();
+        }
+      };
     }
-
-    return () => {
-      // If not connected, remove listeners
-      if (socketRef.current && !socketRef.current.connected) {
-        socketRef.current.off();
-      }
-
-      // If connected, disconnect
-      if (socketRef.current && socketRef.current.connected) {
-        socketRef.current.disconnect();
-      }
-    };
   }, [authTokenRef.current]);
+
+  useEffect(() => {
+    let count = 0;
+    if (user) {
+      count = user.notReadedNotiCount;
+    }
+    setNotReadNotiCount(count);
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -228,6 +239,8 @@ const AuthProvider = ({ children }) => {
       value={{
         user,
         setUser,
+        notReadNotiCount,
+        setNotReadNotiCount,
         authTokenRef,
         socket: socketRef.current,
         isShowing,
