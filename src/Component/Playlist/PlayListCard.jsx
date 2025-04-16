@@ -43,7 +43,7 @@ const PlayListCard = ({
               <img
                 src={`${import.meta.env.VITE_BASE_API_URI}${
                   import.meta.env.VITE_VIEW_THUMB_API
-                }${data?.video_list[0]?.thumb}`}
+                }${data?.video_list[0]?.thumb}?width=720&height=404`}
                 alt='thumb'
                 className='object-contain size-full rounded-[12px] relative z-[2]'
               />
@@ -52,7 +52,7 @@ const PlayListCard = ({
                 style={{
                   backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
                     import.meta.env.VITE_VIEW_THUMB_API
-                  }${data?.video_list[0]?.thumb}')`,
+                  }${data?.video_list[0]?.thumb}?height=404&quality=5')`,
                   filter: "blur(4px)",
                 }}
               ></div>

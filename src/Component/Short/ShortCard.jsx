@@ -49,13 +49,13 @@ const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle, noDesc }) => {
           style={{
             backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_THUMB_API
-            }${data?.thumb}')`,
+            }${data?.thumb}?height=720px&quality=5')`,
           }}
         ></div>
         <img
           src={`${import.meta.env.VITE_BASE_API_URI}${
             import.meta.env.VITE_VIEW_THUMB_API
-          }${data?.thumb}`}
+          }${data?.thumb}?width=405&heigth=720`}
           alt='short'
           className='size-full object-contain relative z-[2]'
         />

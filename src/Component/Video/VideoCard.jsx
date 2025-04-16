@@ -213,7 +213,7 @@ const VideoCard = ({
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_THUMB_API
-              }${data?.thumb}`}
+              }${data?.thumb}?width=720&height=404&format=webp`}
               alt='thumbnail'
               className='size-full object-contain z-[2] relative'
             />
@@ -222,7 +222,7 @@ const VideoCard = ({
               style={{
                 backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
                   import.meta.env.VITE_VIEW_THUMB_API
-                }${data?.thumb}')`,
+                }${data?.thumb}?format=webp&quality=30')`,
               }}
             ></div>
           </div>
@@ -267,7 +267,7 @@ const VideoCard = ({
           <img
             src={`${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_AVA_API
-            }${data?.channel_info?.avatar}`}
+            }${data?.channel_info?.avatar}?width=68&height=68&format=webp`}
             alt='avatar'
           />
         </div>
