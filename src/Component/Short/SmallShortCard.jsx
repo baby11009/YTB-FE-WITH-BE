@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   LaterIcon,
   PlayListIcon,
@@ -100,8 +100,10 @@ const SmallShortCard = ({ style, data }) => {
         setShowed(false);
       }}
     >
-      <div className='relative'>
-        <img src={data.thumb} alt='thumb' className='rounded-[8px]' />
+      <div className='relative '>
+        <div className='aspect-[9/16] rounded-[8px] overflow-hidden'>
+          <img src={data.thumb} alt='thumb' className='aspect-[9/16]' />
+        </div>
         <div
           className='absolute bottom-0 right-0 bg-[rgba(0,0,0,0.6)] text-white px-[4px] py-[1px] 
         mr-[4px] mb-[4px] text-[12px] leading-[18px] rounded-[4px]'
@@ -134,15 +136,12 @@ const SmallShortCard = ({ style, data }) => {
           </div>
         </div>
 
-        <motion.div
+        <div
           className='absolute w-[40px] h-[40px] rounded-[50%] right-0  
-          top-0 flex items-center justify-center'
-          whileTap={{
-            backgroundColor: "rgba(255,255,255,0.2)",
-          }}
+          top-0 flex items-center justify-center active:bg-black-0.2'
         >
           <Setting2Icon />
-        </motion.div>
+        </div>
       </div>
 
       {showed && (

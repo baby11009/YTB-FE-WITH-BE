@@ -7,10 +7,9 @@ import { ButtonHorizonSlider } from "../../../../../Component";
 
 const ChannelVideo = ({ channelEmail }) => {
   const init = {
-    channelEmail: channelEmail,
     limit: 12,
     page: 1,
-    type: "video",
+    search: { channelEmail, type: "video" },
     sort: { createdAt: -1 },
     clearCache: "video",
   };

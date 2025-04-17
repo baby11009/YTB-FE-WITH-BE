@@ -22,7 +22,7 @@ export { default as PlaylistCard } from "./Playlist/PlayListCard.jsx";
 export { default as PlaylistCard2 } from "./Playlist/PlaylistCard2.jsx";
 
 export { default as ShortCard } from "./Short/ShortCard.jsx";
-export { default as ShortVids } from "./Short/ShortVids.jsx";
+export { default as ShortRow } from "./Short/ShortRow.jsx";
 export { default as SmallShortCard } from "./Short/SmallShortCard.jsx";
 export { default as HorizonShorts } from "./Short/HorizonShorts.jsx";
 

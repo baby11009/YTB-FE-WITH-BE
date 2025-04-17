@@ -14,6 +14,7 @@ export default {
         "red-CC": "#CC0000",
         "red-FF": "#FF0000",
         "gray-71": "#717171",
+        "gray-170": "rgb(170,170,170)",
         "blue-3E": "#3EA6FF",
         "blue-26": "#263850",
         "black-0.1": "rgba(255,255,255,0.1)",

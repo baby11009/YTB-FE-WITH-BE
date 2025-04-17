@@ -97,7 +97,7 @@ const ChannelHome = ({ channelEmail }) => {
   const { data: playlistData } = getData(
     "/data/playlists",
     {
-      channelEmail: channelEmail,
+      channelEmail,
       clearCache: "playlist",
     },
     channelEmail ? true : false,
@@ -107,7 +107,9 @@ const ChannelHome = ({ channelEmail }) => {
   const { data: videosData } = getData(
     "/data/videos",
     {
-      channelEmail: channelEmail,
+      search: {
+        channelEmail,
+      },
       limit: 12,
       sort: { view: -1, createdAt: -1 },
       clearCache: "video",
@@ -206,6 +208,7 @@ const ChannelHome = ({ channelEmail }) => {
                 descStyle={"!hidden"}
                 imgStyle={"hidden"}
                 infoStyle={"text-[12px] leading-[18px]"}
+                thumbSize={"width=336&height=188"}
                 noFuncBox={true}
               />
             ))}
@@ -233,6 +236,7 @@ const ChannelHome = ({ channelEmail }) => {
                         width: 210 + "px",
                         paddingRight: "4px",
                       }}
+                      thumbSize={"width=336&height=188"}
                       thumbStyleInline={{
                         borderRadius: 8,
                       }}

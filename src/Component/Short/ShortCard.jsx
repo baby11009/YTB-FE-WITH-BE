@@ -1,36 +1,18 @@
 import { Link } from "react-router-dom";
 import { formatNumber } from "../../util/numberFormat";
 import { Setting2Icon, FeedBackIcon } from "../../Assets/Icons";
-import { motion } from "framer-motion";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
-import { useState, useEffect, useRef } from "react";
-
+import { useAuthContext } from "../../Auth Provider/authContext";
 const funcList1 = [
   {
     id: 1,
-    text: "Gửi ý kiến phản hồi",
+    text: "Send feedback",
     icon: <FeedBackIcon />,
   },
 ];
 
-const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle, noDesc }) => {
-  const [opened, setOpened] = useState(false);
-
-  const containRef = useRef();
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (containRef.current && !containRef.current.contains(event.target)) {
-        setOpened("");
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+const ShortCard = ({ data, containerStyle, imgStyle, noDesc }) => {
+  const { setShowHover, handleCursorPositon } = useAuthContext();
 
   return (
     <Link
@@ -41,7 +23,7 @@ const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle, noDesc }) => {
     >
       <div
         className={`rounded-[12px] overflow-hidden w-full relative ${
-          imgStyle ? imgStyle : "h-[387.55px]"
+          imgStyle ? imgStyle : "h-[468px]"
         }`}
       >
         <div
@@ -49,7 +31,7 @@ const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle, noDesc }) => {
           style={{
             backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_THUMB_API
-            }${data?.thumb}?height=720px&quality=5')`,
+            }${data?.thumb}?width=405&heigth=720&fit=cover')`,
           }}
         ></div>
         <img
@@ -72,30 +54,33 @@ const ShortCard = ({ data, containerStyle, funcBoxPos, imgStyle, noDesc }) => {
               {formatNumber(data.view)} views
             </div>
           </div>
-          <motion.div
-            className='w-[24px] h-[24px] rounded-[50%] relative'
+          <button
+            className='size-[40px] active:bg-black-0.2 rounded-[50%] p-[8px]'
             onClick={(e) => {
-              e.stopPropagation();
               e.preventDefault();
-              setOpened(true);
-            }}
-            whileTap={{
-              backgroundColor: "rgba(255,255,255,0.2)",
-            }}
-            ref={containRef}
-          >
-            <Setting2Icon />
+              e.stopPropagation();
 
-            {opened && (
-              <CustomeFuncBox
-                style={`w-[210px] top-[100%] right-[20%] ${
-                  funcBoxPos ? funcBoxPos : "sm:left-[-20%]"
-                } `}
-                setOpened={setOpened}
-                funcList1={funcList1}
-              />
-            )}
-          </motion.div>
+              setShowHover((prev) => {
+                if (prev) return undefined;
+                handleCursorPositon(e);
+                return (
+                  <CustomeFuncBox
+                    style={`w-[210px] top-[100%] right-[20%] ${
+                      false ? "" : "sm:left-[-20%]"
+                    } `}
+                    setOpened={() => {
+                      setShowHover(undefined);
+                    }}
+                    funcList1={funcList1}
+                  />
+                );
+              });
+            }}
+          >
+            <div className='w-[24px] h-[24px]  '>
+              <Setting2Icon />
+            </div>
+          </button>
         </div>
       )}
     </Link>

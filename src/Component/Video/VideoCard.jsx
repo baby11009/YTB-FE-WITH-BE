@@ -20,7 +20,6 @@ import { CustomeFuncBox } from "..";
 import { timeFormat2 } from "../../util/timeforMat";
 import { formatNumber } from "../../util/numberFormat";
 import { durationCalc } from "../../util/durationCalc";
-import { getRandomHexColor } from "../../util/func";
 import { useAuthContext } from "../../Auth Provider/authContext";
 import PlaylistModal from "../Modal/PlaylistModal";
 import request from "../../util/axios-base-url";
@@ -112,6 +111,7 @@ const VideoCard = ({
   titleStyle,
   descStyle,
   thumbStyle,
+  thumbSize,
   thumbStyleInline,
   imgStyle,
   noFunc2,
@@ -119,8 +119,6 @@ const VideoCard = ({
 }) => {
   const { setShowHover, handleCursorPositon, setIsShowing, user, addToaster } =
     useAuthContext();
-
-  const bgColorRef = useRef(getRandomHexColor());
 
   const navigate = useNavigate();
 
@@ -209,11 +207,13 @@ const VideoCard = ({
           } `}
           style={thumbStyleInline}
         >
-          <div className={`aspect-video relative`}>
+          <div className='aspect-video relative'>
             <img
               src={`${import.meta.env.VITE_BASE_API_URI}${
                 import.meta.env.VITE_VIEW_THUMB_API
-              }${data?.thumb}?width=720&height=404&format=webp`}
+              }${data?.thumb}?${
+                thumbSize ? thumbSize : "width=720&height=404"
+              }&format=webp`}
               alt='thumbnail'
               className='size-full object-contain z-[2] relative'
             />
@@ -222,7 +222,9 @@ const VideoCard = ({
               style={{
                 backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
                   import.meta.env.VITE_VIEW_THUMB_API
-                }${data?.thumb}?format=webp&quality=30')`,
+                }${data?.thumb}?${
+                  thumbSize ? thumbSize : "width=720&height=404"
+                }&fit=cover')`,
               }}
             ></div>
           </div>
@@ -267,7 +269,7 @@ const VideoCard = ({
           <img
             src={`${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_AVA_API
-            }${data?.channel_info?.avatar}?width=68&height=68&format=webp`}
+            }${data?.channel_info?.avatar}?width=68&height=68`}
             alt='avatar'
           />
         </div>

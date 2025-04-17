@@ -7,15 +7,13 @@ import {
   BlockIcon,
 } from "../../Assets/Icons";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
-import { getRandomHexColor } from "../../util/func";
-import { useRef } from "react";
 import { formatNumber } from "../../util/numberFormat";
 import { timeFormat2 } from "../../util/timeforMat";
 import { useAuthContext } from "../../Auth Provider/authContext";
 
 const PlaylistCard2 = ({ data, containerStyle, l3Color, l2Color }) => {
   const { setShowHover, handleCursorPositon } = useAuthContext();
-  const bgColorRef = useRef(getRandomHexColor());
+
   return (
     <Link
       to={`/video?id=${data?.video_list[0]?._id}&list=${data?._id}`}
@@ -27,20 +25,28 @@ const PlaylistCard2 = ({ data, containerStyle, l3Color, l2Color }) => {
     >
       <div className={`${containerStyle} flex`}>
         <div className={`relative h-full aspect-video mr-[8px]`}>
-          <div
-            className='w-full h-full bg-black-0.1 relative rounded-[12px] z-[3]'
-            style={{
-              backgroundColor: bgColorRef.current,
-            }}
-          >
+          <div className='w-full h-full bg-black-0.1 relative rounded-[12px] z-[3]'>
             {data?.size > 0 && (
-              <img
-                src={`${import.meta.env.VITE_BASE_API_URI}${
-                  import.meta.env.VITE_VIEW_THUMB_API
-                }${data?.video_list[0]?.thumb}`}
-                alt='thumb'
-                className='object-contain w-full h-full rounded-[12px] '
-              />
+              <div className='aspect-video bg-black relative rounded-[12px] z-[3]'>
+                <img
+                  src={`${import.meta.env.VITE_BASE_API_URI}${
+                    import.meta.env.VITE_VIEW_THUMB_API
+                  }${data?.video_list[0]?.thumb}?width=336&height=188`}
+                  alt='thumb'
+                  className='object-contain size-full rounded-[12px] relative z-[2]'
+                />
+                <div
+                  className='absolute inset-0 z-[1] bg-no-repeat bg-cover bg-center rounded-[12px]'
+                  style={{
+                    backgroundImage: `url('${
+                      import.meta.env.VITE_BASE_API_URI
+                    }${import.meta.env.VITE_VIEW_THUMB_API}${
+                      data?.video_list[0]?.thumb
+                    }?width=336&height=188&fit=cover')`,
+                    filter: "blur(4px)",
+                  }}
+                ></div>
+              </div>
             )}
           </div>
 
@@ -125,8 +131,8 @@ const PlaylistCard2 = ({ data, containerStyle, l3Color, l2Color }) => {
               e.preventDefault();
               e.stopPropagation();
               setShowHover((prev) => {
-                if (prev) return undefined;
                 handleCursorPositon(e);
+                if (prev) return undefined;
                 return (
                   <CustomeFuncBox
                     funcList1={[

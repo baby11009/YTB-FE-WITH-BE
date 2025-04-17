@@ -1,11 +1,10 @@
 import { useState, useEffect, useMemo, Fragment } from "react";
-import ShortVids from "../Short/ShortVids";
+import ShortRow from "../Short/ShortRow";
 import CardRow from "../Video/CardRow";
 import { chunkArray } from "../../util/func";
 
 const GridLayout = ({ openedMenu, vidList, shortList }) => {
   const [showShortQtt, setShowShortQtt] = useState(1);
-
   const [showCardQtt, setShowCardQtt] = useState(1);
 
   const [renderRows, setRenderRows] = useState([]);
@@ -48,8 +47,9 @@ const GridLayout = ({ openedMenu, vidList, shortList }) => {
     () => chunkArray(vidList, showCardQtt * 2),
     [showCardQtt, vidList],
   );
+
   const shortRows = useMemo(
-    () => chunkArray(shortList, showShortQtt * 2),
+    () => chunkArray(shortList, showShortQtt),
     [showShortQtt, shortList],
   );
 
@@ -75,7 +75,7 @@ const GridLayout = ({ openedMenu, vidList, shortList }) => {
             <CardRow vidList={videoRows[row]} />
           </div>
           {shortRows[row] && (
-            <ShortVids showQtt={showShortQtt} shortList={shortRows[row]} />
+            <ShortRow showQtt={showShortQtt} shortList={shortRows[row]} />
           )}
         </Fragment>
       ))}

@@ -736,7 +736,7 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
             draggable={false}
             src={`${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_THUMB_API
-            }${data?.thumb}`}
+            }${data?.thumb}?width=1280&height=720`}
             alt='thumbnail'
             className='size-full object-contain object-center'
           />

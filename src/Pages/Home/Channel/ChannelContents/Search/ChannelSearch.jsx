@@ -6,7 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "react-router-dom";
 
 const init = {
-  limit: 12,
+  limit: 3,
   page: 1,
   sort: { view: -1, createdAt: -1 },
   clearCache: "search",
@@ -27,14 +27,15 @@ const ChannelSearch = () => {
 
   const [dataList, setDataList] = useState([]);
 
+  const [isEnd, setIsEnd] = useState(false);
+
   const { data, isLoading, isSuccess } = getData(
-    "/data/all",
+    `/data/all/${id}`,
     query,
     query ? true : false,
     false,
   );
-
-  const [isEnd, setIsEnd] = useState(false);
+  console.log("🚀 ~ data:", data);
 
   useLayoutEffect(() => {
     if (id) {
@@ -47,41 +48,43 @@ const ChannelSearch = () => {
       new URLSearchParams(location.search),
     );
 
-    setQuery({ ...initQuery.current, search: searchQuery.title });
+    setQuery({ ...initQuery.current, title: searchQuery.title });
     addNew.current = true;
   }, [location.search]);
 
-  useLayoutEffect(() => {
-    if (data && addNew.current) {
-      setDataList([...data.data]);
-      addNew.current = false;
-    } else if (data) {
-      setDataList((prev) => [...prev, ...data.data]);
-    }
-  }, [data]);
+  // useLayoutEffect(() => {
+  //   if (data && addNew.current) {
+  //     setDataList([...data.data]);
+  //     addNew.current = false;
+  //     setIsEnd(false);
+  //   } else if (data) {
+  //     setDataList((prev) => [...prev, ...data.data]);
+  //     setIsEnd(false);
+  //   }
+  // }, [data]);
 
-  useEffect(() => {
-    const handleOnScroll = () => {
-      IsEnd(setIsEnd);
-    };
+  // useEffect(() => {
+  //   const handleOnScroll = () => {
+  //     IsEnd(setIsEnd);
+  //   };
 
-    window.addEventListener("scroll", handleOnScroll);
+  //   window.addEventListener("scroll", handleOnScroll);
 
-    return () => {
-      window.removeEventListener("scroll", handleOnScroll);
-      queryClient.clear();
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("scroll", handleOnScroll);
+  //     queryClient.clear();
+  //   };
+  // }, []);
 
-  useEffect(() => {
-    if (isEnd && data && data.data.length > 0) {
-      setQuery((prev) => ({ ...prev, page: prev.page + 1 }));
-    }
-  }, [isEnd, data]);
+  // useEffect(() => {
+  //   if (isEnd && !isLoading) {
+  //     setQuery((prev) => ({ ...prev, page: prev.page + 1 }));
+  //   }
+  // }, [isEnd, isLoading]);
 
   return (
     <div>
-      {dataList.length > 0 &&
+      {/* {dataList.length > 0 &&
         dataList.map((data, index) => (
           <div
             className='py-[24px] border-b-[1px] border-black-0.2 overflow-hidden mr-[-32px] xsm:mr-0'
@@ -111,7 +114,7 @@ const ChannelSearch = () => {
         border-b-[transparent] border-l-[transparent] animate-spin'
           ></div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

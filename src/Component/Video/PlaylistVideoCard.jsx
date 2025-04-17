@@ -10,8 +10,7 @@ import {
 } from "../../Assets/Icons";
 import { useAuthContext } from "../../Auth Provider/authContext";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
-import { useCallback, useRef } from "react";
-import { getRandomHexColor } from "../../util/func";
+import { useCallback } from "react";
 import request from "../../util/axios-base-url";
 import { Link } from "react-router-dom";
 import PlaylistModal from "../Modal/PlaylistModal";
@@ -29,8 +28,6 @@ const PlaylistVideoCard = ({
 }) => {
   const { handleCursorPositon, setShowHover, addToaster, setIsShowing } =
     useAuthContext();
-
-  const bgColor = useRef(getRandomHexColor());
 
   const handleSaveToPlaylist = useCallback(() => {
     setIsShowing(<PlaylistModal videoId={data?._id} />);
@@ -161,16 +158,23 @@ const PlaylistVideoCard = ({
         <div
           className={`${
             imgStyle ? imgStyle : "h-full"
-          } aspect-video rounded-[8px] overflow-hidden`}
-          style={{ backgroundColor: bgColor.current }}
+          } aspect-video rounded-[8px] overflow-hidden relative`}
         >
           <img
             src={`${import.meta.env.VITE_BASE_API_URI}${
               import.meta.env.VITE_VIEW_THUMB_API
-            }${data?.thumb}`}
-            alt={`thumbnail-${data?._id}`}
-            className='size-full object-contain object-center'
+            }${data?.thumb}?width=336&height=188&format=webp`}
+            alt='thumbnail'
+            className='size-full object-contain z-[2] relative'
           />
+          <div
+            className='absolute inset-0 z-[1] bg-no-repeat bg-cover bg-center  blur-[8px] '
+            style={{
+              backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.thumb}?width=336&height=188&fit=cover')`,
+            }}
+          ></div>
         </div>
         <div className='px-[8px] flex-1'>
           <div

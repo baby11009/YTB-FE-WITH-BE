@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 const ChannelPlaylist = ({ channelEmail }) => {
   const queryClient = useQueryClient();
 
-  const [params, setParams] = useState({
+  const [queries, setQueries] = useState({
     limit: 12,
     page: 1,
     sort: { createdAt: -1 },
@@ -20,7 +20,7 @@ const ChannelPlaylist = ({ channelEmail }) => {
 
   const { data: playlistData, isLoading } = getData(
     "/data/playlists",
-    params,
+    queries,
     true,
   );
 
@@ -34,7 +34,7 @@ const ChannelPlaylist = ({ channelEmail }) => {
 
   const handleFuncClick = (data) => {
     setCurrentIndex(data.id);
-    setParams((prev) => ({ ...prev, sort: data.sort }));
+    setQueries((prev) => ({ ...prev, sort: data.sort }));
   };
 
   const funcList = [
@@ -79,8 +79,8 @@ const ChannelPlaylist = ({ channelEmail }) => {
   }, []);
 
   useEffect(() => {
-    if (isEnd && playlistData && playlistData.totalPage > params.page) {
-      setParams((prev) => ({ ...prev, page: prev.page + 1 }));
+    if (isEnd && playlistData && playlistData.totalPage > queries.page) {
+      setQueries((prev) => ({ ...prev, page: prev.page + 1 }));
       setAddNew(false);
     }
   }, [isEnd]);

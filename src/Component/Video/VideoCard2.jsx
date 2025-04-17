@@ -4,8 +4,6 @@ import { timeFormat } from "../../util/timeforMat";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
 import { durationCalc } from "../../util/durationCalc";
 import { Setting2Icon } from "../../Assets/Icons";
-import { useRef } from "react";
-import { getRandomHexColor } from "../../util/func";
 import { useAuthContext } from "../../Auth Provider/authContext";
 
 const VideoCard2 = ({
@@ -17,9 +15,6 @@ const VideoCard2 = ({
   playlistId,
   containerStyle,
 }) => {
-
-  const bgColor = useRef(getRandomHexColor());
-
   const { setShowHover, handleCursorPositon } = useAuthContext();
 
   return (
@@ -33,18 +28,24 @@ const VideoCard2 = ({
           : `/video?id=${data?._id}`
       }
     >
-      <div
-        className='h-full aspect-video rounded-[12px] overflow-hidden mr-[8px] relative'
-        style={{ backgroundColor: bgColor.current }}
-      >
-        <img
-          src={`${import.meta.env.VITE_BASE_API_URI}${
-            import.meta.env.VITE_VIEW_THUMB_API
-          }${data?.thumb}`}
-          alt=''
-          draggable={false}
-          className='object-contain w-full h-full'
-        />
+      <div className='h-full aspect-video rounded-[12px] overflow-hidden mr-[8px] relative '>
+        <div className='aspect-video relative'>
+          <img
+            src={`${import.meta.env.VITE_BASE_API_URI}${
+              import.meta.env.VITE_VIEW_THUMB_API
+            }${data?.thumb}?width=336&height=188&format=webp`}
+            alt='thumbnail'
+            className='size-full object-contain z-[2] relative'
+          />
+          <div
+            className='absolute inset-0 z-[1] bg-no-repeat bg-cover bg-center  blur-[8px] '
+            style={{
+              backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
+                import.meta.env.VITE_VIEW_THUMB_API
+              }${data?.thumb}?width=336&height=188&fit=cover')`,
+            }}
+          ></div>
+        </div>
         {/* duration */}
 
         <div

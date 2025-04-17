@@ -2,21 +2,21 @@ import { createContext, useContext } from "react";
 
 export const AuthContext = createContext({
   user: undefined,
-  setUser: Function,
-  notReadNotiCount: Number,
-  setNotReadNotiCount: Function,
+  setUser: () => {},
+  notReadNotiCount: 0,
+  setNotReadNotiCount: () => {},
   authTokenRef: undefined,
   socket: undefined,
   isShowing: undefined,
-  setIsShowing: Function,
+  setIsShowing: () => {},
   openedMenu: false,
-  setOpenedMenu: Function,
-  setShowHover: Function,
-  handleCursorPositon: Function,
+  setOpenedMenu: () => {},
+  setShowHover: () => {},
+  handleCursorPositon: () => {},
   modalContainerRef: undefined,
   fetchingState: undefined,
-  setFetchingState: Function,
-  addToaster: Function,
+  setFetchingState: () => {},
+  addToaster: () => {},
 });
 
 export const useAuthContext = () => useContext(AuthContext);

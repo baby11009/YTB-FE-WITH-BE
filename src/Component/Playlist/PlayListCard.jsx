@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from "react";
 import {
   PlayIcon,
   PlayListIcon,
@@ -10,7 +9,6 @@ import { formatNumber } from "../../util/numberFormat";
 import { timeFormat2 } from "../../util/timeforMat";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
 import { useParams } from "react-router-dom";
-import { getRandomHexColor } from "../../util/func";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "../../Auth Provider/authContext";
 
@@ -52,7 +50,9 @@ const PlayListCard = ({
                 style={{
                   backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
                     import.meta.env.VITE_VIEW_THUMB_API
-                  }${data?.video_list[0]?.thumb}?height=404&quality=5')`,
+                  }${
+                    data?.video_list[0]?.thumb
+                  }?width=720&height=404&fit=cover')`,
                   filter: "blur(4px)",
                 }}
               ></div>
@@ -142,6 +142,7 @@ const PlayListCard = ({
               setShowHover((prev) => {
                 if (prev) return undefined;
                 handleCursorPositon(e);
+
                 return (
                   <CustomeFuncBox
                     funcList1={[
