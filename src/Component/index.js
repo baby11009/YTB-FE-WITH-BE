@@ -20,6 +20,7 @@ export { default as CardRow2 } from "./Video/CardRow2.jsx";
 
 export { default as PlaylistCard } from "./Playlist/PlayListCard.jsx";
 export { default as PlaylistCard2 } from "./Playlist/PlaylistCard2.jsx";
+export { default as PlaylistCard3 } from "./Playlist/PlaylistCard3.jsx";
 
 export { default as ShortCard } from "./Short/ShortCard.jsx";
 export { default as ShortRow } from "./Short/ShortRow.jsx";

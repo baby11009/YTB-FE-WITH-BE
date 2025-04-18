@@ -15,7 +15,7 @@ import {
   useLayoutEffect,
   useCallback,
 } from "react";
-import { getDataWithAuth } from "../../../../../../Api/getData";
+import { getData } from "../../../../../../Api/getData";
 import { createData, updateData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
 import Hls from "hls.js";
@@ -69,7 +69,7 @@ const ShortUpsertModal = ({ title, id }) => {
     message: [],
   });
 
-  const { data: shortData, refetch } = getDataWithAuth(
+  const { data: shortData, refetch } = getData(
     `/user/video/${id}`,
     {},
     id !== undefined,
@@ -81,7 +81,7 @@ const ShortUpsertModal = ({ title, id }) => {
     error: tagErr,
     isLoading: tagIsLoading,
     isError: tagIsErr,
-  } = getDataWithAuth("tag", tagParams, openedTags, false);
+  } = getData("tag", tagParams, openedTags, false);
 
   const handleOnChange = useCallback((name, value) => {
     setFormData((prev) => ({

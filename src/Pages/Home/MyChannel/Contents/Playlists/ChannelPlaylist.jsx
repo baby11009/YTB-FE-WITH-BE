@@ -3,8 +3,7 @@ import { IsEnd } from "../../../../../util/scrollPosition";
 import { CustomeFuncBox, PlaylistCard } from "../../../../../Component";
 import { SortIcon } from "../../../../../Assets/Icons";
 import { motion } from "framer-motion";
-import { getDataWithAuth } from "../../../../../Api/getData";
-import { useQueryClient } from "@tanstack/react-query";
+import { getData } from "../../../../../Api/getData";
 
 const ChannelPlaylist = () => {
   const [params, setParams] = useState({
@@ -15,7 +14,7 @@ const ChannelPlaylist = () => {
     clearCache: "playlist",
   });
 
-  const { data: playlistData, isLoading } = getDataWithAuth(
+  const { data: playlistData, isLoading } = getData(
     "/user/playlist",
     params,
     true,

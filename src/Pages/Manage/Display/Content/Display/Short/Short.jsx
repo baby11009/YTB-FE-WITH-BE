@@ -15,7 +15,7 @@ import {
 import ShortTbRow from "./ShortTbRow";
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import ShortUpsertModal from "./ShortUpsertModal";
-import { getDataWithAuth } from "../../../../../../Api/getData";
+import { getData } from "../../../../../../Api/getData";
 import { dltManyData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -53,7 +53,7 @@ const Short = () => {
 
   const tableHeader = useRef();
 
-  const { data, refetch } = getDataWithAuth(
+  const { data, refetch } = getData(
     "/user/video",
     queriese,
     true,

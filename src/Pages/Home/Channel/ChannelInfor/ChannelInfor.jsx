@@ -133,7 +133,14 @@ const ChannelInfor = ({ channelEmail, feature }) => {
       const query = new URLSearchParams({
         title: inputRef.current.value,
       }).toString();
-      navigate(location.pathname.replace(currFeature, "search") + "?" + query);
+      console.log(currFeature);
+      if (currFeature) {
+        navigate(
+          location.pathname.replace(currFeature, "search") + "?" + query,
+        );
+      } else {
+        navigate(location.pathname + "/search" + "?" + query);
+      }
     }
   };
 
@@ -211,15 +218,17 @@ const ChannelInfor = ({ channelEmail, feature }) => {
           <div className='flex-1 text-[12px] leading-[16px] lg:text-[14px] lg:leading-[20px] text-gray-A '>
             {channelData && (
               <>
-                <div className=' break-all'>
+                <div className='flex items-center'>
                   <span className='text-[24px] leading-[32px] sm:text-[36px] sm:leading-[50px] font-bold text-white-F1'>
                     {channelData?.name}
                   </span>
-                  <span>
-                    <Verification size={"14"} />
-                  </span>
+                  <div className='ml-[8px] w-[14px] inline-block '>
+                    <Verification />
+                  </div>
                   {channelData?.subscriber > 100000 && (
-                    <Verification size={"14"} />
+                    <div className='ml-[8px] w-[14px] inline-block text-white '>
+                      <Verification />
+                    </div>
                   )}
                 </div>
                 <div className='flex items-center flex-wrap '>

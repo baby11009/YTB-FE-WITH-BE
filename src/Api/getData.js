@@ -14,32 +14,35 @@ export const getData = (
 
   const { addToaster } = useAuthContext();
 
-  const paramsValue = [...Object.values(params)];
-  const paramsKey = [...Object.keys(params)];
+  const paramsEntries = [...Object.entries(params)];
 
-  let finalParams = {};
+  const queryFnParams = {};
 
-  if (paramsKey.length > 0) {
-    const notParamsResetKeys = paramsKey.filter(
-      (key) => key !== "refetch" && key !== "clearCache" && key !== "reset",
-    );
+  const queryKeyValue = [path];
 
-    if (paramsKey.length !== notParamsResetKeys.length) {
-      notParamsResetKeys.forEach((key) => {
-        finalParams[key] = params[key];
-      });
-    } else {
-      finalParams = params;
+  if (paramsEntries.length > 0) {
+    const resetKeys = ["clearCache", "reset"];
+
+    const notResetKeys = [""];
+
+    for (const [key, value] of paramsEntries) {
+      if (!resetKeys.includes(key)) {
+        queryFnParams[key] = value;
+      }
+
+      if (!notResetKeys.includes(key)) {
+        queryKeyValue.push(value);
+      }
     }
   }
 
   return useQuery({
-    queryKey: [...paramsValue, path],
+    queryKey: [...queryKeyValue],
     queryFn: async () => {
       try {
         const res = await request.get(path, {
           params: {
-            ...finalParams,
+            ...queryFnParams,
           },
         });
         return res.data;
@@ -49,72 +52,15 @@ export const getData = (
         if (addToaster) {
           addToaster(
             error.response.data?.message ||
-              error.response?.data ||
+              error.response?.data.msg ||
               error.message,
           );
         }
-        throw error;
+        // throw error;
       }
     },
     refetchOnWindowFocus: false,
     enabled: condition,
     suspense,
-  });
-};
-
-export const getDataWithAuth = (
-  path,
-  params = {},
-  condition = true,
-  suspense = true,
-) => {
-  if (!path) {
-    return null;
-  }
-
-  const { addToaster } = useAuthContext();
-
-  const paramsValue = [...Object.values(params)];
-
-  const paramsKey = [...Object.keys(params)];
-
-  let finalParams = {};
-
-  if (paramsKey.length > 0) {
-    const notParamsResetKeys = paramsKey.filter(
-      (key) => key !== "refetch" && key !== "clearCache" && key !== "reset",
-    );
-
-    if (paramsKey.length !== notParamsResetKeys.length) {
-      notParamsResetKeys.forEach((key) => {
-        finalParams[key] = params[key];
-      });
-    } else {
-      finalParams = params;
-    }
-  }
-
-  return useQuery({
-    queryKey: [...paramsValue, path],
-    queryFn: async () => {
-      try {
-        const res = await request.get(path, {
-          params: {
-            ...finalParams,
-          },
-        });
-
-        return res.data;
-      } catch (error) {
-        console.error(error);
-        addToaster(
-          error.response?.data?.msg || error.response?.data || error.message,
-        );
-        throw error;
-      }
-    },
-    refetchOnWindowFocus: false,
-    enabled: condition,
-    suspense: suspense,
   });
 };

@@ -15,7 +15,7 @@ import {
 import VideoTbRow from "./VideoTbRow";
 import { useAuthContext } from "../../../../../../Auth Provider/authContext";
 import VideoUpsertModal from "./VideoUpsertModal";
-import { getDataWithAuth } from "../../../../../../Api/getData";
+import { getData } from "../../../../../../Api/getData";
 import { dltManyData, dltData } from "../../../../../../Api/controller";
 import { useQueryClient } from "@tanstack/react-query";
 import { getDisplayUsingValue } from "../../../../../../util/func";
@@ -50,7 +50,7 @@ const Video = () => {
 
   const tableHeader = useRef();
 
-  const { data, refetch } = getDataWithAuth(
+  const { data, refetch } = getData(
     "/user/video",
     queries,
     true,

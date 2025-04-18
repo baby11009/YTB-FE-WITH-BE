@@ -303,22 +303,23 @@ const VideoCard = ({
             className={` text-gray-A ${
               infoStyle ||
               "text-[12px] leading-[18px] sm:text-[14px] sm:leading-[20px]"
-            }`}
+            } flex flex-wrap`}
           >
             <div className='flex items-center gap-[4px] mr-[8px]'>
-              <div
-                title={data?.channel_info?.name}
+              <Link
+                title={data.channel_info.name}
+                to={`/channel/${data.channel_info.email}`}
                 className='hover:text-white-F1'
               >
                 {data?.channel_info?.name}
-              </div>
+              </Link>
 
-              <div>
-                <Verification size={"14"} />
+              <div className='w-[14px]'>
+                <Verification />
               </div>
             </div>
 
-            <div className='flex flex-wrap items-center'>
+            <div>
               <span>{formatNumber(data?.view)} lượt xem</span>
               <span
                 className={`${

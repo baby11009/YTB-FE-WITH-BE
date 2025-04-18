@@ -16,3 +16,4 @@ export const formatNumber = (number = 0) => {
 export const formatNumber2 = (number) => {
   return new Intl.NumberFormat("en-US").format(number);
 };
+

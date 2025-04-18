@@ -23,6 +23,7 @@ const ChannelPlaylist = ({ channelEmail }) => {
     queries,
     true,
   );
+  console.log("🚀 ~ playlistData:", playlistData);
 
   const [dataList, setDataList] = useState([]);
 

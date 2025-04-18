@@ -1,4 +1,4 @@
-import { VideoCard } from "../../../../../Component";
+import { VideoCard, PlaylistCard3 } from "../../../../../Component";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { IsEnd } from "../../../../../util/scrollPosition";
 import { getData } from "../../../../../Api/getData";
@@ -6,9 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocation, useParams } from "react-router-dom";
 
 const init = {
-  limit: 3,
-  page: 1,
-  sort: { view: -1, createdAt: -1 },
+  limit: 12,
   clearCache: "search",
 };
 
@@ -29,13 +27,14 @@ const ChannelSearch = () => {
 
   const [isEnd, setIsEnd] = useState(false);
 
+  const nextCursors = useRef();
+
   const { data, isLoading, isSuccess } = getData(
     `/data/all/${id}`,
     query,
     query ? true : false,
     false,
   );
-  console.log("🚀 ~ data:", data);
 
   useLayoutEffect(() => {
     if (id) {
@@ -52,53 +51,62 @@ const ChannelSearch = () => {
     addNew.current = true;
   }, [location.search]);
 
-  // useLayoutEffect(() => {
-  //   if (data && addNew.current) {
-  //     setDataList([...data.data]);
-  //     addNew.current = false;
-  //     setIsEnd(false);
-  //   } else if (data) {
-  //     setDataList((prev) => [...prev, ...data.data]);
-  //     setIsEnd(false);
-  //   }
-  // }, [data]);
+  useLayoutEffect(() => {
+    if (data) {
+      if (addNew.current) {
+        setDataList([...data.data]);
+        addNew.current = false;
+      } else {
+        setDataList((prev) => [...prev, ...data.data]);
+      }
+      setIsEnd(false);
+      nextCursors.current = data.cursors;
+    }
+  }, [data]);
 
-  // useEffect(() => {
-  //   const handleOnScroll = () => {
-  //     IsEnd(setIsEnd);
-  //   };
+  useEffect(() => {
+    const handleOnScroll = () => {
+      IsEnd(setIsEnd);
+    };
 
-  //   window.addEventListener("scroll", handleOnScroll);
+    window.addEventListener("scroll", handleOnScroll);
 
-  //   return () => {
-  //     window.removeEventListener("scroll", handleOnScroll);
-  //     queryClient.clear();
-  //   };
-  // }, []);
+    return () => {
+      window.removeEventListener("scroll", handleOnScroll);
+      queryClient.clear();
+    };
+  }, []);
 
-  // useEffect(() => {
-  //   if (isEnd && !isLoading) {
-  //     setQuery((prev) => ({ ...prev, page: prev.page + 1 }));
-  //   }
-  // }, [isEnd, isLoading]);
+  useEffect(() => {
+    if (isEnd && !isLoading && nextCursors.current) {
+      setQuery((prev) => ({ ...prev, cursors: nextCursors.current }));
+    }
+  }, [isEnd, isLoading]);
 
   return (
     <div>
-      {/* {dataList.length > 0 &&
+      {dataList.length > 0 &&
         dataList.map((data, index) => (
           <div
             className='py-[24px] border-b-[1px] border-black-0.2 overflow-hidden mr-[-32px] xsm:mr-0'
-            key={index}
+            key={data._id}
           >
-            <VideoCard
-              data={data}
-              showBtn={true}
-              noFunc2={true}
-              style={"flex gap-[16px] mx-0 mb-0"}
-              thumbStyle={"w-[246px] h-[138px] mb-0 rounded-[8px]"}
-              titleStyle={"text-[18px] leading-[26px] font-[400] max-h-[56px]"}
-              infoStyle={"flex text-[12px] leading-[18px]"}
-            />
+            {data.type ? (
+              <VideoCard
+                data={data}
+                showBtn={true}
+                noFunc2={true}
+                style={"flex gap-[16px] mx-0 mb-0"}
+                thumbStyle={"w-[246px] h-[138px] mb-0 rounded-[8px]"}
+                imgStyle={'hidden'}
+                titleStyle={
+                  "text-[18px] leading-[26px] font-[400] max-h-[56px]"
+                }
+                infoStyle={"flex text-[12px] leading-[18px]"}
+              />
+            ) : (
+              <PlaylistCard3 data={data} />
+            )}
           </div>
         ))}
       {isSuccess && dataList.length < 1 && (
@@ -114,7 +122,7 @@ const ChannelSearch = () => {
         border-b-[transparent] border-l-[transparent] animate-spin'
           ></div>
         </div>
-      )} */}
+      )}
     </div>
   );
 };

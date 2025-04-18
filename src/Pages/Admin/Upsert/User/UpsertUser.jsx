@@ -12,7 +12,7 @@ import {
 } from "../../../../Assets/Icons";
 import { Input, DropDown, ImageCropper, TextArea } from "../../../../Component";
 import { createData, updateData } from "../../../../Api/controller";
-import { getDataWithAuth } from "../../../../Api/getData";
+import { getData } from "../../../../Api/getData";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
@@ -41,7 +41,7 @@ const UpsertUser = () => {
 
   const queryClient = useQueryClient();
 
-  const { data: userData, refetch } = getDataWithAuth(
+  const { data: userData, refetch } = getData(
     `/admin/user/${id}`,
     {},
     id !== undefined,

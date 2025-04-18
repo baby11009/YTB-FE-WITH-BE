@@ -114,7 +114,11 @@ const Description = ({ data, refetch }) => {
               >
                 {data?.channel_info?.name}
               </Link>
-              <Verification size={"14"} />
+              {data?.channl_info?.subscriber > 100000 && (
+                <div className='w-[14px]'>
+                  <Verification />
+                </div>
+              )}
             </div>
             <span className='text-[12px] !leading-[18px] text-gray-A t-1-ellipsis'>
               {formatNumber(data?.channel_info?.subscriber || 0)} subscribers
