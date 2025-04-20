@@ -3,8 +3,9 @@ import { useState } from "react";
 import Header from "./NewsContent/Header";
 import DisplayContent from "./NewsContent/DisplayContent";
 import { vidList3 } from "../../../Mock Data/videoData";
-
-const NewsPart = ({ openedMenu }) => {
+import { useAuthContext } from "../../../Auth Provider/authContext";
+const NewsPage = () => {
+  const { openedMenu } = useAuthContext();
   const [data, setData] = useState([]);
 
   let query = useQuery().get("tag");
@@ -20,4 +21,4 @@ const NewsPart = ({ openedMenu }) => {
     </div>
   );
 };
-export default NewsPart;
+export default NewsPage;

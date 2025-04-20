@@ -12,6 +12,7 @@ import {
 import { motion } from "framer-motion";
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 
 const ContentByDate = ({ date, vidList, shortList }) => {
   return (
@@ -49,7 +50,9 @@ const ContentByDate = ({ date, vidList, shortList }) => {
   );
 };
 
-const WatchedPart = ({ openedMenu }) => {
+const WatchedPage = () => {
+  const { openedMenu } = useAuthContext();
+
   const inputRef = useRef();
 
   const [focused, setFocused] = useState(false);
@@ -178,4 +181,4 @@ const WatchedPart = ({ openedMenu }) => {
     </div>
   );
 };
-export default WatchedPart;
+export default WatchedPage;

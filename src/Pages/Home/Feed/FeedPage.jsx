@@ -9,8 +9,11 @@ import {
   vidList3,
   vidList4,
 } from "../../../Mock Data/videoData";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 
-const FeedPart = ({ openedMenu, id }) => {
+const FeedPage = () => {
+  const { openedMenu } = useAuthContext();
+
   const [data, setData] = useState([]);
 
   let query = useQuery().get("tag");
@@ -53,4 +56,4 @@ const FeedPart = ({ openedMenu, id }) => {
     </div>
   );
 };
-export default FeedPart;
+export default FeedPage;

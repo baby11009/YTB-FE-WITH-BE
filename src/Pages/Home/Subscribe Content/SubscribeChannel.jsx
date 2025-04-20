@@ -3,7 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { IsEnd } from "../../../util/scrollPosition";
 import { ThinArrowIcon } from "../../../Assets/Icons";
 import { getData } from "../../../Api/getData";
-const SubscribeChannel = ({ openedMenu }) => {
+import { useAuthContext } from "../../../Auth Provider/authContext";
+const SubscribeChannel = () => {
+  const { openedMenu } = useAuthContext();
+
   const [queries, SetQueries] = useState({
     page: 1,
     limit: 6,
@@ -21,7 +24,7 @@ const SubscribeChannel = ({ openedMenu }) => {
   const [isEnd, setIsEnd] = useState(false);
 
   const { data, isSuccess } = getData(
-    "/user/user/subscribed-channels",
+    "/user/subscribed-channels",
     queries,
     true,
   );

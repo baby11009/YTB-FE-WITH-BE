@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import WatchLater from "./WatchLater";
 import LikedVideo from "./LikedVideo";
 import { useParams } from "react-router-dom";
-const PlaylistPart = () => {
+const PlaylistPage = () => {
   const { id, path } = useParams();
 
   const [Renderer, setRenderer] = useState(<WatchLater />);
@@ -26,4 +26,4 @@ const PlaylistPart = () => {
 
   return <>{Renderer}</>;
 };
-export default PlaylistPart;
+export default PlaylistPage;

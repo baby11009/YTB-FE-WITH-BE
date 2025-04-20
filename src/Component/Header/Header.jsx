@@ -13,6 +13,8 @@ import AccountSetting from "./AccountSetting";
 import NotificationBox from "./NotificationBox";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "../../Auth Provider/authContext";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "../../util/path";
 
 const fakeHistory = [
   {
@@ -58,15 +60,15 @@ const fakeHistory = [
 ];
 
 const Header = ({ setOpenedMenu }) => {
+  const searchQuery = useQuery().get("search_query");
+
   const { notReadNotiCount } = useAuthContext();
 
-  const searchRef = useRef();
+  const navigate = useNavigate();
 
   const inputRef = useRef();
 
   const [opened, setOpened] = useState("");
-
-  const [inputValue, setInputValue] = useState("");
 
   const [isFocused, setIsFocused] = useState(false);
 
@@ -87,9 +89,17 @@ const Header = ({ setOpenedMenu }) => {
     };
   }, [boxRef.current]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (searchQuery) {
+      inputRef.current.value = searchQuery;
+    }
+  }, [searchQuery]);
+
+  const handleSearch = () => {
     setOpened("");
+    inputRef.current.blur();
+    setIsFocused(false);
+    navigate("/search?search_query=" + inputRef.current.value);
   };
 
   return (
@@ -138,12 +148,7 @@ const Header = ({ setOpenedMenu }) => {
           >
             <BackIcon />
           </motion.button>
-          <form
-            action=''
-            className='flex-1 flex relative '
-            ref={inputRef}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className='flex-1 flex relative '>
             <div
               className={`border-[1px] rounded-l-[40px] flex-1 
                 pr-[4px] ml-[32px] h-[40px] flex items-center
@@ -162,22 +167,15 @@ const Header = ({ setOpenedMenu }) => {
               <input
                 type='text'
                 className=' bg-transparent flex-1 outline-none text-white w-full'
-                placeholder='Searching'
-                value={inputValue}
-                autoComplete='off'
-                onChange={(e) => setInputValue(e.target.value)}
-              />
-              <div
-                className='w-[31px] h-[24px] px-[2px] flex items-center'
-                style={{
-                  filter: "invert(100%)",
+                placeholder='Search'
+                ref={inputRef}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
                 }}
-              >
-                <img
-                  src='//www.gstatic.com/inputtools/images/tia.png'
-                  className='px-[4px]'
-                />
-              </div>
+                autoComplete='off'
+              />
             </div>
 
             {/* Search history */}
@@ -217,10 +215,9 @@ const Header = ({ setOpenedMenu }) => {
                 </ul>
               </div>
             )}
-          </form>
+          </div>
           <button
-            title='Tìm kiếm'
-            type='submit'
+            title='Searching'
             onClick={handleSearch}
             className='px-[6px] py-[1px] border-[1px] border-[#303030] 
             bg-[#222222] w-[64px] h-[40px]  
@@ -228,25 +225,25 @@ const Header = ({ setOpenedMenu }) => {
           >
             <SearchIcon />
           </button>
-          <motion.button
+          <button
             type='button'
-            title='Tìm kiếm bằng giọng nói'
+            title='Search with your voice'
             className='w-[40px] h-[40px] rounded-full hidden xsm:flex items-center 
             justify-center md:border-[1px] border-[#303030] md:bg-[#222222] ml-[4px] md:ml-[12px] 
             hover:bg-[#3d3d3d] hover:border-transparent transition-all duration-[0.1s]
             '
           >
             <MicIcon />
-          </motion.button>
+          </button>
         </div>
         <div className='w-full flex md:hidden justify-end'>
           <button
-            title='Tìm kiếm'
-            type='submit'
+            title='Search'
             onClick={() => {
               setOpened("search");
-              searchRef.current.focus();
-              inputRef.current.focus();
+              setTimeout(() => {
+                inputRef.current.focus();
+              }, 100);
             }}
             className=' w-[40px]  h-[40px] rounded-full
             flex items-center justify-center hover:bg-[#3d3d3d] transition-all duration-[0.1s]'

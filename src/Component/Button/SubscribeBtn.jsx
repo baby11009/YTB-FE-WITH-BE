@@ -11,6 +11,7 @@ import { CustomeFuncBox } from "../../Component";
 import { useState, useEffect, useRef } from "react";
 
 const SubscribeBtn = ({ sub, notify, id, channelId, refetch }) => {
+  console.log("🚀 ~ channelId:", channelId);
   const { user, addToaster } = useAuthContext();
 
   const [opened, setOpened] = useState(false);

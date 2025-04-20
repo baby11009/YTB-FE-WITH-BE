@@ -2,8 +2,10 @@ import { CustomeFuncBox2, PlaylistCard } from "../../../Component";
 import { useState, useEffect, useLayoutEffect } from "react";
 import { getData } from "../../../Api/getData";
 import { IsEnd } from "../../../util/scrollPosition";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 
-const PlaylistsPart = ({ openedMenu }) => {
+const PlaylistsPage = () => {
+  const { openedMenu } = useAuthContext();
   const [activeId, setActiveId] = useState({
     id: 2,
     text: "Newest",
@@ -18,12 +20,7 @@ const PlaylistsPart = ({ openedMenu }) => {
     sort: { createdAt: -1 },
   });
 
-  const { data: playlists } = getData(
-    "/user/playlist",
-    queriese,
-    true,
-    false,
-  );
+  const { data: playlists } = getData("/user/playlist", queriese, true, false);
 
   const [dataList, setDataList] = useState([]);
 
@@ -105,4 +102,4 @@ const PlaylistsPart = ({ openedMenu }) => {
     </div>
   );
 };
-export default PlaylistsPart;
+export default PlaylistsPage;

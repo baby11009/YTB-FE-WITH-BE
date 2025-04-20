@@ -6,8 +6,10 @@ import {
   ytbSportChannel,
 } from "../../../Mock Data/channelData";
 import { useParams } from "react-router-dom";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 
-const YtbChannelPart = ({ openedMenu }) => {
+const YtbChannelPage = () => {
+  const { openedMenu } = useAuthContext();
   const [activeId, setActiveId] = useState(0);
 
   const { id } = useParams();
@@ -45,4 +47,4 @@ const YtbChannelPart = ({ openedMenu }) => {
     </div>
   );
 };
-export default YtbChannelPart;
+export default YtbChannelPage;

@@ -218,7 +218,7 @@ const VideoCard = ({
               className='size-full object-contain z-[2] relative'
             />
             <div
-              className='absolute inset-0 z-[1] bg-no-repeat bg-cover bg-center  blur-[8px] '
+              className='absolute inset-0 z-[1] bg-no-repeat bg-cover bg-center  blur-[4px] '
               style={{
                 backgroundImage: `url('${import.meta.env.VITE_BASE_API_URI}${
                   import.meta.env.VITE_VIEW_THUMB_API
@@ -307,8 +307,8 @@ const VideoCard = ({
           >
             <div className='flex items-center gap-[4px] mr-[8px]'>
               <Link
-                title={data.channel_info.name}
-                to={`/channel/${data.channel_info.email}`}
+                title={data?.channel_info?.name}
+                to={`/channel/${data?.channel_info?.email}`}
                 className='hover:text-white-F1'
               >
                 {data?.channel_info?.name}

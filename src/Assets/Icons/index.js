@@ -187,4 +187,4 @@ export { default as PinterestIcon } from "./Pinterest.jsx";
 export { default as TumblrIcon } from "./Tumblr.jsx";
 export { default as LinkedInIcon } from "./LinkedIn.jsx";
 export { default as MixIcon } from "./Mix.jsx";
-
+export { default as NoResultIcon } from "./NoResult.jsx";

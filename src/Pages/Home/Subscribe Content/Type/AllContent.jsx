@@ -49,15 +49,10 @@ const AllContent = ({ openedMenu }) => {
     data: videoData,
     isLoading,
     isSuccess,
-  } = getData(
-    "/user/user/subscribed-channels-videos",
-    videoQueriese,
-    true,
-    false,
-  );
+  } = getData("/user/subscribed-channels-videos", videoQueriese, true, false);
 
   const { data: shortData } = getData(
-    "/user/user/subscribed-channels-videos",
+    "/user/subscribed-channels-videos",
     shortQueriese,
   );
 

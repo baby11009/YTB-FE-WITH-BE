@@ -11,8 +11,11 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { MyChannel } from "../../../Assets/Images";
 import { IsEnd, IsTop } from "../../../util/scrollPosition";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 
-const PostPart = ({ openedMenu }) => {
+const PostPage = () => {
+  const { openedMenu } = useAuthContext();
+
   const location = useLocation();
 
   const data = location.state || {};
@@ -174,4 +177,4 @@ const PostPart = ({ openedMenu }) => {
     </div>
   );
 };
-export default PostPart;
+export default PostPage;

@@ -17,7 +17,7 @@ const ShortContent = () => {
   const [isEnd, setIsEnd] = useState(false);
 
   const { data: shortData } = getData(
-    "/user/user/subscribed-channels-videos",
+    "/user/subscribed-channels-videos",
     shortQueriese,
   );
 

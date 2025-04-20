@@ -29,8 +29,8 @@ const initShortQuery = {
   watchedVideoIdList: [],
 };
 
-const MainPart = ({ openedMenu }) => {
-  const { setFetchingState } = useAuthContext();
+const MainPage = () => {
+  const { setFetchingState, openedMenu } = useAuthContext();
 
   const [addNew, setAddNew] = useState(true);
 
@@ -241,4 +241,4 @@ const MainPart = ({ openedMenu }) => {
     </div>
   );
 };
-export default MainPart;
+export default MainPage;

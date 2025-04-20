@@ -23,7 +23,7 @@ const ChannelCard = ({ data }) => {
         <img
           src={`${import.meta.env.VITE_BASE_API_URI}${
             import.meta.env.VITE_VIEW_AVA_API
-          }${channelData?.avatar}`}
+          }${channelData?.avatar}?width=176px&height=176px`}
           alt={`avatar-${channelData?.email}`}
           className='size-[136px] rounded-[50%]'
         />
@@ -50,15 +50,17 @@ const ChannelCard = ({ data }) => {
           )}
         </div>
       </div>
-      <SubscribeBtn
-        sub={channelData?.notify === 0 ? false : true}
-        notify={channelData?.notify}
-        id={channelData?.subcription_id}
-        channelId={channelData?.channel_id}
-        refetch={(data) => {
-          setRspData(data);
-        }}
-      />
+      <div className='w-fit'>
+        <SubscribeBtn
+          sub={channelData?.notify === 0 ? false : true}
+          notify={channelData?.notify}
+          id={channelData?.subcription_id}
+          channelId={channelData?.channel_id}
+          refetch={(data) => {
+            setRspData(data);
+          }}
+        />
+      </div>
     </Link>
   );
 };

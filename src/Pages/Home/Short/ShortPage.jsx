@@ -3,7 +3,6 @@ import { LongArrowIcon } from "../../../Assets/Icons";
 import { useLayoutEffect, useState, useRef, useEffect } from "react";
 import { IsEnd, IsTop } from "../../../util/scrollPosition";
 import { useAuthContext } from "../../../Auth Provider/authContext";
-import connectSocket from "../../../util/connectSocket";
 import { useParams } from "react-router-dom";
 import request from "../../../util/axios-base-url";
 import CommentBox from "./CommentBox";
@@ -11,7 +10,7 @@ import DetailsBox from "./DetailsBox";
 
 const fetchingShortQtt = 2;
 
-const ShortPart = () => {
+const ShortPage = () => {
   const { id } = useParams();
 
   const { setFetchingState, user, openedMenu } = useAuthContext();
@@ -396,4 +395,4 @@ const ShortPart = () => {
     </div>
   );
 };
-export default ShortPart;
+export default ShortPage;

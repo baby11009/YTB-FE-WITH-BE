@@ -4,6 +4,7 @@ import { HorizonShorts, GamingRow } from "../../../Component";
 import { Link } from "react-router-dom";
 import { vidList3, vidList4 } from "../../../Mock Data/videoData";
 import { gameList } from "../../../Mock Data/gamesData";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 
 const Layout = ({ data, noBtn, children }) => {
   return (
@@ -30,7 +31,9 @@ const Layout = ({ data, noBtn, children }) => {
   );
 };
 
-const GamingPart = ({ openedMenu }) => {
+const GamingPage = () => {
+
+const { openedMenu } = useAuthContext();
   return (
     <div className='flex justify-center min-h-screen'>
       <div
@@ -112,4 +115,4 @@ const GamingPart = ({ openedMenu }) => {
     </div>
   );
 };
-export default GamingPart;
+export default GamingPage;

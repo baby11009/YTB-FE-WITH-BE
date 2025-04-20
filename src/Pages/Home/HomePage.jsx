@@ -1,68 +1,67 @@
 import { useState, useLayoutEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
-
+import { useParams, useNavigate } from "react-router-dom";
 import MainLayOut from "../../Layout/MainLayOut";
 import { Body, Header } from "../../Component";
 import { scrollToTop } from "../../util/scrollCustom";
-
-import MainPart from "./Main/MainPart";
-import ShortPart from "./Short/ShortPart";
-import ChannelPart from "./Channel/ChannelPart";
-import PostPart from "./Comunity Post/PostPart";
-import SubscribeContentPart from "./Subscribe Content/SubscribeContentPart";
+import MainPage from "./Main/MainPage";
+import ShortPage from "./Short/ShortPage";
+import ChannelPage from "./Channel/ChannelPage";
+import PostPage from "./Comunity Post/PostPage";
+import SubscribeContentPage from "./Subscribe Content/SubscribeContentPage";
 import SubscribeChannel from "./Subscribe Content/SubscribeChannel";
-import WatchedPart from "./Watched/WatchedPart";
-import PlaylistsPart from "./Playlists/PlaylistsPart";
-import PlaylistPart from "./Playlist/PlaylistPart";
-import YtbChannelPart from "./Ytb Channel/YtbChannelPart";
-import FeedPart from "./Feed/FeedPart";
-import NewsPart from "./News/NewsPart";
-import GamingPart from "./Gaming/GamingPart";
-import MyChannelPart from "./MyChannel/MyChannelPart";
+import WatchedPage from "./Watched/WatchedPage";
+import PlaylistsPage from "./Playlists/PlaylistsPage";
+import PlaylistPage from "./Playlist/PlaylistPage";
+import YtbChannelPage from "./Ytb Channel/YtbChannelPage";
+import FeedPage from "./Feed/FeedPage";
+import NewsPage from "./News/NewsPage";
+import GamingPage from "./Gaming/GamingPage";
+import MyChannelPage from "./MyChannel/MyChannelPage";
+import SearchPage from "./Search/SearchPage";
 import { useAuthContext } from "../../Auth Provider/authContext";
 
 const HomePage = () => {
+  const navigate = useNavigate();
+
   const params = useParams();
 
   const { openedMenu, setOpenedMenu } = useAuthContext();
 
   const [renderComponent, setRenderComponent] = useState(undefined);
 
-  const componentMap = useRef();
-
-  componentMap.current = {
-    main: <MainPart openedMenu={openedMenu} />,
-    short: <ShortPart />,
-    channel: <ChannelPart openedMenu={openedMenu} />,
-    post: <PostPart openedMenu={openedMenu} />,
-    "sub-content": <SubscribeContentPart openedMenu={openedMenu} />,
-    "sub-channels": <SubscribeChannel openedMenu={openedMenu} />,
-    watched: <WatchedPart openedMenu={openedMenu} />,
-    playlists: <PlaylistsPart openedMenu={openedMenu} />,
-    playlist: <PlaylistPart />,
-    "ytb-channel": <YtbChannelPart openedMenu={openedMenu} />,
-    feed: <FeedPart openedMenu={openedMenu} id={params?.id} />,
-    news: <NewsPart openedMenu={openedMenu} />,
-    gaming: <GamingPart openedMenu={openedMenu} />,
-    "my-channel": <MyChannelPart openedMenu={openedMenu} />,
-  };
+  const componentMap = useRef({
+    main: <MainPage />,
+    short: <ShortPage />,
+    channel: <ChannelPage />,
+    post: <PostPage />,
+    "sub-content": <SubscribeContentPage />,
+    "sub-channels": <SubscribeChannel />,
+    watched: <WatchedPage />,
+    playlists: <PlaylistsPage />,
+    playlist: <PlaylistPage />,
+    "ytb-channel": <YtbChannelPage />,
+    feed: <FeedPage />,
+    news: <NewsPage />,
+    gaming: <GamingPage />,
+    "my-channel": <MyChannelPage />,
+    search: <SearchPage />,
+  });
 
   useLayoutEffect(() => {
     scrollToTop();
   }, [params]);
 
   useLayoutEffect(() => {
-    if (params.path) {
-      const pageRender = componentMap.current[params.path];
+    const path = params.path || "main";
 
-      if (pageRender) {
-        setRenderComponent(pageRender);
-      } else {
-        setRenderComponent(undefined);
+    const pageRender = componentMap.current[path];
 
-        throw new Error(`Route ${params.path} does not exist`);
-      }
-    } else setRenderComponent(componentMap.current["main"]);
+    if (pageRender) {
+      setRenderComponent(pageRender);
+    } else {
+      setRenderComponent(componentMap.current["main"]);
+      navigate("/", { replace: true });
+    }
   }, [params, openedMenu]);
 
   return (

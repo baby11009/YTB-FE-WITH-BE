@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import AllContent from "./Type/AllContent";
 import ShortContent from "./Type/ShortContent";
 import { useParams } from "react-router-dom";
-const SubscribeContentPart = ({ openedMenu }) => {
+import { useAuthContext } from "../../../Auth Provider/authContext";
+const SubscribeContentPage = () => {
+
+  const {openedMenu} = useAuthContext();
+
   const { id } = useParams();
 
   const [Renderer, setRenderer] = useState(undefined);
@@ -22,4 +26,4 @@ const SubscribeContentPart = ({ openedMenu }) => {
 
   return <div>{Renderer}</div>;
 };
-export default SubscribeContentPart;
+export default SubscribeContentPage;

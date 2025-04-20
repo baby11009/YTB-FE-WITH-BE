@@ -3,8 +3,8 @@ import MyChannelDisplay from "./Contents/MyChannelDisplay";
 import { useAuthContext } from "../../../Auth Provider/authContext";
 import { useState } from "react";
 
-const MyChannelPart = ({ openedMenu }) => {
-  const { user } = useAuthContext();
+const MyChannelPage = () => {
+  const { user, openedMenu } = useAuthContext();
 
   const [display, setDisplay] = useState({
     title: "playlists",
@@ -27,4 +27,4 @@ const MyChannelPart = ({ openedMenu }) => {
     </div>
   );
 };
-export default MyChannelPart;
+export default MyChannelPage;
