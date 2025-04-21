@@ -10,6 +10,7 @@ const CardRow = ({ vidList, showBtn }) => {
             <PlayListCard
               data={item}
               key={index}
+              
               imgStyle={"w-full max-h-[185.3px]"}
             />
           );
@@ -19,6 +20,7 @@ const CardRow = ({ vidList, showBtn }) => {
             data={item}
             key={index}
             showBtn={showBtn}
+            infoStyle={"flex-col "}
             descStyle={"!hidden"}
           />
         );

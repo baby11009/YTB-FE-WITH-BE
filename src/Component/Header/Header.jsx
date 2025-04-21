@@ -174,7 +174,7 @@ const Header = ({ setOpenedMenu }) => {
                     handleSearch();
                   }
                 }}
-                autoComplete='off'
+                autoComplete='nope'
               />
             </div>
 

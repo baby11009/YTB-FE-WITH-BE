@@ -5,11 +5,12 @@ import {
   useRef,
   useCallback,
 } from "react";
-import { GridLayout, ButtonHorizonSlider } from "../../../Component";
+import { GridLayout } from "../../../Component";
 import { IsEnd } from "../../../util/scrollPosition";
 import { useQueryClient } from "@tanstack/react-query";
 import { getData } from "../../../Api/getData";
 import { useAuthContext } from "../../../Auth Provider/authContext";
+import Filters from "./Filters";
 
 const initVideoQuery = {
   page: 1,
@@ -52,8 +53,6 @@ const MainPage = () => {
 
   const watchedShortIdSet = useRef(new Set());
 
-  const currentSortId = useRef("all");
-
   const {
     data: videos,
     isLoading,
@@ -62,7 +61,7 @@ const MainPage = () => {
 
   const { data: shorts } = getData("/data/all", shortQuery, true);
 
-  const handleSort = useCallback((data) => {
+  const setSortQuery = useCallback((data) => {
     queryClient.removeQueries({
       queryKey: [...Object.values(videoQuery), "/data/all"],
       exact: true,
@@ -73,55 +72,14 @@ const MainPage = () => {
     });
     setVideoQuery({
       ...initVideoQuery,
-      sort: data.value,
+      [data.type === "sort" ? "sort" : "tag"]: data.value,
     });
     setShortQuery({
       ...initShortQuery,
-      sort: data.value,
+      [data.type === "sort" ? "sort" : "tag"]: data.value,
     });
     setAddNew(true);
-
-    currentSortId.current = data.id;
   });
-
-  const buttonList = [
-    {
-      id: "all",
-      title: "All",
-      value: undefined,
-      handleOnClick: handleSort,
-    },
-    {
-      id: "latest",
-      title: "Latest",
-      value: { createdAt: -1 },
-      handleOnClick: handleSort,
-    },
-    {
-      id: "view",
-      title: "Popular",
-      value: { view: -1 },
-      handleOnClick: handleSort,
-    },
-    {
-      id: "oldest",
-      title: "Oldest",
-      value: { createdAt: 1 },
-      handleOnClick: handleSort,
-    },
-    {
-      id: "test1",
-      title: "Hello World",
-    },
-    {
-      id: "test2",
-      title: "Hello VOHUYTHANH",
-    },
-    {
-      id: "test3",
-      title: "THIS IS MY CODE",
-    },
-  ];
 
   useEffect(() => {
     if (isEnd) {
@@ -226,10 +184,7 @@ const MainPage = () => {
           openedMenu && "xl:!left-[227px]"
         } right-0 px-[24px] fixed top-[56px] z-[200] bg-black overflow-hidden`}
       >
-        <ButtonHorizonSlider
-          buttonList={buttonList}
-          currentId={currentSortId.current}
-        />
+        <Filters setSortQuery={setSortQuery} />
       </div>
       <div className='mt-[80px] px-[16px]'>
         <GridLayout

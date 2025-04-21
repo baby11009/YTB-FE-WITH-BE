@@ -57,7 +57,7 @@ const ChannelCard = ({ data }) => {
           id={channelData?.subcription_id}
           channelId={channelData?.channel_id}
           refetch={(data) => {
-            setRspData(data);
+            setChannelData((prev) => ({ ...prev, ...data?.data }));
           }}
         />
       </div>

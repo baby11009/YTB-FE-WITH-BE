@@ -16,7 +16,7 @@ import CustomeFuncBox from "../Box/CustomeFuncBox";
 import PlaylistModal from "../Modal/PlaylistModal";
 import request from "../../util/axios-base-url";
 import { useNavigate } from "react-router-dom";
-const VideoCard4 = ({ data}) => {
+const VideoCard4 = ({ data }) => {
   const { setShowHover, handleCursorPositon, addToaster, user, setIsShowing } =
     useAuthContext();
 

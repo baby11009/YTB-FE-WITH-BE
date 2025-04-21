@@ -1,67 +1,103 @@
 import { ButtonHorizonSlider } from "../../../Component";
-import { useRe, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { getData } from "../../../Api/getData";
+import { useQueryClient } from "@tanstack/react-query";
+const Filters = ({ setQueries, newSearchQuery }) => {
+  const queryClient = useQueryClient();
 
-const Filters = ({ setQueries }) => {
+  const { data: tagData } = getData("/data/tags", {});
+
   const [currentSort, setCurrentSort] = useState("all");
 
   const handleSort = (data) => {
     setCurrentSort(data.id);
-    // setQueries(setQueries)
+    newSearchQuery.current = true;
+    setQueries((prev) => {
+      queryClient.removeQueries({
+        queryKey: ["/data/search", ...Object.values(prev)],
+        exact: true,
+      });
+      const queriesClone = { search: prev.search, sort: prev.sort };
+
+      if (data.type === "search") {
+        return {
+          ...queriesClone,
+          type: data.id,
+        };
+      }
+
+      if (data.type === "tag") {
+        return {
+          ...queriesClone,
+          type: "all",
+          tag: data.id,
+        };
+      }
+
+      return {
+        ...queriesClone,
+        sort: data.id,
+      };
+    });
   };
 
-  const buttonList = [
+  const buttonList = useRef([
     {
       id: "all",
       title: "All",
-      value: undefined,
+      type: "search",
       handleOnClick: handleSort,
     },
     {
       id: "video",
       title: "Videos",
-      value: { createdAt: -1 },
+      type: "search",
       handleOnClick: handleSort,
     },
     {
       id: "short",
       title: "Shorts",
-      value: { view: -1 },
-      handleOnClick: handleSort,
-    },
-    {
-      id: "Gaming",
-      title: "Gaming",
-      value: { createdAt: 1 },
+      type: "search",
       handleOnClick: handleSort,
     },
     {
       id: "playlist",
       title: "Playlists",
-      value: { view: -1 },
+      type: "search",
       handleOnClick: handleSort,
     },
     {
       id: "user",
       title: "Channels",
-      value: { view: -1 },
+      type: "search",
       handleOnClick: handleSort,
     },
-    {
-      id: "test1",
-      title: "Hello World",
-    },
-    {
-      id: "test2",
-      title: "Hello VOHUYTHANH",
-    },
-    {
-      id: "test3",
-      title: "THIS IS MY CODE",
-    },
-  ];
+    // {
+    //   id: "createdAt",
+    //   title: "Recently Uploaded",
+    //   type: "sort",
+    //   handleOnClick: handleSort,
+    // },
+  ]);
+
+  useEffect(() => {
+    if (tagData) {
+      for (const tag of tagData.data) {
+        buttonList.current.push({
+          id: tag.title,
+          title: tag.title,
+          type: "tag",
+          handleOnClick: handleSort,
+        });
+      }
+    }
+  }, [tagData]);
 
   return (
-    <ButtonHorizonSlider buttonList={buttonList} currentId={currentSort} />
+    <ButtonHorizonSlider
+      buttonList={buttonList.current}
+      currentId={currentSort}
+    />
   );
 };
 export default Filters;

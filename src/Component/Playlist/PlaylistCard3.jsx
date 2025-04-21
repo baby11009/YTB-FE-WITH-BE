@@ -4,12 +4,14 @@ import { useRef } from "react";
 import { Verification } from "../../Assets/Icons";
 import { durationCalc } from "../../util/durationCalc";
 
-const PlaylistCard3 = ({ data }) => {
+const PlaylistCard3 = ({ data, thumbStyle }) => {
   const bgColor = useRef(getRandomHexColor());
   return (
     <div className='flex'>
       <Link
-        className=' w-[246px] h-[138px] aspect-video relative mr-[16px]'
+        className={`${
+          thumbStyle ? thumbStyle : "w-[246px] h-[138px] "
+        } aspect-video relative mr-[16px]`}
         to={`/video?id=${data?.video_list[0]?._id}&list=${data?._id}`}
       >
         <div className='relative rounded-[8px] overflow-hidden'>
@@ -18,7 +20,7 @@ const PlaylistCard3 = ({ data }) => {
               import.meta.env.VITE_VIEW_THUMB_API
             }${data?.video_list[0]?.thumb}?width=480&height=270`}
             alt={"thumb" + data._id}
-            className='relative  z-[2]'
+            className='relative w-full  z-[2]'
           />
           <div
             className='absolute inset-0 z-[1] bg-no-repeat bg-cover bg-center rounded-[8px]'
@@ -37,7 +39,7 @@ const PlaylistCard3 = ({ data }) => {
           style={{ backgroundColor: bgColor.current }}
         ></div>
       </Link>
-      <div>
+      <div className="flex-1">
         <div className=' line-clamp-2 max-h-[52px]  text-[18px] leading-[26px]'>
           {data.title}
         </div>

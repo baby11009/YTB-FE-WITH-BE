@@ -4,6 +4,7 @@ import { ThinArrowIcon, SearchIcon } from "../../Assets/Icons";
 import { IsElementEnd } from "../../util/scrollPosition";
 
 const InfiniteDropDown = ({
+  disabled,
   title,
   dataType,
   list,
@@ -111,6 +112,7 @@ const InfiniteDropDown = ({
       >
         <div className='relative pl-[12px]'>
           <button
+            disabled={disabled}
             className='flex items-center justify-between w-full  h-[56px] z-[100]'
             type='button'
             onClick={() => {

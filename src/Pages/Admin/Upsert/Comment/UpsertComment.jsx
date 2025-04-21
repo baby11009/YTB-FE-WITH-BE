@@ -1,10 +1,4 @@
-import {
-  useRef,
-  useState,
-  useEffect,
-  useLayoutEffect,
-  useCallback,
-} from "react";
+import { useState, useEffect, useLayoutEffect, useCallback } from "react";
 import {
   Input,
   InfiniteDropDown,
@@ -102,13 +96,13 @@ const UpsertComment = () => {
     data: videosData,
     isLoading: videoIsLoading,
     error: videoError,
-  } = getDataWithAuth("/admin/video", videoQuerese, videoOpened, false);
+  } = getData("/admin/video", videoQuerese, videoOpened, false);
 
   const {
     data: replyCmtsData,
     isLoading: replyCmtsIsLoading,
     error: replyCmtsError,
-  } = getDataWithAuth(
+  } = getData(
     `/admin/comment`,
     replyCmtQueriese,
     cmtOpened && formData.videoId ? true : false,
@@ -398,7 +392,7 @@ const UpsertComment = () => {
               isLoading={userIsLoading}
               fetchingError={userError?.response?.data?.msg}
               validateError={submitErrs["userId"]}
-              handleSetQueriese={(value, pageInc) => {
+              handleSetQueries={(value, pageInc) => {
                 setUserQueriese((prev) => {
                   const prevClone = {
                     ...prev,
@@ -440,8 +434,7 @@ const UpsertComment = () => {
               displayData={"title"}
               fetchingError={videoError?.response?.data?.msg}
               validateError={submitErrs["videoId"]}
-              handleSetQueriese={(value, pageInc) => {
-                console.log(value);
+              handleSetQueries={(value, pageInc) => {
                 setVideoQueriese((prev) => {
                   const prevClone = {
                     ...prev,
@@ -483,8 +476,7 @@ const UpsertComment = () => {
               isLoading={replyCmtsIsLoading}
               displayData={"cmtText"}
               fetchingError={replyCmtsError?.response?.data?.msg}
-              handleSetQueriese={(value, pageInc) => {
-                console.log(value);
+              handleSetQueries={(value, pageInc) => {
                 setReplyCmtQueriese((prev) => {
                   const prevClone = {
                     ...prev,

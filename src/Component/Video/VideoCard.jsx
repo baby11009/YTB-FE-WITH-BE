@@ -260,11 +260,6 @@ const VideoCard = ({
       <div className={`flex relative  ${ctContainerStyle}`}>
         <div
           className={`shrink-0 w-[36px] h-[36px] rounded-[50%] overflow-hidden cursor-pointer mr-[12px] ${imgStyle}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            handleNavigate(5);
-          }}
         >
           <img
             src={`${import.meta.env.VITE_BASE_API_URI}${
