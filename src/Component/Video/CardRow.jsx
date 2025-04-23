@@ -6,14 +6,7 @@ const CardRow = ({ vidList, showBtn }) => {
     <>
       {vidList?.map((item, index) => {
         if (item?.video_list) {
-          return (
-            <PlayListCard
-              data={item}
-              key={index}
-              
-              imgStyle={"w-full max-h-[185.3px]"}
-            />
-          );
+          return <PlayListCard data={item} key={index} />;
         }
         return (
           <VideoCard

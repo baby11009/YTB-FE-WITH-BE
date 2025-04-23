@@ -7,28 +7,32 @@ import { useParams } from "react-router-dom";
 import request from "../../../util/axios-base-url";
 import CommentBox from "./CommentBox";
 import DetailsBox from "./DetailsBox";
+import { getData } from "../../../Api/getData";
+import { cleanSessionCookies } from "../../../util/other";
+import { useQueryClient } from "@tanstack/react-query";
 
 const fetchingShortQtt = 2;
 
 const ShortPage = () => {
   const { id } = useParams();
 
+  const queryClient = useQueryClient();
+
   const { setFetchingState, user, openedMenu } = useAuthContext();
+
+  const [shortQueries, setShortQueries] = useState({ size: 2 });
+
+  const {
+    data: shortData,
+    isLoading,
+    isSuccess,
+  } = getData(id ? `/data/shorts/${id}` : "/data/shorts", shortQueries);
+
+  const [shortList, setShortList] = useState([]);
 
   const [isTop, setIsTop] = useState(true);
 
   const [isEnd, setIsEnd] = useState(false);
-
-  const isScrolling = useRef(false);
-
-  // Prevent React strict mode to fetch data 2 times in a row when first rendering
-  const firtTimeRender = useRef(true);
-
-  const remainData = useRef(1);
-
-  const [shortList, setShortList] = useState([]);
-
-  const [sideMenu, setSideMenu] = useState("comment");
 
   const [openedSideMenu, setOpenedSideMenu] = useState(false);
 
@@ -40,43 +44,22 @@ const ShortPage = () => {
 
   const [volume, setVolume] = useState(1);
 
+  // Prevent React strict mode to fetch data 2 times in a row when first rendering
+  const firtTimeRender = useRef(true);
+
+  const nextCursors = useRef();
+
+  const isScrolling = useRef(false);
+
+  const remainData = useRef(1);
+
+  const [sideMenu, setSideMenu] = useState("comment");
+
   const containerRef = useRef();
 
   const listContainerRef = useRef();
 
   const outSideAreaRef = useRef();
-
-  const fetchRandomShort = async () => {
-    if (user) {
-      // set session-id is user _id if user already signed in
-      sessionStorage.setItem("session-id", user._id);
-    }
-    let sessionId = sessionStorage.getItem("session-id") || "";
-    setFetchingState("loading");
-    await request
-      .get(
-        id
-          ? `/data/shorts/${id}?size=${fetchingShortQtt}`
-          : `/data/shorts?size=${fetchingShortQtt}`,
-        {
-          headers: { "session-id": sessionId },
-        },
-      )
-      .then((rsp) => {
-        if (!sessionId) {
-          sessionStorage.setItem("session-id", rsp.headers["session-id"]);
-          console.log(rsp.headers["session-id"]);
-        }
-        remainData.current = rsp.data.remain;
-        setShortList((prev) => [...prev, ...rsp.data.data]);
-        setFetchingState("success");
-      })
-      .catch((err) => {
-        console.error(err);
-        alert("Failed to get short data");
-        setFetchingState("false");
-      });
-  };
 
   const handleScrollPrev = () => {
     if (isScrolling.current) {
@@ -99,9 +82,10 @@ const ShortPage = () => {
   };
 
   const handleScrollNext = async () => {
-    if (remainData.current > 0) {
-      await fetchRandomShort();
+    if (nextCursors.current) {
+      setShortQueries((prev) => ({ ...prev, cursors: nextCursors.current }));
     }
+
     if (isScrolling.current) {
       return;
     }
@@ -163,24 +147,36 @@ const ShortPage = () => {
     });
   };
 
+  useEffect(() => {
+    if (shortData) {
+      if (shortData.data.length) {
+        setShortList((prev) => [...prev, ...shortData.data]);
+      }
+
+      nextCursors.current = shortData.cursors;
+      remainData.current = shortData.cursors ? 1 : 0;
+    }
+  }, [shortData]);
+
+  useEffect(() => {
+    setFetchingState(() => {
+      if (isLoading) return "loading";
+
+      if (isSuccess) {
+        return "success";
+      } else {
+        return "error";
+      }
+    });
+  }, [isLoading, isSuccess]);
+
   useLayoutEffect(() => {
     if (!firtTimeRender.current) {
-      fetchRandomShort();
+      // fetchRandomShort();
     }
 
-    const removeRedisKey = async () => {
-      let sessionId = sessionStorage.getItem("session-id");
-      if (!sessionId) return;
-      await request
-        .delete("/redis/remove", {
-          headers: { "session-id": sessionId },
-        })
-        .then((rsp) => {
-          console.log(rsp.data);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+    const handleBeforeUnLoad = () => {
+      cleanSessionCookies("randomShort");
     };
 
     const handleScrollEvent = () => {
@@ -192,7 +188,7 @@ const ShortPage = () => {
       setOpenedSideMenu("");
     };
 
-    window.addEventListener("beforeunload", removeRedisKey);
+    window.addEventListener("beforeunload", handleBeforeUnLoad);
 
     document.addEventListener("scroll", handleScrollEvent);
 
@@ -203,11 +199,16 @@ const ShortPage = () => {
     outSideAreaRef.current.addEventListener("click", handleClickOutsideArea);
 
     return () => {
+      if (!firtTimeRender.current) {
+        handleBeforeUnLoad();
+        queryClient.removeQueries(id ? `/data/shorts/${id}` : "/data/shorts");
+      }
+
       firtTimeRender.current = false;
 
       // Remove session-id key in redis to make watched data reset - should use this if doesn't have much data
 
-      window.removeEventListener("beforeunload", removeRedisKey);
+      window.removeEventListener("beforeunload", handleBeforeUnLoad);
 
       document.removeEventListener("scroll", handleScrollEvent);
 

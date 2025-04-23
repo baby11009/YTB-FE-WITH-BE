@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 const Filters = ({ setQueries, newSearchQuery }) => {
   const queryClient = useQueryClient();
 
-  const { data: tagData } = getData("/data/tags", {});
+  const { data: tagData, isLoading } = getData("/data/tags", {});
 
   const [currentSort, setCurrentSort] = useState("all");
 
@@ -95,7 +95,7 @@ const Filters = ({ setQueries, newSearchQuery }) => {
 
   return (
     <ButtonHorizonSlider
-      buttonList={buttonList.current}
+      buttonList={isLoading ? [] : buttonList.current}
       currentId={currentSort}
     />
   );

@@ -4,7 +4,7 @@ import { getData } from "../../../Api/getData";
 const Filters = ({ setSortQuery }) => {
   const [currentSort, setCurrentSort] = useState("all");
 
-  const { data: tagData } = getData("/data/tags", {});
+  const { data: tagData, isLoading } = getData("/data/tags", {});
 
   const handleSort = (data) => {
     setSortQuery(data);
@@ -16,27 +16,24 @@ const Filters = ({ setSortQuery }) => {
       id: "all",
       title: "All",
       value: undefined,
-      type: "sort",
+      type: "default",
       handleOnClick: handleSort,
     },
     {
-      id: "latest",
-      title: "Latest",
-      type: "sort",
-      value: { createdAt: -1 },
-      handleOnClick: handleSort,
-    },
-    {
-      id: "view",
-      title: "Popular",
-      value: { view: -1 },
+      id: "recently",
+      title: "Recently uploaded",
       type: "sort",
       handleOnClick: handleSort,
     },
     {
       id: "oldest",
-      title: "Oldest",
-      value: { createdAt: 1 },
+      title: "Oldest uploads",
+      type: "sort",
+      handleOnClick: handleSort,
+    },
+    {
+      id: "popular",
+      title: "Popular",
       type: "sort",
       handleOnClick: handleSort,
     },
@@ -48,7 +45,6 @@ const Filters = ({ setSortQuery }) => {
         buttonList.current.push({
           id: tag.title,
           title: tag.title,
-          value: tag.slug,
           type: "search",
           handleOnClick: handleSort,
         });
@@ -58,7 +54,7 @@ const Filters = ({ setSortQuery }) => {
 
   return (
     <ButtonHorizonSlider
-      buttonList={buttonList.current}
+      buttonList={isLoading ? [] : buttonList.current}
       currentId={currentSort}
     />
   );
