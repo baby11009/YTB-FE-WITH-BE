@@ -289,7 +289,7 @@ const VideoUpsertModal = ({ title, id }) => {
         setFormData(init);
         setPreviewVideo(undefined);
         setPreviewThumb(undefined);
-        thumbInputRef.current.value = undefined;
+        thumbInputRef.current.value = "";
       },
       undefined,
       addToaster,

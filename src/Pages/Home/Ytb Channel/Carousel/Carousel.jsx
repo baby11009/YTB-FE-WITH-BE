@@ -1,5 +1,5 @@
 import { formatNumber } from "../../../../util/numberFormat";
-import { timeFormat } from "../../../../util/timeforMat";
+import { timeFormat2 } from "../../../../util/timeforMat";
 import { useRef, useLayoutEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -96,7 +96,7 @@ const Carousel = ({ openedMenu, data, activeId, setActiveId }) => {
               </span>
 
               <span className="before:content-['•'] before:mx-[4px]">
-                {currData?.postedTime && timeFormat(currData.postedTime)}
+                {currData?.postedTime && timeFormat2(currData.postedTime)}
               </span>
             </div>
             <div

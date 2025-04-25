@@ -1,13 +1,13 @@
 import { useState, useRef, memo, useEffect } from "react";
 import { ButtonHorizonSlider } from "../../../Component";
 import { getData } from "../../../Api/getData";
-const Filters = ({ setSortQuery }) => {
+const Filters = ({ handleQueryChange }) => {
   const [currentSort, setCurrentSort] = useState("all");
 
   const { data: tagData, isLoading } = getData("/data/tags", {});
 
-  const handleSort = (data) => {
-    setSortQuery(data);
+  const handleOnClick = (data) => {
+    handleQueryChange(data);
     setCurrentSort(data.id);
   };
 
@@ -17,25 +17,25 @@ const Filters = ({ setSortQuery }) => {
       title: "All",
       value: undefined,
       type: "default",
-      handleOnClick: handleSort,
+      handleOnClick,
     },
     {
       id: "recently",
       title: "Recently uploaded",
       type: "sort",
-      handleOnClick: handleSort,
+      handleOnClick,
     },
     {
       id: "oldest",
       title: "Oldest uploads",
       type: "sort",
-      handleOnClick: handleSort,
+      handleOnClick,
     },
     {
       id: "popular",
       title: "Popular",
       type: "sort",
-      handleOnClick: handleSort,
+      handleOnClick,
     },
   ]);
 
@@ -46,7 +46,7 @@ const Filters = ({ setSortQuery }) => {
           id: tag.title,
           title: tag.title,
           type: "search",
-          handleOnClick: handleSort,
+          handleOnClick,
         });
       }
     }

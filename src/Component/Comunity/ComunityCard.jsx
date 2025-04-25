@@ -1,4 +1,4 @@
-import { timeFormat } from "../../util/timeforMat";
+import { timeFormat2 } from "../../util/timeforMat";
 import { formatNumber } from "../../util/numberFormat";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
@@ -120,7 +120,7 @@ const ComunityCard = ({ data, noNav }) => {
               {data?.channel.name}
             </div>
             <span className='text-[12px] leading-[20px]'>
-              {timeFormat(data.time)}
+              {timeFormat2(data.time)}
             </span>
           </div>
 

@@ -171,10 +171,10 @@ const UpsertVideo = ({ type }) => {
       imageElement.addEventListener("load", (e) => {
         const { naturalWidth, naturalHeight } = e.currentTarget;
         let minWidth = 640;
-        let aspect = 16 / 9;
+        let aspect = Number((16 / 9).toFixed(2));
         if (type === "short") {
           minWidth = 404;
-          aspect = 9 / 16;
+          aspect = Number((9 / 16).toFixed(2));
         }
 
         if (

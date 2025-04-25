@@ -1,12 +1,7 @@
-import {
-  useState,
-  useRef,
-  useLayoutEffect,
-  useCallback,
-  useEffect,
-} from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { smoothScroll } from "../../util/scrollCustom";
 import { ThinArrowIcon } from "../../Assets/Icons";
+import { use } from "react";
 
 const Slider = ({
   containerStyle,
@@ -69,27 +64,27 @@ const Slider = ({
     }
   }, []);
 
-  const handleResizeEvent = useCallback(() => {
-    if (!sliderRef.current) return;
-    enabledScrolling.current =
-      sliderRef.current.scrollWidth > sliderRef.current.clientWidth;
-    visibleChildrenCount.current = Math.round(
-      sliderRef.current?.clientWidth /
-        sliderRef.current?.firstChild.clientWidth,
-    );
-    if (enabledScrolling.current) {
-      handleScrollEvent();
-    } else {
-      setScrollPosition();
-    }
-  }, []);
-
   useEffect(() => {
+    const handleResizeEvent = () => {
+      if (!sliderRef.current) return;
+      enabledScrolling.current =
+        sliderRef.current.scrollWidth > sliderRef.current.clientWidth;
+      visibleChildrenCount.current = Math.round(
+        sliderRef.current?.clientWidth /
+          sliderRef.current?.firstChild.clientWidth,
+      );
+
+      if (enabledScrolling.current) {
+        handleScrollEvent();
+      } else {
+        setScrollPosition();
+      }
+    };
     handleResizeEvent();
     sliderRef.current.addEventListener("scroll", handleScrollEvent);
 
     window.addEventListener("resize", handleResizeEvent);
-  }, []);
+  }, [children]);
 
   return (
     <div className={`relative w-full  ${containerStyle ? containerStyle : ""}`}>
@@ -160,7 +155,8 @@ const Slider = ({
       >
         {children}
       </div>
-      {scrollPosition &&
+      {enabledScrolling.current &&
+        scrollPosition &&
         scrollPosition !== "end" &&
         (buttonType === 1 ? (
           <div

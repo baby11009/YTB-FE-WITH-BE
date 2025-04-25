@@ -1,4 +1,4 @@
-import { timeFormat } from "../../../util/timeforMat";
+import { timeFormat2 } from "../../../util/timeforMat";
 import { vidList1 } from "../../../Mock Data/videoData";
 import { shortList1 } from "../../../Mock Data/shortData";
 import { VideoCard, HorizonShorts } from "../../../Component";
@@ -18,7 +18,7 @@ const ContentByDate = ({ date, vidList, shortList }) => {
   return (
     <div>
       <div className='pt-[24px] pb-[8px] text-[20px] leading-[28px] font-bold '>
-        {timeFormat(date)?.includes("giờ") ? "Hôm nay" : "Hôm qua"}
+        {timeFormat2(date)}
       </div>
       <div>
         <HorizonShorts shortList={shortList} />

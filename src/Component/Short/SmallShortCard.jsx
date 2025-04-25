@@ -8,7 +8,7 @@ import {
 import { motion, useAnimate } from "framer-motion";
 import { Link } from "react-router-dom";
 import { formatNumber } from "../../util/numberFormat";
-import { timeFormat } from "../../util/timeforMat";
+import { timeFormat2 } from "../../util/timeforMat";
 import { durationCalc } from "../../util/durationCalc";
 
 const HoverButton = ({ title, icon }) => {
@@ -131,7 +131,7 @@ const SmallShortCard = ({ style, data }) => {
             <div>
               <span>{formatNumber(data.view)}</span>
               <span className='px-[4px]'>•</span>
-              <span>{timeFormat(data.time)}</span>
+              <span>{timeFormat2(data.time)}</span>
             </div>
           </div>
         </div>

@@ -37,6 +37,7 @@ const ButtonHorizonSlider = ({ buttonList, currentId }) => {
   useLayoutEffect(() => {
     enabledScrolling.current =
       sliderRef.current.scrollWidth > sliderRef.current.clientWidth;
+
     const handleResize = () => {
       if (sliderRef.current.scrollWidth === 0) return;
       enabledScrolling.current =
@@ -47,12 +48,14 @@ const ButtonHorizonSlider = ({ buttonList, currentId }) => {
         setScrollPosition(undefined);
       }
     };
+
+    handleResize();
     window.addEventListener("resize", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [buttonList]);
 
   useLayoutEffect(() => {
     if (enabledScrolling.current) {

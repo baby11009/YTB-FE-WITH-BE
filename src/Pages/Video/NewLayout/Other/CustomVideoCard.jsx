@@ -12,7 +12,7 @@ import {
 } from "../../../../Assets/Icons";
 import request from "../../../../util/axios-base-url";
 
-const CustomVideoCard = ({ data, index, size }) => {
+const CustomVideoCard = ({ data, index }) => {
   const { setIsShowing, user, addToaster } = useAuthContext();
 
   const funcList1 = [
@@ -84,7 +84,6 @@ const CustomVideoCard = ({ data, index, size }) => {
     <VideoCard2
       data={data}
       index={index}
-      size={size}
       funcList1={funcList1}
       funcList2={funcList2}
       containerStyle={"mt-[8px] h-[94px]"}

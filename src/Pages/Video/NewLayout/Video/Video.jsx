@@ -1,11 +1,4 @@
-import {
-  useRef,
-  useLayoutEffect,
-  useState,
-  useCallback,
-  useEffect,
-  memo,
-} from "react";
+import { useRef, useLayoutEffect, useState, useEffect, memo } from "react";
 import Hls from "hls.js";
 import {
   FillSettingIcon,
@@ -165,33 +158,36 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
     }
   });
 
+  const timeRecord = useRef();
+
+  const watchedTime = useRef(0);
+
+  const isViewCount = useRef(false);
+
   // handle window events
-  const handleWindowMouseDown = useCallback(
-    (e) => {
-      // Click Update Timeline
-      // Close setting menu when user clicks outside of the menu and the setting button
-      if (
-        !settingsBtn.current.contains(e.target) &&
-        !settingMenuRef.current.contains(e.target)
-      ) {
-        setOpenSettings(false);
-      }
-      //update video timline  when user left click the timeline ref
-      if (!e.target.contains(timeline.current)) return;
-      const rect = timeLineContainer.current.getBoundingClientRect();
-      const percent =
-        Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
-      videoRef.current.currentTime = videoRef.current.duration * percent;
-      timeline.current.style.setProperty("--progress-position", percent);
-    },
-    [openedSettings],
-  );
+  const handleWindowMouseDown = (e) => {
+    // Click Update Timeline
+    // Close setting menu when user clicks outside of the menu and the setting button
+    if (
+      !settingsBtn.current.contains(e.target) &&
+      !settingMenuRef.current.contains(e.target)
+    ) {
+      setOpenSettings(false);
+    }
+    //update video timline  when user left click the timeline ref
+    if (!e.target.contains(timeline.current)) return;
+    const rect = timeLineContainer.current.getBoundingClientRect();
+    const percent =
+      Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+    videoRef.current.currentTime = videoRef.current.duration * percent;
+    timeline.current.style.setProperty("--progress-position", percent);
+  };
 
-  const handleWindowDisableSelects = useCallback((event) => {
+  const handleWindowDisableSelects = (event) => {
     event.preventDefault();
-  }, []);
+  };
 
-  const handleWindowKeyboardDown = useCallback((e) => {
+  const handleWindowKeyboardDown = (e) => {
     switch (e.code) {
       case "ArrowLeft":
         controls.current.style.opacity = 1;
@@ -210,15 +206,15 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
         }
         break;
     }
-  }, []);
+  };
 
   //  handle  container ref events
-  const handleContainerMouseOver = useCallback((e) => {
+  const handleContainerMouseOver = (e) => {
     // Show the controls UI when mouse is over the container
     controls.current.style.opacity = 1;
-  }, []);
+  };
 
-  const handleContainerMouseOut = useCallback((e) => {
+  const handleContainerMouseOut = (e) => {
     // Hide the controls UI when mouse is not out the container and scrubbing event is not fired
     if (
       isScrubbing.current ||
@@ -228,9 +224,9 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
       return;
     clearTimeout(timeOut.current);
     controls.current.style.opacity = 0;
-  }, []);
+  };
 
-  const handleContainerMouseMove = useCallback(() => {
+  const handleContainerMouseMove = () => {
     // check if mouse is moving
     clearTimeout(timeOut.current);
     if (autoPlaySuccesss.current) {
@@ -245,63 +241,61 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
         }
       }, 2500);
     }
-  }, []);
+  };
 
-  const handleContainerMouseDown = useCallback(
-    (e) => {
-      switch (e.buttons) {
-        case 1:
-          // play video when user left click on the container but not when the settings menu is opened
-          if (openedSettings) return;
+  const handleContainerMouseDown = (e) => {
+    switch (e.buttons) {
+      case 1:
+        // play video when user left click on the container but not when the settings menu is opened
+        if (openedSettings) return;
 
-          if (e.target.contains(videoRef.current)) {
-            handlePlayVideo();
-          }
-          break;
-        case 2:
-          // open custome menu when user right click'
-          e.preventDefault();
-          e.stopPropagation();
-          setShowHover((prev) => {
-            if (prev) return undefined;
-            handleCursorPositon(e);
-            return (
-              <CustomeFuncBox
-                style={`w-[293px] !rounded-[0] !bg-[rgba(28,28,28,.9)]`}
-                useCheckIcon={true}
-                currentId={currentRightMenuId.current}
-                setOpened={() => {
-                  setShowHover(undefined);
-                }}
-                funcList1={funcList.current}
-              />
-            );
-          });
-          break;
-      }
-    },
-    [openedSettings],
-  );
+        if (e.target.contains(videoRef.current)) {
+          handlePlayVideo();
+        }
+        break;
+      case 2:
+        // open custome menu when user right click'
+        e.preventDefault();
+        e.stopPropagation();
+        setShowHover((prev) => {
+          if (prev) return undefined;
+          handleCursorPositon(e);
+          return (
+            <CustomeFuncBox
+              style={`w-[293px] !rounded-[0] !bg-[rgba(28,28,28,.9)]`}
+              useCheckIcon={true}
+              currentId={currentRightMenuId.current}
+              setOpened={() => {
+                setShowHover(undefined);
+              }}
+              funcList1={funcList.current}
+            />
+          );
+        });
+        break;
+    }
+  };
 
-  const preventContainerMenuContext = useCallback((e) => {
+  const preventContainerMenuContext = (e) => {
     // prevent user to show right click menu when user click on container
     e.preventDefault();
-  }, []);
+  };
 
   // handle timelineContainer ref events
 
-  const handleTimelineContainerMouseOut = useCallback(() => {
+  const handleTimelineContainerMouseOut = () => {
     timeline.current.style.setProperty(
       "--preview-progress",
       previewProgress.current,
     );
-  }, []);
+  };
 
   // handle video ref events
-  const handleVideoloaded = useCallback(() => {
+  const handleVideoloaded = () => {
     // Set video loaded state and calculate the video duration and current time
     // apply video local storage settings and autoplay
-
+    isViewCount.current = false;
+    watchedTime.current = 0;
     setVideoState({
       duration: videoRef.current.duration,
       currentTime: videoRef.current.currentTime,
@@ -321,29 +315,29 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
       .catch((err) => {
         setVideoState((prev) => ({ ...prev, paused: true }));
       });
-  }, []);
+  };
 
-  const handlePlayVideo = useCallback(() => {
+  const handlePlayVideo = () => {
     videoRef.current.paused
       ? videoRef.current.play()
       : videoRef.current.pause();
-  }, []);
+  };
 
-  const handleVideoPlay = useCallback(() => {
+  const handleVideoPlay = () => {
     setVideoState((prev) => ({ ...prev, paused: false }));
     autoPlaySuccesss.current = true;
-  }, []);
+  };
 
-  const handleVideoEnded = useCallback(() => {
+  const handleVideoEnded = () => {
     // handle video ended event
     if (currentRightMenuId.current === 1) {
       videoRef.current.play();
     } else {
       handlePlayNextVideo();
     }
-  }, [playlitStatus, data]);
+  };
 
-  const handleVideoError = useCallback((e) => {
+  const handleVideoError = (e) => {
     const error = videoRef.current.error;
     let errMsg;
     switch (error.code) {
@@ -363,13 +357,13 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
         errMsg = "An unknown error occurred";
     }
     setError(errMsg);
-  }, []);
+  };
 
-  const handleVideoPause = useCallback(() => {
+  const handleVideoPause = () => {
     setVideoState((prev) => ({ ...prev, paused: true }));
-  }, []);
+  };
 
-  const handleVideoProgress = useCallback(() => {
+  const handleVideoProgress = () => {
     // calculate the video buffer size that has been loaded to adjust the loaded progress timeline
     let bufferedTime = 0;
 
@@ -385,9 +379,9 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
 
     previewProgress.current = percent;
     timeline.current.style.setProperty("--preview-progress", percent);
-  }, []);
+  };
 
-  const handleVideoTimeUpdate = useCallback(() => {
+  const handleVideoTimeUpdate = () => {
     if (videoRef.current && videoRef.current.duration) {
       setVideoState((prev) => ({
         ...prev,
@@ -398,9 +392,9 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
         videoRef.current.currentTime / videoRef.current.duration,
       );
     }
-  }, []);
+  };
 
-  const handleChangeVideoSettings = useCallback((type, value) => {
+  const handleChangeVideoSettings = (type, value) => {
     // change video settings based on the variant type and value were passed
     switch (type) {
       case "quality":
@@ -419,9 +413,9 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
         videoRef.current.playbackRate = value;
         break;
     }
-  }, []);
+  };
 
-  const handleFullScreen = useCallback(() => {
+  const handleFullScreen = () => {
     if (document.fullscreenElement == null) {
       if (container.current.requestFullscreen) {
         container.current.requestFullscreen();
@@ -435,9 +429,9 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
     } else {
       document.exitFullscreen();
     }
-  }, []);
+  };
 
-  const handleAddScrubbing = useCallback((e) => {
+  const handleAddScrubbing = (e) => {
     // Add scrubbing when mouse is over the timeline and mouse left button is down for timelineContainer element
     if (e.buttons !== 1) return;
     isScrubbing.current = true;
@@ -449,9 +443,9 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
     if (!videoRef.current.paused) {
       videoRef.current.pause();
     }
-  }, []);
+  };
 
-  const handleRemoveScrubbing = useCallback((e) => {
+  const handleRemoveScrubbing = (e) => {
     // Remove scrubbing when mouse left button is up for window event
     if (isScrubbing.current) {
       isScrubbing.current = false;
@@ -462,9 +456,8 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
       }
       window.removeEventListener("selectstart", handleWindowDisableSelects);
     }
-  }, []);
-
-  const handleScrubbingUpdateTimeline = useCallback((e) => {
+  };
+  const handleScrubbingUpdateTimeline = (e) => {
     // handle adjust video timeline when user is scrubbing and moving cursor
     if (!isScrubbing.current) return;
 
@@ -476,15 +469,15 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
     videoRef.current.currentTime = videoRef.current.duration * percent;
 
     timeline.current.style.setProperty("--progress-position", percent);
-  }, []);
+  };
 
-  const handleMiniPlayerMode = useCallback(() => {
+  const handleMiniPlayerMode = () => {
     if (document.pictureInPictureElement === null) {
       videoRef.current.requestPictureInPicture();
     } else {
       document.exitPictureInPicture();
     }
-  }, []);
+  };
 
   useLayoutEffect(() => {
     if (data) {
@@ -502,7 +495,7 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
         );
 
         hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-          if (data.levels.length > 1) {
+          if (data.levels.length > 0) {
             const availableQuality = data.levels
               .map((item, id) => {
                 let result;
@@ -643,6 +636,36 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isViewCount.current) {
+      if (videoState.paused) {
+        clearInterval(timeRecord.current);
+        timeRecord.current = undefined;
+      } else if (!timeRecord.current) {
+        // Record user watched time
+
+        timeRecord.current = setInterval(() => {
+          watchedTime.current = watchedTime.current + 1;
+        }, 1000);
+      }
+    }
+  }, [videoState.paused]);
+
+  useEffect(() => {
+    if (!isViewCount.current && videoRef.current) {
+      // If video duration > 30 then user must watched at least 30s
+      // else user must watched at least 80% of video duration
+      if (
+        (videoRef.current.duration >= 30 && watchedTime.current >= 10) ||
+        (videoRef.current.duration < 30 &&
+          watchedTime.current > (videoRef.current.duration * 80) / 100)
+      ) {
+        console.log("View +1");
+        isViewCount.current = true;
+      }
+    }
+  }, [watchedTime.current]);
+
   useLayoutEffect(() => {
     if (videoSettings) {
       // set video local settings based on videoSettings changes
@@ -656,6 +679,7 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
         hlsRef.current.on(Hls.Events.LEVEL_SWITCHED, function (event, data) {
           console.log("Switched to level:", data.level);
           // Xem chất lượng đã thay đổi
+
           const levels = [...qualityDisplay.current]
             .splice(0, qualityDisplay.current.length - 1)
             .reverse();

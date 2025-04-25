@@ -16,17 +16,39 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { cleanSessionCookies } from "../../../util/other";
+import { scrollToTop } from "../../../util/scrollCustom";
 
 // video mode : normal , theater , fullscreen
 
-const initCombineQuery = {
-  page: 1,
-  limit: 12,
-  watchedVideoIdList: [],
-  type: "all",
-  split: true,
-  sort: undefined,
-  prevPlCount: 0,
+const initButtonQueries = (handleOnClick) => {
+  return [
+    {
+      id: "all",
+      title: "All",
+      value: undefined,
+      type: "default",
+      handleOnClick,
+    },
+    {
+      id: "recently",
+      title: "Recently uploaded",
+      type: "sort",
+      handleOnClick,
+    },
+    {
+      id: "oldest",
+      title: "Oldest uploads",
+      type: "sort",
+      handleOnClick,
+    },
+    {
+      id: "popular",
+      title: "Popular",
+      type: "sort",
+      handleOnClick,
+    },
+  ];
 };
 
 const VideoPart = () => {
@@ -44,13 +66,13 @@ const VideoPart = () => {
 
   const [smallMedia, setSmallMedia] = useState();
 
-  const [playlistQuery, setPlaylistQuery] = useState({
+  const [playlistQueries, setPlaylistQueries] = useState({
     videoLimit: 100,
     videoPage: 1,
     reset: list,
   });
 
-  const [addNew, setAddNew] = useState(true);
+  const addNew = useRef(true);
 
   const [videoInfo, setVideoInfo] = useState(undefined);
 
@@ -65,7 +87,7 @@ const VideoPart = () => {
 
   const [playlistInfo, setPlaylistInfo] = useState(undefined);
 
-  const [playlistAddNew, setPlaylistAddNew] = useState(true);
+  const playlistAddNew = useRef(true);
 
   const [playlistVideos, setPlaylistVideos] = useState([]);
 
@@ -82,15 +104,19 @@ const VideoPart = () => {
 
   const firstRender = useRef(true);
 
-  const currentPage = useRef(1);
+  const nextCursors = useRef(null);
 
   const currentSortId = useRef("all");
 
-  const [combineQuery, setCombineQuery] = useState(undefined);
+  const [otherDataQueries, setOtherDataQueires] = useState(undefined);
 
-  const [comebineDataList, setCombineDataList] = useState([]);
+  const [otherDataList, setOtherDataList] = useState([]);
 
-  const [combineAddNew, setCombineAddNew] = useState();
+  const addNewOtherData = useRef(true);
+
+  const [queryBtns, setQueryBtns] = useState([]);
+
+  const [currentQuery, setCurrentQuery] = useState("all");
 
   // Video details
   const {
@@ -104,24 +130,25 @@ const VideoPart = () => {
       id: id,
     },
     !!id,
-    false,
   );
 
   // playlist data
   const { data: playlistDetails, isError: plIsError } = getData(
     `/data/playlist/${list}`,
-    playlistQuery,
+    playlistQueries,
     !!list,
-    false,
   );
 
   // video, short , playlist
-  const { data: combineData } = getData(
-    `/data/all`,
-    combineQuery,
-    !!combineQuery,
-    false,
+  const { data: otherData } = getData(
+    "/data/random",
+    otherDataQueries,
+    !!otherDataQueries,
   );
+
+  const { data: tagData } = getData("/data/tags", {
+    clearCache: "tag",
+  });
 
   const handlePlayNextVideo = useCallback(() => {
     let playlist = [...playlistVideosArr.current];
@@ -167,10 +194,13 @@ const VideoPart = () => {
   }, [playlistStatus, pathname, list]);
 
   const handlePlaylistShowMore = useCallback(() => {
-    if (playlistInfo && playlistTotalPage.current > playlistQuery.videoPage) {
-      setPlaylistQuery((prev) => ({ ...prev, videoPage: prev.videoPage + 1 }));
+    if (playlistInfo && playlistTotalPage.current > playlistQueries.videoPage) {
+      setPlaylistQueries((prev) => ({
+        ...prev,
+        videoPage: prev.videoPage + 1,
+      }));
     }
-  }, [playlistInfo, playlistQuery]);
+  }, [playlistInfo, playlistQueries]);
 
   const handleModifyVideoList = useCallback((videoId) => {
     setPlaylistVideos((prev) => prev.filter((item) => item._id !== videoId));
@@ -182,64 +212,59 @@ const VideoPart = () => {
     setPlaylistInfo((prev) => ({ ...prev, size: prev.size - 1 }));
   }, []);
 
-  const handleSort = useCallback(
-    (data) => {
-      queryClient.removeQueries({
-        queryKey: [...Object.values(combineQuery), "/data/all"],
-        exact: true,
-      });
+  const handleQueryChange = useCallback(async (queryData) => {
+    await cleanSessionCookies();
 
-      setCombineQuery({
-        ...initCombineQuery,
-        reset: id + list,
-        sort: data.value,
-      });
-      setCombineAddNew(true);
-      currentSortId.current = data.id;
-    },
-    [id, list, combineQuery],
-  );
+    setCurrentQuery(queryData.id);
+    // Xóa queries cũ với giá trị mới nhất của prevQueries
+    queryClient.removeQueries({ queryKey: ["/data/random"] });
+
+    setOtherDataQueires(() => {
+      // Tạo queries mới
+      let queries;
+      switch (queryData.type) {
+        case "search":
+          queries = { tag: queryData.id };
+          break;
+        case "sort":
+          queries = { sort: queryData.id };
+          break;
+        default:
+          queries = {};
+      }
+
+      scrollToTop();
+      addNewOtherData.current = true;
+      return queries; // Trả về state mới
+    });
+  }, []);
 
   const handleShowMore = useCallback(() => {
     // get current data page
-    const currentData = comebineDataList[currentPage.current - 1];
-    if (!currentData) return;
+    if (!nextCursors.current) return;
 
-    // calculate total playlist is available
-    const playlistQtt = currentData?.videoList.filter(
-      (data) => data.video_list,
-    ).length;
-
-    // // calculate all the data id is available
-    const watchedId = [
-      ...currentData?.videoList.map((item) => item._id),
-      ...currentData?.shortList.map((item) => item._id),
-    ];
-
-    setCombineQuery((prev) => ({
+    setOtherDataQueires((prev) => ({
       ...prev,
-      page: prev.page + 1,
-      watchedVideoIdList: [...prev.watchedVideoIdList, ...[...watchedId]],
-      prevPlCount: prev.prevPlCount + playlistQtt,
+      cursors: nextCursors.current,
     }));
-  }, [comebineDataList]);
+  }, []);
 
-  const updateVideoData = (data) => {
-    setVideoInfo((prev) => ({ ...prev, ...data }));
-  };
+  const updateVideoData = useCallback((newData) => {
+    setVideoInfo((prev) => ({ ...prev, ...newData }));
+  }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (videoDetails) {
       if (addNew) {
         setVideoInfo(videoDetails.data);
-        setAddNew(false);
+        addNew.current = false;
       } else {
         setVideoInfo((prev) => ({ ...prev, ...videoDetails.data }));
       }
     }
-  }, [videoDetails, addNew]);
+  }, [videoDetails]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (playlistDetails) {
       playlistTotalPage.current = playlistDetails.totalPages;
 
@@ -264,7 +289,7 @@ const VideoPart = () => {
           }
         });
         setPlaylistVideos([...finalList]);
-        setPlaylistAddNew(false);
+        playlistAddNew.current = false;
       } else {
         const finalList = [];
 
@@ -289,8 +314,7 @@ const VideoPart = () => {
   useLayoutEffect(() => {
     if (list && playlistInfo) {
       queryClient.invalidateQueries({
-        queryKey: Object.values(playlistQuery),
-        exact: true,
+        queryKey: [`/data/playlist/${list}`],
       });
     }
   }, [list]);
@@ -303,76 +327,59 @@ const VideoPart = () => {
           queryKey: [user?._id, id],
           exact: true,
         });
-        setAddNew(true);
+        addNew.current = true;
       }
     } else {
       navigate("/");
     }
   }, [id]);
 
-  useLayoutEffect(() => {
-    // Don't get new data when the playlist is loaded
+  useEffect(() => {
+    // Load new others data when id is changed
+    // but not when user playing a playlist
     if (!list || firstRender.current) {
-      firstRender.current = false;
-
-      setCombineQuery({
-        ...initCombineQuery,
+      setOtherDataQueires({
         reset: id + list,
       });
-      setCombineAddNew(true);
-      setCombineDataList([]);
+      addNewOtherData.current = true;
     }
   }, [id, list]);
 
-  useLayoutEffect(() => {
-    if (combineQuery) {
-      currentPage.current = combineQuery?.page;
-    }
-  }, [combineQuery]);
+  useEffect(() => {
+    if (otherData) {
+      if (addNewOtherData.current) {
+        const modifedList = [...otherData.video];
+        if (otherData.short.length > 0) {
+          modifedList.splice(1, 0, otherData.short);
+        }
 
-  useLayoutEffect(() => {
-    if (
-      combineData &&
-      (combineData.data.length > 0 || combineData.short.length > 0)
-    ) {
-      const data = { videoList: [], shortList: [] };
-
-      if (combineData.data.length > 0) {
-        data.videoList = [...combineData.data];
-      }
-
-      if (combineData.shorts.length > 0) {
-        data.shortList = [...combineData.shorts];
-      }
-
-      if (combineAddNew) {
-        setCombineDataList([data]);
-        setCombineAddNew(false);
+        setOtherDataList(modifedList);
+        addNewOtherData.current = false;
       } else {
-        setCombineDataList((prev) => [...prev, data]);
+        setOtherDataList((prev) => [...prev, ...otherData.video]);
       }
+
+      nextCursors.current = otherData.cursors;
     }
-  }, [combineData]);
+  }, [otherData]);
 
   useEffect(() => {
-    const handleOnScroll = (e) => {
-      IsEnd(setIsEnd);
-    };
+    if (tagData && tagData.data.length) {
+      setQueryBtns(() => {
+        const init = initButtonQueries(handleQueryChange);
+        tagData.data.forEach((tag) => {
+          init.push({
+            id: tag.title,
+            title: tag.title,
+            type: "search",
+            handleOnClick: handleQueryChange,
+          });
+        });
 
-    window.addEventListener("scroll", handleOnScroll);
-
-    const handleResize = (e) => {
-      setSmallMedia(window.innerWidth < 1024 ? true : false);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("scroll", handleOnScroll);
-      window.removeEventListener("resize", handleResize);
-
-      queryClient.clear();
-    };
-  }, []);
+        return init;
+      });
+    }
+  }, [tagData]);
 
   useLayoutEffect(() => {
     if (id && playlistVideos.length > 0) {
@@ -384,16 +391,46 @@ const VideoPart = () => {
   }, [id, playlistVideos]);
 
   useEffect(() => {
-    if (
-      isEnd &&
-      !smallMedia &&
-      combineData &&
-      (combineData?.data?.length === combineQuery?.limit ||
-        combineData?.shorts?.length === combineQuery?.limit)
-    ) {
+    if (isEnd && !smallMedia && nextCursors.current) {
       handleShowMore();
     }
-  }, [isEnd, smallMedia, combineData]);
+  }, [isEnd, smallMedia]);
+
+  useEffect(() => {
+    const handleOnScroll = (e) => {
+      IsEnd(setIsEnd);
+    };
+
+    window.addEventListener("scroll", handleOnScroll);
+
+    const handleResize = (e) => {
+      setSmallMedia(window.innerWidth < 1024 ? true : false);
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    const handleBeforUnload = () => {
+      cleanSessionCookies();
+    };
+
+    window.addEventListener("beforeunload", handleBeforUnload);
+    return () => {
+      if (!firstRender.current) {
+        handleBeforUnload();
+        queryClient.removeQueries(`/data/video/${id}`);
+        queryClient.removeQueries(`/data/playlist/${list}`);
+        queryClient.removeQueries("/data/random");
+      }
+
+      window.removeEventListener("beforeunload", handleBeforUnload);
+
+      firstRender.current = false;
+      window.removeEventListener("scroll", handleOnScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   if (isError || plIsError) {
     return <div>Failed to loading data</div>;
@@ -426,7 +463,6 @@ const VideoPart = () => {
         }`}
       >
         {/* Left side */}
-        <button></button>
         <div
           className='flex-1 min-w-240-16/9 lg:min-w-360-16/9 lg:max-w-max-16/9
          1356:min-w-480-16/9 ml-[24px] pr-[24px] '
@@ -445,11 +481,12 @@ const VideoPart = () => {
 
           {smallMedia && (
             <Other
+              key={"small"}
               videoId={id}
               playlistId={list}
-              combineData={comebineDataList}
-              handleSort={handleSort}
-              handleShowMore={combineQuery?.page < 2 && handleShowMore}
+              otherDataList={otherDataList}
+              handleQueryChange={handleQueryChange}
+              handleShowMore={nextCursors.current && handleShowMore}
               currentSortId={currentSortId.current}
               playlistInfo={playlistInfo}
               playlistVideos={playlistVideos}
@@ -457,6 +494,8 @@ const VideoPart = () => {
               handleModifyVideoList={handleModifyVideoList}
               playlistStatus={playlistStatus}
               setPlaylistStatus={setPlaylistStatus}
+              queryBtns={queryBtns}
+              currentQuery={currentQuery}
             />
           )}
 
@@ -464,9 +503,7 @@ const VideoPart = () => {
             videoData={videoInfo}
             videoUserId={videoInfo?.channel_info?._id}
             refetch={refetch}
-            updateVideoData={(newVideoData) => {
-              updateVideoData(newVideoData);
-            }}
+            updateVideoData={updateVideoData}
             isEnd={isEnd}
           />
         </div>
@@ -474,10 +511,11 @@ const VideoPart = () => {
         {!smallMedia && (
           <div className='pr-[24px] w-[402px] min-w-[300px] box-content'>
             <Other
+              key={"large"}
               videoId={id}
               playlistId={list}
-              combineData={comebineDataList}
-              handleSort={handleSort}
+              otherDataList={otherDataList}
+              handleQueryChange={handleQueryChange}
               currentSortId={currentSortId.current}
               playlistInfo={playlistInfo}
               playlistVideos={playlistVideos}
@@ -491,6 +529,8 @@ const VideoPart = () => {
               handleModifyVideoList={handleModifyVideoList}
               playlistStatus={playlistStatus}
               setPlaylistStatus={setPlaylistStatus}
+              queryBtns={queryBtns}
+              currentQuery={currentQuery}
             />
           </div>
         )}

@@ -13,7 +13,7 @@ const MainPage = () => {
 
   const queryClient = useQueryClient();
 
-  const [dataQueries, setDataQueries] = useState({});
+  const [dataQueries, setDataQueries] = useState({ clearCache: "main" });
 
   const [vidList, setVidList] = useState([]);
 
@@ -29,22 +29,19 @@ const MainPage = () => {
 
   const { data, isLoading, isSuccess } = getData("/data/random", dataQueries);
 
-  const setSortQuery = useCallback((sortData) => {
-    setDataQueries((prevQueries) => {
-      // Xóa queries cũ với giá trị mới nhất của prevQueries
-      queryClient.removeQueries({
-        queryKey: ["/data/random", ...Object.values(prevQueries)],
-        exact: true,
-      });
+  const handleQueryChange = useCallback((queryData) => {
+    // Xóa queries cũ với giá trị mới nhất của prevQueries
+    queryClient.removeQueries({ queryKey: ["/data/random"] });
 
+    setDataQueries(() => {
       // Tạo queries mới
       let queries;
-      switch (sortData.type) {
+      switch (queryData.type) {
         case "search":
-          queries = { tag: sortData.id };
+          queries = { tag: queryData.id };
           break;
         case "sort":
-          queries = { sort: sortData.id };
+          queries = { sort: queryData.id };
           break;
         default:
           queries = {};
@@ -116,7 +113,7 @@ const MainPage = () => {
       window.removeEventListener("scroll", handleScroll);
       if (firstTimeRender.current === false) {
         handleBeforeUnLoad();
-        queryClient.removeQueries("/data/random");
+        queryClient.invalidateQueries("/data/random");
       }
 
       window.removeEventListener("beforeunload", handleBeforeUnLoad);
@@ -132,7 +129,7 @@ const MainPage = () => {
           openedMenu && "xl:!left-[227px]"
         } right-0 px-[24px] fixed top-[56px] z-[200] bg-black overflow-hidden`}
       >
-        <Filters setSortQuery={setSortQuery} />
+        <Filters handleQueryChange={handleQueryChange} />
       </div>
       <div className='mt-[80px] px-[16px]'>
         <GridLayout

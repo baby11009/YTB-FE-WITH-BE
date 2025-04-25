@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { formatNumber } from "../../util/numberFormat";
-import { timeFormat } from "../../util/timeforMat";
+import { timeFormat2 } from "../../util/timeforMat";
 import CustomeFuncBox from "../Box/CustomeFuncBox";
 import { durationCalc } from "../../util/durationCalc";
 import { Setting2Icon } from "../../Assets/Icons";
@@ -76,7 +76,7 @@ const VideoCard2 = ({
             {formatNumber(data?.view || 0)} lượt xem
           </div>
           <div className="hidden 2xsm:block before:content-['•'] before:mx-[4px]">
-            {timeFormat(data?.postedTime)}
+            {timeFormat2(data.createdAt)}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { formatNumber } from "../../../../util/numberFormat";
 import { SortIcon } from "../../../../Assets/Icons";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { getMousePosition } from "../../../../util/mouse";
 import { CustomeFuncBox, CommentInput, Comment } from "../../../../Component";
 import { getData } from "../../../../Api/getData";
@@ -308,4 +308,4 @@ const CommentSection = ({ videoData, videoUserId, updateVideoData, isEnd }) => {
     </div>
   );
 };
-export default CommentSection;
+export default memo(CommentSection);
