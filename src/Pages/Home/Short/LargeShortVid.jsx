@@ -38,7 +38,10 @@ const ConfirmUnsubscribe = ({
     <div className=' max-w-[688px] bg-black-21 rounded-[10px]'>
       <div className='pt-[24px]'>
         <div className='px-[24px] mt-[4px] mb-[24px] text-nowrap'>
-          <span className="text-[14px] leading-[20px] text-gray-A"> Unsubscribe from {channelEmail} ?</span>
+          <span className='text-[14px] leading-[20px] text-gray-A'>
+            {" "}
+            Unsubscribe from {channelEmail} ?
+          </span>
         </div>
         <div className='flex justify-end items-center py-[8px]'>
           <button
@@ -416,6 +419,54 @@ const LargeShortVid = ({
         }
       }
     };
+
+    if (hlsRef.current) {
+      let waitingForFragLoad = false;
+
+      hlsRef.current.on(Hls.Events.LEVEL_SWITCHING, function (event, data) {
+        console.log("Start switching quality");
+        if (videoRef.current && !videoRef.current.paused) {
+          videoRef.current.pause();
+          waitingForFragLoad = true; // Đánh dấu cần đợi fragment mới load
+        }
+      });
+
+      hlsRef.current.on(Hls.Events.LEVEL_SWITCHED, function (event, data) {
+        console.log("Switched to level:", data.level);
+      });
+
+      hlsRef.current.on(Hls.Events.FRAG_LOADED, async function (event, data) {
+        if (waitingForFragLoad) {
+          console.log("Fragment loaded, check buffer...");
+
+          const video = videoRef.current;
+          if (video) {
+            const buffered = video.buffered;
+            if (buffered.length > 0) {
+              const currentTime = video.currentTime;
+              let bufferEnd = buffered.end(buffered.length - 1);
+              const bufferLength = bufferEnd - currentTime;
+
+              console.log(`Buffered: ${bufferLength.toFixed(2)}s`);
+
+              // Check nếu đủ buffer (ví dụ >= 2s) thì mới play
+              if (bufferLength >= 2) {
+                try {
+                  await video.play();
+                  console.log("Play after enough buffer");
+                } catch (err) {
+                  console.error("Error playing:", err);
+                }
+                waitingForFragLoad = false;
+              } else {
+                console.log("Buffer chưa đủ, chờ thêm fragment...");
+                // Nếu chưa đủ buffer, giữ waiting = true, đợi fragment tiếp theo
+              }
+            }
+          }
+        }
+      });
+    }
 
     handleStreamingVideo();
 

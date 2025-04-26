@@ -21,6 +21,7 @@ import { getObjectChangedKey } from "../../../../util/func";
 import { AudioRange, CustomeFuncBox } from "../../../../Component";
 import VideoSettingMenu from "./Setting menu/VideoSettingMenu";
 import { useAuthContext } from "../../../../Auth Provider/authContext";
+import request from "../../../../util/axios-base-url";
 
 const defaultQuality = [{ title: "Auto", value: -1, res: 1080 }];
 
@@ -457,6 +458,7 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
       window.removeEventListener("selectstart", handleWindowDisableSelects);
     }
   };
+
   const handleScrubbingUpdateTimeline = (e) => {
     // handle adjust video timeline when user is scrubbing and moving cursor
     if (!isScrubbing.current) return;
@@ -660,11 +662,18 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
         (videoRef.current.duration < 30 &&
           watchedTime.current > (videoRef.current.duration * 80) / 100)
       ) {
-        console.log("View +1");
+        request
+          .post(`/modify-data/video/${data._id}/view`)
+          .then(() => {
+            console.log("View +1");
+          })
+          .catch((error) => {
+            console.log(error);
+          });
         isViewCount.current = true;
       }
     }
-  }, [watchedTime.current]);
+  }, [watchedTime.current, data._id]);
 
   useLayoutEffect(() => {
     if (videoSettings) {
@@ -676,8 +685,20 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
 
       // listen event level changed when video is streaming with hls not chunksize
       if (isStreamingHls.current) {
+        let waitingForFragLoad = false;
+
+        hlsRef.current.on(Hls.Events.LEVEL_SWITCHING, function (event, data) {
+          console.log("Start switching quality");
+          if (videoRef.current && !videoRef.current.paused) {
+            videoRef.current.pause();
+            setVideoState((prev) => ({ ...prev, paused: true }));
+            waitingForFragLoad = true; // Đánh dấu cần đợi fragment mới load
+          }
+        });
+
         hlsRef.current.on(Hls.Events.LEVEL_SWITCHED, function (event, data) {
           console.log("Switched to level:", data.level);
+
           // Xem chất lượng đã thay đổi
 
           const levels = [...qualityDisplay.current]
@@ -693,6 +714,48 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
               },
             }));
           }
+        });
+
+        hlsRef.current.on(Hls.Events.FRAG_LOADED, async function (event, data) {
+          if (waitingForFragLoad) {
+            console.log("Fragment loaded, check buffer...");
+
+            const video = videoRef.current;
+            if (video) {
+              const buffered = video.buffered;
+              if (buffered.length > 0) {
+                const currentTime = video.currentTime;
+                let bufferEnd = buffered.end(buffered.length - 1);
+                const bufferLength = bufferEnd - currentTime;
+
+                console.log(`Buffered: ${bufferLength.toFixed(2)}s`);
+
+                // Check nếu đủ buffer (ví dụ >= 2s) thì mới play
+                if (bufferLength >= 2) {
+                  try {
+                    await video.play();
+                    setVideoState((prev) => ({ ...prev, paused: false }));
+                    console.log("Play after enough buffer");
+                  } catch (err) {
+                    console.error("Error playing:", err);
+                  }
+                  waitingForFragLoad = false;
+                } else {
+                  console.log("Buffer chưa đủ, chờ thêm fragment...");
+                  // Nếu chưa đủ buffer, giữ waiting = true, đợi fragment tiếp theo
+                }
+              }
+            }
+          }
+        });
+
+        hlsRef.current.on(Hls.Events.BUFFER_FULL, (event, data) => {
+          console.log("Buffer đã đầy.");
+        });
+
+        // Kiểm tra khi buffer thiếu và cần tải thêm
+        hlsRef.current.on(Hls.Events.BUFFER_STARVED, (event, data) => {
+          console.log("Buffer không đủ, cần tải thêm dữ liệu.");
         });
       }
 
@@ -715,6 +778,10 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
       // stop listen level changed events
       if (isStreamingHls.current) {
         hlsRef.current.off(Hls.Events.LEVEL_SWITCHED);
+        hlsRef.current.off(Hls.Events.LEVEL_SWITCHING);
+        hlsRef.current.off(Hls.Events.FRAG_LOADED);
+        hlsRef.current.off(Hls.Events.BUFFER_FULL);
+        hlsRef.current.off(Hls.Events.BUFFER_STARVED);
       }
     };
   }, [videoSettings]);
