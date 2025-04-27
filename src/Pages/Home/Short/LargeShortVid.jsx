@@ -20,7 +20,6 @@ import {
   ShortFullScreenIcon,
   ShortFullScreenExitIcon,
 } from "../../../Assets/Icons";
-
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { formatNumber } from "../../../util/numberFormat";
 import { useAuthContext } from "../../../Auth Provider/authContext";
@@ -137,6 +136,12 @@ const LargeShortVid = ({
   const [opened, setOpened] = useState(false);
 
   const [videoState, setVideoState] = useState({ paused: true });
+
+  const isViewCount = useRef(false);
+
+  const timeRecord = useRef(undefined);
+
+  const watchedTime = useRef(0);
 
   const funcList = [
     {
@@ -540,6 +545,43 @@ const LargeShortVid = ({
       });
     };
   }, []);
+
+  useEffect(() => {
+    if (!isViewCount.current) {
+      if (videoState.paused) {
+        clearInterval(timeRecord.current);
+        timeRecord.current = undefined;
+      } else if (!timeRecord.current) {
+        // Record user watched time
+
+        timeRecord.current = setInterval(() => {
+          watchedTime.current = watchedTime.current + 1;
+        }, 1000);
+      }
+    }
+  }, [videoState.paused]);
+
+  useEffect(() => {
+    if (!isViewCount.current && videoRef.current) {
+      // If video duration > 30 then user must watched at least 30s
+      // else user must watched at least 80% of video duration
+      if (
+        (videoRef.current.duration >= 30 && watchedTime.current >= 10) ||
+        (videoRef.current.duration < 30 &&
+          watchedTime.current > (videoRef.current.duration * 80) / 100)
+      ) {
+        request
+          .post(`/modify-data/video/${shortData._id}/view`)
+          .then(() => {
+            console.log("View +1");
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+        isViewCount.current = true;
+      }
+    }
+  }, [watchedTime.current, shortData._id]);
 
   useEffect(() => {
     videoRef.current.volume = volume;
