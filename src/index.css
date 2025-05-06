@@ -33,7 +33,7 @@ button:focus {
 }
 .scrollbar-3 {
   scrollbar-width: thin;
-  
+
   scrollbar-color: #606060 transparent;
 }
 .scrollbar-3 ::-webkit-scrollbar {
@@ -583,5 +583,3 @@ th {
     transform: translateY(100%);
   }
 }
-
-

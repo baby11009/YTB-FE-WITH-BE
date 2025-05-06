@@ -8,6 +8,7 @@ import { scrollToTop } from "../../util/scrollCustom";
 
 const VideoPage = () => {
   const { openedMenu, setOpenedMenu } = useAuthContext();
+
   const params = useParams();
   useLayoutEffect(() => {
     scrollToTop();
@@ -18,10 +19,12 @@ const VideoPage = () => {
       <Body
         openedMenu={openedMenu}
         setOpenedMenu={setOpenedMenu}
-        RenderContent={<VideoPart openedMenu={openedMenu} />}
         noLDMenu={true}
         noIconMenu={true}
-      />
+        modalMenu={true}
+      >
+        <VideoPart />
+      </Body>
     </MainLayOut>
   );
 };

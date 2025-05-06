@@ -30,7 +30,7 @@ const PlaylistPage = ({ openedMenu }) => {
 
   const queryClient = useQueryClient();
 
-  const [queriese, setQueriese] = useState(initQueriese);
+  const [queries, setQueries] = useState(initQueriese);
 
   const [isQueryBoxOpened, setIsQueryBoxOpened] = useState(false);
 
@@ -48,7 +48,7 @@ const PlaylistPage = ({ openedMenu }) => {
 
   const { data: playlistsData, refetch } = getData(
     "/admin/playlist",
-    queriese,
+    queries,
     true,
     false,
   );
@@ -69,7 +69,7 @@ const PlaylistPage = ({ openedMenu }) => {
       prev.filter((search) => search.id !== queryData.id),
     );
 
-    setQueriese((prev) => {
+    setQueries((prev) => {
       const prevClone = { ...prev };
       const { search, sort } = prevClone;
 
@@ -101,8 +101,8 @@ const PlaylistPage = ({ openedMenu }) => {
   };
 
   const handleSearch = (searchKey, searchValue) => {
-    if (queriese.search[searchKey] === searchValue) return;
-    setQueriese((prev) => ({
+    if (queries.search[searchKey] === searchValue) return;
+    setQueries((prev) => ({
       ...prev,
       search: { ...prev.search, [searchKey]: searchValue },
       page: 1,
@@ -110,7 +110,7 @@ const PlaylistPage = ({ openedMenu }) => {
   };
 
   const handleSort = (sortKey, sortValue) => {
-    if (queriese.sort[sortKey] === sortValue) return;
+    if (queries.sort[sortKey] === sortValue) return;
 
     const sortOptionIds = queryOptions.map((query) => {
       if (query.buttonType === "sort") {
@@ -124,13 +124,13 @@ const PlaylistPage = ({ openedMenu }) => {
       let value;
       if (sortOptionId === sortKey) {
         value = sortValue;
-      } else if (queriese.sort[sortOptionId]) {
-        value = queriese.sort[sortOptionId];
+      } else if (queries.sort[sortOptionId]) {
+        value = queries.sort[sortOptionId];
       }
       sortObj[sortOptionId] = value;
     });
 
-    setQueriese((prev) => ({
+    setQueries((prev) => ({
       ...prev,
       sort: sortObj,
       page: 1,
@@ -349,7 +349,7 @@ const PlaylistPage = ({ openedMenu }) => {
                     <QueryTextInput
                       key={query.id}
                       queryData={query}
-                      currValue={queriese.search[query.id]}
+                      currValue={queries.search[query.id]}
                       handleExecuteQuery={handleSearch}
                       handleClose={handleClose}
                     />
@@ -362,8 +362,8 @@ const PlaylistPage = ({ openedMenu }) => {
                       currValue={getDisplayUsingValue(
                         query.options,
                         query?.buttonType === "sort"
-                          ? queriese.sort[query.id]
-                          : queriese.search[query.id],
+                          ? queries.sort[query.id]
+                          : queries.search[query.id],
                       )}
                       handleExecuteQuery={
                         query?.buttonType === "sort" ? handleSort : handleSearch
@@ -403,8 +403,8 @@ const PlaylistPage = ({ openedMenu }) => {
 
       <div className='w-full bg-black fixed bottom-[0] right-0 py-[6px]'>
         <Pagination
-          setQueriese={setQueriese}
-          currPage={queriese.page}
+          setQueries={setQueries}
+          currPage={queries.page}
           totalPage={totalPage.current}
         />
       </div>

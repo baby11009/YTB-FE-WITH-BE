@@ -68,6 +68,10 @@ const UpsertUser = () => {
     { id: "false", label: "False" },
   ]);
 
+  const avaFileName = useRef();
+
+  const bannerFileName = useRef();
+
   const handleOnChange = (name, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -369,7 +373,6 @@ const UpsertUser = () => {
                   setPreview={(url) => {
                     setPreviewAva(url);
                   }}
-
                   setData={(file) => {
                     setFormData((prev) => ({
                       ...prev,

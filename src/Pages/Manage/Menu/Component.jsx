@@ -29,7 +29,6 @@ export const BtnList = [
     icon: <UnActiveCommentIcon />,
     active: <CommentIcon />,
     path: "/manage/comment",
-    param: "video-comment",
   },
   {
     title: "Customization",
@@ -49,10 +48,6 @@ export const Button = ({ data, currPath, openedMenu }) => {
       navigate(path);
     }
   };
-
-  if (!data) {
-    throw new Error("Thiếu data");
-  }
 
   return (
     <button className='w-full' onClick={handleOnclick}>

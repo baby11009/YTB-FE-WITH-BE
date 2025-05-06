@@ -63,7 +63,7 @@ const Confirmation = () => {
         console.log(rsp);
         alert(rsp.data.msg || "Thành công");
         setIsConfirm(false);
-        navigate(`/auth/success/${rsp.data.msg}`, { replace: true });
+        navigate(`/success?message=${rsp.data.msg}`, { replace: true });
       })
       .catch((err) => {
         setIsConfirm(false);

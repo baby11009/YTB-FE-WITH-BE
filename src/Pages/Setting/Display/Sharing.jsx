@@ -1,4 +1,4 @@
-import { SharingIcon } from "../../../../Assets/Icons";
+import { SharingIcon } from "../../../Assets/Icons";
 import { Link } from "react-router-dom";
 import {
   EA_app,
@@ -6,7 +6,7 @@ import {
   Garena_app,
   Riot_app,
   Ubi_app,
-} from "../../../../Assets/Images";
+} from "../../../Assets/Images";
 
 const appList = [
   {

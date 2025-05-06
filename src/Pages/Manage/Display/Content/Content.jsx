@@ -1,10 +1,8 @@
 import Navigate from "./Navigate";
-import Display from "./Display/Display";
-import { useParams } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import { Suspense } from "react";
 
-const Content = ({}) => {
-  const params = useParams();
-
+const Content = () => {
   return (
     <div>
       <div className='z-[2000] bg-black md:mr-[12px]'>
@@ -13,14 +11,15 @@ const Content = ({}) => {
             Channel's content
           </h1>
           <div className='pt-[12px]'>
-            <Navigate pathParam={Object.values(params)[1]} />
+            <Navigate />
           </div>
         </div>
       </div>
-      <Display
-        path={Object.values(params)[0]}
-        pathParam={Object.values(params)[1]}
-      />
+      <Suspense>
+        <div className='md:mr-[12px] h-[calc(100vh-170px)]'>
+          <Outlet />
+        </div>
+      </Suspense>
     </div>
   );
 };

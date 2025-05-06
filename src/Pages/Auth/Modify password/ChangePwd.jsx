@@ -20,11 +20,11 @@ const changePwd = ({ type }) => {
 
   const navigate = useNavigate();
 
-  useLayoutEffect(() => {
-    if (!state?.access) {
-      navigate("/dont-have-permission");
-    }
-  }, [state]);
+  // useLayoutEffect(() => {
+  //   if (!state?.access) {
+  //     navigate("/dont-have-permission");
+  //   }
+  // }, [state]);
 
   const [formData, setFormData] = useState(initForm);
 
@@ -87,7 +87,7 @@ const changePwd = ({ type }) => {
         console.log(rsp);
         alert(rsp.data.msg || "Thành công");
         setIsLoading(false);
-        navigate(`/auth/success/${rsp.data.msg}`, {
+        navigate(`/success?message=${rsp.data.msg}`, {
           replace: true,
         });
       })
@@ -157,7 +157,7 @@ const changePwd = ({ type }) => {
         </button>
 
         <div className='flex items-center justify-between pt-[8px]'>
-          <Link to={"/auth/login"}>
+          <Link to={"/auth"}>
             <span className=' text-blue-3E font-bold'>Sign in</span>
           </Link>
           <Link to={"/auth/register"}>

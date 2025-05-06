@@ -20,15 +20,17 @@ const ImageCropper = ({
   const imgRef = useRef(null);
   const inputRef = useRef(null);
   const previewCanvasRef = useRef(null);
+  const fileName = useRef();
   const [imgSrc, setImgSrc] = useState("");
   const [crop, setCrop] = useState();
   const [error, setError] = useState("");
   const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
 
-
   const onSelectFile = (e) => {
     const file = e.files?.[0];
+
     if (!file) return;
+    fileName.current = file.name;
     const reader = new FileReader();
     reader.addEventListener("load", () => {
       const imageElement = new Image();
@@ -76,8 +78,13 @@ const ImageCropper = ({
       convertToPixelCrop(crop, imgRef.current.width, imgRef.current.height),
     );
     const dataUrl = previewCanvasRef.current.toDataURL();
+
     previewCanvasRef.current.toBlob((blob) => {
-      setData(blob);
+      const cropedFile = new File([blob], fileName.current, {
+        type: blob.type,
+      });
+
+      setData(cropedFile);
     });
     setPreview(dataUrl);
     setIsShowing(undefined);

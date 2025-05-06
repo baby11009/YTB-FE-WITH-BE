@@ -1,7 +1,7 @@
-import { CheckBox, RadioCheckBox } from "../../../../../Component";
+import { CheckBox, RadioCheckBox } from "../../../../Component";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { RoundCircleIcon } from "../../../../../Assets/Icons";
+import { RoundCircleIcon } from "../../../../Assets/Icons";
 
 export const CustomeBox = ({ data }) => {
   const [checked, setChecked] = useState(false);

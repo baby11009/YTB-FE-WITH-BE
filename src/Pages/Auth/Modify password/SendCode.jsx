@@ -123,7 +123,7 @@ const SendCode = ({ type }) => {
         </button>
 
         <div className='flex items-center justify-between pt-[8px]'>
-          <Link to={"/auth/login"}>
+          <Link to={"/auth"}>
             <span className=' text-blue-3E font-bold'>Sign in</span>
           </Link>
           <Link to={"/auth/register"}>

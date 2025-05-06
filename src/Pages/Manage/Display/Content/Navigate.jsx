@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Slider } from "../../../../Component";
-import { useCallback, useState, useLayoutEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 
 const funcList = [
   {
@@ -25,34 +25,38 @@ const funcList = [
   },
 ];
 
-const CustomeButton = ({ data, pathParam, handleOnClick }) => {
+const CustomeButton = ({ data, currPath, handleOnClick }) => {
   return (
-    <Link
-      to={`/manage/content/${data.param}`}
+    <div
       onClick={(e) => {
-        if (pathParam === data.param) return;
-        handleOnClick(e);
+        if (currPath === data.param) return;
+        handleOnClick(e, data.param);
       }}
       data-path={data.param}
       className={`border-b-[3px]  cursor-pointer ml-[8px] mr-[32px] border-[transparent] h-[48px] py-[12px]
-        ${pathParam !== data.param ? " hover:border-gray-71  text-gray-A" : ""}
+        ${currPath !== data.param ? " hover:border-gray-71  text-gray-A" : ""}
         `}
     >
       <span className='text-[15px] leading-[24px] font-[500]'>
         {data.title}
       </span>
-    </Link>
+    </div>
   );
 };
 
-const Navigate = ({ pathParam }) => {
+const Navigate = () => {
   const [underlineInfo, setUnderlineInfo] = useState({ width: 0, left: 0 });
 
   const containerRef = useRef();
 
   const indicator = useRef();
 
-  const handleOnClick = useCallback((e) => {
+  const location = useLocation();
+
+  const navigate = useNavigate();
+
+  const handleOnClick = useCallback((e, path) => {
+    navigate(`/manage/content/${path}`);
     if (!indicator.current.classList.contains("transition-[left]")) {
       indicator.current.classList.add("transition-[left]");
     }
@@ -64,12 +68,11 @@ const Navigate = ({ pathParam }) => {
     });
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (containerRef.current) {
       const currChild = containerRef.current.querySelector(
-        `[data-path="${pathParam}"]`,
+        `div[data-path="${location.pathname.split("/")[3]}"]`,
       );
-
       const childRect = currChild.getBoundingClientRect();
       const parentRect = containerRef.current.getBoundingClientRect();
       setUnderlineInfo({
@@ -86,7 +89,7 @@ const Navigate = ({ pathParam }) => {
           <CustomeButton
             key={item.id}
             data={item}
-            pathParam={pathParam}
+            currPath={location.pathname.split("/")[3]}
             handleOnClick={handleOnClick}
           />
         ))}

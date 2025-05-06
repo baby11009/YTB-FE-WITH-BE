@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { PrivacyIcon } from "../../../../Assets/Icons";
+import { PrivacyIcon } from "../../../Assets/Icons";
 import { CustomeBox } from "./Component/Component";
 
 const Privacy = () => {

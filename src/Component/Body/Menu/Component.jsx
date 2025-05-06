@@ -42,83 +42,7 @@ import {
   ActiveLikedIcon,
 } from "../../../Assets/Icons";
 
-import {
-  iloda,
-  levi,
-  sangtraan,
-  llstylish,
-  theanh,
-  tgb,
-  zeros,
-  bauffs,
-  vuive,
-  asoken,
-} from "../../../Assets/Images";
-
 import { useNavigate } from "react-router-dom";
-
-export const channelList = [
-  {
-    id: 1,
-    name: "iLoda",
-    img: iloda,
-    state: 2,
-  },
-  {
-    id: 2,
-    name: "Levi",
-    img: levi,
-    state: 2,
-  },
-  {
-    id: 3,
-    name: "sangtraan",
-    img: sangtraan,
-    state: 0,
-  },
-  {
-    id: 4,
-    name: "LL Stylish",
-    img: llstylish,
-    state: 1,
-  },
-  {
-    id: 5,
-    name: "TheAnh96",
-    img: theanh,
-    state: 1,
-  },
-  {
-    id: 6,
-    name: "Thầy Giáo Ba",
-    img: tgb,
-    state: 1,
-  },
-  {
-    id: 7,
-    name: "Zeros",
-    img: zeros,
-    state: 0,
-  },
-  {
-    id: 8,
-    name: "Thebausffs",
-    img: bauffs,
-    state: 1,
-  },
-  {
-    id: 9,
-    name: "Vui vẻ",
-    img: vuive,
-    state: 1,
-  },
-  {
-    id: 10,
-    name: "Asoken",
-    img: asoken,
-    state: 0,
-  },
-];
 
 export const footerList1 = [
   "About",
@@ -317,7 +241,7 @@ export const funcList5 = [
   {
     id: 1,
     title: "Settings",
-    path: "/account-setting/account",
+    path: "/setting/account",
     icon: <SettingIcon />,
     activeIcon: <ActiveSettingIcon />,
   },

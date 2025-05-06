@@ -1,5 +1,5 @@
 import { AuthContext } from "./authContext";
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { useState, useRef, useLayoutEffect, useEffect, Suspense } from "react";
 import { getCookie } from "../util/tokenHelpers";
 import request from "../util/axios-base-url";
 import connectSocket from "../util/connectSocket";
@@ -276,7 +276,7 @@ const AuthProvider = ({ children }) => {
             </span>
           </div>
         ) : (
-          children
+          <Suspense>{children}</Suspense>
         )}
         {showHover && (
           <div

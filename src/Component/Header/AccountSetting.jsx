@@ -118,7 +118,7 @@ const AccountSetting = ({ opened, setOpened, boxRef }) => {
           <div
             className='size-[32px] rounded-[50%] border-[2px] flex items-center justify-center cursor-pointer'
             onClick={() => {
-              navigate("/auth/login");
+              navigate("/auth");
             }}
           >
             <UserIcon />
@@ -134,7 +134,7 @@ const AccountSetting = ({ opened, setOpened, boxRef }) => {
         >
           <img
             draggable='false'
-            alt='Hình ảnh đại diện'
+            alt='Avatar'
             height='32px'
             width='32px'
             src={`${import.meta.env.VITE_BASE_API_URI}${
@@ -161,7 +161,7 @@ const AccountSetting = ({ opened, setOpened, boxRef }) => {
                   <span>{user?.name}</span>
                   <span>{`@${user?.email}`}</span>
                   <Link className='mt-[8px] text-blue-3E'>
-                    Xem kênh của bạn
+                    Watch your channel
                   </Link>
                 </div>
               </div>

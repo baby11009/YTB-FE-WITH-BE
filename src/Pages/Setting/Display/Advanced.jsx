@@ -1,4 +1,4 @@
-import { AdvancedIcon } from "../../../../Assets/Icons";
+import { AdvancedIcon } from "../../../Assets/Icons";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 

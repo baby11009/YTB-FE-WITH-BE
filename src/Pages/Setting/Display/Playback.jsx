@@ -1,7 +1,7 @@
-import { PlaybackIcon } from "../../../../Assets/Icons";
-import { CheckBox2 } from "../../../../Component";
+import { PlaybackIcon } from "../../../Assets/Icons";
+import { CheckBox2 } from "../../../Component";
 import { useState } from "react";
-import { RoundCircleIcon } from "../../../../Assets/Icons";
+import { RoundCircleIcon } from "../../../Assets/Icons";
 import { CustomeBox, CustomeRadioBox } from "./Component/Component";
 
 const radioList = [

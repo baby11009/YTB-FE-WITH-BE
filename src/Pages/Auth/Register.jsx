@@ -45,7 +45,7 @@ const Register = () => {
     });
 
     const emailRegex = new RegExp(
-      "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$"
+      "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
     );
 
     if (!emailRegex.test(formData.email)) {
@@ -72,7 +72,7 @@ const Register = () => {
       return;
     }
     const email = formData.email;
-    const register = await request
+    await request
       .post("/auth/register", formData)
       .then((rsp) => {
         setIsRegister(false);
@@ -176,7 +176,7 @@ const Register = () => {
         </button>
 
         <div className='flex items-center justify-between pt-[10px] '>
-          <Link to='/auth/login'>
+          <Link to='/auth'>
             <span className='text-blue-3E font-bold'>Sign in</span>
           </Link>
           <Link to={"/"}>

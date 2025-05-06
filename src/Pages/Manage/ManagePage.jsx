@@ -1,43 +1,18 @@
 import MainLayOut from "../../Layout/MainLayOut";
 import Header from "./Header";
 import Menu from "./Menu/Menu";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation,  Outlet } from "react-router-dom";
 import { scrollToTop } from "../../util/scrollCustom";
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useEffect,  Suspense } from "react";
 import { useAuthContext } from "../../Auth Provider/authContext";
-import { Dashboard, Content, Comment, ChannelSetting } from "./Display";
 const ManagePage = () => {
   const { user, openedMenu, setOpenedMenu } = useAuthContext();
 
-  const [pageRender, setPageRender] = useState(undefined);
-
   const location = useLocation();
-
-  const params = useParams();
-
-  const pageList = {
-    dashboard: <Dashboard openedMenu={openedMenu} />,
-    content: <Content openedMenu={openedMenu} />,
-    comment: <Comment openedMenu={openedMenu} />,
-    setting: <ChannelSetting openedMenu={openedMenu} />,
-  };
-
-  useLayoutEffect(() => {
-    const values = Object.values(params);
-
-    const page = `${values[0]}`;
-
-    if (pageList[page]) {
-      setPageRender(pageList[page]);
-    } else {
-      setPageRender(undefined);
-      throw new Error("Route does not exits");
-    }
-  }, [params, openedMenu]);
 
   useEffect(() => {
     scrollToTop();
-  }, [pageRender]);
+  }, [location.pathname]);
   return (
     <MainLayOut>
       <>
@@ -62,7 +37,9 @@ const ManagePage = () => {
             className={`w-full  h-screen overflow-hidden
             pt-[56px] relative`}
           >
-            {pageRender}
+            <Suspense>
+              <Outlet />
+            </Suspense>
           </div>
         </div>
       </>

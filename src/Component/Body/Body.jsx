@@ -3,10 +3,11 @@ import LeftMenu from "./Menu/LeftMenu";
 const Body = ({
   openedMenu,
   setOpenedMenu,
-  RenderContent,
   containerStyle,
   noLDMenu,
   noIconMenu,
+  modalMenu,
+  children,
 }) => {
   return (
     <main className={`pt-[56px] ${containerStyle}`}>
@@ -15,6 +16,8 @@ const Body = ({
         openedMenu={openedMenu}
         setOpenedMenu={setOpenedMenu}
         path={location.pathname}
+        noIconMenu={noIconMenu}
+        modalMenu={modalMenu}
       />
       <div
         className={`
@@ -23,7 +26,7 @@ const Body = ({
           ${openedMenu && !noLDMenu && " xl:ml-[240px]"} 
           `}
       >
-        {RenderContent}
+        {children}
       </div>
     </main>
   );

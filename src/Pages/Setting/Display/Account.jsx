@@ -1,10 +1,10 @@
-import { AccountIcon } from "../../../../Assets/Icons";
-import { MyChannel } from "../../../../Assets/Images";
+import { AccountIcon } from "../../../Assets/Icons";
+import { MyChannel } from "../../../Assets/Images";
 import { Link } from "react-router-dom";
 
 const Account = () => {
   return (
-    <div>
+    <>
       <div className='pt-[48px] flex justify-between border-b-[1px] border-b-black-0.2'>
         <div className='pb-[24px]'>
           <div className='text-[16px] leading-[22px] font-[500] t-1-ellipsis'>
@@ -100,7 +100,7 @@ const Account = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 export default Account;

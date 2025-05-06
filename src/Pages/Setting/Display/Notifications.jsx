@@ -1,7 +1,7 @@
-import { NotificationsIcon } from "../../../../Assets/Icons";
+import { NotificationsIcon } from "../../../Assets/Icons";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ThinArrowIcon } from "../../../../Assets/Icons";
+import { ThinArrowIcon } from "../../../Assets/Icons";
 import { CustomeBox } from "./Component/Component";
 
 const list1 = [

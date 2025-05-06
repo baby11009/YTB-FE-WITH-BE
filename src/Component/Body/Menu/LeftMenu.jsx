@@ -19,7 +19,13 @@ import { useEffect, useRef, useState } from "react";
 
 import { useAuthContext } from "../../../Auth Provider/authContext";
 
-const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
+const LeftMenu = ({
+  openedMenu,
+  setOpenedMenu,
+  path,
+  noIconMenu,
+  modalMenu,
+}) => {
   const { user } = useAuthContext();
 
   const [showMored, setShowMored] = useState(false);
@@ -109,7 +115,7 @@ const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
            openedMenu ? "translate-x-[0]" : "translate-x-[-100%]"
          } 
          ${
-           path !== "/video"
+           !modalMenu
              ? "transition-[transform] 1312:transition-none"
              : "transition-[transform]"
          }`}
@@ -253,32 +259,30 @@ const LeftMenu = ({ openedMenu, setOpenedMenu, path }) => {
 
       {/* Small menu */}
 
-      <nav
-        className={`w-[74px] mt-[4px] px-[4px] hidden   ${
-          path !== "/video" ? "800:block" : ""
-        } `}
-      >
-        {funcList1.map((item) => {
-          if (item.renderCondition && !item.renderCondition(user)) {
-            return;
-          }
-          return (
-            <SmButton
-              key={item.id}
-              data={item}
-              path={path}
-              handleOnClick={handleNav}
-            />
-          );
-        })}
-      </nav>
+      {!noIconMenu && (
+        <nav className={`w-[74px] mt-[4px] px-[4px] hidden 800:block`}>
+          {funcList1.map((item) => {
+            if (item.renderCondition && !item.renderCondition(user)) {
+              return;
+            }
+            return (
+              <SmButton
+                key={item.id}
+                data={item}
+                path={path}
+                handleOnClick={handleNav}
+              />
+            );
+          })}
+        </nav>
+      )}
 
       <div
         className={`fixed inset-0  ${
           openedMenu
             ? "visible bg-[rgba(0,0,0,0.5)] "
             : "invisible bg-[transparent] transition-all delay-[250ms] "
-        }    ${path !== "/video" ? "1312:invisible" : ""}`}
+        }    ${!modalMenu ? "1312:invisible" : ""}`}
         onClick={(e) => {
           e.stopPropagation();
           setOpenedMenu(false);
