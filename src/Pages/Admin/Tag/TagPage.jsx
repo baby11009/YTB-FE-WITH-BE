@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CreateIcon, SortIcon2, TrashBinIcon } from "../../../../Assets/Icons";
-import { getData } from "../../../../Api/getData";
-import { dltManyData, dltData } from "../../../../Api/controller";
+import { CreateIcon, SortIcon2, TrashBinIcon } from "../../../Assets/Icons";
+import { getData } from "../../../Api/getData";
+import { dltManyData, dltData } from "../../../Api/controller";
 import {
   Pagination,
   CustomeFuncBox,
   QueryTextInput,
   QuerySelection,
-} from "../../../../Component";
-import { getDisplayUsingValue } from "../../../../util/func";
-import { useAuthContext } from "../../../../Auth Provider/authContext";
+} from "../../../Component";
+import { getDisplayUsingValue } from "../../../util/func";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 import Display from "./Display";
 
 const limit = 12;

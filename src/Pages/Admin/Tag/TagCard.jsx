@@ -1,6 +1,6 @@
-import { CheckBox2 } from "../../../../Component";
-import { EditIcon, TrashBinIcon } from "../../../../Assets/Icons";
-import { timeFormat3 } from "../../../../util/timeforMat";
+import { CheckBox2 } from "../../../Component";
+import { EditIcon, TrashBinIcon } from "../../../Assets/Icons";
+import { timeFormat3 } from "../../../util/timeforMat";
 
 const TagCard = ({
   data,

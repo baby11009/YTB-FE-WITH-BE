@@ -1,8 +1,8 @@
-import { SaveIcon, CloseIcon, CreateIcon } from "../../../../Assets/Icons";
+import { SaveIcon, CloseIcon, CreateIcon } from "../../../Assets/Icons";
 import { useState, useRef, useEffect } from "react";
-import { UploadImageIcon } from "../../../../Assets/Icons";
-import { createData } from "../../../../Api/controller";
-import { useAuthContext } from "../../../../Auth Provider/authContext";
+import { UploadImageIcon } from "../../../Assets/Icons";
+import { createData } from "../../../Api/controller";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 
 const initForm = {
   title: "",

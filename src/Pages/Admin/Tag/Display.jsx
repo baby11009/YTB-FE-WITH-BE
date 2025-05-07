@@ -13,7 +13,7 @@ const Display = ({
   currMode,
   setCurrMode,
 }) => {
-  console.log("🚀 ~ checkedList:", checkedList)
+
   return (
     <div className='min-w-full w-fit'>
       <div

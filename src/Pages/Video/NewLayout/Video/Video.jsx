@@ -487,7 +487,7 @@ const Video = ({ data, handlePlayNextVideo, playlitStatus }) => {
 
       isStreamingHls.current = Hls.isSupported() && data?.stream;
 
-      if (data?.stream && isStreamingHls.current) {
+      if (isStreamingHls.current) {
         const hls = new Hls();
         hlsRef.current = hls;
         hls.loadSource(

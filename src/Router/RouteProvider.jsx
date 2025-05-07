@@ -3,9 +3,8 @@ import {
   createBrowserRouter,
   Navigate,
 } from "react-router-dom";
-import { AdminHomePage } from "../Pages";
 
-import { ProtectedRoute, GuestOnly } from "./ProtectedRoute";
+import { ProtectedRoute, GuestOnly, ForSpecificRole } from "./ProtectedRoute";
 
 import {
   HomePage,
@@ -57,6 +56,19 @@ import {
   Short,
   Playlist,
 } from "./Route/Manage";
+
+import {
+  AdminPage,
+  UserDisplayPage,
+  UserUpsertPage,
+  TagPage,
+  VideoDisplayPage,
+  VideoUpsertPage,
+  CommentDisplayPage,
+  CommentUpsertPage,
+  PlaylistDisplayPage,
+  PlaylistUpsertPage,
+} from "./Route/Admin";
 
 import { lazy } from "react";
 
@@ -307,15 +319,89 @@ const router = createBrowserRouter([
       },
     ],
   },
-  // {
-  //   path: "/admin/:data/:page?/:id?/:func?",
-  //   element: (
-  //     <ProtectedRoute requiredRole={"admin"}>
-  //       <AdminHomePage />
-  //     </ProtectedRoute>
-  //   ),
-  // },
-  // {
+  {
+    path: "/admin",
+    element: (
+      <ForSpecificRole role={["admin"]}>
+        <AdminPage />
+      </ForSpecificRole>
+    ),
+    children: [
+      {
+        path: "dashboard",
+        element: <div>Dashboard</div>,
+      },
+      {
+        path: "user",
+        children: [
+          {
+            index: true,
+            element: <UserDisplayPage />,
+          },
+          {
+            path: "upsert/:id?",
+            element: <UserUpsertPage />,
+          },
+        ],
+      },
+      {
+        path: "tag",
+        element: <TagPage />,
+      },
+      {
+        path: "video",
+        children: [
+          {
+            index: true,
+            element: <VideoDisplayPage type='video' key='video' />,
+          },
+          {
+            path: "upsert/:id?",
+            element: <VideoUpsertPage type='video' key='video' />,
+          },
+        ],
+      },
+      {
+        path: "short",
+        children: [
+          {
+            index: true,
+            element: <VideoDisplayPage type='short' key='short' />,
+          },
+          {
+            path: "upsert/:id?",
+            element: <VideoUpsertPage type='short' key='short' />,
+          },
+        ],
+      },
+      {
+        path: "comment",
+        children: [
+          {
+            index: true,
+            element: <CommentDisplayPage />,
+          },
+          {
+            path: "upsert/:id?",
+            element: <CommentUpsertPage />,
+          },
+        ],
+      },
+      {
+        path: "playlist",
+        children: [
+          {
+            index: true,
+            element: <PlaylistDisplayPage />,
+          },
+          {
+            path: "upsert/:id?",
+            element: <PlaylistUpsertPage />,
+          },
+        ],
+      },
+    ],
+  },
 
   // {
   //   path: "*",

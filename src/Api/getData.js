@@ -45,7 +45,8 @@ export const getData = (
             ...queryFnParams,
           },
         });
-        return res.data;
+    
+        return res.data || [];
       } catch (error) {
         console.error(error.response.data);
 

@@ -44,7 +44,12 @@ const CommentPage = ({ openedMenu }) => {
 
   const tableHeader = useRef();
 
-  const { data: cmtsData, refetch } = getData("/admin/comment", queries, true, false);
+  const { data: cmtsData, refetch } = getData(
+    "/admin/comment",
+    queries,
+    true,
+    false,
+  );
 
   const handleOnClick = (queryData) => {
     setQueryOptions((prev) => [...prev, queryData]);

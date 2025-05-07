@@ -40,6 +40,7 @@ const initTagQueries = {
 };
 
 const VideoUpsertModal = ({ title, id }) => {
+  console.log("🚀 ~  id:", id);
   const queryClient = useQueryClient();
 
   const { setIsShowing, addToaster } = useAuthContext();

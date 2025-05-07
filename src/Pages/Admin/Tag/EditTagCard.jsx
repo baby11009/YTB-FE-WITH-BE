@@ -1,7 +1,7 @@
-import { EditIcon, CloseIcon, UploadImageIcon } from "../../../../Assets/Icons";
-import { useAuthContext } from "../../../../Auth Provider/authContext";
+import { EditIcon, CloseIcon, UploadImageIcon } from "../../../Assets/Icons";
+import { useAuthContext } from "../../../Auth Provider/authContext";
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { updateData } from "../../../../Api/controller";
+import { updateData } from "../../../Api/controller";
 const initForm = {
   title: "",
   image: undefined,

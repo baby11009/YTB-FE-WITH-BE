@@ -48,7 +48,6 @@ const initReplyCmtQueriese = {
   search: {},
   limit: 10,
   page: 1,
-  videoId: undefined,
   clearCache: "reply",
 };
 

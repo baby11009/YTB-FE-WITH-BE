@@ -276,7 +276,17 @@ const AuthProvider = ({ children }) => {
             </span>
           </div>
         ) : (
-          <Suspense>{children}</Suspense>
+          <Suspense
+            fallback={
+              <div className='w-screen h-screen size bg-black flex items-center justify-center'>
+                <span className='text-white font-bold text-[20px] leading-[22px]'>
+                  Loading......
+                </span>
+              </div>
+            }
+          >
+            {children}
+          </Suspense>
         )}
         {showHover && (
           <div
