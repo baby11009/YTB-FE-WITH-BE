@@ -5,7 +5,7 @@ const InfiniteDropDownWithCheck = ({
   title,
   valueList,
   setIsOpened,
-  list,
+  data,
   displayValue,
   HoverCard,
   isLoading,
@@ -17,23 +17,27 @@ const InfiniteDropDownWithCheck = ({
 
   const [dataList, setDataList] = useState([]);
 
-  const [addNewValue, setAddNewValue] = useState(false);
+  const addNewValue = useRef(true);
 
   const [valueListSet, setValueListSet] = useState();
 
   const containerRef = useRef();
 
-  const boxRef = useRef();
+  const scrollContainerRef = useRef();
 
   const inputRef = useRef();
 
   const timeOutRef = useRef();
 
+  const loadingMile = useRef();
+
+  const canLoadMore = useRef(false);
+
   const handleSearch = (e) => {
     clearTimeout(timeOutRef.current);
 
     timeOutRef.current = setTimeout(() => {
-      setAddNewValue(true);
+      addNewValue.current = true;
       handleSetQueries(e.target.value);
     }, 600);
   };
@@ -66,58 +70,55 @@ const InfiniteDropDownWithCheck = ({
       setIsOpened(opened);
     }
 
-    if (!opened && boxRef.current) {
-      boxRef.current.scrollTop = 0;
+    if (!opened && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
     }
 
     window.addEventListener("mousedown", handleClickOutScope);
 
     return () => {
       window.removeEventListener("mousedown", handleClickOutScope);
-      handleSetQueries("");
-      setDataList([]);
-      setAddNewValue(true);
-      if (inputRef.current) {
-        inputRef.current.value = "";
+      if (!opened) {
+        handleSetQueries("");
+        addNewValue.current = true;
+        if (inputRef.current) {
+          inputRef.current.value = "";
+        }
       }
     };
   }, [opened]);
 
   useEffect(() => {
-    const element = boxRef.current;
+    if (data) {
+      canLoadMore.current = data.totalPages > data.currPage;
 
-    const handleScroll = () => {
-      const element = boxRef.current;
-      if (element) {
-        const { scrollTop, scrollHeight, clientHeight } = element;
-
-        if (Math.ceil(scrollTop) + clientHeight >= scrollHeight) {
-          handleSetQueries(undefined, 1);
-        }
+      if (addNewValue.current) {
+        setDataList([...data.data]);
+        addNewValue.current = false;
+      } else {
+        setDataList((prev) => [...prev, ...data.data]);
       }
-    };
-
-    if (element) {
-      element.addEventListener("scroll", handleScroll);
     }
-
-    return () => {
-      if (element) {
-        element.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [boxRef.current]);
+  }, [data]);
 
   useEffect(() => {
-    if (list) {
-      if (addNewValue) {
-        setDataList([...list]);
-        setAddNewValue(false);
-      } else {
-        setDataList((prev) => [...prev, ...list]);
-      }
-    }
-  }, [list]);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && canLoadMore.current) {
+          handleSetQueries(undefined, 1);
+        }
+      },
+      {
+        threshold: 0.85,
+        root: scrollContainerRef.current,
+      },
+    );
+
+    if (loadingMile.current) observer.observe(loadingMile.current);
+    return () => {
+      if (loadingMile.current) observer.unobserve(loadingMile.current);
+    };
+  }, []);
 
   useLayoutEffect(() => {
     setValueListSet(new Set(valueList));
@@ -177,7 +178,7 @@ const InfiniteDropDownWithCheck = ({
                   <SearchIcon />
                 </div>
               </div>
-              <div className='size-full overflow-auto' ref={boxRef}>
+              <div className='size-full overflow-auto' ref={scrollContainerRef}>
                 {isLoading && dataList.length === 0 ? (
                   <div className='flex flex-col items-center justify-center '>
                     <div
@@ -223,6 +224,7 @@ const InfiniteDropDownWithCheck = ({
                 ) : (
                   <div className='px-[12px]'>Not found any {title}</div>
                 )}
+                <div className='h-[20px]' ref={loadingMile}></div>
               </div>
             </div>
           </div>

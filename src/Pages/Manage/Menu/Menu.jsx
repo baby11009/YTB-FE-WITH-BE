@@ -33,7 +33,7 @@ const Menu = ({ openedMenu, setOpenedMenu, currPath, data }) => {
               }  transition-all ease-cubic-bezier-[0,0,0.2,1] duration-[217ms]`}
             >
               <h3 className='pt-[14px] text-[15px] leading-[24px] font-[500] text-center '>
-                Kênh của bạn
+                Your channel
               </h3>
               <span className='text-[12px] leading-[16px] text-gray-A text-center'>
                 {data?.email}

@@ -68,10 +68,6 @@ const UpsertUser = () => {
     { id: "false", label: "False" },
   ]);
 
-  const avaFileName = useRef();
-
-  const bannerFileName = useRef();
-
   const handleOnChange = (name, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -97,8 +93,14 @@ const UpsertUser = () => {
   );
 
   const handleValidate = () => {
-    const { role, confirmed, avatar, banner, ...neededVaildateFields } =
-      formData;
+    const {
+      role,
+      confirmed,
+      avatar,
+      banner,
+      description,
+      ...neededVaildateFields
+    } = formData;
 
     const fieldEntries = Object.entries(neededVaildateFields);
 

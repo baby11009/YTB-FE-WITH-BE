@@ -1,6 +1,6 @@
 const CommentCard = ({ data }) => {
   return (
-    <div className='px-[16px] py-[8px] rounded-[10px] bg-black-21 w-[250px] shadow-[0_0_8px_2px_rgba(255,255,255,1)]'>
+    <div className='min-w-full px-[16px] py-[8px] rounded-[10px] bg-black-21 w-[250px] shadow-[0_0_8px_2px_rgba(255,255,255,1)]'>
       <div className='flex items-center gap-[8px]'>
         <div className='size-[30px] rounded-[50%] overflow-hidden'>
           <img

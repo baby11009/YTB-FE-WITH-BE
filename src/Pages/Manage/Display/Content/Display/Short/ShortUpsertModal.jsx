@@ -81,7 +81,8 @@ const ShortUpsertModal = ({ title, id }) => {
     error: tagErr,
     isLoading: tagIsLoading,
     isError: tagIsErr,
-  } = getData("tag", tagParams, openedTags, false);
+  } = getData("/data/tags", tagParams, openedTags, false);
+
 
   const handleOnChange = useCallback((name, value) => {
     setFormData((prev) => ({
@@ -329,19 +330,18 @@ const ShortUpsertModal = ({ title, id }) => {
     );
   };
 
-  const handleSubmit =
-    async (e) => {
-      e.preventDefault();
-      setSubmitLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitLoading(true);
 
-      if (id) {
-        await update(formData, shortData);
-      } else {
-        await create(formData);
-      }
-
-      setSubmitLoading(false);
+    if (id) {
+      await update(formData, shortData);
+    } else {
+      await create(formData);
     }
+
+    setSubmitLoading(false);
+  };
   useLayoutEffect(() => {
     if (shortData) {
       const dataForm = {
@@ -619,7 +619,7 @@ const ShortUpsertModal = ({ title, id }) => {
                     title={"Tag"}
                     valueList={formData.tag}
                     setIsOpened={setOpenedTags}
-                    list={tagList?.data}
+                    data={tagList}
                     displayValue={"title"}
                     isLoading={tagIsLoading}
                     isError={tagIsErr}
@@ -627,7 +627,7 @@ const ShortUpsertModal = ({ title, id }) => {
                     setData={(value) => {
                       setFormData((prev) => ({ ...prev, tag: value }));
                     }}
-                    handleSetParams={(value, pageInc) => {
+                    handleSetQueries={(value, pageInc) => {
                       setTagParams((prev) => {
                         let finalobj = {
                           ...prev,

@@ -395,7 +395,11 @@ const router = createBrowserRouter([
             element: <PlaylistDisplayPage />,
           },
           {
-            path: "upsert/:id?",
+            path: "upsert",
+            element: <PlaylistUpsertPage />,
+          },
+          {
+            path: "upsert/:id/:func",
             element: <PlaylistUpsertPage />,
           },
         ],

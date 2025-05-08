@@ -32,13 +32,13 @@ const CardRow2 = ({ data }) => {
     if (currentRef) {
       checkScrollPosition(rowRef, setAtStart, setAtEnd);
       currentRef.addEventListener("scroll", () =>
-        checkScrollPosition(rowRef, setAtStart, setAtEnd)
+        checkScrollPosition(rowRef, setAtStart, setAtEnd),
       );
     }
     return () => {
       if (currentRef) {
         currentRef.removeEventListener("scroll", () =>
-          checkScrollPosition(rowRef, setAtStart, setAtEnd)
+          checkScrollPosition(rowRef, setAtStart, setAtEnd),
         );
       }
     };
@@ -72,8 +72,10 @@ const CardRow2 = ({ data }) => {
             className={`sd3 w-[40px] h-[40px] rounded-[50%] overflow-hidden 
            bg-[#212121]  z-[20] absolute right-0 translate-x-[40%] top-[50%]`}
           >
-            <div className='hover:bg-[rgba(255,255,255,0.2)] w-full h-full flex items-center justify-center'>
-              <ThinArrowIcon />
+            <div className='hover:bg-[rgba(255,255,255,0.2)] size-full p-[8px] flex items-center justify-center'>
+              <div className='w-[24px]'>
+                <ThinArrowIcon />
+              </div>
             </div>
           </button>
         )}
@@ -83,8 +85,10 @@ const CardRow2 = ({ data }) => {
             className={`sd3 w-[40px] h-[40px] rounded-[50%] overflow-hidden 
           bg-[#212121] z-[20] absolute left-0 translate-x-[-40%] top-[50%]`}
           >
-            <div className='hover:bg-[rgba(255,255,255,0.2)] w-full h-full flex items-center justify-center rotate-[180deg]'>
-              <ThinArrowIcon />
+            <div className='hover:bg-[rgba(255,255,255,0.2)] size-full p-[8px] flex items-center justify-center rotate-[180deg]'>
+              <div className='w-[24px]'>
+                <ThinArrowIcon />
+              </div>
             </div>
           </button>
         )}

@@ -1,13 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { ThinArrowIcon, SearchIcon } from "../../Assets/Icons";
-
-import { IsElementEnd } from "../../util/scrollPosition";
 
 const InfiniteDropDown = ({
   disabled,
   title,
   dataType,
-  list,
+  data,
   displayData,
   isLoading,
   fetchingError,
@@ -22,10 +20,6 @@ const InfiniteDropDown = ({
 
   const [dataList, setDataList] = useState([]);
 
-  const [addNewValue, setAddNewValue] = useState(false);
-
-  const [isEnd, setIsEnd] = useState(false);
-
   const containerRef = useRef();
 
   const timeOutRef = useRef();
@@ -34,11 +28,17 @@ const InfiniteDropDown = ({
 
   const scrollContainerRef = useRef();
 
+  const addNewValue = useRef(true);
+
+  const loadingMile = useRef();
+
+  const canLoadMore = useRef(false);
+
   const handleSearch = (e) => {
     clearTimeout(timeOutRef.current);
 
     timeOutRef.current = setTimeout(() => {
-      setAddNewValue(true);
+      addNewValue.current = true;
       handleSetQueries(e.target.value);
       scrollContainerRef.current.scrollTop = 0;
     }, 600);
@@ -62,44 +62,49 @@ const InfiniteDropDown = ({
 
     window.addEventListener("mousedown", handleClickOutScope);
 
+    if (!opened) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+
     return () => {
       window.removeEventListener("mousedown", handleClickOutScope);
+
       if (!opened) {
         handleSetQueries("");
-        setDataList([]);
         inputRef.current && (inputRef.current.value = "");
-        setAddNewValue(false);
+        addNewValue.current = true;
       }
     };
   }, [opened]);
 
-  useEffect(() => {
-    if (list) {
-      if (addNewValue) {
-        setDataList([...list]);
-        setAddNewValue(false);
+  useLayoutEffect(() => {
+    if (data) {
+      canLoadMore.current = data.totalPages > data.currPage;
+      if (addNewValue.current) {
+        setDataList([...data.data]);
+        addNewValue.current = false;
       } else {
-        setDataList((prev) => [...prev, ...list]);
+        setDataList((prev) => [...prev, ...data.data]);
       }
     }
-  }, [list]);
+  }, [data]);
 
   useEffect(() => {
-    if (isEnd) {
-      handleSetQueries(undefined, 1);
-    }
-  }, [isEnd]);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && canLoadMore.current) {
+          handleSetQueries(undefined, 1);
+        }
+      },
+      {
+        threshold: 0.85,
+        root: scrollContainerRef.current,
+      },
+    );
 
-  useEffect(() => {
-    const handleScroll = (e) => {
-      IsElementEnd(setIsEnd, e);
-    };
-    scrollContainerRef.current.addEventListener("scroll", handleScroll);
-
+    if (loadingMile.current) observer.observe(loadingMile.current);
     return () => {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.removeEventListener("scroll", handleScroll);
-      }
+      if (loadingMile.current) observer.unobserve(loadingMile.current);
     };
   }, []);
 
@@ -192,10 +197,11 @@ const InfiniteDropDown = ({
                     </button>
                   ))
                 ) : (
-                  <div className='flex items-center justify-center h-full'>
+                  <div className='flex items-center justify-center h-[calc(100%-20px)]'>
                     Not found any {dataType}
                   </div>
                 )}
+                <div className='h-[20px]' ref={loadingMile}></div>
               </div>
             </div>
           </div>

@@ -270,7 +270,7 @@ const PlaylistDetails = ({ id, playlistData, setQueries, addToaster }) => {
               title={"User"}
               value={formData.email || "Not picked"}
               setIsOpened={setUserOpened}
-              list={usersData?.data}
+              data={usersData}
               isLoading={userIsLoading}
               fetchingError={userError?.response?.data?.msg}
               validateError={submitErrs["userId"] ? submitErrs["userId"] : ""}

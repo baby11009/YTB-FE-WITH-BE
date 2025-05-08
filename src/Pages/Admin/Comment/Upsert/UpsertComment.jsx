@@ -78,7 +78,6 @@ const UpsertComment = () => {
 
   const [replyCmtQueriese, setReplyCmtQueriese] =
     useState(initReplyCmtQueriese);
-
   const {
     data: commentData,
     refetch,
@@ -314,21 +313,21 @@ const UpsertComment = () => {
 
   useEffect(() => {
     if (!userOpened) {
-      queryClient.removeQueries({ queryKey: Object.values(userQueriese) });
+      queryClient.removeQueries("/admin/user");
     }
-  }, [userOpened, userQueriese]);
+  }, [userOpened]);
 
   useEffect(() => {
     if (!videoOpened) {
-      queryClient.removeQueries({ queryKey: Object.values(videoQuerese) });
+      queryClient.removeQueries("/admin/video");
     }
-  }, [videoOpened, videoQuerese]);
+  }, [videoOpened]);
 
   useEffect(() => {
     if (!cmtOpened) {
-      queryClient.removeQueries({ queryKey: Object.values(replyCmtQueriese) });
+      queryClient.removeQueries(`/admin/comment`);
     }
-  }, [cmtOpened, replyCmtQueriese]);
+  }, [cmtOpened]);
 
   useEffect(() => {
     let timeOut;
@@ -386,7 +385,7 @@ const UpsertComment = () => {
               title={"User"}
               value={formData.email || "Not picked yet"}
               setIsOpened={setUserOpened}
-              list={usersData?.data}
+              data={usersData}
               displayData={"email"}
               isLoading={userIsLoading}
               fetchingError={userError?.response?.data?.msg}
@@ -428,7 +427,7 @@ const UpsertComment = () => {
               dataType={"video"}
               value={formData.videoTitle || "Not picked yet"}
               setIsOpened={setVideoOpened}
-              list={videosData?.data}
+              data={videosData}
               isLoading={videoIsLoading}
               displayData={"title"}
               fetchingError={videoError?.response?.data?.msg}
@@ -471,7 +470,7 @@ const UpsertComment = () => {
               prsRemoveValue={replyCmtQueriese.clearCache}
               value={formData.replyContent || "Not picked yet"}
               setIsOpened={setCmtOpened}
-              list={replyCmtsData?.data}
+              data={replyCmtsData}
               isLoading={replyCmtsIsLoading}
               displayData={"cmtText"}
               fetchingError={replyCmtsError?.response?.data?.msg}

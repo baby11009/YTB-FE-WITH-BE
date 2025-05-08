@@ -40,7 +40,6 @@ const initTagQueries = {
 };
 
 const VideoUpsertModal = ({ title, id }) => {
-  console.log("🚀 ~  id:", id);
   const queryClient = useQueryClient();
 
   const { setIsShowing, addToaster } = useAuthContext();
@@ -83,6 +82,7 @@ const VideoUpsertModal = ({ title, id }) => {
     error: tagErr,
     isLoading: tagIsLoading,
   } = getData("/data/tags", tagQueries, openedTags, false);
+  console.log("🚀 ~ tagData:", tagData);
 
   const handleOnChange = useCallback((name, value) => {
     setFormData((prev) => ({
@@ -642,7 +642,7 @@ const VideoUpsertModal = ({ title, id }) => {
                   title={"Tag"}
                   valueList={formData.tags}
                   setIsOpened={setOpenedTags}
-                  list={tagData?.data}
+                  data={tagData}
                   displayValue={"title"}
                   isLoading={tagIsLoading}
                   fetchingError={tagErr?.response?.data?.msg}

@@ -52,7 +52,6 @@ const initTagQueries = {
   page: 1,
   limit: 10,
   priorityList: [],
-  clearCache: "tag",
 };
 
 const UpsertVideo = ({ type }) => {
@@ -492,19 +491,15 @@ const UpsertVideo = ({ type }) => {
 
   useEffect(() => {
     if (!openedUsers) {
-      queryClient.removeQueries({
-        queryKey: Object.values(userQueries),
-      });
+      queryClient.removeQueries("/admin/user");
     }
-  }, [openedUsers, userQueries]);
+  }, [openedUsers]);
 
   useEffect(() => {
     if (!openedTags) {
-      queryClient.removeQueries({
-        queryKey: Object.values(tagQueries),
-      });
+      queryClient.removeQueries("/admin/tag");
     }
-  }, [openedTags, tagQueries]);
+  }, [openedTags]);
 
   useEffect(() => {
     let timeOut;
@@ -715,7 +710,7 @@ const UpsertVideo = ({ type }) => {
             dataType={"user"}
             value={formData.email || "Not picked yet"}
             setIsOpened={setOpenedUsers}
-            list={userData?.data}
+            data={userData}
             displayData={"email"}
             isLoading={isLoading}
             fetchingError={userError?.response?.data?.msg}
@@ -751,7 +746,7 @@ const UpsertVideo = ({ type }) => {
               title={"Tag"}
               valueList={formData.tags}
               setIsOpened={setOpenedTags}
-              list={tagData?.data}
+              data={tagData}
               displayValue={"title"}
               isLoading={tagIsLoading}
               fetchingError={tagErr?.response?.data?.msg}
